@@ -9,4 +9,7 @@ function changeText(id, text){
     document.getElementById(id).innerHTML = text;
 }
 
+function getText(id){
+    return document.getElementById(id).value;
+}
 
