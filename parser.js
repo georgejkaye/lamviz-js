@@ -33,15 +33,24 @@ function findClosingBracket(initial, text){
         index++;
     }
 
-    return -1;
+    return initial + index;
 
 }
 
 /**
  * Parse a lambda term
- * @param {*} text the text to parse for a lambda term
+ * @param {*} text  the text to parse for a lambda term
  */
-function parseTerm(text){
+function parse(text){
+    return parseTerm(text, 0);
+}
+
+/**
+ * Parse a lambda term
+ * @param {*} text the text to parse for a lambda term
+ * @param {*} initial the index to start counting from (for debugging)
+ */
+function parseTerm(text, initial){
 
     const len = text.length;
 
@@ -53,8 +62,15 @@ function parseTerm(text){
     var abstraction = false;
     var parseError = false;
     var currentAbstraction = "";
+    var currentVariable = "";
+    var currentSubterm = "";
+    var newSubterm;
+    var oldSubterm;
 
-    var term;
+    // variables for function application
+    var app = false;  // are we parsing the second part of an application?
+    var app1;
+    var app2;
 
     while(index < len){
 
@@ -66,7 +82,6 @@ function parseTerm(text){
             
             // beginning of a lambda abstraction
             case '\\':
-                console.log("abstraction")
                 abstraction = true;
                 break;
 
@@ -74,7 +89,29 @@ function parseTerm(text){
             case '.':
                 if(abstraction){
                     // TODO deal with abstraction
-                    console.log(currentAbstraction);
+                    console.log("Lambda abstraction: " + currentAbstraction);
+
+                    var scope = findClosingBracket(index, text.substring(index + 1)) + 1;
+
+                    if(scope === -1){
+                        scope = len - 1;
+                    }
+
+                    var t = text.substring(index + 1, scope);
+                    if(t.charAt(0) === ' '){
+                        t = t.substring(1);
+                        index++;
+                    }
+
+                    console.log("Scope of \u03BB" + currentAbstraction + ": " + t);
+                    
+                    // parse the subterm
+                    const t1 = parseTerm(t, index + 1);
+
+                    // create this new lambda abstraction
+                    // \x. t
+                    return new LambdaAbstraction(t1, currentAbstraction)
+                    
                 } else {
                     // dot with no associated lambda is a parse error
                     parseError = true
@@ -83,27 +120,48 @@ function parseTerm(text){
 
                 break;
 
+            // start of a subterm
             case '(':
 
                 const end = findClosingBracket(index, text.substring(index + 1));
 
-                if(end === -1){
+                if(end === len){
                     parseError = true;
                 }
 
                 console.log("Subterm: " + text.substring(index + 1, end));
 
-                var t1 = parseTerm(text.substring(index + 1, end));
+                var t1 = parseTerm(text.substring(index + 1, end), index + 1);
+                index++;
 
                 break;
 
+            // floating close bracket (all close brackets dealt with in the subterm process) 
+            // parse error
             case ')':
 
-                // TODO
+                parseError = true;
                 break;
 
             case ' ':
-                // spaces are permitted and can be skipped over
+                // end of a variable/term
+               
+                // abstractions cannot have spaces in them
+                if(abstraction){
+                    parseError = true;
+                } else {
+                    newSubterm = parseTerm(currentSubterm, index)
+                    
+                    if(app){
+                        newSubterm = new LambdaApplication(oldSubterm, newSubterm);
+                    } else {
+                        app = true;
+                    }
+
+                    currentSubterm = "";
+                
+                }
+
                 break;
 
             default:
@@ -111,17 +169,19 @@ function parseTerm(text){
                 if (abstraction){
                     currentAbstraction += currentCharacter;
                 } else {
-
-                // TODO
-
+                    currentSubterm += currentCharacter;
                 }
                 
                 break;
-            
-
-            
         } 
         
+        if(parseError){
+            console.log("Error parsing \'" + text.charAt(index) + "\' at character " + (initial + index));
+        }
+
         index++;
     }
+
+    console.log("New variable: " + currentSubterm);
+    return new LambdaVariable(currentSubterm);
 }

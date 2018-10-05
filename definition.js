@@ -21,6 +21,10 @@ class LambdaAbstraction{
     getType(){
         return ABS;
     }
+
+    prettyPrint(){
+        return "\u03BB" + "." + this.term.prettyPrint()
+    }
 }
 
 // An application of two lambda terms

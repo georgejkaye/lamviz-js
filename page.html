@@ -12,9 +12,12 @@
 
     <input type = "text" id = "input"><br>
     <button type = "button"id = "execute-btn"
-    onclick = "parseTerm(getText('input'))">
+    onclick = "changeText('result', parse(getText('input')))">
     Execute</button>
 
+    <p id="result"></p>
+
+    <script src = "definition.js"></script>
     <script src = "functions.js"></script>
     <script src = "scripts.js"></script>
     <script src = "parser.js"></script>
