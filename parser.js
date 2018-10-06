@@ -1,42 +1,3 @@
-//import * as def from "definition";
-
-
-/**
- * Find the index of the appropriate closing bracket - i.e. the end of the term
- * @param {*} initial the initial index of the term in the whole string
- * @param {*} text the text to search for the closing bracket
- */
-function findClosingBracket(initial, text){
-
-    const len = text.length;
-    var index = 0;
-    var brackets = 1;
-
-    while(index < len){
-
-        var currentCharacter = text.charAt(index);
-
-        switch(currentCharacter){
-            case '(':
-                brackets++;
-                break;
-            case ')':
-                brackets--;
-                if(brackets === 0){
-                    return initial + index + 1;
-                }
-                break;
-            default:
-                break;
-        }
-
-        index++;
-    }
-
-    return initial + index;
-
-}
-
 /**
  * Parse a lambda term
  * @param {*} text  the text to parse for a lambda term
@@ -184,4 +145,84 @@ function parseTerm(text, initial){
 
     console.log("New variable: " + currentSubterm);
     return new LambdaVariable(currentSubterm);
+}
+
+/**
+ * Tokenise an input string
+ * @param {} text the string to tokenise
+ */
+function tokenise(text){
+
+    const len = text.length;
+    var tokens = [];
+
+    var string = "";
+
+    for(i = 0; i < len; i++){
+
+        const currentCharacter = text.charAt(i);
+
+        switch(currentCharacter){
+
+            // a dot denotes the end of a lambda abstraction variable
+            case '.':
+                tokens.push('.');
+            
+            // a space denotes the end of a string
+            case ' ':
+                tokens.push(string);
+                string = "";
+                break;
+            case '\\':
+            case '(':
+            case ')':
+                tokens.push(currentCharacter);
+                break;
+            default:
+                string += currentCharacter;
+                break;
+        }
+
+    }
+
+    tokens.push(string);
+
+    return tokens;
+
+}
+
+/**
+ * Find the index of the appropriate closing bracket - i.e. the end of the term
+ * @param {*} initial the initial index of the term in the whole string
+ * @param {*} text the text to search for the closing bracket
+ */
+function findClosingBracket(initial, text){
+
+    const len = text.length;
+    var index = 0;
+    var brackets = 1;
+
+    while(index < len){
+
+        var currentCharacter = text.charAt(index);
+
+        switch(currentCharacter){
+            case '(':
+                brackets++;
+                break;
+            case ')':
+                brackets--;
+                if(brackets === 0){
+                    return initial + index + 1;
+                }
+                break;
+            default:
+                break;
+        }
+
+        index++;
+    }
+
+    return initial + index;
+
 }
