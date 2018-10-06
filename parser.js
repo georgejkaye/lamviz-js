@@ -13,13 +13,21 @@ function parse(text){
  */
 function parseTerm(tokens, initial){
 
+    console.log("Parsing term: " + tokens);
+
     const len = tokens.length;
 
     // flags
     var abstraction = false;
     var abstractionVariable = "";
 
+    var secondTerm = false;
+    var t1;
+    var t2;
+
     for(i = 0; i < len; i++){
+
+        console.log("Looking at token " + i);
 
         switch(tokens[i]){
             
@@ -27,25 +35,50 @@ function parseTerm(tokens, initial){
             case '\\':
                 abstraction = true;
                 break;
+
+            // start of a subterm
             case '(':
+
+                var scope = findScope(tokens.slice(i + 1));
+                t2 = parseTerm(scope, initial + i);
+                i += scope.length;
+
+                break;
+
+            // otherwise
             default:
+
                 if(abstraction){
                     abstractionVariable = tokens[i];
                     
-                    // TODO find scope
                     var scope = findScope(tokens.slice(i + 1));
-
-                    //var t = new LambdaAbstraction(abstractionVariable, parse(scope));
-
-                    console.log("Scope of \u03BB" + abstractionVariable + ": " + scope);
+                    t2 = new LambdaAbstraction (parseTerm(scope, initial + i), abstractionVariable);
+                    i += scope.length;
+                    console.log("New abstraction: " + t2.prettyPrint(0));
                     abstraction = false;
+
+                } else {
+                    t2 = new LambdaVariable(tokens[i]);
                 }
-            break;
 
+                break;
+                
+        } 
+
+        if(!abstraction){
+            if(secondTerm){
+                console.log("Applying " + t2.prettyPrint(0) + " to " + t1.prettyPrint(0));
+                t1 = new LambdaApplication(t1, t2);
+            } else {
+                t1 = t2;
+                secondTerm = true;
+                console.log("Current variable: " + t1.prettyPrint(0));
+            }
         }
-
     }
 
+    console.log("Returning term: " + t1.prettyPrint(0));
+    return t1;
 }
 
 /**

@@ -11,6 +11,10 @@ class LambdaVariable{
     getType(){
         return VAR;
     }
+
+    prettyPrint(x){
+        return this.index;
+    }
 }
 
 // A lambda abstraction
@@ -22,8 +26,8 @@ class LambdaAbstraction{
         return ABS;
     }
 
-    prettyPrint(){
-        return "\u03BB" + "." + this.term.prettyPrint()
+    prettyPrint(x){
+        return "\u03BB" + this.label + ". " + this.term.prettyPrint(x);
     }
 }
 
@@ -34,5 +38,13 @@ class LambdaApplication{
     // return the type of this lambda term (application)
     getType(){
         return APP;
+    }
+
+    prettyPrint(x){
+        if(x === 0){
+            return this.t1.prettyPrint(1) + " " + this.t2.prettyPrint(1);
+        }
+
+        return "(" + this.t1.prettyPrint(x+1) + " " + this.t2.prettyPrint(x+1) + ")";
     }
 }
