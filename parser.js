@@ -17,6 +17,7 @@ function parseTerm(tokens, initial){
 
     // flags
     var abstraction = false;
+    var abstractionVariable = "";
 
     for(i = 0; i < len; i++){
 
@@ -26,13 +27,52 @@ function parseTerm(tokens, initial){
             case '\\':
                 abstraction = true;
                 break;
-            // ends
-            case '.':
+            case '(':
+            default:
+                if(abstraction){
+                    abstractionVariable = tokens[i];
+                    
+                    // TODO find scope
+                    var scope = findScope(tokens.slice(i + 1));
+
+                    var t = new LambdaAbstraction(abstractionVariable, parse(scope));
+
+                    console.log("Scope of \u03BB" + abstractionVariable + ": " + scope);
+                    abstraction = false;
+                }
             break;
 
         }
 
     }
+
+}
+
+/**
+ * Find the scope of a lambda abstraction
+ * @param {} array the tokens succeeding a lambda abstraction
+ */
+function findScope(array){
+    console.log(array);
+
+    var j = -1;
+    brackets = 1;
+
+    while(brackets > 0 && j < array.length){
+
+        j++;
+
+        console.log(array[j]);
+
+        if(array[j] === '('){
+            brackets++;
+        } else if (array[j] === ')'){
+            brackets--;
+        }
+
+    }
+
+    return array.slice(0, j);
 
 }
 
@@ -62,7 +102,6 @@ function tokenise(text){
 
             // a dot can only follow an abstraction
             case '.':
-                console.log("dot");
                 if(!abstraction){
                     parseError = true;
                     errorMessage = "Abstraction expected but none in progress";
@@ -82,7 +121,6 @@ function tokenise(text){
             // a space can only indicate a gap between terms, and cannot occur inside strings
             case ' ':
                 if(abstraction){
-                    console.log("error!");
                     parseError = true;
                     errorMessage = "Variable expected after lambda abstraction";
                 } else {
@@ -177,8 +215,6 @@ function smartPush(array, item){
  * @param {*} text the text to search for the closing bracket
  */
 function findClosingBracket(initial, text){
-
-    console.log(text);
 
     const len = text.length;
     var index = 0;

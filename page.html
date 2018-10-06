@@ -12,7 +12,9 @@
 
     <input type = "text" id = "input"><br>
     <button type = "button"id = "execute-btn"
-    onclick = "changeText('result', tokenise(getText('input')))">
+    onclick =   "var text = tokenise(getText('input'));
+                 changeText('result', text);
+                 parse(text);">
     Execute</button>
 
     <h2 id="result"></h2>
