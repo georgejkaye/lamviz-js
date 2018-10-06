@@ -81,7 +81,7 @@ function tokenise(text){
 
             // a space can only indicate a gap between terms, and cannot occur inside strings
             case ' ':
-                if(abstraction && string === ""){
+                if(abstraction){
                     console.log("error!");
                     parseError = true;
                     errorMessage = "Variable expected after lambda abstraction";
