@@ -8,143 +8,32 @@ function parse(text){
 
 /**
  * Parse a lambda term
- * @param {*} text the text to parse for a lambda term
+ * @param {*} tokens the array of tokens to parse
  * @param {*} initial the index to start counting from (for debugging)
  */
-function parseTerm(text, initial){
+function parseTerm(tokens, initial){
 
-    const len = text.length;
+    const len = tokens.length;
 
-    console.log("Input to parse: " + text);
-    //console.log("Input length: " + len.toString());
-
-    var index = 0;
-
+    // flags
     var abstraction = false;
-    var parseError = false;
-    var currentAbstraction = "";
-    var currentVariable = "";
-    var currentSubterm = "";
-    var newSubterm;
-    var oldSubterm;
 
-    // variables for function application
-    var app = false;  // are we parsing the second part of an application?
-    var app1;
-    var app2;
+    for(i = 0; i < len; i++){
 
-    while(index < len){
-
-        var currentCharacter = text.charAt(index);
-        
-        //console.log("Character " + index + ": " + currentCharacter);
-
-        switch(currentCharacter){
+        switch(tokens[i]){
             
-            // beginning of a lambda abstraction
+            // lambda abstraction, next token must be a variable
             case '\\':
                 abstraction = true;
                 break;
-
-            // end of a lambda abstraction
+            // ends
             case '.':
-                if(abstraction){
-                    // TODO deal with abstraction
-                    console.log("Lambda abstraction: " + currentAbstraction);
+            break;
 
-                    var scope = findClosingBracket(index, text.substring(index + 1)) + 1;
-
-                    if(scope === -1){
-                        scope = len - 1;
-                    }
-
-                    var t = text.substring(index + 1, scope);
-                    if(t.charAt(0) === ' '){
-                        t = t.substring(1);
-                        index++;
-                    }
-
-                    console.log("Scope of \u03BB" + currentAbstraction + ": " + t);
-                    
-                    // parse the subterm
-                    const t1 = parseTerm(t, index + 1);
-
-                    // create this new lambda abstraction
-                    // \x. t
-                    return new LambdaAbstraction(t1, currentAbstraction)
-                    
-                } else {
-                    // dot with no associated lambda is a parse error
-                    parseError = true
-                    break;
-                }
-
-                break;
-
-            // start of a subterm
-            case '(':
-
-                const end = findClosingBracket(index, text.substring(index + 1));
-
-                if(end === len){
-                    parseError = true;
-                }
-
-                console.log("Subterm: " + text.substring(index + 1, end));
-
-                var t1 = parseTerm(text.substring(index + 1, end), index + 1);
-                index++;
-
-                break;
-
-            // floating close bracket (all close brackets dealt with in the subterm process) 
-            // parse error
-            case ')':
-
-                parseError = true;
-                break;
-
-            case ' ':
-                // end of a variable/term
-               
-                // abstractions cannot have spaces in them
-                if(abstraction){
-                    parseError = true;
-                } else {
-                    newSubterm = parseTerm(currentSubterm, index)
-                    
-                    if(app){
-                        newSubterm = new LambdaApplication(oldSubterm, newSubterm);
-                    } else {
-                        app = true;
-                    }
-
-                    currentSubterm = "";
-                
-                }
-
-                break;
-
-            default:
-
-                if (abstraction){
-                    currentAbstraction += currentCharacter;
-                } else {
-                    currentSubterm += currentCharacter;
-                }
-                
-                break;
-        } 
-        
-        if(parseError){
-            console.log("Error parsing \'" + text.charAt(index) + "\' at character " + (initial + index));
         }
 
-        index++;
     }
 
-    console.log("New variable: " + currentSubterm);
-    return new LambdaVariable(currentSubterm);
 }
 
 /**
@@ -157,6 +46,13 @@ function tokenise(text){
     var tokens = [];
 
     var string = "";
+    var brackets = 0;
+
+    var abstraction = false;
+
+    var parseError = false;
+    var parseNumber = 0;
+    var errorMessage = "";
 
     for(i = 0; i < len; i++){
 
@@ -164,30 +60,114 @@ function tokenise(text){
 
         switch(currentCharacter){
 
-            // a dot denotes the end of a lambda abstraction variable
+            // a dot can only follow an abstraction
             case '.':
-                tokens.push('.');
-            
-            // a space denotes the end of a string
+                console.log("dot");
+                if(!abstraction){
+                    parseError = true;
+                    errorMessage = "Abstraction expected but none in progress";
+                } else {
+                    abstraction = false;
+
+                    if(string === ""){
+                        parseError = true
+                        errorMessage = "No variable given for lambda abstraction";
+                    }
+
+                    tokens = pushString(tokens, string);
+                    string = "";
+                }
+                break;
+
+            // a space can only indicate a gap between terms, and cannot occur inside strings
             case ' ':
-                tokens.push(string);
-                string = "";
+                if(abstraction && string === ""){
+                    console.log("error!");
+                    parseError = true;
+                    errorMessage = "Variable expected after lambda abstraction";
+                } else {
+                    tokens = pushString(tokens, string);
+                    string = "";
+                }
                 break;
-            case '\\':
-            case '(':
+
+            // a closing bracket must have a matching opening bracket
             case ')':
-                tokens.push(currentCharacter);
+                brackets--;
+
+                if(brackets < 0){
+                    parseError = true;
+                    errorMessage = "No opening bracket";
+                } else {
+                    tokens = pushString(tokens, string);
+                    string = "";
+                    tokens = pushString(tokens, currentCharacter);
+                }
+
                 break;
+
+            // beginning of an abstraction;
+            case '\\':
+                abstraction = true;
+                tokens = pushString(tokens, string);
+                string = "";
+                tokens = pushString(tokens, currentCharacter);
+                break;
+
+            // start of a subterm, need to check there is a matching closing bracket
+            case '(':
+                tokens = pushString(tokens, string);
+                string = "";
+                const x = findClosingBracket(i, text.substring(i));
+
+                if(x === -1){
+                    parseError = true;
+                    errorMessage = "No closing bracket"
+                } else {
+                    brackets++;
+                    tokens = pushString(tokens, currentCharacter);
+                }
+                break;
+
+            // any other character is part of a string
             default:
                 string += currentCharacter;
                 break;
         }
 
+        if(parseError){
+            return "Parse error, character " + i + ": " + errorMessage;
+        }
+
     }
 
-    tokens.push(string);
+    // push whatever is left at the end
+    if(string !== ""){
+        tokens = pushString(tokens, string);
+    }
 
     return tokens;
+
+}
+
+function pushString(array, string){
+    
+    if(string !== ""){
+        array = smartPush(array, string);
+    }
+
+    return array;
+}
+
+function smartPush(array, item){
+
+    if(array[0] === ""){
+        array[0] = item;
+    } else {
+        array.push(item);
+    }
+
+    return array;
 
 }
 
@@ -198,9 +178,11 @@ function tokenise(text){
  */
 function findClosingBracket(initial, text){
 
+    console.log(text);
+
     const len = text.length;
     var index = 0;
-    var brackets = 1;
+    var brackets = 0;
 
     while(index < len){
 
@@ -223,6 +205,6 @@ function findClosingBracket(initial, text){
         index++;
     }
 
-    return initial + index;
+    return -1;
 
 }
