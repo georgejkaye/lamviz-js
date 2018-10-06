@@ -35,7 +35,7 @@ function parseTerm(tokens, initial){
                     // TODO find scope
                     var scope = findScope(tokens.slice(i + 1));
 
-                    var t = new LambdaAbstraction(abstractionVariable, parse(scope));
+                    //var t = new LambdaAbstraction(abstractionVariable, parse(scope));
 
                     console.log("Scope of \u03BB" + abstractionVariable + ": " + scope);
                     abstraction = false;
@@ -53,7 +53,6 @@ function parseTerm(tokens, initial){
  * @param {} array the tokens succeeding a lambda abstraction
  */
 function findScope(array){
-    console.log(array);
 
     var j = -1;
     brackets = 1;
@@ -61,8 +60,6 @@ function findScope(array){
     while(brackets > 0 && j < array.length){
 
         j++;
-
-        console.log(array[j]);
 
         if(array[j] === '('){
             brackets++;
