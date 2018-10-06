@@ -27,19 +27,31 @@ function parseTerm(tokens, initial){
 
     for(i = 0; i < len; i++){
 
-        console.log("Looking at token " + i);
+        console.log("Looking at token " + (initial + i) + ": " + tokens[i]);
 
         switch(tokens[i]){
             
             // lambda abstraction, next token must be a variable
             case '\\':
-                abstraction = true;
+
+                i++;
+                console.log("Looking at token " + (initial + i) + ": " + tokens[i]);
+                abstractionVariable = tokens[i]; 
+
+                i++;
+                var scope = findScope(tokens.slice(i));
+                t2 = new LambdaAbstraction (parseTerm(scope, initial + i), abstractionVariable);
+                i += scope.length;
+                console.log("New abstraction: " + t2.prettyPrint(0));
+                abstraction = false;
+
                 break;
 
             // start of a subterm
             case '(':
 
-                var scope = findScope(tokens.slice(i + 1));
+                i++;
+                var scope = findScope(tokens.slice(i));
                 t2 = parseTerm(scope, initial + i);
                 i += scope.length;
 
@@ -47,20 +59,7 @@ function parseTerm(tokens, initial){
 
             // otherwise
             default:
-
-                if(abstraction){
-                    abstractionVariable = tokens[i];
-                    
-                    var scope = findScope(tokens.slice(i + 1));
-                    t2 = new LambdaAbstraction (parseTerm(scope, initial + i), abstractionVariable);
-                    i += scope.length;
-                    console.log("New abstraction: " + t2.prettyPrint(0));
-                    abstraction = false;
-
-                } else {
-                    t2 = new LambdaVariable(tokens[i]);
-                }
-
+                t2 = new LambdaVariable(tokens[i]);
                 break;
                 
         } 
