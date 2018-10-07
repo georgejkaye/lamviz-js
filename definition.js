@@ -1,31 +1,58 @@
-// constants to distinguish between different lambda terms
+/** Constants to distinguish between different lambda terms. */
 const VAR = 0; // variable e.g. x, y, z
 const ABS = 1; // lambda abstraction e.g. \x.t
 const APP = 2; // application e.g. t1 t2
 
-// A variable, stored as a De Bruijn index
+/** Class representing a lambda variable (currently stored as a string - TODO De Bruijn). */
 class LambdaVariable{
+
+    /**
+     * Create a lambda variable.
+     * @param {anything} index - Which lambda abstraction this term refers to.
+     */
     constructor(index){this.index = index;}
 
-    // return the type of this lambda term (variable)
+    /**
+     * Get the type of this lambda term - a variable.
+     * @return {number} The type of this lambda term.
+     */
     getType(){
         return VAR;
     }
 
+    /**
+     * Get a pretty print of this term.
+     * @param {number} x - The layer this term is at - determines whether brackets are required.
+     * @return {string} The pretty string.
+     */
     prettyPrint(x){
         return this.index;
     }
 }
 
-// A lambda abstraction
+/** Class representing a lambda abstraction. */
 class LambdaAbstraction{
+
+    /**
+     * Create a lambda abstraction.
+     * @param {lambda term} term    - The scope of this lambda abstraction.
+     * @param {string}      label   - The label this lambda abstraction has.
+     */
     constructor(term, label){this.term = term; this.label = label}
 
-    // return the type of this lambda term (abstraction)
+    /**
+     * Get the type of this lambda term - an abstraction.
+     * @return {number} The type of this lambda term.
+     */
     getType(){
         return ABS;
     }
 
+    /**
+     * Get a pretty print of this term.
+     * @param {number} x - The layer this term is at - determines whether brackets are required.
+     * @return {string} The pretty string.
+     */
     prettyPrint(x){
 
         if(x === undefined){
@@ -40,15 +67,29 @@ class LambdaAbstraction{
     }
 }
 
-// An application of two lambda terms
+/** Class representing a lambda application. */
 class LambdaApplication{
+
+    /**
+     * Create a lambda application.
+     * @param {lambda term} t1 - the first term in the lambda application (the function).
+     * @param {lambda term} t2 - the second term in the lambda application (the argument).
+     */
     constructor(t1, t2){this.t1 = t1; this.t2 = t2}
 
-    // return the type of this lambda term (application)
+    /**
+     * Get the type of this lambda term - an application.
+     * @return {number} The type of this lambda term.
+     */
     getType(){
         return APP;
     }
 
+    /**
+     * Get a pretty print of this term.
+     * @param {number} x - The layer this term is at - determines whether brackets are required.
+     * @return {string} The pretty string.
+     */
     prettyPrint(x){
 
         if(x === undefined){
