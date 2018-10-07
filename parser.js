@@ -4,16 +4,20 @@
  * @return {lambda term} The parsed lambda term.
  */
 function parse(tokens){
-    return parseTerm(tokens, 0);
+
+    var env = new LambdaEnvironment();
+
+    return parseTerm(tokens, 0, env);
 }
 
 /**
  * Parse a lambda term from an array of tokens.
- * @param {array of tokens} tokens  - The array of tokens to parse.
- * @param {number}          initial - The index to start counting from.
+ * @param {array of tokens}     tokens  - The array of tokens to parse.
+ * @param {number}              initial - The index to start counting from.
+ * @param {lambda environment}  env     - The current lambda environment
  * @return {lambda term} The parsed lambda term.
  */
-function parseTerm(tokens, initial){
+function parseTerm(tokens, initial, env){
 
     console.log("Parsing term: " + tokens);
 
@@ -41,10 +45,12 @@ function parseTerm(tokens, initial){
                 abstractionVariable = tokens[i]; 
 
                 i++;
+                env.pushTerm(abstractionVariable);
                 var scope = findScope(tokens.slice(i));
-                t2 = new LambdaAbstraction (parseTerm(scope, initial + i), abstractionVariable);
+                t2 = new LambdaAbstraction (parseTerm(scope, initial + i, env), abstractionVariable);
                 i += scope.length;
                 console.log("New abstraction: " + t2.prettyPrint());
+                env.popTerm();
 
                 break;
 
@@ -55,7 +61,7 @@ function parseTerm(tokens, initial){
                 var scope = findScope(tokens.slice(i));
                 console.log("Scope of subterm: " + scope);
                 console.log("Length of scope: " + scope.length);
-                t2 = parseTerm(scope, initial + i);
+                t2 = parseTerm(scope, initial + i, env);
                 i += (scope.length - 1);
                 console.log("New subterm: " + t2.prettyPrint());
                 console.log("Remaining tokens: " + tokens.slice(i + 1));
@@ -70,7 +76,7 @@ function parseTerm(tokens, initial){
 
             // otherwise
             default:
-                t2 = new LambdaVariable(tokens[i]);
+                t2 = new LambdaVariable(env.find(tokens[i]));
                 break;
                 
         } 

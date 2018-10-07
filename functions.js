@@ -1,5 +1,5 @@
 /**
- * Change the text of an element with a given id
+ * Change the text of an element with a given id.
  * @param {string} id   - The id of the element.
  * @param {string} text - the text to change to
  */
@@ -8,7 +8,7 @@ function changeText(id, text){
 }
 
 /**
- * Get the text of an element with a given id
+ * Get the text of an element with a given id.
  * @param {string} id - The id of the element.
  * @return {string} The text of the element.
  */
@@ -17,7 +17,7 @@ function getText(id){
 }
 
 /**
- * Get a 'pretty' string of an array with spaces in between each element
+ * Get a 'pretty' string of an array with spaces in between each element.
  * @param {array} array - The array to get the string from.
  */
 function prettyString(array){

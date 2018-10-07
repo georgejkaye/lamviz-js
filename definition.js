@@ -3,7 +3,7 @@ const VAR = 0; // variable e.g. x, y, z
 const ABS = 1; // lambda abstraction e.g. \x.t
 const APP = 2; // application e.g. t1 t2
 
-/** Class representing a lambda variable (currently stored as a string - TODO De Bruijn). */
+/** Class representing a lambda variable (stored as a de Bruijn index). */
 class LambdaVariable{
 
     /**
@@ -60,10 +60,10 @@ class LambdaAbstraction{
         }
 
         if(x === 0){
-            return "\u03BB" + this.label + ". " + this.term.prettyPrint(0);
+            return "\u03BB" + ". " + this.term.prettyPrint(0);
         }
 
-        return "(\u03BB" + this.label + ". " + this.term.prettyPrint(0) + ")";
+        return "(\u03BB" + ". " + this.term.prettyPrint(0) + ")";
     }
 }
 
@@ -105,5 +105,55 @@ class LambdaApplication{
         }
 
         return "(" + this.t1.prettyPrint(x) + " " + this.t2.prettyPrint(x+1) + ")";
+    }
+}
+
+/** Class representing an environment of currently abstracted variables. */
+class LambdaEnvironment{
+
+    /**
+     * Create a new empty environment.
+     */
+    constructor(){this.env = []};
+
+    /**
+     * Push a new variable into the environment.
+     * @param {string} variable - The variable to push into the environment.
+     */
+    pushTerm(variable){
+        if(this.env[0] === ""){
+            this.env[0] = variable;
+        } else {
+            this.env.push(variable);
+        }
+    }
+
+    /**
+     * Remove a term from the environment.
+     */
+    popTerm(){
+        this.env.pop();
+    }
+
+    /**
+     * Find the de Bruijn index of a variable.
+     * @param {string} variable - The variable to search for.
+     * @returns {number} The de Bruijn index of the variable, or -1 if not found.
+     */
+    find(variable){
+
+        var j = -1;
+
+        for(i = this.env.length - 1; i >= 0; i--){
+
+            j++;
+
+            if(this.env[i] === variable){
+                return j;
+            }
+        }
+
+        return -1;
+
     }
 }
