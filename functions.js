@@ -1,7 +1,7 @@
 /**
  * Change the text of an element with a given id
- * @param {*} id  the id of the object
- * @param {*} text the text to change to
+ * @param {string} id   - The id of the element.
+ * @param {string} text - the text to change to
  */
 function changeText(id, text){
     document.getElementById(id).innerHTML = text;
@@ -9,7 +9,8 @@ function changeText(id, text){
 
 /**
  * Get the text of an element with a given id
- * @param {*} id the id of the object
+ * @param {string} id - The id of the element.
+ * @return {string} The text of the element.
  */
 function getText(id){
     return document.getElementById(id).value;
@@ -17,7 +18,7 @@ function getText(id){
 
 /**
  * Get a 'pretty' string of an array with spaces in between each element
- * @param {*} array the array to get the string
+ * @param {array} array - The array to get the string from.
  */
 function prettyString(array){
 

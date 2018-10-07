@@ -1,15 +1,17 @@
 /**
- * Parse a lambda term
- * @param {*} text  the text to parse for a lambda term
+ * Parse a lambda term from an array of tokens.
+ * @param {array of tokens} tokens - The tokens to parse for a lambda term.
+ * @return {lambda term} The parsed lambda term.
  */
-function parse(text){
-    return parseTerm(text, 0);
+function parse(tokens){
+    return parseTerm(tokens, 0);
 }
 
 /**
- * Parse a lambda term
- * @param {*} tokens the array of tokens to parse
- * @param {*} initial the index to start counting from (for debugging)
+ * Parse a lambda term from an array of tokens.
+ * @param {array of tokens} tokens  - The array of tokens to parse.
+ * @param {number}          initial - The index to start counting from.
+ * @return {lambda term} The parsed lambda term.
  */
 function parseTerm(tokens, initial){
 
@@ -17,7 +19,6 @@ function parseTerm(tokens, initial){
 
     const len = tokens.length;
 
-    // flags
     var abstractionVariable = "";
 
     var secondTerm = false;
@@ -90,33 +91,35 @@ function parseTerm(tokens, initial){
 }
 
 /**
- * Find the scope of a lambda abstraction
- * @param {} array the tokens succeeding a lambda abstraction
+ * Find the scope of a lambda abstraction from an array of tokens.
+ * @param {array of tokens} tokens - The tokens succeeding a lambda abstraction.
+ * @return {array of tokens} The tokens that are under the current scope.
  */
-function findScope(array){
+function findScope(tokens){
 
     var j = -1;
     brackets = 1;
 
-    while(brackets > 0 && j < array.length){
+    while(brackets > 0 && j < tokens.length){
 
         j++;
 
-        if(array[j] === '('){
+        if(tokens[j] === '('){
             brackets++;
-        } else if (array[j] === ')'){
+        } else if (tokens[j] === ')'){
             brackets--;
         }
 
     }
 
-    return array.slice(0, j + 1);
+    return tokens.slice(0, j + 1);
 
 }
 
 /**
- * Tokenise an input string
- * @param {} text the string to tokenise
+ * Tokenise an input string.
+ * @param {string} text - The string to tokenise.
+ * @return {array of tokens} The tokenised string in an array.
  */
 function tokenise(text){
 
@@ -226,6 +229,12 @@ function tokenise(text){
 
 }
 
+/**
+ * Push a string into an array, checking to make sure it isn't empty.
+ * @param {array}   array  - The array to push the string into.
+ * @param {string}  string - The string to push into the array.
+ * @return {array} The array with the string pushed into it.
+ */
 function pushString(array, string){
     
     if(string !== ""){
@@ -235,6 +244,11 @@ function pushString(array, string){
     return array;
 }
 
+/**
+ * Push something into an array, overwriting the first element if it is empty.
+ * @param {array}       array   - The array to push into.
+ * @param {anything}    item    - The item to push into the array.
+ */
 function smartPush(array, item){
 
     if(array[0] === ""){
@@ -248,9 +262,10 @@ function smartPush(array, item){
 }
 
 /**
- * Find the index of the appropriate closing bracket - i.e. the end of the term
- * @param {*} initial the initial index of the term in the whole string
- * @param {*} text the text to search for the closing bracket
+ * Find the index of the appropriate closing bracket - i.e. the end of the term.
+ * @param {number} initial  - The initial index of the term in the whole string.
+ * @param {string} text     - The text to search for the closing bracket.
+ * @return The index of the closing bracket (or -1 if there isn't one).
  */
 function findClosingBracket(initial, text){
 
