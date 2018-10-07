@@ -24,7 +24,9 @@ function parseTerm(tokens, initial){
     var t1;
     var t2;
 
-    for(i = 0; i < len; i++){
+    var i = 0;
+
+    while(i < len){
 
         console.log("Looking at token " + (initial + i) + ": " + tokens[i]);
 
@@ -41,7 +43,7 @@ function parseTerm(tokens, initial){
                 var scope = findScope(tokens.slice(i));
                 t2 = new LambdaAbstraction (parseTerm(scope, initial + i), abstractionVariable);
                 i += scope.length;
-                console.log("New abstraction: " + t2.prettyPrint(0));
+                console.log("New abstraction: " + t2.prettyPrint());
 
                 break;
 
@@ -54,7 +56,7 @@ function parseTerm(tokens, initial){
                 console.log("Length of scope: " + scope.length);
                 t2 = parseTerm(scope, initial + i);
                 i += (scope.length - 1);
-                console.log("New subterm: " + t2.prettyPrint(0));
+                console.log("New subterm: " + t2.prettyPrint());
                 console.log("Remaining tokens: " + tokens.slice(i + 1));
 
                 break;
@@ -62,6 +64,7 @@ function parseTerm(tokens, initial){
             // end of a subterm
             case ')':
                 
+                console.log("Returning term: " + t1.prettyPrint());
                 return t1;
 
             // otherwise
@@ -72,15 +75,17 @@ function parseTerm(tokens, initial){
         } 
 
         if(secondTerm){
-                console.log("Applying " + t2.prettyPrint(0) + " to " + t1.prettyPrint(0));
+                console.log("Applying " + t2.prettyPrint() + " to " + t1.prettyPrint());
                 t1 = new LambdaApplication(t1, t2);
         } else {
                 t1 = t2;
                 secondTerm = true;
         }
+
+        i++;
     }
 
-    console.log("Returning term: " + t1.prettyPrint(0));
+    console.log("Returning term: " + t1.prettyPrint());
     return t1;
 }
 

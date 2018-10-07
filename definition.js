@@ -28,6 +28,10 @@ class LambdaAbstraction{
 
     prettyPrint(x){
 
+        if(x === undefined){
+            x = 0;
+        }
+
         if(x === 0){
             return "\u03BB" + this.label + ". " + this.term.prettyPrint(0);
         }
@@ -46,10 +50,19 @@ class LambdaApplication{
     }
 
     prettyPrint(x){
-        if(x === 0){
-            return this.t1.prettyPrint(1) + " " + this.t2.prettyPrint(1);
+
+        if(x === undefined){
+            x = 0;
         }
 
-        return "(" + this.t1.prettyPrint(x+1) + " " + this.t2.prettyPrint(x+1) + ")";
+        if(x === 0){
+            if(this.t1.getType() === ABS){
+                return this.t1.prettyPrint(1) + " " + this.t2.prettyPrint(1);
+            }
+
+            return this.t1.prettyPrint(0) + " " + this.t2.prettyPrint(1);
+        }
+
+        return "(" + this.t1.prettyPrint(x) + " " + this.t2.prettyPrint(x+1) + ")";
     }
 }
