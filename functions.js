@@ -37,3 +37,16 @@ function prettyString(array){
 
     return string;
 }
+
+/**
+ * Function to execute when the 'execute' button is pressed.
+ */
+function execute(){
+    var text = tokenise(getText('input'));
+
+    if(typeof text !== "string"){
+        text = parse(text).prettyPrint();
+    }
+
+    changeText('result', text);
+}
