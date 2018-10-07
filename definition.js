@@ -27,7 +27,12 @@ class LambdaAbstraction{
     }
 
     prettyPrint(x){
-        return "\u03BB" + this.label + ". " + this.term.prettyPrint(x);
+
+        if(x === 0){
+            return "\u03BB" + this.label + ". " + this.term.prettyPrint(0);
+        }
+
+        return "(\u03BB" + this.label + ". " + this.term.prettyPrint(0) + ")";
     }
 }
 

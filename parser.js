@@ -18,7 +18,6 @@ function parseTerm(tokens, initial){
     const len = tokens.length;
 
     // flags
-    var abstraction = false;
     var abstractionVariable = "";
 
     var secondTerm = false;
@@ -43,7 +42,6 @@ function parseTerm(tokens, initial){
                 t2 = new LambdaAbstraction (parseTerm(scope, initial + i), abstractionVariable);
                 i += scope.length;
                 console.log("New abstraction: " + t2.prettyPrint(0));
-                abstraction = false;
 
                 break;
 
@@ -52,10 +50,19 @@ function parseTerm(tokens, initial){
 
                 i++;
                 var scope = findScope(tokens.slice(i));
+                console.log("Scope of subterm: " + scope);
+                console.log("Length of scope: " + scope.length);
                 t2 = parseTerm(scope, initial + i);
-                i += scope.length;
+                i += (scope.length - 1);
+                console.log("New subterm: " + t2.prettyPrint(0));
+                console.log("Remaining tokens: " + tokens.slice(i + 1));
 
                 break;
+
+            // end of a subterm
+            case ')':
+                
+                return t1;
 
             // otherwise
             default:
@@ -64,15 +71,12 @@ function parseTerm(tokens, initial){
                 
         } 
 
-        if(!abstraction){
-            if(secondTerm){
+        if(secondTerm){
                 console.log("Applying " + t2.prettyPrint(0) + " to " + t1.prettyPrint(0));
                 t1 = new LambdaApplication(t1, t2);
-            } else {
+        } else {
                 t1 = t2;
                 secondTerm = true;
-                console.log("Current variable: " + t1.prettyPrint(0));
-            }
         }
     }
 
@@ -101,7 +105,7 @@ function findScope(array){
 
     }
 
-    return array.slice(0, j);
+    return array.slice(0, j + 1);
 
 }
 
