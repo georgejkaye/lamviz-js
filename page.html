@@ -10,10 +10,15 @@
 
     <h2 id="demo"></h2>
 
-    <input type = "text" id = "input"><br>
-    <button type = "button"id = "execute-btn"
+    Term <input type = "text" id = "input"> Environment <input type = "text" id = "env"> <br> 
+    <button type = "button" id = "execute-btn"
     onclick =   "execute();">
     Execute</button>
+
+    <br>
+
+    Substitute <input type = "text" id = "s" style="width: 50px"> for <input type = "text" id = "j" style="width: 50px"><br>
+    <button type = "button" id = "shift-btn" onclick = "subst();">Substitute</button>
 
     <h2 id="result"></h2>
 
@@ -21,5 +26,6 @@
     <script src = "functions.js"></script>
     <script src = "scripts.js"></script>
     <script src = "parser.js"></script>
+    <script src = "evaluator.js"></script>
 </body>
 </html> 

@@ -43,10 +43,38 @@ function prettyString(array){
  */
 function execute(){
     var text = tokenise(getText('input'));
+    var frees = getText('env').split(" ");
+    
+    var env = new LambdaEnvironment();
+
+    for(i = 0; i < frees.length; i++){
+        env.pushTerm(frees[i]);
+    }
+
+    var term;
 
     if(typeof text !== "string"){
-        text = parse(text).prettyPrint();
+        term = parse(text, env)
+        text = term.prettyPrint();
     }
 
     changeText('result', text);
+
+    return term;
+}
+
+function subst(){
+    var text = execute();
+
+    var s = tokenise(getText('s'));
+    var j = parseInt(getText('j'));
+
+    if(typeof s === "string"){
+        changeText('result', s)
+    } else if(isNaN(j)){
+        changeText('result', "Variable to substitute wasn't a number");
+    } else {
+        var newterm = substitute(parse(s, new LambdaEnvironment()), j, execute());
+        changeText('result', newterm.prettyPrint());
+    }
 }

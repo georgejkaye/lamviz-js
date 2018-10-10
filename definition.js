@@ -8,7 +8,7 @@ class LambdaVariable{
 
     /**
      * Create a lambda variable.
-     * @param {anything} index - Which lambda abstraction this term refers to.
+     * @param {any} index - Which lambda abstraction this term refers to.
      */
     constructor(index){this.index = index;}
 
@@ -35,10 +35,10 @@ class LambdaAbstraction{
 
     /**
      * Create a lambda abstraction.
-     * @param {lambda term} term    - The scope of this lambda abstraction.
+     * @param {Object}      t       - The scope of this lambda abstraction.
      * @param {string}      label   - The label this lambda abstraction has.
      */
-    constructor(term, label){this.term = term; this.label = label}
+    constructor(t, label){this.t = t; this.label = label}
 
     /**
      * Get the type of this lambda term - an abstraction.
@@ -60,10 +60,10 @@ class LambdaAbstraction{
         }
 
         if(x === 0){
-            return "\u03BB" + ". " + this.term.prettyPrint(0);
+            return "\u03BB" + ". " + this.t.prettyPrint(0);
         }
 
-        return "(\u03BB" + ". " + this.term.prettyPrint(0) + ")";
+        return "(\u03BB" + ". " + this.t.prettyPrint(0) + ")";
     }
 }
 
@@ -72,8 +72,8 @@ class LambdaApplication{
 
     /**
      * Create a lambda application.
-     * @param {lambda term} t1 - the first term in the lambda application (the function).
-     * @param {lambda term} t2 - the second term in the lambda application (the argument).
+     * @param {Object} t1 - the first term in the lambda application (the function).
+     * @param {Object} t2 - the second term in the lambda application (the argument).
      */
     constructor(t1, t2){this.t1 = t1; this.t2 = t2}
 

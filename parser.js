@@ -1,21 +1,19 @@
 /**
  * Parse a lambda term from an array of tokens.
- * @param {array of tokens} tokens - The tokens to parse for a lambda term.
- * @return {lambda term} The parsed lambda term.
+ * @param {string[]} tokens - The tokens to parse for a lambda term.
+ * @return {Object} The parsed lambda term.
  */
-function parse(tokens){
-
-    var env = new LambdaEnvironment();
+function parse(tokens, env){
 
     return parseTerm(tokens, 0, env);
 }
 
 /**
  * Parse a lambda term from an array of tokens.
- * @param {array of tokens}     tokens  - The array of tokens to parse.
- * @param {number}              initial - The index to start counting from.
- * @param {lambda environment}  env     - The current lambda environment
- * @return {lambda term} The parsed lambda term.
+ * @param {string[]}    tokens  - The array of tokens to parse.
+ * @param {number}      initial - The index to start counting from.
+ * @param {Object}      env     - The current lambda environment
+ * @return {Object} The parsed lambda term.
  */
 function parseTerm(tokens, initial, env){
 
@@ -125,7 +123,7 @@ function findScope(tokens){
 /**
  * Tokenise an input string.
  * @param {string} text - The string to tokenise.
- * @return {array of tokens} The tokenised string in an array.
+ * @return {string[]} The tokenised string in an array.
  */
 function tokenise(text){
 
@@ -252,8 +250,8 @@ function pushString(array, string){
 
 /**
  * Push something into an array, overwriting the first element if it is empty.
- * @param {array}       array   - The array to push into.
- * @param {anything}    item    - The item to push into the array.
+ * @param {array}   array   - The array to push into.
+ * @param {any}      item    - The item to push into the array.
  */
 function smartPush(array, item){
 
