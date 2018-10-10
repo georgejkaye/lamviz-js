@@ -1,3 +1,5 @@
+var currentTerm;
+
 /**
  * Change the text of an element with a given id.
  * @param {string} id   - The id of the element.
@@ -60,21 +62,37 @@ function execute(){
 
     changeText('result', text);
 
-    return term;
+    currentTerm = term;
 }
 
 function subst(){
-    var text = execute();
 
     var s = tokenise(getText('s'));
-    var j = parseInt(getText('j'));
+    var j = getText('j');
 
-    if(typeof s === "string"){
+    var frees = getText('env').split(" ");
+    var env = new LambdaEnvironment();
+
+    for(i = 0; i < frees.length; i++){
+        env.pushTerm(frees[i]);
+    }
+
+    j = env.find(j);
+
+    if(j === -1){
+        changeText('result', "Variable not in environment");
+    } else if(typeof s === "string"){
         changeText('result', s)
-    } else if(isNaN(j)){
-        changeText('result', "Variable to substitute wasn't a number");
     } else {
-        var newterm = substitute(parse(s, new LambdaEnvironment()), j, execute());
+        var newterm = substitute(parse(s, new LambdaEnvironment()), j, currentTerm);
         changeText('result', newterm.prettyPrint());
     }
+}
+
+function eval(){
+
+    var res = evaluate(currentTerm);
+
+    changeText('result', res.prettyPrint());
+
 }
