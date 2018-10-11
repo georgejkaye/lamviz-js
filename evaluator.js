@@ -58,7 +58,7 @@ function substituteTop(s, t){
     return shift(-1, (shift(0, (shift(1, s)), t)));
 }
 
-function isVal(env, t){
+function isVal(t){
     if(t.getType() === ABS){
         return true;
     }
@@ -87,6 +87,7 @@ function evaluate(t){
 
     }
 
+    console.log("Returning " + t.prettyPrint());
     return t;
 
 }

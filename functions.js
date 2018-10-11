@@ -93,6 +93,8 @@ function eval(){
 
     var res = evaluate(currentTerm);
 
+    console.log("Evaluated term: " + res.prettyPrint());
+
     changeText('result', res.prettyPrint());
 
 }

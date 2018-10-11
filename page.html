@@ -10,14 +10,14 @@
 
     <h2 id="demo"></h2>
 
-    Term <input type = "text" id = "input"> Environment <input type = "text" id = "env"> <br> 
+    t = <input type = "text" id = "input"> &Gamma; = <input type = "text" id = "env"> <br> 
     <button type = "button" id = "execute-btn"
     onclick =   "execute();">
     Execute</button>
 
     <br>
 
-    Substitute <input type = "text" id = "s" style="width: 50px"> for <input type = "text" id = "j" style="width: 50px"><br>
+    [ <input type = "text" id = "j" style="width: 50px"> &#x21A6; <input type = "text" id = "s" style="width: 50px"> ] t<br>
     <button type = "button" id = "shift-btn" onclick = "subst();">Substitute</button>
     <br>
     <button type = "button" id = "eval-btn" onclick = "eval();">Evaluate</button>
