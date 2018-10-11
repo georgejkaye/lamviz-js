@@ -53,21 +53,23 @@ function substitute(s, j, t){
 
 }
 
-
-function substituteTop(s, t){
-    return shift(-1, (shift(0, (shift(1, s)), t)));
+/**
+ * Perform a beta-reduction.
+ * @param {Object} abs - The abstraction to substitute the value in.
+ * @param {Object} val - The value to substitute into the abstraction.
+ * @return {Object} The beta-reduced expression.
+ */
+function applicationAbstraction(abs, val){
+    return shift(substitute(shift(val, 1, 0), 0, abs), -1, 0);
 }
 
-function isVal(t){
-    if(t.getType() === ABS){
-        return true;
-    }
-
-    return false;
-}
-
+/**
+ * Evaluate a lambda expression.
+ * @param {Object} t - The lambda expression to evaluate.
+ * @return The fully evaluated lambda expression.
+ */
 function evaluate(t){
-
+    ordinal();
     console.log("Evaluating " + t.prettyPrint());
 
     if(t.getType() === APP){
@@ -75,11 +77,11 @@ function evaluate(t){
             var t1 = t.t1;
             var t2 = t.t2;
 
-            if(t1.getType === ABS && isVal(t2)){
-                return substituteTop(t2, t1.t);
+            if(t1.getType() === ABS && t2.getType() === ABS){
+                return applicationAbstraction(t2, t1.t);
             }
 
-            if(isVal(t1)){
+            if(t1.getType() === ABS){
                 return new LambdaApplication(t1, evaluate(t2));
             }
 
