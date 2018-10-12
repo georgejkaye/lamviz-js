@@ -1,5 +1,5 @@
 var cy = cytoscape({
-    container: document.getElementById('cy'),
+    container: document.getElementById("cy"),
 
     elements: [ // list of graph elements to start with
         { // node a
