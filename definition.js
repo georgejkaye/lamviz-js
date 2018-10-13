@@ -3,6 +3,8 @@ const VAR = 0; // variable e.g. x, y, z
 const ABS = 1; // lambda abstraction e.g. \x.t
 const APP = 2; // application e.g. t1 t2
 
+var termHistory = [];
+
 /** Class representing a lambda variable (stored as a de Bruijn index). */
 class LambdaVariable{
 
@@ -186,7 +188,7 @@ class LambdaEnvironment{
     /**
      * Create a new empty environment.
      */
-    constructor(){this.env = [], this.envUnique = []};
+    constructor(){this.env = [], this.envUnique = [], termHistory = []};
 
     /**
      * Push a new variable into the environment. If the element already exists, appends a prime to it (e.g. x -> x').
@@ -202,8 +204,8 @@ class LambdaEnvironment{
 
         var i = 0;
 
-        while(i < this.env.length - 1){
-            if(this.env[i] === variable){
+        while(i < termHistory.length){
+            if(termHistory[i] === variable){
                 variable += "\'";
                 i = 0;
             } else {
@@ -215,6 +217,12 @@ class LambdaEnvironment{
             this.envUnique[0] = variable;
         } else {
             this.envUnique.push(variable);
+        }
+
+        if(termHistory[0] === ""){
+            termHistory[0] = variable;
+        } else {
+            termHistory.push(variable);
         }
 
         return variable;
@@ -264,22 +272,4 @@ class LambdaEnvironment{
         return this.envUnique[this.envUnique.length - 1 - index];
 
     }
-}
-
-/**
- * Check if a variable exists in the environment and adjust it if necessary.
- * @param {string} variable - The variable to check if it appears in the environment.
- * @param {Object} env      - The environment.
- * @return {string} The updated variable name.
- */
-function check(variable, env){
-
-    for(i = 0; i < env.length; i++){
-        if(env.env[i] === variable){
-            variable += "\'";
-        }
-    }
-
-    return variable;
-
 }

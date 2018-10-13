@@ -44,6 +44,7 @@ function prettyString(array){
  * Function to execute when the 'execute' button is pressed.
  */
 function execute(){
+
     var text = tokenise(getText('input'));
     var frees = getText('env').split(" ");
     
