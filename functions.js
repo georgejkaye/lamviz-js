@@ -57,12 +57,14 @@ function execute(){
 
     if(typeof text !== "string"){
         term = parse(text, env)
-        text = term.prettyPrint();
+        text = term.prettyPrint() + " ~  ~  ~ " + term.prettyPrintLabels();
     }
 
     changeText('result', text);
 
     currentTerm = term;
+
+    drawGraph();
 }
 
 function subst(){

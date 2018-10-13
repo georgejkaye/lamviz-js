@@ -28,6 +28,21 @@ class LambdaVariable{
     prettyPrint(x){
         return this.index;
     }
+
+    /**
+     * Get a pretty print of this term using the actual labels.
+     * @param {Object} env - The environment of this lambda term.
+     * @param {number} x - The layer this term is at - determines whether brackets are required.
+     * @return {string} The pretty string.
+     */
+    prettyPrintLabels(env, x){
+
+        if(env === undefined){
+            env = new LambdaEnvironment();
+        }
+
+        return env.determine(this.index);
+    }
 }
 
 /** Class representing a lambda abstraction. */
@@ -64,6 +79,36 @@ class LambdaAbstraction{
         }
 
         return "(\u03BB" + ". " + this.t.prettyPrint(0) + ")";
+    }
+
+    /**
+     * Get a pretty print of this term using the actual labels.
+     * @param {Object} env  - The environment of this lambda term.
+     * @param {number} x    - The layer this term is at - determines whether brackets are required.
+     * @return {string} The pretty string.
+     */
+    prettyPrintLabels(env, x){
+
+        if(env === undefined){
+            env = new LambdaEnvironment();
+        }
+
+        if(x === undefined){
+            x = 0;
+        }
+
+        env.pushTerm(this.label);
+
+        var string = "";
+
+        if(x === 0){
+            string = "\u03BB" + this.label + ". " + this.t.prettyPrintLabels(env, 0);
+        } else {
+            string = "(\u03BB" + this.label + ". " + this.t.prettyPrintLabels(env, 0) + ")";
+        }
+        
+        env.popTerm();
+        return string;
     }
 }
 
@@ -106,6 +151,33 @@ class LambdaApplication{
 
         return "(" + this.t1.prettyPrint(x) + " " + this.t2.prettyPrint(x+1) + ")";
     }
+
+    /**
+     * Get a pretty print of this term using the actual labels.
+     * @param {Object} env  - The environment of this lambda term.
+     * @param {number} x    - The layer this term is at - determines whether brackets are required.
+     * @return {string} The pretty string.
+     */
+    prettyPrintLabels(env, x){
+
+        if(env === undefined){
+            env = new LambdaEnvironment();
+        }
+
+        if(x === undefined){
+            x = 0;
+        }
+
+        if(x === 0){
+            if(this.t1.getType() === ABS){
+                return this.t1.prettyPrintLabels(env, 1) + " " + this.t2.prettyPrintLabels(env, 1);
+            }
+
+            return this.t1.prettyPrintLabels(env, 0) + " " + this.t2.prettyPrintLabels(env, 1);
+        }
+
+        return "(" + this.t1.prettyPrintLabels(env, x) + " " + this.t2.prettyPrintLabels(env, x+1) + ")";
+    }
 }
 
 /** Class representing an environment of currently abstracted variables. */
@@ -114,11 +186,12 @@ class LambdaEnvironment{
     /**
      * Create a new empty environment.
      */
-    constructor(){this.env = []};
+    constructor(){this.env = [], this.envUnique = []};
 
     /**
-     * Push a new variable into the environment.
+     * Push a new variable into the environment. If the element already exists, appends a prime to it (e.g. x -> x').
      * @param {string} variable - The variable to push into the environment.
+     * @return {string} The name of the variable as it appears in the 'unique names' environment.
      */
     pushTerm(variable){
         if(this.env[0] === ""){
@@ -126,6 +199,25 @@ class LambdaEnvironment{
         } else {
             this.env.push(variable);
         }
+
+        var i = 0;
+
+        while(i < this.env.length - 1){
+            if(this.env[i] === variable){
+                variable += "\'";
+                i = 0;
+            } else {
+                i++;
+            }
+        }
+
+        if(this.envUnique[0] === ""){
+            this.envUnique[0] = variable;
+        } else {
+            this.envUnique.push(variable);
+        }
+
+        return variable;
     }
 
     /**
@@ -133,6 +225,7 @@ class LambdaEnvironment{
      */
     popTerm(){
         this.env.pop();
+        this.envUnique.pop();
     }
 
     /**
@@ -156,4 +249,37 @@ class LambdaEnvironment{
         return -1;
 
     }
+
+    /**
+     * Get the name of a variable with a certain de Bruijn index.
+     * @param {number} index - The index to determine the variable name from
+     * @return {string} The name of the variable (? if could not be found)
+     */
+    determine(index){
+
+        if(this.envUnique.length - 1 - index < 0){
+            return "?";
+        }
+
+        return this.envUnique[this.envUnique.length - 1 - index];
+
+    }
+}
+
+/**
+ * Check if a variable exists in the environment and adjust it if necessary.
+ * @param {string} variable - The variable to check if it appears in the environment.
+ * @param {Object} env      - The environment.
+ * @return {string} The updated variable name.
+ */
+function check(variable, env){
+
+    for(i = 0; i < env.length; i++){
+        if(env.env[i] === variable){
+            variable += "\'";
+        }
+    }
+
+    return variable;
+
 }

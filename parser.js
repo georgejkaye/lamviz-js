@@ -43,9 +43,9 @@ function parseTerm(tokens, initial, env){
                 abstractionVariable = tokens[i]; 
 
                 i++;
-                env.pushTerm(abstractionVariable);
+                var label = env.pushTerm(abstractionVariable);
                 var scope = findScope(tokens.slice(i));
-                t2 = new LambdaAbstraction (parseTerm(scope, initial + i, env), abstractionVariable);
+                t2 = new LambdaAbstraction (parseTerm(scope, initial + i, env), label);
                 i += scope.length;
                 console.log("New abstraction: " + t2.prettyPrint());
                 env.popTerm();
