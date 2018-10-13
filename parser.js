@@ -74,7 +74,11 @@ function parseTerm(tokens, initial, env){
 
             // otherwise
             default:
-                t2 = new LambdaVariable(env.find(tokens[i]));
+
+                var index = env.find(tokens[i]);
+                var label = env.determine(index);
+
+                t2 = new LambdaVariable(index, label);
                 break;
                 
         } 

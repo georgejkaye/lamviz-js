@@ -11,8 +11,9 @@ class LambdaVariable{
     /**
      * Create a lambda variable.
      * @param {any} index - Which lambda abstraction this term refers to.
+     * @param {string} label - The label this term is associated with.
      */
-    constructor(index){this.index = index;}
+    constructor(index, label){this.index = index, this.label = label;}
 
     /**
      * Get the type of this lambda term - a variable.
@@ -39,11 +40,7 @@ class LambdaVariable{
      */
     prettyPrintLabels(env, x){
 
-        if(env === undefined){
-            env = new LambdaEnvironment();
-        }
-
-        return env.determine(this.index);
+        return this.label;
     }
 }
 
