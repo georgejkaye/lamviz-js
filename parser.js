@@ -231,6 +231,8 @@ function tokenise(text){
     // push whatever is left at the end
     if(string !== ""){
         tokens = pushString(tokens, string);
+    } else {
+        return "Parse error, unexpected end of input";
     }
 
     return tokens;

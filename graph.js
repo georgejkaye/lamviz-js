@@ -51,7 +51,7 @@ function convertToElems(term, array, parent){
 
             // The edge linking the lambda node with its parent
             
-            var edgeID = checkID(parent + " " + nodeID + " " + term.t.prettyPrintLabels(), edges);
+            var edgeID = checkID(nodeID + " " + term.t.prettyPrintLabels(), edges);
             var edge = { data: { id: edgeID, source: nodeID, target: parent }};
             smartPush(array, edge);
             smartPush(edges, edgeID);
@@ -113,7 +113,7 @@ function convertToElems(term, array, parent){
         case VAR:
 
             // If a lone variable has been encountered it's an application with the id function
-            var idEdge = { data: {id: "id " + term.label, source: "\u03BB" + term.label, target: parent }};
+            var idEdge = { data: {id: "id " + term.label, source: "\u03BB" + term.label + ".", target: parent }};
             smartPush(array, idEdge);
 
             break;
