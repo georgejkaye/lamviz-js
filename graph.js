@@ -1,6 +1,11 @@
+/** Array containing all nodes used in the current graph */
 var nodes = [];
+/** Array containing all edges used in the current graph */
 var edges = [];
 
+/**
+ * Reset the nodes and edges arrays
+ */
 function reset(){
     nodes = [];
     edges = [];
@@ -29,6 +34,12 @@ function convertToElems(term, array, parent){
     }
 
     switch(term.getType()){
+
+        /*
+         * An abstraction creates a node.
+         * This node has many outgoing edges that 'feed' the abstracted variable into applications.
+         * This node has one ingoing edge from the scope of the abstraction.
+         */
         case ABS:
 
             var nodeID = checkID("\u03BB" + term.label + ".", nodes);
@@ -50,6 +61,11 @@ function convertToElems(term, array, parent){
             
             break;
 
+        /*
+         * An application creates a node.
+         * This node has one ougoing edge that 'feeds' the application to its parent (be it another application or an abstraction).
+         * This node has two ingoing edges from the two terms that make up the application.
+         */
         case APP:
 
             var nodeID = checkID("[" + term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels() + "]", nodes);
@@ -91,6 +107,9 @@ function convertToElems(term, array, parent){
             
             break;
 
+        /*
+         * A lone variable creates an edge from where it was abstracted to where it is being applied.
+         */
         case VAR:
 
             // If a lone variable has been encountered it's an application with the id function
@@ -105,6 +124,12 @@ function convertToElems(term, array, parent){
 
 }
 
+/**
+ * Check to make sure an id is not used in an array, and suffixes a prime (') after it if it does.
+ * @param {string} id - The id to check.
+ * @param {Object[]} array - The array to search for duplicates in.
+ * @return {string} The id, suffixed with primes if necessary.
+ */
 function checkID(id, array){
     
     while(array.includes(id)){

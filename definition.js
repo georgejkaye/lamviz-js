@@ -1,9 +1,9 @@
-/** Constants to distinguish between different lambda terms. */
-const VAR = 0; // variable e.g. x, y, z
-const ABS = 1; // lambda abstraction e.g. \x.t
-const APP = 2; // application e.g. t1 t2
-
-var termHistory = [];
+/** Variable e.g. x, y, z */
+const VAR = 0;
+/** Lambda abstraction e.g. \x.t */
+const ABS = 1;
+/** Lambda application e.g. t1 t2 */
+const APP = 2;
 
 /** Class representing a lambda variable (stored as a de Bruijn index). */
 class LambdaVariable{
@@ -178,6 +178,12 @@ class LambdaApplication{
         return "(" + this.t1.prettyPrintLabels(env, x) + " " + this.t2.prettyPrintLabels(env, x+1) + ")";
     }
 }
+
+/** The terms encountered in the current environment.
+ *  
+ * (Used to ensure that there are no duplicates for graphing purposes)
+ */
+var termHistory = [];
 
 /** Class representing an environment of currently abstracted variables. */
 class LambdaEnvironment{
