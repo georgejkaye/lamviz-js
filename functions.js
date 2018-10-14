@@ -65,7 +65,7 @@ function execute(){
 
     currentTerm = term;
 
-    drawGraph(currentTerm);
+    drawGraph(currentTerm, document.getElementById('labels-yes').checked);
 }
 
 function subst(){

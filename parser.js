@@ -138,6 +138,7 @@ function tokenise(text){
     var brackets = 0;
 
     var abstraction = false;
+    var awaitingContent = false;
 
     var parseError = false;
     var parseNumber = 0;
@@ -164,6 +165,7 @@ function tokenise(text){
 
                     tokens = pushString(tokens, string);
                     string = "";
+                    awaitingContent = true;
                 }
                 break;
 
@@ -219,6 +221,7 @@ function tokenise(text){
             // any other character is part of a string
             default:
                 string += currentCharacter;
+                awaitingContent = false;
                 break;
         }
 
@@ -231,7 +234,9 @@ function tokenise(text){
     // push whatever is left at the end
     if(string !== ""){
         tokens = pushString(tokens, string);
-    } else {
+    }
+
+    if(awaitingContent){
         return "Parse error, unexpected end of input";
     }
 

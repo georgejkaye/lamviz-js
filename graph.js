@@ -143,9 +143,15 @@ function checkID(id, array){
  * Draw a graph representing a lambda term into the graph box.
  * @param {Object} term - The term to draw as a graph.
  */
-function drawGraph(term){
+function drawGraph(term, labels){
 
     reset();
+
+    var label = "";
+
+    if(labels){
+        label = 'data(id)';
+    }
 
     var elems = convertToElems(term);
     
@@ -159,7 +165,7 @@ function drawGraph(term){
                 selector: 'node',
                 style: {
                     'background-color': '#666',
-                    'label': 'data(id)'
+                    'label': label
                 }
             },
       
@@ -173,7 +179,7 @@ function drawGraph(term){
                 'arrow-scale': 2,
                 'curve-style': 'bezier',
                 'control-point-step-size': '200px',
-                'label': 'data(id)'
+                'label': label
                 }
             }
         ],
