@@ -1,3 +1,11 @@
+var nodes = [];
+var edges = [];
+
+function reset(){
+    nodes = [];
+    edges = [];
+}
+
 /**
  * Convert a lambda expression into an array of all the graph elements
  * @param {Object} term - The term to convert into an array of elements.
@@ -6,7 +14,7 @@
  * @param {Object} edges - The list of edges in the graph (for when edges are named the same).
  * @return {Object[]} The array containing all of the elements.
  */
-function convertToElems(term, array, parent, edges){
+function convertToElems(term, array, parent){
 
     // At the first level an empty array must be created
     if(array === undefined){
@@ -20,22 +28,19 @@ function convertToElems(term, array, parent, edges){
         smartPush(array, startNode);
     }
 
-    if(edges === undefined){
-        edges = [];
-    }
-
     switch(term.getType()){
         case ABS:
 
-            var nodeID = "\u03BB" + term.label + ".";
+            var nodeID = checkID("\u03BB" + term.label + ".", nodes);
 
             // The lambda node
             var lambdaNode = { data: { id: nodeID }};
             smartPush(array, lambdaNode);
+            smartPush(nodes, nodeID);
 
             // The edge linking the lambda node with its parent
             
-            var edgeID = checkEdge(parent + " " + nodeID + " " + term.t.prettyPrintLabels(), edges);
+            var edgeID = checkID(parent + " " + nodeID + " " + term.t.prettyPrintLabels(), edges);
             var edge = { data: { id: edgeID, source: nodeID, target: parent }};
             smartPush(array, edge);
             smartPush(edges, edgeID);
@@ -47,14 +52,15 @@ function convertToElems(term, array, parent, edges){
 
         case APP:
 
-            var nodeID = term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels();
+            var nodeID = checkID("[" + term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels() + "]", nodes);
             
             // The application node
             var appNode = { data: { id: nodeID }};
             smartPush(array, appNode);
+            smartPush(nodes, nodeID);
 
             // The edge linking the application node with its parent
-            var edgeID = checkEdge("(" + nodeID + ")", edges);
+            var edgeID = checkID("(" + nodeID + ")", edges);
             var edge = { data: { id: edgeID, source: nodeID, target: parent }};
             smartPush(array, edge);
             smartPush(edges, edgeID);
@@ -62,8 +68,7 @@ function convertToElems(term, array, parent, edges){
             // Check to see if the lhs is a variable
             if(term.t1.getType() === VAR){
 
-                var edgeID = checkEdge(term.t1.label + " in " + nodeID, edges);
-
+                var edgeID = checkID("(" + term.t1.label + " in " + nodeID + ")", edges);
                 var t1edge = { data: { id: edgeID, source: "\u03BB" + term.t1.label + ".", target: nodeID }};
                 smartPush(array, t1edge);
                 smartPush(edges, edgeID);
@@ -75,8 +80,7 @@ function convertToElems(term, array, parent, edges){
             // Check to see if the rhs is a variable
             if(term.t2.getType() === VAR){
 
-                var edgeID = checkEdge(term.t2.label + " in " + nodeID, edges);
-
+                var edgeID = checkID("(" + term.t2.label + " in " + nodeID + ")", edges);
                 var t2edge = { data: { id: edgeID, source: "\u03BB" + term.t2.label + ".", target: nodeID }};
                 smartPush(array, t2edge);
                 smartPush(edges, edgeID);
@@ -101,13 +105,13 @@ function convertToElems(term, array, parent, edges){
 
 }
 
-function checkEdge(edgeID, edges){
+function checkID(id, array){
     
-    while(edges.includes(edgeID)){
-        edgeID += "\'";
+    while(array.includes(id)){
+        id += "\'";
     }
 
-    return edgeID;
+    return id;
 }
 
 /**
@@ -115,6 +119,8 @@ function checkEdge(edgeID, edges){
  * @param {Object} term - The term to draw as a graph.
  */
 function drawGraph(term){
+
+    reset();
 
     var elems = convertToElems(term);
     
