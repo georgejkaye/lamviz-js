@@ -68,6 +68,19 @@ function execute(){
     drawGraph(currentTerm, document.getElementById('labels-yes').checked);
 }
 
+function updateLabels(labels){
+
+    var style = '';
+
+    if(labels){
+        style = 'data(id)';
+    }
+
+    cy.style().selector('node').label(style);
+    cy.style().selector('edge').label(style);
+
+}
+
 function subst(){
 
     var s = tokenise(getText('s'));

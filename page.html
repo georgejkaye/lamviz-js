@@ -34,10 +34,10 @@
 
     <h2 id="result"></h2>
 
-    <input type="radio" id="labels-yes" name="labels" value="yes" onclick = "execute();" checked />
+    <input type="radio" id="labels-yes" name="labels" value="yes" onclick = "updateLabels(true);" checked />
     <label for="labels-yes">Show edge and node labels</label>
 
-    <input type="radio" id="labels-no" name="labels" onclick = "execute();" value="no" />
+    <input type="radio" id="labels-no" name="labels" onclick = "updateLabels(false);" value="no" />
     <label for="labels-no">Blank edges and nodes</label>
 
     <div class="w3-container" id="cy" style="border-style:solid; border-color: black;">
