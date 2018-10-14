@@ -19,8 +19,11 @@ function convertToElems(term, array, env, parent){
             var edge = { data: { id: parent + " \u2192 " + nodeID, source: nodeID, target: parent }};
             smartPush(array, edge);
 
+            // go inside the abstraction
             array = convertToElems(term.t, array, env, nodeID);
+            
             break;
+
         case APP:
 
             var nodeID = term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels();
@@ -36,9 +39,7 @@ function convertToElems(term, array, env, parent){
             // check to see if the lhs is a variable
             if(term.t1.getType() === VAR){
                 var t1edge1 = { data: { id: term.t1.label + " in " + nodeID, source: "\u03BB" + term.t1.label, target: nodeID }};
-                //var t1edge2 = { data: { id: term.t1.label + " " + nodeID, source: nodeID, target: "\u03BB" + term.t1.label }};
                 smartPush(array, t1edge1);
-                //smartPush(array, t1edge2);
             } else {
                 array = convertToElems(term.t1, array, env, nodeID);
             }
@@ -46,9 +47,7 @@ function convertToElems(term, array, env, parent){
             // check to see if the rhs is a variable
             if(term.t2.getType() === VAR){
                 var t2edge1 = { data: { id: term.t2.label + " in " + nodeID, source: "\u03BB" + term.t2.label, target: nodeID }};
-                //var t2edge2 = { data: { id: term.t2.label + " " + nodeID, source: nodeID, target: "\u03BB" + term.t2.label }};
                 smartPush(array, t2edge1);
-                //smartPush(array, t2edge2);
             } else {
                 array = convertToElems(term.t2, array, env, nodeID);
             }
@@ -57,14 +56,12 @@ function convertToElems(term, array, env, parent){
 
         case VAR:
 
+            // if a lone variable has been encountered it's effectively an application with the id function
             var idEdge = { data: {id: "id " + term.label, source: "\u03BB" + term.label, target: parent }};
             smartPush(array, idEdge);
 
             break;
-            
 
-        default:
-            break;
     }
 
     return array;
