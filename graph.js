@@ -15,8 +15,8 @@ function convertToElems(term, array, parent, edges){
 
     // Root of lambda expression is connected to the root (represented as box) node
     if(parent === undefined){
-        var startNode = { data: { id: "\u25A1"}};
-        parent = "\u25A1";
+        var startNode = { data: { id: ">"}};
+        parent = ">";
         smartPush(array, startNode);
     }
 
@@ -27,7 +27,7 @@ function convertToElems(term, array, parent, edges){
     switch(term.getType()){
         case ABS:
 
-            var nodeID = "\u03BB" + term.label;
+            var nodeID = "\u03BB" + term.label + ".";
 
             // The lambda node
             var lambdaNode = { data: { id: nodeID }};
@@ -35,7 +35,7 @@ function convertToElems(term, array, parent, edges){
 
             // The edge linking the lambda node with its parent
             
-            var edgeID = checkEdge(parent + " \u2192 " + term.t.prettyPrintLabels(), edges);
+            var edgeID = checkEdge(parent + " " + nodeID + " " + term.t.prettyPrintLabels(), edges);
             var edge = { data: { id: edgeID, source: nodeID, target: parent }};
             smartPush(array, edge);
             smartPush(edges, edgeID);
@@ -54,7 +54,7 @@ function convertToElems(term, array, parent, edges){
             smartPush(array, appNode);
 
             // The edge linking the application node with its parent
-            var edgeID = checkEdge(parent + " \u2192 " + nodeID, edges);
+            var edgeID = checkEdge("(" + nodeID + ")", edges);
             var edge = { data: { id: edgeID, source: nodeID, target: parent }};
             smartPush(array, edge);
             smartPush(edges, edgeID);
@@ -64,7 +64,7 @@ function convertToElems(term, array, parent, edges){
 
                 var edgeID = checkEdge(term.t1.label + " in " + nodeID, edges);
 
-                var t1edge = { data: { id: edgeID, source: "\u03BB" + term.t1.label, target: nodeID }};
+                var t1edge = { data: { id: edgeID, source: "\u03BB" + term.t1.label + ".", target: nodeID }};
                 smartPush(array, t1edge);
                 smartPush(edges, edgeID);
 
@@ -77,7 +77,7 @@ function convertToElems(term, array, parent, edges){
 
                 var edgeID = checkEdge(term.t2.label + " in " + nodeID, edges);
 
-                var t2edge = { data: { id: edgeID, source: "\u03BB" + term.t2.label, target: nodeID }};
+                var t2edge = { data: { id: edgeID, source: "\u03BB" + term.t2.label + ".", target: nodeID }};
                 smartPush(array, t2edge);
                 smartPush(edges, edgeID);
 
@@ -116,39 +116,40 @@ function checkEdge(edgeID, edges){
  */
 function drawGraph(term){
 
-  var elems = convertToElems(term);
-  
-  var cy = cytoscape({
-      container: document.getElementById("cy"),
+    var elems = convertToElems(term);
+    
+    var cy = cytoscape({
+        container: document.getElementById("cy"),
 
-      elements: elems,
+        elements: elems,
       
-        style: [ // the stylesheet for the graph
-          {
-            selector: 'node',
-            style: {
-              'background-color': '#666',
-              'label': 'data(id)'
-            }
-          },
+        style: [
+            {
+                selector: 'node',
+                style: {
+                    'background-color': '#666',
+                    'label': 'data(id)'
+                }
+            },
       
-          {
-            selector: 'edge',
-            style: {
-              'width': 3,
-              'line-color': '#ccc',
-              'mid-target-arrow-color': '#ccc',
-              'mid-target-arrow-shape': 'triangle',
-              'arrow-scale': 2,
-              'curve-style': 'bezier',
-              'control-point-step-size': '200px'
+            {
+                selector: 'edge',
+                style: {
+                'width': 3,
+                'line-color': '#ccc',
+                'mid-target-arrow-color': '#ccc',
+                'mid-target-arrow-shape': 'triangle',
+                'arrow-scale': 2,
+                'curve-style': 'bezier',
+                'control-point-step-size': '200px',
+                'label': 'data(id)'
+                }
             }
-          }
         ],
       
         layout: {
-          name: 'circle',
-          startAngle: 5 / 2 * Math.PI
+            name: 'circle',
+            startAngle: 5 / 2 * Math.PI
         }
 
   });
