@@ -1,10 +1,73 @@
-function convertToElems(term, array, env){
+function convertToElems(term, array, env, parent){
+
+    if(parent === undefined){
+        var startNode = { data: { id: "\u25A1"}};
+        parent = "\u25A1";
+        smartPush(array, startNode);
+    }
 
     switch(term.getType()){
         case ABS:
-            var lambdaNode = { data: { id: "\\" }};
 
+            var nodeID = "\u03BB" + term.label;
+
+            // the lambda node
+            var lambdaNode = { data: { id: nodeID }};
+            smartPush(array, lambdaNode);
+
+            // the edge linking the lambda node with its parent
+            var edge = { data: { id: parent + " \u2192 " + nodeID, source: nodeID, target: parent }};
+            smartPush(array, edge);
+
+            array = convertToElems(term.t, array, env, nodeID);
+            break;
+        case APP:
+
+            var nodeID = term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels();
+            
+            // the application node
+            var appNode = { data: { id: nodeID }};
+            smartPush(array, appNode);
+
+            // the edge linking the application node with its parent
+            var edge = { data: { id: parent + " \u2192 " + nodeID, source: nodeID, target: parent }};
+            smartPush(array,edge);
+
+            // check to see if the lhs is a variable
+            if(term.t1.getType() === VAR){
+                var t1edge1 = { data: { id: term.t1.label + " in " + nodeID, source: "\u03BB" + term.t1.label, target: nodeID }};
+                //var t1edge2 = { data: { id: term.t1.label + " " + nodeID, source: nodeID, target: "\u03BB" + term.t1.label }};
+                smartPush(array, t1edge1);
+                //smartPush(array, t1edge2);
+            } else {
+                array = convertToElems(term.t1, array, env, nodeID);
+            }
+
+            // check to see if the rhs is a variable
+            if(term.t2.getType() === VAR){
+                var t2edge1 = { data: { id: term.t2.label + " in " + nodeID, source: "\u03BB" + term.t2.label, target: nodeID }};
+                //var t2edge2 = { data: { id: term.t2.label + " " + nodeID, source: nodeID, target: "\u03BB" + term.t2.label }};
+                smartPush(array, t2edge1);
+                //smartPush(array, t2edge2);
+            } else {
+                array = convertToElems(term.t2, array, env, nodeID);
+            }
+            
+            break;
+
+        case VAR:
+
+            var idEdge = { data: {id: "id " + term.label, source: "\u03BB" + term.label, target: parent }};
+            smartPush(array, idEdge);
+
+            break;
+            
+
+        default:
+            break;
     }
+
+    return array;
 
 }
 
@@ -13,25 +76,12 @@ function convertToElems(term, array, env){
  */
 function drawGraph(term){
 
-  var elems = convertToElems(term, new LambdaEnvironment());
+  var elems = convertToElems(term, [], new LambdaEnvironment());
   
   var cy = cytoscape({
       container: document.getElementById("cy"),
 
-      elements: [ // list of graph elements to start with
-          { // node a
-            data: { id: 'a' }
-          },
-          { // node b
-            data: { id: 'b' }
-          },
-          {
-            data: { id: 'c' }
-          },
-          { // edge ab
-            data: { id: 'ab', source: 'a', target: 'b' }
-          }
-        ],
+      elements: elems,
       
         style: [ // the stylesheet for the graph
           {
@@ -47,15 +97,18 @@ function drawGraph(term){
             style: {
               'width': 3,
               'line-color': '#ccc',
-              'target-arrow-color': '#ccc',
-              'target-arrow-shape': 'triangle'
+              'mid-target-arrow-color': '#ccc',
+              'mid-target-arrow-shape': 'triangle',
+              'arrow-scale': 2,
+              'curve-style': 'bezier',
+              'control-point-step-size': '200px'
             }
           }
         ],
       
         layout: {
-          name: 'grid',
-          rows: 1
+          name: 'circle',
+          startAngle: 5 / 2 * Math.PI
         }
 
   });

@@ -65,7 +65,7 @@ function execute(){
 
     currentTerm = term;
 
-    drawGraph();
+    drawGraph(currentTerm);
 }
 
 function subst(){
