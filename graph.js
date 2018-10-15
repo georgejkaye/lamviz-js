@@ -87,7 +87,17 @@ function convertToElems(term, array, parent){
             if(term.t1.getType() === VAR){
 
                 var edgeID = checkID("(" + term.t1.label + " in " + nodeID + ")", edges);
-                var t1edge = { data: { id: edgeID, source: "\u03BB" + term.t1.label + ".", target: nodeID }};
+                var sourceID = "\u03BB" + term.t1.label + ".";
+                var classes = "";
+
+                if(!nodes.includes(sourceID)){
+                    var externalNode = { data: { id: sourceID }, classes: 'global'};
+                    smartPush(array, externalNode);
+                    smartPush(nodes, sourceID);
+                    classes = 'dashed';
+                }
+
+                var t1edge = { data: { id: edgeID, source: sourceID, target: nodeID }, classes: classes};
                 smartPush(array, t1edge);
                 smartPush(edges, edgeID);
 
@@ -99,7 +109,17 @@ function convertToElems(term, array, parent){
             if(term.t2.getType() === VAR){
 
                 var edgeID = checkID("(" + term.t2.label + " in " + nodeID + ")", edges);
-                var t2edge = { data: { id: edgeID, source: "\u03BB" + term.t2.label + ".", target: nodeID }};
+                var sourceID = "\u03BB" + term.t2.label + "."; 
+                var classes = "";
+                
+                if(!nodes.includes(sourceID)){
+                    var externalNode = { data: { id: sourceID}, classes: 'global'};
+                    smartPush(array, externalNode);
+                    smartPush(nodes, sourceID);
+                    classes = 'dashed'
+                }
+
+                var t2edge = { data: { id: edgeID, source: sourceID, target: nodeID }, classes: classes};
                 smartPush(array, t2edge);
                 smartPush(edges, edgeID);
 
@@ -115,7 +135,17 @@ function convertToElems(term, array, parent){
         case VAR:
 
             // If a lone variable has been encountered it's an application with the id function
-            var idEdge = { data: {id: "id " + term.label, source: "\u03BB" + term.label + ".", target: parent }};
+            
+            var sourceID = "\u03BB" + term.label + ".";
+
+            if(!nodes.includes(sourceID)){
+                var externalNode = { data: { id: sourceID }, classes: 'global'}
+                smartPush(array, externalNode);
+                smartPush(nodes, sourceID);
+            }
+            
+            var idEdge = { data: {id: "id " + term.label, source: sourceID, target: parent }};
+            
             smartPush(array, idEdge);
 
             break;
@@ -182,6 +212,20 @@ function drawGraph(term, labels){
                 'curve-style': 'bezier',
                 'control-point-step-size': '200px',
                 'label': label
+                }
+            },
+
+            {
+                selector: '.global',
+                style: {
+                    'background-color': '#f00'
+                }
+            },
+
+            {
+                selector: '.dashed',
+                style: {
+                    'width': 5
                 }
             }
         ],

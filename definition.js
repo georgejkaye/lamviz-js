@@ -268,7 +268,7 @@ class LambdaEnvironment{
      */
     determine(index){
 
-        if(this.envUnique.length - 1 - index < 0){
+        if(index < 0 || this.envUnique.length - 1 - index < 0){
             return "?";
         }
 
