@@ -2,6 +2,8 @@
 var nodes = [];
 /** Array containing all edges used in the current graph */
 var edges = [];
+/** The graph object */
+var cy = undefined;
 
 /**
  * Reset the nodes and edges arrays
@@ -155,7 +157,7 @@ function drawGraph(term, labels){
 
     var elems = convertToElems(term);
     
-    var cy = cytoscape({
+    cy = cytoscape({
         container: document.getElementById("cy"),
 
         elements: elems,
