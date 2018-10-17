@@ -70,16 +70,24 @@ function execute(){
 
 function updateLabels(labels){
 
-    console.log("hello!");
-
     var style = "";
 
-    if(labels){
-        style = 'data(id)';
+    switch(labels){
+        case 2:
+            style = 'data(id)';
+        case 0:
+            cy.style().selector('node').style({'label': style}).update();
+            break;
+        case 1:
+            cy.style().selector('node[type = "abs"]').style({'label': "\u03BB"}).update();
+            cy.style().selector('node[type = "app"]').style({'label': "@"}).update();
+            break;
+
     }
 
-    cy.style().selector('node').style({'label': style}).update();
     cy.style().selector('edge').style({'label': style}).update();
+
+    
 
 }
 

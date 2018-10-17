@@ -47,7 +47,7 @@ function convertToElems(term, array, parent){
             var nodeID = checkID("\u03BB" + term.label + ".", nodes);
 
             // The lambda node
-            var lambdaNode = { data: { id: nodeID }};
+            var lambdaNode = { data: { id: nodeID, type: "abs" }};
             smartPush(array, lambdaNode);
             smartPush(nodes, nodeID);
 
@@ -73,7 +73,7 @@ function convertToElems(term, array, parent){
             var nodeID = checkID("[" + term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels() + "]", nodes);
             
             // The application node
-            var appNode = { data: { id: nodeID }};
+            var appNode = { data: { id: nodeID, type: "app" }};
             smartPush(array, appNode);
             smartPush(nodes, nodeID);
 
@@ -139,7 +139,7 @@ function convertToElems(term, array, parent){
             var sourceID = "\u03BB" + term.label + ".";
 
             if(!nodes.includes(sourceID)){
-                var externalNode = { data: { id: sourceID }, classes: 'global'}
+                var externalNode = { data: { id: sourceID, type: "abs" }, classes: 'global'}
                 smartPush(array, externalNode);
                 smartPush(nodes, sourceID);
             }

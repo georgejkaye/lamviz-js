@@ -35,10 +35,13 @@
     <h2 id="result">Type an expression</h2>
 
     <h3>Graph options</h3>
-    <input type="radio" id="labels-yes" name="labels" value="yes" onclick = "updateLabels(true);" checked />
+    <input type="radio" id="labels-yes" name="labels" value="yes" onclick = "updateLabels(2);" checked />
     <label for="labels-yes">Show edge and node labels</label>
 
-    <input type="radio" id="labels-no" name="labels" onclick = "updateLabels(false);" value="no" />
+    <input type="radio" id="labels-some" name="labels" onclick = "updateLabels(1);" value="no" />
+    <label for="labels-some">Basic node labels</label>
+
+    <input type="radio" id="labels-no" name="labels" onclick = "updateLabels(0);" value="no" />
     <label for="labels-no">Blank edges and nodes</label>
 
     <br>
@@ -46,7 +49,7 @@
     <div class="w3-container" id="cy" style="border-style:solid; border-color: black;">
     </div>
 
-    Graph display is powerered by <a href="http://js.cytoscape.org/">Cytoscape.js</a>
+    Graph display powerered by <a href="http://js.cytoscape.org/">Cytoscape.js</a>
 
     <script src = "definition.js"></script>
     <script src = "parser.js"></script>
