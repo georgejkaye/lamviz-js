@@ -54,7 +54,7 @@ function convertToElems(term, array, parent){
             // The edge linking the lambda node with its parent
             
             var edgeID = checkID(nodeID + " " + term.t.prettyPrintLabels(), edges);
-            var edge = { data: { id: edgeID, source: nodeID, target: parent }};
+            var edge = { data: { id: edgeID, source: nodeID, target: parent, type: "a->b" }};
             smartPush(array, edge);
             smartPush(edges, edgeID);
 
@@ -77,12 +77,28 @@ function convertToElems(term, array, parent){
             smartPush(array, appNode);
             smartPush(nodes, nodeID);
 
-            // The edge linking the application node with its parent
-            var edgeID = checkID("(" + nodeID + ")", edges);
-            var edge = { data: { id: edgeID, source: nodeID, target: parent }};
-            smartPush(array, edge);
-            smartPush(edges, edgeID);
+            // Check to see if the rhs is a variable
+            if(term.t2.getType() === VAR){
 
+                var edgeID = checkID("(" + term.t2.label + " in " + nodeID + ")", edges);
+                var sourceID = "\u03BB" + term.t2.label + "."; 
+                var classes = "";
+                
+                if(!nodes.includes(sourceID)){
+                    var externalNode = { data: { id: sourceID }, classes: 'global' };
+                    smartPush(array, externalNode);
+                    smartPush(nodes, sourceID);
+                    classes = 'dashed'
+                }
+
+                var t2edge = { data: { id: edgeID, source: sourceID, target: nodeID, type: "a" }, classes: classes};
+                smartPush(array, t2edge);
+                smartPush(edges, edgeID);
+
+            } else {
+                array = convertToElems(term.t2, array, nodeID);
+            }
+            
             // Check to see if the lhs is a variable
             if(term.t1.getType() === VAR){
 
@@ -97,7 +113,7 @@ function convertToElems(term, array, parent){
                     classes = 'dashed';
                 }
 
-                var t1edge = { data: { id: edgeID, source: sourceID, target: nodeID }, classes: classes};
+                var t1edge = { data: { id: edgeID, source: sourceID, target: nodeID, type: "a->b" }, classes: classes};
                 smartPush(array, t1edge);
                 smartPush(edges, edgeID);
 
@@ -105,28 +121,12 @@ function convertToElems(term, array, parent){
                 array = convertToElems(term.t1, array, nodeID);
             }
 
-            // Check to see if the rhs is a variable
-            if(term.t2.getType() === VAR){
+            // The edge linking the application node with its parent
+            var edgeID = checkID("(" + nodeID + ")", edges);
+            var edge = { data: { id: edgeID, source: nodeID, target: parent, type: "b" }};
+            smartPush(array, edge);
+            smartPush(edges, edgeID);
 
-                var edgeID = checkID("(" + term.t2.label + " in " + nodeID + ")", edges);
-                var sourceID = "\u03BB" + term.t2.label + "."; 
-                var classes = "";
-                
-                if(!nodes.includes(sourceID)){
-                    var externalNode = { data: { id: sourceID}, classes: 'global'};
-                    smartPush(array, externalNode);
-                    smartPush(nodes, sourceID);
-                    classes = 'dashed'
-                }
-
-                var t2edge = { data: { id: edgeID, source: sourceID, target: nodeID }, classes: classes};
-                smartPush(array, t2edge);
-                smartPush(edges, edgeID);
-
-            } else {
-                array = convertToElems(term.t2, array, nodeID);
-            }
-            
             break;
 
         /*
@@ -144,7 +144,7 @@ function convertToElems(term, array, parent){
                 smartPush(nodes, sourceID);
             }
             
-            var idEdge = { data: {id: "id " + term.label, source: sourceID, target: parent }};
+            var idEdge = { data: {id: "id " + term.label, source: sourceID, target: parent, type: "a" }};
             
             smartPush(array, idEdge);
 
@@ -211,7 +211,7 @@ function drawGraph(term, labels){
                 'arrow-scale': 2,
                 'curve-style': 'bezier',
                 'control-point-step-size': '200px',
-                'label': label
+                'label': 'data(type)'
                 }
             },
 
