@@ -11,6 +11,8 @@ var cy = undefined;
 function reset(){
     nodes = [];
     edges = [];
+    cy = undefined;
+    firstNode = undefined;
 }
 
 /**
@@ -39,7 +41,7 @@ function convertToElems(term, array, parent){
 
         /*
          * An abstraction creates a node.
-         * This node has many outgoing edges that 'feed' the abstracted variable into applications.
+         * This node has many (linear: only one) outgoing edges that 'feed' the abstracted variable into applications.
          * This node has one ingoing edge from the scope of the abstraction.
          */
         case ABS:
@@ -48,6 +50,7 @@ function convertToElems(term, array, parent){
 
             // The lambda node
             var lambdaNode = { data: { id: nodeID, type: "abs" }};
+
             smartPush(array, lambdaNode);
             smartPush(nodes, nodeID);
 
@@ -60,7 +63,7 @@ function convertToElems(term, array, parent){
 
             // Go inside the abstraction
             array = convertToElems(term.t, array, nodeID);
-            
+
             break;
 
         /*
@@ -74,6 +77,7 @@ function convertToElems(term, array, parent){
             
             // The application node
             var appNode = { data: { id: nodeID, type: "app" }};
+
             smartPush(array, appNode);
             smartPush(nodes, nodeID);
 
@@ -268,5 +272,6 @@ function drawGraph(term){
   });
 
   updateLabels(document.getElementById('labels-yes').checked);
+  cy.$(firstNode).position
 
 }
