@@ -65,41 +65,7 @@ function execute(){
 
     currentTerm = term;
 
-    drawGraph(currentTerm, document.getElementById('labels-yes').checked);
-}
-
-function updateLabels(labels){
-
-    var style = "";
-
-    switch(labels){
-        case 2:
-            cy.style().selector('node[type = "abs"]').style({'label': '\u03BB'}).update();
-            cy.style().selector('node[type = "app"]').style({'label': '@'}).update();
-            cy.style().selector('edge[type = "abs"]').style({'label': 'data(id)'}).update();
-            cy.style().selector('edge[type = "var"]').style({'label': function(ele){
-                return ele.data().id.substring(1,2);
-            }}).update();
-            cy.style().selector('edge[type = "app"]').style({'label': function(ele){
-                var terms = ele.data().id.substring(2, ele.data().id.length - 2).split(" @ ");
-                return terms[0] + " " + terms[1];
-            }}).update();
-            break;
-        case 0:
-            cy.style().selector('node').style({'label': ''}).update();
-            cy.style().selector('edge').style({'label': ''}).update();
-            break;
-        case 1:
-            cy.style().selector('node[type = "abs"]').style({'label': "\u03BB"}).update();
-            cy.style().selector('node[type = "app"]').style({'label': "@"}).update();
-            break;
-
-    }
-
-    
-
-    
-
+    drawGraph(currentTerm);
 }
 
 function subst(){

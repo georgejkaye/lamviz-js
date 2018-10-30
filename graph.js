@@ -172,18 +172,50 @@ function checkID(id, array){
 }
 
 /**
+ * Update the labels on the graph
+ * @param {boolean} labels - Whether labels are shown
+ */
+function updateLabels(labels){
+
+    if(labels){
+        
+        cy.style().selector('node[type = "abs"]').style({'label': '\u03BB'}).update();
+        cy.style().selector('node[type = "app"]').style({'label': '@'}).update();
+        cy.style().selector('edge[type = "abs"]').style({'label': 'data(id)'}).update();
+        
+        cy.style().selector('edge[type = "var"]').style({'label': function(ele){
+            return ele.data().id.substring(1,2);
+        }}).update();
+        
+        cy.style().selector('edge[type = "app"]').style({'label': function(ele){
+            
+            var terms = ele.data().id.substring(2, ele.data().id.length - 2).split(" @ ");
+
+            if(terms[0].length > 1){
+                terms[0] = "(" + terms[0] + ")";
+            }
+
+            if(terms[1].length > 1){
+                terms[1] = "(" + terms[1] + ")";
+            }
+
+            return terms[0] + " " + terms[1];
+
+        }}).update();
+
+    } else {
+        cy.style().selector('node').style({'label': ''}).update();
+        cy.style().selector('edge').style({'label': ''}).update();
+    }
+}
+
+/**
  * Draw a graph representing a lambda term into the graph box.
  * @param {Object} term - The term to draw as a graph.
  */
-function drawGraph(term, labels){
+function drawGraph(term){
 
     reset();
-
-    var label = "";
-
-    if(labels){
-        label = 'data(id)';
-    }
 
     var elems = convertToElems(term);
     
@@ -197,7 +229,6 @@ function drawGraph(term, labels){
                 selector: 'node',
                 style: {
                     'background-color': '#666',
-                    'label': label
                 }
             },
       
@@ -211,7 +242,6 @@ function drawGraph(term, labels){
                 'arrow-scale': 2,
                 'curve-style': 'bezier',
                 'control-point-step-size': '200px',
-                'label': label
                 }
             },
 
@@ -236,4 +266,7 @@ function drawGraph(term, labels){
         }
 
   });
+
+  updateLabels(document.getElementById('labels-yes').checked);
+
 }

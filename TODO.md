@@ -7,4 +7,6 @@
         * function top: A -> B
         * arhument u right A
         * t(u) left B
-* Actually do proposal
+    * I think I've done this!
+* ~~Actually do proposal~~
+* Graph labels are pretty dodgy, fix these
