@@ -54,7 +54,7 @@ function convertToElems(term, array, parent){
             // The edge linking the lambda node with its parent
             
             var edgeID = checkID(nodeID + " " + term.t.prettyPrintLabels(), edges);
-            var edge = { data: { id: edgeID, source: nodeID, target: parent, type: "a->b" }};
+            var edge = { data: { id: edgeID, source: nodeID, target: parent, type: "abs"}};
             smartPush(array, edge);
             smartPush(edges, edgeID);
 
@@ -91,7 +91,7 @@ function convertToElems(term, array, parent){
                     classes = 'dashed'
                 }
 
-                var t2edge = { data: { id: edgeID, source: sourceID, target: nodeID, type: "a" }, classes: classes};
+                var t2edge = { data: { id: edgeID, source: sourceID, target: nodeID, type: "var" }};
                 smartPush(array, t2edge);
                 smartPush(edges, edgeID);
 
@@ -113,7 +113,7 @@ function convertToElems(term, array, parent){
                     classes = 'dashed';
                 }
 
-                var t1edge = { data: { id: edgeID, source: sourceID, target: nodeID, type: "a->b" }, classes: classes};
+                var t1edge = { data: { id: edgeID, source: sourceID, target: nodeID, type: "var" }};
                 smartPush(array, t1edge);
                 smartPush(edges, edgeID);
 
@@ -123,7 +123,7 @@ function convertToElems(term, array, parent){
 
             // The edge linking the application node with its parent
             var edgeID = checkID("(" + nodeID + ")", edges);
-            var edge = { data: { id: edgeID, source: nodeID, target: parent, type: "b" }};
+            var edge = { data: { id: edgeID, source: nodeID, target: parent, type: "app" }};
             smartPush(array, edge);
             smartPush(edges, edgeID);
 
@@ -144,7 +144,7 @@ function convertToElems(term, array, parent){
                 smartPush(nodes, sourceID);
             }
             
-            var idEdge = { data: {id: "id " + term.label, source: sourceID, target: parent, type: "a" }};
+            var idEdge = { data: {id: "id " + term.label, source: sourceID, target: parent, type: "var" }};
             
             smartPush(array, idEdge);
 
@@ -211,7 +211,7 @@ function drawGraph(term, labels){
                 'arrow-scale': 2,
                 'curve-style': 'bezier',
                 'control-point-step-size': '200px',
-                'label': 'data(type)'
+                'label': label
                 }
             },
 
