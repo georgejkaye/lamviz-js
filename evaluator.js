@@ -49,7 +49,7 @@ function substitute(s, j, t){
             return t;
 
         case ABS:
-            return new LambdaAbstraction(substitute(shift(s, 1, 0), j + 1, t.t));
+            return new LambdaAbstraction(substitute(shift(s, 1, 0), j + 1, t.t), t.label);
 
         case APP:
             return new LambdaApplication(substitute(s, j, t.t1), substitute(s, j, t.t2));
@@ -73,7 +73,7 @@ function applicationAbstraction(abs, val){
  * @return The fully evaluated lambda expression.
  */
 function evaluate(t){
-    ordinal();
+
     console.log("Evaluating " + t.prettyPrint());
 
     if(t.getType() === APP){
@@ -112,7 +112,7 @@ function normalise(t){
             return t;
         case ABS:
 
-            var normalised_subterm = shift(normalise(shift(t.t, -1)), 1);
+            var normalised_subterm = shift(normalise(shift(t.t, -1, 0)), 1, 0);
             var new_abstraction = new LambdaAbstraction(normalised_subterm, t.label);
             return new_abstraction;
         case APP:
@@ -123,6 +123,7 @@ function normalise(t){
             /* Perform a beta-reduction */
             if(t.t1.getType() === ABS){
                 t1 = applicationAbstraction(t.t1, t.t2);
+                console.log("Beta reduction performed: " + t1.prettyPrintLabels());
                 return normalise(t1);
             }
 

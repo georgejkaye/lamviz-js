@@ -122,3 +122,23 @@ function normalise_button(){
     changeText('result', text);
 
 }
+
+function beta_button(){
+
+    var frees = getText('env').split(" ");
+    var env = new LambdaEnvironment();
+
+    for(i = 0; i < frees.length; i++){
+        env.pushTerm(frees[i]);
+    }
+
+    var t1 = parse(tokenise(getText('b1')), env);
+    var t2 = parse(tokenise(getText('b2')), env);
+
+    var res = applicationAbstraction(t1, t2)
+
+    var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels();
+
+    changeText('result', text)
+
+}
