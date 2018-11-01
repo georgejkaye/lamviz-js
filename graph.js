@@ -148,7 +148,7 @@ function convertToElems(term, array, parent){
                 smartPush(nodes, sourceID);
             }
             
-            var idEdge = { data: {id: "id " + term.label, source: sourceID, target: parent, type: "var" }};
+            var idEdge = { data: {id: "id " + term.label, source: sourceID, target: parent, type: "id" }};
             
             smartPush(array, idEdge);
 
@@ -187,6 +187,10 @@ function updateLabels(labels){
         cy.style().selector('node[type = "app"]').style({'label': '@'}).update();
         cy.style().selector('edge[type = "abs"]').style({'label': 'data(id)'}).update();
         
+        cy.style().selector('edge[type = "id"]').style({'label': function(ele){
+            return ele.data().id.substring(3);
+        }}).update();
+
         cy.style().selector('edge[type = "var"]').style({'label': function(ele){
             return ele.data().id.substring(1,2);
         }}).update();

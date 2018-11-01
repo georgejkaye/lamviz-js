@@ -43,7 +43,7 @@ function prettyString(array){
 /**
  * Function to execute when the 'execute' button is pressed.
  */
-function execute(){
+function execute_button(){
 
     var text = tokenise(getText('input'));
     var frees = getText('env').split(" ");
@@ -68,7 +68,10 @@ function execute(){
     drawGraph(currentTerm);
 }
 
-function subst(){
+/**
+ * Function to execute when the 'substitute' button is pressed.
+ */
+function substitute_button(){
 
     var s = tokenise(getText('s'));
     var j = getText('j');
@@ -92,12 +95,30 @@ function subst(){
     }
 }
 
-function eval(){
+/**
+ * Function to execute when the 'evaluate' button is pressed.
+ */
+function evaluate_button(){
 
     var res = evaluate(currentTerm);
 
     console.log("Evaluated term: " + res.prettyPrint());
 
     changeText('result', res.prettyPrint());
+
+}
+
+/**
+ * Function to execute when the 'normalise' button is pressed.
+ */
+function normalise_button(){
+
+    var res = normalise(currentTerm);
+
+    console.log("Normalised term: " + res.prettyPrint());
+
+    var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels();
+
+    changeText('result', text);
 
 }

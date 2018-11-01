@@ -7,15 +7,19 @@
  */ 
 function shift (t, d, c){
 
+    if(c === undefined){
+        c = "none"
+    }
+
     console.log("Shifting " + t.prettyPrint() + " by " + d + " cutoff " + c);
 
     switch(t.getType()){
         case VAR:
-            if(t.index < c){
+            if(c !== "none" && t.index < c){
                 return t;
             } 
                 
-            return new LambdaVariable(t.index + d);
+            return new LambdaVariable(t.index + d, t.label);
 
         case ABS:
             return new LambdaAbstraction(shift(t.t, d, c+1), t.label);
@@ -91,5 +95,41 @@ function evaluate(t){
 
     console.log("Returning " + t.prettyPrint());
     return t;
+
+}
+
+/**
+ * Attempt to normalise a lambda expression (This might not terminate!).
+ * @param {Object} t  - The lambda expression to normalise.
+ * @return The normalised lambda expression (if the program terminates).
+ */
+function normalise(t){
+
+    console.log("Normalising term: " + t.prettyPrint());
+
+    switch(t.getType()){
+        case VAR:
+            return t;
+        case ABS:
+
+            var normalised_subterm = shift(normalise(shift(t.t, -1)), 1);
+            var new_abstraction = new LambdaAbstraction(normalised_subterm, t.label);
+            return new_abstraction;
+        case APP:
+
+            var t1;
+            var t2;
+
+            /* Perform a beta-reduction */
+            if(t.t1.getType() === ABS){
+                t1 = applicationAbstraction(t.t1, t.t2);
+                return normalise(t1);
+            }
+
+            t1 = normalise(t.t1);
+            t2 = normalise(t.t2);
+
+            return new LambdaApplication(t1, t2);
+    }
 
 }
