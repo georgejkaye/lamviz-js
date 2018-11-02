@@ -1,3 +1,8 @@
+/** Maximum number of operations to perform during normalisation */
+const max_normalisation_ops = 100;
+/** Current number of operations performed during normalisation */
+var current_normalisation_ops = 0;
+
 /**
  * Shifts all the de Bruijn indices in a t by a certain amount.
  * @param {Object}      t    - The lambda term to do the shifting to.
@@ -105,9 +110,24 @@ function evaluate(t){
 /**
  * Attempt to normalise a lambda expression (This might not terminate!).
  * @param {Object} t  - The lambda expression to normalise.
+ * @param {boolean} x - Whether this is the beginning of normalisation.
  * @return The normalised lambda expression (if the program terminates).
  */
-function normalise(t){
+function normalise(t, x){
+
+    if(x === undefined){
+        x = true; 
+    }
+    
+    if(x){
+        current_normalisation_ops = 0;
+    }
+
+    current_normalisation_ops++;
+
+    if(current_normalisation_ops > max_normalisation_ops){
+        return "Timeout";
+    }
 
     console.log("Normalising term: " + t.prettyPrint());
 
@@ -116,7 +136,12 @@ function normalise(t){
             return t;
         case ABS:
 
-            var normalised_subterm = normalise(t.t);
+            var normalised_subterm = normalise(t.t, false);
+
+            if(normalised_subterm === "Timeout"){
+                return "Timeout";
+            }
+
             var new_abstraction = new LambdaAbstraction(normalised_subterm, t.label);
             return new_abstraction;
         case APP:
@@ -128,11 +153,15 @@ function normalise(t){
             if(t.t1.getType() === ABS){
                 t1 = applicationAbstraction(t.t1, t.t2);
                 console.log("Beta reduction performed: " + t1.prettyPrintLabels());
-                return normalise(t1);
+                return normalise(t1, false);
             }
 
-            t1 = normalise(t.t1);
-            t2 = normalise(t.t2);
+            t1 = normalise(t.t1, false);
+            t2 = normalise(t.t2, false);
+
+            if(t1 === "Timeout" || t2 === "Timeout"){
+                return "Timeout";
+            }
 
             return new LambdaApplication(t1, t2);
     }

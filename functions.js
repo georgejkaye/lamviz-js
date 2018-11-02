@@ -115,12 +115,16 @@ function normalise_button(){
 
     var res = normalise(currentTerm);
 
-    console.log("Normalised term: " + res.prettyPrint());
+    if(res === "Timeout"){
+        changeText('result', "Timed out during normalisation");
+    } else {
 
-    var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels();
+        console.log("Normalised term: " + res.prettyPrint());
 
-    changeText('result', text);
+        var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels();
 
+        changeText('result', text);
+    }
 }
 
 function beta_button(){

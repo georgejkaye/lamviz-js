@@ -192,19 +192,21 @@ function updateLabels(labels){
         }}).update();
 
         cy.style().selector('edge[type = "var"]').style({'label': function(ele){
-            return ele.data().id.substring(1,2);
+            var id = ele.data().id.substring(1);
+            var res = id.split(" ");
+            return res[0];
         }}).update();
         
         cy.style().selector('edge[type = "app"]').style({'label': function(ele){
             
             var terms = ele.data().id.substring(2, ele.data().id.length - 2).split(" @ ");
 
-            if(terms[0].length > 1){
-                terms[0] = "(" + terms[0] + ")";
+            if(terms[1].split(" ").length > 1){
+               terms[1] = "(" + terms[1] + ")";
             }
 
-            if(terms[1].length > 1){
-                terms[1] = "(" + terms[1] + ")";
+            if(terms[0].substring(0,1) === "\u03BB"){
+                terms[0] = "(" + terms[0] + ")";
             }
 
             return terms[0] + " " + terms[1];
