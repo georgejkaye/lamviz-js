@@ -64,7 +64,11 @@ function substitute(s, j, t){
  * @return {Object} The beta-reduced expression.
  */
 function applicationAbstraction(abs, val){
-    return shift(substitute(shift(val, 1, 0), 0, abs), -1, 0);
+    var term = shift(substitute(shift(val, 1, 0), 0, abs.t), -1, 0);
+
+    console.log("Beta reduced term: " + term.prettyPrint());
+
+    return term
 }
 
 /**
@@ -112,7 +116,7 @@ function normalise(t){
             return t;
         case ABS:
 
-            var normalised_subterm = shift(normalise(shift(t.t, -1, 0)), 1, 0);
+            var normalised_subterm = normalise(t.t);
             var new_abstraction = new LambdaAbstraction(normalised_subterm, t.label);
             return new_abstraction;
         case APP:
