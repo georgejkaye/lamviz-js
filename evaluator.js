@@ -1,7 +1,7 @@
-/** Maximum number of operations to perform during normalisation */
-const max_normalisation_ops = 100;
+/** Maximum number of operations to perform during normalisation or evaluation */
+const max_execution_ops = 100;
 /** Current number of operations performed during normalisation */
-var current_normalisation_ops = 0;
+var current_execution_ops = 0;
 
 /**
  * Shifts all the de Bruijn indices in a t by a certain amount.
@@ -15,8 +15,6 @@ function shift (t, d, c){
     if(c === undefined){
         c = "none"
     }
-
-    console.log("Shifting " + t.prettyPrint() + " by " + d + " cutoff " + c);
 
     switch(t.getType()){
         case VAR:
@@ -77,34 +75,67 @@ function applicationAbstraction(abs, val){
 }
 
 /**
+ * Check if the max execution ops have been reached
+ */
+function timeout(){
+    return current_execution_ops > max_execution_ops;
+}
+
+/**
  * Evaluate a lambda expression.
  * @param {Object} t - The lambda expression to evaluate.
+ * @param {boolean} x - If this is the first step of evaluation.
  * @return The fully evaluated lambda expression.
  */
-function evaluate(t){
+function evaluate(t, x){
+
+    if(x === undefined){
+        x = true; 
+    }
+    
+    if(x){
+        current_execution_ops = 0;
+    }
+
+    current_execution_ops++;
+
+    if(timeout()){
+        return "Timeout";
+    }
 
     console.log("Evaluating " + t.prettyPrint());
 
-    if(t.getType() === APP){
+    while(t.getType() === APP){
 
-            var t1 = t.t1;
-            var t2 = t.t2;
+        var t1 = t.t1;
+        var t2 = t.t2;
 
-            if(t1.getType() === ABS && t2.getType() === ABS){
-                return applicationAbstraction(t2, t1.t);
+        if(t1.getType() === ABS && t2.getType() === ABS){
+            t = applicationAbstraction(t1, t2);
+        } else if(t1.getType() === ABS){
+
+            t2 = evaluate(t2)
+
+            if(t2 === "Timeout"){
+                return "Timeout";
             }
 
-            if(t1.getType() === ABS){
-                return new LambdaApplication(t1, evaluate(t2));
+            t = new LambdaApplication(t1, t2);
+
+        } else {
+
+            t1 = evaluate(t1);
+
+            if(t1 === "Timeout"){
+                return "Timeout";
             }
 
-            return new LambdaApplication(evaluate(t1), t2);
-
+            t = new LambdaApplication(t1, t2);
+        }
     }
 
     console.log("Returning " + t.prettyPrint());
     return t;
-
 }
 
 /**
@@ -120,12 +151,12 @@ function normalise(t, x){
     }
     
     if(x){
-        current_normalisation_ops = 0;
+        current_execution_ops = 1;
+    } else {
+        current_execution_ops++;
     }
 
-    current_normalisation_ops++;
-
-    if(current_normalisation_ops > max_normalisation_ops){
+    if(timeout()){
         return "Timeout";
     }
 
