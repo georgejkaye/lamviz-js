@@ -163,7 +163,14 @@ function normalise(t, x){
                 return "Timeout";
             }
 
-            return new LambdaApplication(t1, t2);
+            var term = new LambdaApplication(t1, t2);
+
+            if(t1.getType() === ABS){
+                return normalise(term);
+            }
+
+            return term;
+
     }
 
 }
