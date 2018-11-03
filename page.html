@@ -12,30 +12,30 @@
 </head>
 <body>
 
-    <h2>Hello there!</h2>
+    <h1>&lambda;-calculus visualiser</h1>
 
-    <button type="button" 
-    onclick = "changeText('demo', '\u03BB')">
-    Click me!</button>
+    Type a term t and an environment &Gamma; below!
 
-    <h2 id="demo"></h2>
-
-    t = <input type = "text" id = "input"> &Gamma; = <input type = "text" id = "env"> <br> 
-    <button type = "button" id = "execute-btn"
-    onclick =   "execute_button();">
-    Execute</button>
+    <br>
     <br>
 
-    [ <input type = "text" id = "j" style="width: 50px"> &#x21A6; <input type = "text" id = "s" style="width: 50px"> ] t<br>
-    <button type = "button" id = "shift-btn" onclick = "substitute_button();">Substitute</button>
+    <b>Example:</b> (&lambda;x. &lambda;y. x y) a b
+    <br>t = (\x. \y. x y) a b
+    <br>&Gamma; = a b
+
     <br>
+    <br>
+
+    t = <input type = "text" id = "input"> &Gamma; = <input type = "text" id = "env"> 
+    
+    <br> 
+    <br>
+    
+    <button type = "button" id = "execute-btn" onclick =   "execute_button();">Execute</button>
     <button type = "button" id = "eval-btn" onclick = "evaluate_button();">Evaluate</button>
     <button type = "button" id = "norm-btn" onclick = "normalise_button();">Normalise</button>
 
     <br>
-
-    (<input type = "text" id = "b1">)<input type = "text" id = "b2"><button type = "button" id = "beta-btn" onclick = "beta_button();">Beta</button>
-
 
     <h2 id="result">Type an expression</h2>
 
