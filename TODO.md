@@ -5,8 +5,8 @@
         * left is body B
     * application ( clockwise)
         * function top: A -> B
-        * arhument u right A
+        * argument u right A
         * t(u) left B
     * I think I've done this!
 * ~~Actually do proposal~~
-* Graph labels are pretty dodgy, fix these
+* ~~Graph labels are pretty dodgy, fix these~~
