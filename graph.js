@@ -41,18 +41,21 @@ function findNode(fun){
 
         var id = nodeObjs[i].data.id;
 
-        if(nodeObjs[i].data.type === "abs"){
+        if(nodeObjs[i].data.type === "abs-node"){
 
             if(id.substring(1, id.length - 1) === fun){
                 return nodeObjs[i];
             }
 
-        } else if(nodeObjs[i].data.type === "app"){
-                
+        } else if(nodeObjs[i].data.type === "app-node"){
+
             var lhs = id.substring(1, id.length - 1);
+
+            console.log("Comparing function " + fun + " with " + lhs);
 
             if(lhs === fun){
                 return nodeObjs[i];
+
             }
         }
 
@@ -109,7 +112,7 @@ function convertToElems(term, array, parent){
                 posY = parentPos[1] - nodeDistance;
             }
 
-            var lambdaNode = { data: { id: nodeID, type: "abs" }, position: {x: posX, y: posY}};
+            var lambdaNode = { data: { id: nodeID, type: "abs-node" }, position: {x: posX, y: posY}};
 
             parentPos[0] = posX;
             parentPos[1] = posY;
@@ -151,7 +154,7 @@ function convertToElems(term, array, parent){
                 posY = parentPos[1] - nodeDistance;
             }
 
-            var appNode = { data: { id: nodeID, type: "app" },  position: {x: posX, y: posY}};
+            var appNode = { data: { id: nodeID, type: "app-node" },  position: {x: posX, y: posY}};
 
             console.log(posX + ", " + posY);
 
@@ -170,7 +173,7 @@ function convertToElems(term, array, parent){
                 var classes = "";
                 
                 if(!nodes.includes(sourceID)){
-                    var externalNode = { data: { id: sourceID }, classes: 'global' };
+                    var externalNode = { data: { id: sourceID, type: "abs-node" }, classes: 'global' };
                     smartPush(array, externalNode);
                     smartPush(nodes, sourceID);
                     smartPush(nodeObjs, externalNode);
@@ -193,7 +196,7 @@ function convertToElems(term, array, parent){
                 var classes = "";
 
                 if(!nodes.includes(sourceID)){
-                    var externalNode = { data: { id: sourceID }, classes: 'global'};
+                    var externalNode = { data: { id: sourceID, type: "abs-node" }, classes: 'global'};
                     smartPush(array, externalNode);
                     smartPush(nodes, sourceID);
                     smartPush(nodeObjs, externalNode);
@@ -245,6 +248,42 @@ function convertToElems(term, array, parent){
 
     }
 
+    console.log(" ");
+
+    for(i = 0; i < array.length; i++){
+
+        if(array[i].data.type === "app-node"){
+
+            var id = array[i].data.id;
+            console.log(id);
+
+            var args = id.split(" @ ")[0].substring(1);
+            var elms = args.split(' ');
+            
+            // single term
+            if(elms.length === 1){
+
+                var var1 = elms[0]
+
+                console.log("var " + var1);
+
+                for(j = 0; j < nodes.length; j++){
+
+                    console.log(nodes[j].substring(1, ));
+
+                    if(var1 === nodes[j].substring(1, nodes[j].length - 1)){
+            
+                    }
+
+                }
+
+            }
+
+
+        }
+
+    }
+
     return array;
 
 }
@@ -272,8 +311,8 @@ function updateLabels(labels){
 
     if(labels){
         
-        cy.style().selector('node[type = "abs"]').style({'label': '\u03BB'}).update();
-        cy.style().selector('node[type = "app"]').style({'label': 'data(id)'}).update();
+        cy.style().selector('node[type = "abs-node"]').style({'label': '\u03BB'}).update();
+        cy.style().selector('node[type = "app-node"]').style({'label': 'data(id)'}).update();
         cy.style().selector('edge[type = "abs"]').style({'label': 'data(id)'}).update();
         
         cy.style().selector('edge[type = "id"]').style({'label': function(ele){
