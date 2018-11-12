@@ -1,6 +1,8 @@
-/** Array containing all nodes used in the current graph */
+/** Array containing all node ids used in the current graph */
 var nodes = [];
-/** Array containing all edges used in the current graph */
+/** Array containing all node objects used in the current graph */
+var nodeObjs = [];
+/** Array containing all edge ids used in the current graph */
 var edges = [];
 /** The graph object */
 var cy = undefined;
@@ -14,10 +16,49 @@ const nodeDistance = 100;
  */
 function reset(){
     nodes = [];
+    nodeObjs = [];
     edges = [];
     cy = undefined;
     firstNode = undefined;
     parent = [0,0];
+}
+
+/**
+ * Find the node that generates a given function (could be an abstraction or an application!).
+ * @param {string} fun The name of the function.
+ */
+function findNode(fun){
+
+    var funComps = fun.split(' ');
+    
+    if(funComps.length === 2){
+        fun = funComps[0] + " @ " + funComps[1];
+    }
+
+    console.log("Looking for function " + fun);
+
+    for(i = 0; i < nodeObjs.length; i++){
+
+        var id = nodeObjs[i].data.id;
+
+        if(nodeObjs[i].data.type === "abs"){
+
+            if(id.substring(1, id.length - 1) === fun){
+                return nodeObjs[i];
+            }
+
+        } else if(nodeObjs[i].data.type === "app"){
+                
+            var lhs = id.substring(1, id.length - 1);
+
+            if(lhs === fun){
+                return nodeObjs[i];
+            }
+        }
+
+    }
+
+    return null;
 }
 
 /**
@@ -39,19 +80,13 @@ function convertToElems(term, array, parent){
     if(parent === undefined){
         var startNode = { data: { id: ">"}, position: { x: 0, y: 0}};
         parent = ">";
+        parentPos = [0,0];
         smartPush(array, startNode);
+        smartPush(nodeObjs, startNode);
     }
 
     var posX;
     var posY;
-
-    if(parentPos[1] !== 0){
-        posX = parentPos[0] - nodeDistance;
-        posY = parentPos[1] - nodeDistance;
-    } else {
-        posX = parentPos[0]
-        posY = parentPos[1] - nodeDistance;
-    }
 
     switch(term.getType()){
 
@@ -66,6 +101,14 @@ function convertToElems(term, array, parent){
 
             // The lambda node
 
+            if(parentPos[1] === 0){
+                posX = parentPos[0];
+                posY = parentPos[1] - nodeDistance;
+            } else {
+                posX = parentPos[0] - nodeDistance;
+                posY = parentPos[1] - nodeDistance;
+            }
+
             var lambdaNode = { data: { id: nodeID, type: "abs" }, position: {x: posX, y: posY}};
 
             parentPos[0] = posX;
@@ -75,6 +118,7 @@ function convertToElems(term, array, parent){
 
             smartPush(array, lambdaNode);
             smartPush(nodes, nodeID);
+            smartPush(nodeObjs, lambdaNode);
 
             // The edge linking the lambda node with its parent
             
@@ -99,6 +143,14 @@ function convertToElems(term, array, parent){
             
             // The application node
 
+            if(parentPos[1] === 0){
+                posX = parentPos[0];
+                posY = parentPos[1] - nodeDistance;
+            } else {
+                posX = parentPos[0] + nodeDistance;
+                posY = parentPos[1] - nodeDistance;
+            }
+
             var appNode = { data: { id: nodeID, type: "app" },  position: {x: posX, y: posY}};
 
             console.log(posX + ", " + posY);
@@ -108,6 +160,7 @@ function convertToElems(term, array, parent){
 
             smartPush(array, appNode);
             smartPush(nodes, nodeID);
+            smartPush(nodeObjs, appNode);
 
             // Check to see if the rhs is a variable
             if(term.t2.getType() === VAR){
@@ -120,6 +173,7 @@ function convertToElems(term, array, parent){
                     var externalNode = { data: { id: sourceID }, classes: 'global' };
                     smartPush(array, externalNode);
                     smartPush(nodes, sourceID);
+                    smartPush(nodeObjs, externalNode);
                     classes = 'dashed'
                 }
 
@@ -142,6 +196,7 @@ function convertToElems(term, array, parent){
                     var externalNode = { data: { id: sourceID }, classes: 'global'};
                     smartPush(array, externalNode);
                     smartPush(nodes, sourceID);
+                    smartPush(nodeObjs, externalNode);
                     classes = 'dashed';
                 }
 
@@ -152,6 +207,12 @@ function convertToElems(term, array, parent){
             } else {
                 array = convertToElems(term.t1, array, nodeID);
             }
+
+            var funNode = findNode(term.t1.prettyPrintLabels());
+            var funX = funNode.position.x;
+            appNode.position.x = funX;
+            appNode.position.y += (funX / 2)
+
 
             // The edge linking the application node with its parent
             var edgeID = checkID("(" + nodeID + ")", edges);
@@ -212,7 +273,7 @@ function updateLabels(labels){
     if(labels){
         
         cy.style().selector('node[type = "abs"]').style({'label': '\u03BB'}).update();
-        cy.style().selector('node[type = "app"]').style({'label': '@'}).update();
+        cy.style().selector('node[type = "app"]').style({'label': 'data(id)'}).update();
         cy.style().selector('edge[type = "abs"]').style({'label': 'data(id)'}).update();
         
         cy.style().selector('edge[type = "id"]').style({'label': function(ele){
