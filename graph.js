@@ -4,6 +4,10 @@ var nodes = [];
 var edges = [];
 /** The graph object */
 var cy = undefined;
+/** The current position of the parent */
+var parentPos = [0,0];
+/** The distance between nodes */
+const nodeDistance = 100;
 
 /**
  * Reset the nodes and edges arrays
@@ -13,6 +17,7 @@ function reset(){
     edges = [];
     cy = undefined;
     firstNode = undefined;
+    parent = [0,0];
 }
 
 /**
@@ -32,9 +37,20 @@ function convertToElems(term, array, parent){
 
     // Root of lambda expression is connected to the root (represented as box) node
     if(parent === undefined){
-        var startNode = { data: { id: ">"}};
+        var startNode = { data: { id: ">"}, position: { x: 0, y: 0}};
         parent = ">";
         smartPush(array, startNode);
+    }
+
+    var posX;
+    var posY;
+
+    if(parentPos[1] !== 0){
+        posX = parentPos[0] - nodeDistance;
+        posY = parentPos[1] - nodeDistance;
+    } else {
+        posX = parentPos[0]
+        posY = parentPos[1] - nodeDistance;
     }
 
     switch(term.getType()){
@@ -49,7 +65,13 @@ function convertToElems(term, array, parent){
             var nodeID = checkID("\u03BB" + term.label + ".", nodes);
 
             // The lambda node
-            var lambdaNode = { data: { id: nodeID, type: "abs" }};
+
+            var lambdaNode = { data: { id: nodeID, type: "abs" }, position: {x: posX, y: posY}};
+
+            parentPos[0] = posX;
+            parentPos[1] = posY;
+
+            console.log(posX + ", " + posY);
 
             smartPush(array, lambdaNode);
             smartPush(nodes, nodeID);
@@ -76,7 +98,13 @@ function convertToElems(term, array, parent){
             var nodeID = checkID("[" + term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels() + "]", nodes);
             
             // The application node
-            var appNode = { data: { id: nodeID, type: "app" }};
+
+            var appNode = { data: { id: nodeID, type: "app" },  position: {x: posX, y: posY}};
+
+            console.log(posX + ", " + posY);
+
+            parentPos[0] = posX;
+            parentPos[1] = posY;
 
             smartPush(array, appNode);
             smartPush(nodes, nodeID);
@@ -267,17 +295,15 @@ function drawGraph(term){
                 style: {
                     'width': 5
                 }
-            }
-        ],
-      
-        layout: {
-            name: 'circle',
-            startAngle: 5 / 2 * Math.PI
-        }
+            },
 
+        ],
+
+        layout: {
+            name: 'preset'
+        }
   });
 
   updateLabels(document.getElementById('labels-yes').checked);
-  cy.$(firstNode).position
 
 }
