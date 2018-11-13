@@ -312,7 +312,7 @@ function updateLabels(labels){
     if(labels){
         
         cy.style().selector('node[type = "abs-node"]').style({'label': '\u03BB'}).update();
-        cy.style().selector('node[type = "app-node"]').style({'label': 'data(id)'}).update();
+        cy.style().selector('node[type = "app-node"]').style({'label': '@'}).update();
         cy.style().selector('edge[type = "abs"]').style({'label': 'data(id)'}).update();
         
         cy.style().selector('edge[type = "id"]').style({'label': function(ele){
