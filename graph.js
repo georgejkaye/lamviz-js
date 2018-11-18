@@ -95,8 +95,7 @@ function convertToElems(term, array, parent, parentType){
         posX = 0;
         posY = -nodeDistance;
 
-        smartPush(array, startNode);
-        smartPush(nodeObjs, startNode);
+        array = pushNode(array, startNode, ">");
 
     } else {
 
@@ -132,16 +131,13 @@ function convertToElems(term, array, parent, parentType){
 
             console.log(posX + ", " + posY);
 
-            smartPush(array, lambdaNode);
-            smartPush(nodes, nodeID);
-            smartPush(nodeObjs, lambdaNode);
+            array = pushNode(array, lambdaNode, nodeID);
 
             // The edge linking the lambda node with its parent
             
             var edgeID = checkID(nodeID + " " + term.t.prettyPrintLabels(), edges);
-            var edge = { data: { id: edgeID, source: nodeID, target: parent, type: "abs"}};
-            smartPush(array, edge);
-            smartPush(edges, edgeID);
+            var edge = { data: { id: edgeID, source: nodeID, target: parent, type: "abs-edge"}};
+            array = pushEdge(array, edge, edgeID);
 
             // Go inside the abstraction
             array = convertToElems(term.t, array, nodeID, LHS);
@@ -163,12 +159,13 @@ function convertToElems(term, array, parent, parentType){
 
             console.log(posX + ", " + posY);
 
-            smartPush(array, appNode);
-            smartPush(nodes, nodeID);
-            smartPush(nodeObjs, appNode);
+            array = pushNode(array, appNode, nodeID);
             
             // Check to see if the lhs is a variable
             if(term.t1.getType() === VAR){
+
+                var newNode = { data: { id: nodeID + "support", type: "app-supp" },  position: {x: posX, y: posY - nodeDistance}};
+                array = pushNode(array, newNode, nodeID + "support");
 
                 var edgeID = checkID("(" + term.t1.label + " in " + nodeID + ")", edges);
                 var sourceID = "\u03BB" + term.t1.label + ".";
@@ -176,15 +173,15 @@ function convertToElems(term, array, parent, parentType){
 
                 if(!nodes.includes(sourceID)){
                     var externalNode = { data: { id: sourceID, type: "abs-node" }, classes: 'global'};
-                    smartPush(array, externalNode);
-                    smartPush(nodes, sourceID);
-                    smartPush(nodeObjs, externalNode);
+                    array = pushNode(array, externalNode, sourceID);
                     classes = 'dashed';
                 }
 
-                var t1edge = { data: { id: edgeID, source: sourceID, target: nodeID, type: "var" }};
-                smartPush(array, t1edge);
-                smartPush(edges, edgeID);
+                var t1edge = { data: { id: edgeID, source: sourceID, target: nodeID + "support", type: "var-edge" }};
+                array = pushEdge(array, t1edge, edgeID);
+
+                var newEdge = { data: { id: edgeID + "supp", source: nodeID + "support", target: nodeID, type: "var-edge-supp" }};
+                array = pushEdge(array, newEdge, edgeID + "supp");
 
             } else {
                 array = convertToElems(term.t1, array, nodeID, LHS);
@@ -199,15 +196,12 @@ function convertToElems(term, array, parent, parentType){
                 
                 if(!nodes.includes(sourceID)){
                     var externalNode = { data: { id: sourceID, type: "abs-node" }, classes: 'global' };
-                    smartPush(array, externalNode);
-                    smartPush(nodes, sourceID);
-                    smartPush(nodeObjs, externalNode);
+                    array = pushNode(array, externalNode, sourceID);
                     classes = 'dashed'
                 }
 
-                var t2edge = { data: { id: edgeID, source: sourceID, target: nodeID, type: "var" }};
-                smartPush(array, t2edge);
-                smartPush(edges, edgeID);
+                var t2edge = { data: { id: edgeID, source: sourceID, target: nodeID, type: "var-edge" }};
+                array = pushEdge(array, t2edge, edgeID);
 
             } else {
                 array = convertToElems(term.t2, array, nodeID, RHS);
@@ -215,9 +209,8 @@ function convertToElems(term, array, parent, parentType){
 
             // The edge linking the application node with its parent
             var edgeID = checkID("(" + nodeID + ")", edges);
-            var edge = { data: { id: edgeID, source: nodeID, target: parent, type: "app" }};
-            smartPush(array, edge);
-            smartPush(edges, edgeID);
+            var edge = { data: { id: edgeID, source: nodeID, target: parent, type: "app-edge" }};
+            array = pushEdge(array, edge, edgeID);
 
             break;
 
@@ -232,13 +225,13 @@ function convertToElems(term, array, parent, parentType){
 
             if(!nodes.includes(sourceID)){
                 var externalNode = { data: { id: sourceID, type: "abs" }, classes: 'global'}
-                smartPush(array, externalNode);
-                smartPush(nodes, sourceID);
+                array = pushNode(array, externalNode, sourceID);
             }
             
-            var idEdge = { data: {id: "id " + term.label, source: sourceID, target: parent, type: "id" }};
+            var edgeID = "id " + term.label;
+            var idEdge = { data: {id: edgeID, source: sourceID, target: parent, type: "id" }};
             
-            smartPush(array, idEdge);
+            array = pushEdge(array, idEdge, edgeID);
 
             break;
 
@@ -246,6 +239,52 @@ function convertToElems(term, array, parent, parentType){
 
     return array;
 
+}
+
+/**
+ * Fix the support node positions in the array of elements.
+ */
+function fixSupports(elems){
+
+    var ys = [];
+
+    for(i = 0; i < elems.length; i++){
+        ys[i] = elems[i].position('y');
+    }
+
+    for(i = 0; i < elems.length; i++){
+        //elems[i].position('y', ys[ys.length - i - 1]);
+    }
+
+}
+
+/**
+ * Push a node onto the various arrays.
+ * @param {Object[]} array - The array all the elements are stored in.
+ * @param {Object} node - The node object.
+ * @param {string} nodeID - The node ID.
+ * @return {Object[]} The updated array all the elements are stored in.
+ */
+function pushNode(array, node, nodeID){
+    smartPush(array, node);
+    smartPush(nodes, nodeID);
+    smartPush(nodeObjs, node);
+
+    return array;
+}
+
+/**
+ * Push an edge onto the various arrays.
+ * @param {Object[]} array - The array all the elements are stored in.
+ * @param {Object} edge - The edge object.
+ * @param {string} edgeID - The edge ID.
+ * @return {Object[]} The updated array all the elements are stored in.
+ */
+function pushEdge(array, edge, edgeID){
+    smartPush(array, edge);
+    smartPush(edges, edgeID);
+
+    return array;
 }
 
 /**
@@ -275,11 +314,11 @@ function updateLabels(labels){
         cy.style().selector('node[type = "app-node"]').style({'label': '@'}).update();
         cy.style().selector('edge[type = "abs"]').style({'label': 'data(id)'}).update();
         
-        cy.style().selector('edge[type = "id"]').style({'label': function(ele){
+        cy.style().selector('edge[type = "id-edge"]').style({'label': function(ele){
             return ele.data().id.substring(3);
         }}).update();
 
-        cy.style().selector('edge[type = "var"]').style({'label': function(ele){
+        cy.style().selector('edge[type = "var-edge"]').style({'label': function(ele){
             var id = ele.data().id.substring(1);
             var res = id.split(" ");
             return res[0];
@@ -316,7 +355,7 @@ function drawGraph(term){
     reset();
 
     var elems = convertToElems(term);
-    
+
     cy = cytoscape({
         container: document.getElementById("cy"),
 
@@ -331,6 +370,13 @@ function drawGraph(term){
             },
       
             {
+                selector: 'node[type = "abs-supp"]',
+                style: {
+                    'visibility': 'hidden'
+                }
+            },
+
+            {
                 selector: 'edge',
                 style: {
                 'width': 3,
@@ -338,8 +384,17 @@ function drawGraph(term){
                 'mid-target-arrow-color': '#ccc',
                 'mid-target-arrow-shape': 'triangle',
                 'arrow-scale': 2,
-                'curve-style': 'bezier',
-                'control-point-step-size': '200px',
+                }
+            },
+
+            {
+                selector: 'edge[type = "var-edge"]',
+                style: {
+                    'curve-style': 'unbundled-bezier',
+                    'control-point-distances': '200',
+                    'control-point-weights': '0.25 0.5 0.75',
+                    'loop-direction': '45deg',
+                    
                 }
             },
 
@@ -363,6 +418,8 @@ function drawGraph(term){
             name: 'preset'
         }
   });
+
+  fixSupports(cy.elements('node[type = "app-supp"]'));
 
   updateLabels(document.getElementById('labels-yes').checked);
 
