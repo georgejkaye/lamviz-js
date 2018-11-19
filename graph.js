@@ -11,11 +11,14 @@ const LHS = 0;
 const RHS = 1;
 /** The current position of the parent */
 var parentPos = [0,0];
-/** The distance between nodes */
+/** The distance between adjacent nodes in the X direction */
 const nodeDistanceX = 100;
+/** The distance between adjacent nodes in the Y direction */
 const nodeDistanceY = 75;
+/** The distance between support nodes and their parent in the X direction */
 const supportDistanceX = 50;
-const supportDistanceY = 50;
+/** The distance between support nodes and their parent in the Y direction */
+const supportDistanceY = 75;
 
 /**
  * Reset the nodes and edges arrays
@@ -81,6 +84,8 @@ function findNode(fun){
  */
 function convertToElems(term, array, parent, parentType){
 
+    var noAbs = 0;
+
     // At the first level an empty array must be created
     if(array === undefined){
         array = [];
@@ -124,6 +129,8 @@ function convertToElems(term, array, parent, parentType){
          * This node has one ingoing edge from the scope of the abstraction.
          */
         case ABS:
+
+            noAbs++;
 
             var nodeID = checkID("\u03BB" + term.label + ".", nodes);
 
@@ -312,6 +319,18 @@ function checkID(id, array){
     return id;
 }
 
+function getNumber(id){
+
+    for(i = 0; i < edges.length; i++){
+
+        if(edges[i] === id){
+            return i;
+        }
+    }
+
+    return -1;
+}
+
 /**
  * Update the labels on the graph
  * @param {boolean} labels - Whether labels are shown
@@ -406,8 +425,17 @@ function drawGraph(term){
                 selector: 'edge[type = "var-edge"]',
                 style: {
                     'curve-style': 'unbundled-bezier',
-                    'control-point-distances': '100',
-                    'control-point-weights': '0.5',
+                    'control-point-distances': function(ele){
+
+                        var x = getNumber(ele.data().id);
+                        var y = 250 / x;
+
+                        console.log(y + " " + y + " " + y);
+
+                        return y + " " + y + " " + y;
+
+                    },
+                    'control-point-weights': '0.25 0.5 0.75',
                     'loop-direction': '45deg',
                     'edge-distances': 'node-position'
                     
