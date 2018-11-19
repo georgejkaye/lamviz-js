@@ -13,7 +13,9 @@ const RHS = 1;
 var parentPos = [0,0];
 /** The distance between nodes */
 const nodeDistanceX = 100;
-const nodeDistanceY = 50;
+const nodeDistanceY = 75;
+const supportDistanceX = 50;
+const supportDistanceY = 50;
 
 /**
  * Reset the nodes and edges arrays
@@ -164,12 +166,11 @@ function convertToElems(term, array, parent, parentType){
             // Check to see if the lhs is a variable
             if(term.t1.getType() === VAR){
 
-                var newNode = { data: { id: nodeID + "support", type: "app-supp" },  position: {x: posX, y: posY - nodeDistanceY}};
-                array = pushNode(array, newNode, nodeID + "support");
+                var newNode = { data: { id: nodeID + "support-lhs", type: "app-supp" },  position: {x: posX, y: posY - supportDistanceY}};
+                array = pushNode(array, newNode, nodeID + "support-lhs");
 
                 var edgeID = checkID("(" + term.t1.label + " in " + nodeID + ")", edges);
                 var sourceID = "\u03BB" + term.t1.label + ".";
-                var classes = "";
 
                 if(!nodes.includes(sourceID)){
                     var externalNode = { data: { id: sourceID, type: "abs-node" }, classes: 'global'};
@@ -177,11 +178,11 @@ function convertToElems(term, array, parent, parentType){
                     classes = 'dashed';
                 }
 
-                var t1edge = { data: { id: edgeID, source: sourceID, target: nodeID + "support", type: "var-edge" }};
+                var t1edge = { data: { id: edgeID, source: sourceID, target: nodeID + "support-lhs", type: "var-edge" }};
                 array = pushEdge(array, t1edge, edgeID);
 
-                var newEdge = { data: { id: edgeID + "supp", source: nodeID + "support", target: nodeID, type: "var-edge-supp" }};
-                array = pushEdge(array, newEdge, edgeID + "supp");
+                var newEdge = { data: { id: edgeID + "supp-lhs", source: nodeID + "support-lhs", target: nodeID, type: "var-edge-supp" }};
+                array = pushEdge(array, newEdge, edgeID + "supp-lhs");
 
             } else {
                 array = convertToElems(term.t1, array, nodeID, LHS);
@@ -190,9 +191,11 @@ function convertToElems(term, array, parent, parentType){
             // Check to see if the rhs is a variable
             if(term.t2.getType() === VAR){
 
+                var newNode = { data: { id: nodeID + "support-rhs", type: "app-supp" },  position: {x: posX + supportDistanceX, y: posY - supportDistanceY}};
+                array = pushNode(array, newNode, nodeID + "support-rhs");
+
                 var edgeID = checkID("(" + term.t2.label + " in " + nodeID + ")", edges);
                 var sourceID = "\u03BB" + term.t2.label + "."; 
-                var classes = "";
                 
                 if(!nodes.includes(sourceID)){
                     var externalNode = { data: { id: sourceID, type: "abs-node" }, classes: 'global' };
@@ -200,8 +203,11 @@ function convertToElems(term, array, parent, parentType){
                     classes = 'dashed'
                 }
 
-                var t2edge = { data: { id: edgeID, source: sourceID, target: nodeID, type: "var-edge" }};
+                var t2edge = { data: { id: edgeID, source: sourceID, target: nodeID + "support-rhs", type: "var-edge" }};
                 array = pushEdge(array, t2edge, edgeID);
+
+                var newEdge = { data: { id: edgeID + "supp-rhs", source: nodeID + "support-rhs", target: nodeID, type: "var-edge-supp" }};
+                array = pushEdge(array, newEdge, edgeID + "supp-rhs");
 
             } else {
                 array = convertToElems(term.t2, array, nodeID, RHS);
@@ -224,12 +230,12 @@ function convertToElems(term, array, parent, parentType){
             var sourceID = "\u03BB" + term.label + ".";
 
             if(!nodes.includes(sourceID)){
-                var externalNode = { data: { id: sourceID, type: "abs" }, classes: 'global'}
+                var externalNode = { data: { id: sourceID, type: "abs-node" }, classes: 'global'}
                 array = pushNode(array, externalNode, sourceID);
             }
             
             var edgeID = "id " + term.label;
-            var idEdge = { data: {id: edgeID, source: sourceID, target: parent, type: "id" }};
+            var idEdge = { data: {id: edgeID, source: sourceID, target: parent, type: "id-edge" }};
             
             array = pushEdge(array, idEdge, edgeID);
 
@@ -246,14 +252,18 @@ function convertToElems(term, array, parent, parentType){
  */
 function fixSupports(elems){
 
-    var ys = [];
+    if(elems.length > 0){
 
-    for(i = 0; i < elems.length; i++){
-        ys[i] = elems[i].position('y');
-    }
+        var ys = [];
+        var highest = elems[elems.length - 1].position('y');
+        var j = 0;
 
-    for(i = 0; i < elems.length; i++){
-        //elems[i].position('y', ys[ys.length - i - 1]);
+        for(i = elems.length - 1; i >= 0; i--){
+            elems[i].position('y', highest - (nodeDistanceY * j) - (supportDistanceY * j));
+            j++;
+
+            console.log(elems[i].position('y'));
+        }
     }
 
 }
@@ -396,8 +406,8 @@ function drawGraph(term){
                 selector: 'edge[type = "var-edge"]',
                 style: {
                     'curve-style': 'unbundled-bezier',
-                    'control-point-distances': '200',
-                    'control-point-weights': '0.25 0.5 0.75',
+                    'control-point-distances': '100',
+                    'control-point-weights': '0.5',
                     'loop-direction': '45deg',
                     'edge-distances': 'node-position'
                     
