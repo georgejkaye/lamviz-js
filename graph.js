@@ -12,8 +12,8 @@ const RHS = 1;
 /** The current position of the parent */
 var parentPos = [0,0];
 /** The distance between nodes */
-const nodeDistance = 100;
-
+const nodeDistanceX = 100;
+const nodeDistanceY = 50;
 
 /**
  * Reset the nodes and edges arrays
@@ -93,7 +93,7 @@ function convertToElems(term, array, parent, parentType){
         parent = ">";
 
         posX = 0;
-        posY = -nodeDistance;
+        posY = -nodeDistanceY;
 
         array = pushNode(array, startNode, ">");
 
@@ -101,12 +101,12 @@ function convertToElems(term, array, parent, parentType){
 
         switch(parentType){
             case LHS:
-                posX = parentPos[0] - nodeDistance;
-                posY = parentPos[1] - nodeDistance;
+                posX = parentPos[0] - nodeDistanceX;
+                posY = parentPos[1] - nodeDistanceY;
                 break;
             case RHS:
-                posX = parentPos[0] + nodeDistance;
-                posY = parentPos[1] - nodeDistance;
+                posX = parentPos[0] + nodeDistanceX;
+                posY = parentPos[1] - nodeDistanceY;
                 break;
         }
 
@@ -164,7 +164,7 @@ function convertToElems(term, array, parent, parentType){
             // Check to see if the lhs is a variable
             if(term.t1.getType() === VAR){
 
-                var newNode = { data: { id: nodeID + "support", type: "app-supp" },  position: {x: posX, y: posY - nodeDistance}};
+                var newNode = { data: { id: nodeID + "support", type: "app-supp" },  position: {x: posX, y: posY - nodeDistanceY}};
                 array = pushNode(array, newNode, nodeID + "support");
 
                 var edgeID = checkID("(" + term.t1.label + " in " + nodeID + ")", edges);
@@ -312,7 +312,7 @@ function updateLabels(labels){
         
         cy.style().selector('node[type = "abs-node"]').style({'label': '\u03BB'}).update();
         cy.style().selector('node[type = "app-node"]').style({'label': '@'}).update();
-        cy.style().selector('edge[type = "abs"]').style({'label': 'data(id)'}).update();
+        cy.style().selector('edge[type = "abs-edge"]').style({'label': 'data(id)'}).update();
         
         cy.style().selector('edge[type = "id-edge"]').style({'label': function(ele){
             return ele.data().id.substring(3);
@@ -324,7 +324,7 @@ function updateLabels(labels){
             return res[0];
         }}).update();
         
-        cy.style().selector('edge[type = "app"]').style({'label': function(ele){
+        cy.style().selector('edge[type = "app-edge"]').style({'label': function(ele){
             
             var terms = ele.data().id.substring(2, ele.data().id.length - 2).split(" @ ");
 
@@ -366,13 +366,18 @@ function drawGraph(term){
                 selector: 'node',
                 style: {
                     'background-color': '#666',
+                    'text-valign': 'center',
+                    'color': 'white'
                 }
             },
       
             {
-                selector: 'node[type = "abs-supp"]',
+                selector: 'node[type = "app-supp"]',
                 style: {
-                    'visibility': 'hidden'
+                    'width': '10',
+                    'height': '10',
+                    'background-color': '#ccc',
+                    'shape': 'roundrectangle'
                 }
             },
 
@@ -383,7 +388,7 @@ function drawGraph(term){
                 'line-color': '#ccc',
                 'mid-target-arrow-color': '#ccc',
                 'mid-target-arrow-shape': 'triangle',
-                'arrow-scale': 2,
+                'arrow-scale': 1.2,
                 }
             },
 
@@ -394,6 +399,7 @@ function drawGraph(term){
                     'control-point-distances': '200',
                     'control-point-weights': '0.25 0.5 0.75',
                     'loop-direction': '45deg',
+                    'edge-distances': 'node-position'
                     
                 }
             },
