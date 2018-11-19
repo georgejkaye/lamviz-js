@@ -18,7 +18,7 @@ const nodeDistanceY = 75;
 /** The distance between support nodes and their parent in the X direction */
 const supportDistanceX = 50;
 /** The distance between support nodes and their parent in the Y direction */
-const supportDistanceY = 75;
+const supportDistanceY = 50;
 
 /**
  * Reset the nodes and edges arrays
@@ -261,15 +261,12 @@ function fixSupports(elems){
 
     if(elems.length > 0){
 
-        var ys = [];
         var highest = elems[elems.length - 1].position('y');
         var j = 0;
 
         for(i = elems.length - 1; i >= 0; i--){
-            elems[i].position('y', highest - (nodeDistanceY * j) - (supportDistanceY * j));
+            elems[i].position('y', highest - (-(elems[i].position('x')/8 * j)));
             j++;
-
-            console.log(elems[i].position('y'));
         }
     }
 
@@ -428,14 +425,12 @@ function drawGraph(term){
                     'control-point-distances': function(ele){
 
                         var x = getNumber(ele.data().id);
-                        var y = 250 / x;
+                        var y = (edges.length * 200) / x;
 
-                        console.log(y + " " + y + " " + y);
-
-                        return y + " " + y + " " + y;
+                        return y;
 
                     },
-                    'control-point-weights': '0.25 0.5 0.75',
+                    'control-point-weights': '0.5',
                     'loop-direction': '45deg',
                     'edge-distances': 'node-position'
                     
