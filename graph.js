@@ -68,10 +68,178 @@ function findNode(fun){
 
             }
         }
-
     }
 
     return null;
+}
+
+/**
+ * Get the furthest left x coordinate of a node in an array of elements
+ * @param {Object[]} array - The array of elements
+ * @return {number} the furthest left x coordinate
+ */
+function furthestLeft(array){
+
+    left = array[0].position.x;
+
+    for(i = 1; i < array.length; i++){
+
+        if(array[i].position !== undefined){
+            const newLeft = array[1].position.x;
+
+            if(newLeft < left){
+                left = newLeft;
+            }
+        }
+    }
+
+    return left;
+}
+
+/**
+ * Get the furthest right x coordinate of a node in an array of elements.
+ * @param {Object[]} array - The array of elements.
+ * @return {number} the furthest left x coordinate.
+ */
+function furthestRight(array){
+
+    var right = array[0].position.x;
+
+    for(i = 1; i < array.length; i++){
+
+        if(array[i].position !== undefined){
+            const newRight = array[1].position.x;
+
+            if(newRight > left){
+                right = newRight;
+            }
+        }
+    }
+
+    return right;
+}
+
+/**
+ * Shift all the x coordinates of nodes in an array of elements.
+ * @param {Object[]} array - The array of elements. 
+ * @param {number} x - The amount to shift the x coordinates. 
+ * @param {Object[]} - The array with all the elements shifted.
+ */
+function shiftXs(array, x){
+
+    for(i = 0; i < array.length; i++){
+        array[i].position.x += x; 
+    }
+
+    return array;
+}
+
+/**
+ * Generate the elements of the map of a term.
+ * @param {Object} term - The lambda term to generate the elements of the map for.  
+ * @param {Object[]} array - The array to put the elements in. 
+ * @param {string} parent - The ID of the parent of the current term. 
+ * @param {number} parentX - The x coordinate of the parent. 
+ * @param {number} parentY - The y coordinate of the parent.
+ * @param {number} position - The position (LHS or RHS) of the current element.
+ */
+function generateMapElements(term, array, parent, parentX, parentY, position){
+
+    /* If there is no element array, create one */
+    if(array === undefined){
+        array = [];
+    }
+
+    var posX = 0;
+    var posY = 0;
+
+    /* If this is the start of the map, create a root node. */
+    if(parent === undefined){
+
+        parent = ">";
+        parentX = 0;
+        parentY = 0;
+
+        var rootNode = { data: { id: ">"}, position: { x: parentX, y: parentY }};
+        array = pushNode(array, rootNode);
+
+        posX = parentX;
+        posY = parentY - nodeDistanceY;
+
+    } else {
+
+        posY = parentY - nodeDistanceY;
+
+        if(position === LHS){
+            posX = parentX - nodeDistanceX; 
+        } else {
+            posX = parentX + nodeDistanceX;
+        }
+    }
+
+    var newNode;
+    var newEdge;
+    var nodeID = "";
+    var edgeID = "";
+    var edgeType = "";
+
+    switch(term.getType()){
+        case ABS:
+
+        nodeID = checkID("\u03BB" + term.label + ".", nodes);
+        newNode = { data: { id: nodeID, type: "abs-node" }, position: { x: posX, y: posY}};
+
+        array = pushNode(array, newNode);
+
+        edgeID = checkID(nodeID + " " + term.t.prettyPrintLabels(), edges);
+        edgeType = "abs-edge";
+
+        array = generateMapElements(term.t, array, nodeID, posX, posY, LHS);
+
+        break;
+        
+        case APP:
+        
+        nodeID = checkID("[" + term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels() + "]", nodes);
+        newNode = { data: { id: nodeID, type: "app-node"}, position: {x: posX, y: posY}};
+
+        array = pushNode(array, newNode);
+
+        edgeID = checkID("(" + nodeID + ")", edges);
+        edgeType = "app-edge";
+        
+        var lhsArray = generateMapElements(term.t1, [], nodeID, posX, posY, LHS);
+        const rightmostX = furthestRight(lhsArray);
+
+        var rhsArray = generateMapElements(term.t2, [], nodeID, posX, posY, RHS);
+        const leftmostX = furthestLeft(rhsArray);
+
+        if(rightmostX >= leftmostX){
+            array = shiftXs(rhsArray, leftmostX - rightmostX + nodeDistanceX);
+        }
+
+        array = array.concat(lhsArray);
+        array = array.concat(rhsArray);
+
+        break;
+
+        case VAR:
+
+        nodeID = checkID("{" + term.label + "}", nodes);
+        newNode = { data: { id: nodeID, type: "var-supp"}, position: {x: posX, y: posY}};
+
+        array = pushNode(array, newNode);
+        edgeID = checkID("{" + term.label + "} in " + parent, edges);
+
+        break;
+    }
+
+    /* Create an edge linking the newest node with its parent */
+    newEdge = { data: { id: edgeID, source: nodeID, target: parent, type: edgeType}};
+    array = pushEdge(array, newEdge);
+
+    return array;
+    
 }
 
 /**
@@ -380,7 +548,7 @@ function drawGraph(term){
 
     reset();
 
-    var elems = convertToElems(term);
+    var elems = generateMapElements(term);
 
     cy = cytoscape({
         container: document.getElementById("cy"),
@@ -398,7 +566,7 @@ function drawGraph(term){
             },
       
             {
-                selector: 'node[type = "app-supp"]',
+                selector: 'node[type = "var-supp"]',
                 style: {
                     'width': '10',
                     'height': '10',
