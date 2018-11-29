@@ -29,10 +29,12 @@ const appNode = "app-node";
 const appEdge = "app-edge";
 /** A node supporting a variable */
 const varNode = "var-node";
+/** A node supporting a variable at the top of the page */
+const varNodeTop = "var-node-top";
 /** An edge carrying a variable (no label) */
 const varEdge = "var-edge";
 /** An edge carrying a variable (with label) */
-const varLabelEdge = "var-label-edge";
+const varEdgeLabel = "var-label-edge";
 
 /** A lambda character */
 const lambda = "\u03BB";
@@ -116,7 +118,7 @@ function generateMapElements(term, array, parent, parentX, parentY, position){
 
             /* The abstracted variable travels to the top of the map */
             const lambdaAbstractionSupportNode2ID = checkID(lambda + term.label + ".nsupp1", nodes);
-            array = defineNode(array, lambdaAbstractionSupportNode2ID, varNode, posX + nodeDistanceX, posY - (2 * nodeDistanceY));
+            array = defineNode(array, lambdaAbstractionSupportNode2ID, varNodeTop, posX + nodeDistanceX, posY - (2 * nodeDistanceY));
 
             const lambdaAbstractionSupportEdge2ID = checkID(lambda + term.label + ".esupp1", edges);
             array = defineEdge(array, lambdaAbstractionSupportEdge2ID, varEdge, lambdaAbstractionSupportNodeID, lambdaAbstractionSupportNode2ID);
@@ -180,16 +182,16 @@ function generateMapElements(term, array, parent, parentX, parentY, position){
             newEdgeID = checkID(term.label + " in " + parent + "supp", edges);
             newEdgeType = varEdge;
 
-            /* The variable comes from the NW (LHS/ABS) or NE (RHS) of the node */
+            /* The variable needs to come from the top of the map */
             const lambdaVariableSupportNodeID = checkID(term.label + "supp", nodes);
-            array = defineNode(array, lambdaVariableSupportNodeID, varNode, posX, posY - nodeDistanceY);
+            array = defineNode(array, lambdaVariableSupportNodeID, varNodeTop, posX, posY - nodeDistanceY);
 
             const lambdaVariableSupportEdgeID = checkID(term.label + " in " + parent + "supp1", edges);
             array = defineEdge(array, lambdaVariableSupportEdgeID, varEdge, lambdaVariableSupportNodeID, newNodeID);
 
             /* The variable comes from the corresponding abstraction node at the top of the map */
             const lambdaVariableAbstractionEdgeID = checkID(term.label + " in " + parent + "supp2", edges);
-            array = defineEdge(array, lambdaVariableAbstractionEdgeID, varLabelEdge, lambda + term.label + ".nsupp1", lambdaVariableSupportNodeID);
+            array = defineEdge(array, lambdaVariableAbstractionEdgeID, varEdgeLabel, lambda + term.label + ".nsupp1", lambdaVariableSupportNodeID);
 
             break;
     }
@@ -405,7 +407,7 @@ function updateLabels(labels){
         updateNodeLabels(absNode, lambda);
         updateNodeLabels(appNode, '@');
         updateEdgeLabels(absEdge, 'data(id)');
-        updateEdgeLabels(varLabelEdge, function(ele){
+        updateEdgeLabels(varEdgeLabel, function(ele){
             var id = ele.data().id.substring(0);
             var res = id.split(" ");
             return res[0];
@@ -426,6 +428,8 @@ function updateLabels(labels){
             return terms[0] + " " + terms[1];
 
         });
+
+        //updateNodeLabels(varNodeTop, "top");
 
     } else {
        updateStyle('node', 'label', '');
@@ -463,7 +467,7 @@ function drawGraph(term){
             },
       
             {
-                selector: 'node[type =\"' + varNode + '\"]',
+                selector: 'node[type =\"' + varNode + '\"], node[type =\"' + varNodeTop + '\"]',
                 style: {
                     'width': '5',
                     'height': '5',
@@ -485,7 +489,7 @@ function drawGraph(term){
             },
 
             {
-                selector: 'edge[type = \"' + varLabelEdge + '\"]',
+                selector: 'edge[type = \"' + varEdgeLabel + '\"]',
                 style: {
                     'curve-style': 'unbundled-bezier',
                     'control-point-weights': '0.5',
@@ -517,5 +521,6 @@ function drawGraph(term){
   });
 
   updateLabels(document.getElementById('labels-yes').checked);
+  cy.elements('node[type = \"' + varNodeTop + '\"]').position('y', -300);
 
 }
