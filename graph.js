@@ -9,8 +9,6 @@ var cy = undefined;
 /** Constants to represent the location of a child relative to its parent */
 const LHS = 0;
 const RHS = 1;
-/** The current position of the parent */
-var parentPos = [0,0];
 /** The distance between adjacent nodes in the X direction */
 const nodeDistanceX = 30;
 /** The distance between adjacent nodes in the Y direction */
@@ -19,6 +17,25 @@ const nodeDistanceY = 30;
 const supportDistanceX = 50;
 /** The distance between support nodes and their parent in the Y direction */
 const supportDistanceY = 50;
+
+/** Constants for the different types of graph elements */
+/** A node representing an abstraction*/
+const absNode = "abs-node";
+/** An edge carrying an abstraction */
+const absEdge = "abs-edge";
+/** A node representing an application */
+const appNode = "app-node";
+/** An edge carrying an application */
+const appEdge = "app-edge";
+/** A node supporting a variable */
+const varNode = "var-node";
+/** An edge carrying a variable (no label) */
+const varEdge = "var-edge";
+/** An edge carrying a variable (with label) */
+const varLabelEdge = "var-label-edge";
+
+/** A lambda character */
+const lambda = "\u03BB";
 
 /**
  * Reset the nodes and edges arrays
@@ -77,53 +94,56 @@ function generateMapElements(term, array, parent, parentX, parentY, position){
         }
     }
 
-    var parentNodeID = "";
-    var parentEdgeID = "";
-    var parentEdgeType = "";
+    var newNodeID = "";
+    var newEdgeID = "";
+    var newEdgeType = "";
 
     switch(term.getType()){
         case ABS:
 
-            parentNodeID = checkID("\u03BB" + term.label + ".", nodes);
-            array = defineNode(array, parentNodeID, "abs-node", posX, posY);
+            newNodeID = checkID(lambda + term.label + ".", nodes);
+            array = defineNode(array, newNodeID, absNode, posX, posY);
     
-            parentEdgeID = checkID(parentNodeID + " " + term.t.prettyPrintLabels(), edges);
-            parentEdgeType = "abs-edge";
+            newEdgeID = checkID(newNodeID + " " + term.t.prettyPrintLabels(), edges);
+            newEdgeType = absEdge;
 
-            const lambdaAbstractionSupportNodeID = checkID("\u03BB" + term.label + ".supp", nodes);
-            array = defineNode(array, lambdaAbstractionSupportNodeID, "var-node-supp", posX + nodeDistanceX, posY - nodeDistanceY);
+            const lambdaAbstractionSupportNodeID = checkID(lambda + term.label + ".nsupp", nodes);
+            array = defineNode(array, lambdaAbstractionSupportNodeID, varNode, posX + nodeDistanceX, posY - nodeDistanceY);
 
-            const lambdaAbstractionSupportEdgeID = checkID("\u03BB" + term.label + ".supp1", edges);
-            array = defineEdge(array, lambdaAbstractionSupportEdgeID, "var-edge-supp", parentNodeID, lambdaAbstractionSupportNodeID);
+            const lambdaAbstractionSupportEdgeID = checkID(lambda + term.label + ".esupp", edges);
+            array = defineEdge(array, lambdaAbstractionSupportEdgeID, varEdge, newNodeID, lambdaAbstractionSupportNodeID);
 
-            const lambdaAbstractionSupportEdge2ID = checkID("\u03BB" + term.label + ".supp2", edges);
-            array = defineEdge(array, lambdaAbstractionSupportEdge2ID, "var-edge-supp", parentNodeID, lambdaAbstractionSupportNodeID);
+            const lambdaAbstractionSupportNode2ID = checkID(lambda + term.label + ".nsupp1", nodes);
+            array = defineNode(array, lambdaAbstractionSupportNode2ID, varNode, posX + nodeDistanceX, posY - (2 * nodeDistanceY));
 
-            var scopeArray = generateMapElements(term.t, array, parentNodeID, posX, posY, LHS);
+            const lambdaAbstractionSupportEdge2ID = checkID(lambda + term.label + ".esupp1", edges);
+            array = defineEdge(array, lambdaAbstractionSupportEdge2ID, varEdge, lambdaAbstractionSupportNodeID, lambdaAbstractionSupportNode2ID);
+
+            var scopeArray = generateMapElements(term.t, [], newNodeID, posX, posY, LHS);
             const rightmostScope = furthestRight(scopeArray);
 
             if(rightmostScope >= posX){
                 scopeArray = shiftXs(scopeArray, -(rightmostScope - posX) - nodeDistanceX);
             }
 
-            //for(i = 0; i < scopeArray.length; i++){
-                //array = pushNode(array, scopeArray[i]);
-            //}
+            for(i = 0; i < scopeArray.length; i++){
+                array.push(scopeArray[i]);
+            }
 
             break;
             
         case APP:
             
-            parentNodeID = checkID("[" + term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels() + "]", nodes);
-            array = defineNode(array, parentNodeID, "app-node", posX, posY);
+            newNodeID = checkID("[" + term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels() + "]", nodes);
+            array = defineNode(array, newNodeID, appNode, posX, posY);
 
-            parentEdgeID = checkID("(" + parentNodeID + ")", edges);
-            parentEdgeType = "app-edge";
+            newEdgeID = checkID("(" + newNodeID + ")", edges);
+            newEdgeType = appEdge;
             
-            var lhsArray = generateMapElements(term.t1, [], parentNodeID, posX, posY, LHS);
+            var lhsArray = generateMapElements(term.t1, [], newNodeID, posX, posY, LHS);
             const rightmostLHS = furthestRight(lhsArray);
 
-            var rhsArray = generateMapElements(term.t2, [], parentNodeID, posX, posY, RHS);
+            var rhsArray = generateMapElements(term.t2, [], newNodeID, posX, posY, RHS);
             const leftmostRHS = furthestLeft(rhsArray);
 
             if(rightmostLHS >= posX){
@@ -135,37 +155,37 @@ function generateMapElements(term, array, parent, parentX, parentY, position){
             }
 
             for(i = 0; i < lhsArray.length; i++){
-                array = pushNode(array, lhsArray[i]);
+                array.push(lhsArray[i]);
             }
 
             for(j = 0; j < rhsArray.length; j++){
-                array = pushNode(array, rhsArray[j]);
+                array.push(rhsArray[j]);
             }
 
             break;
 
         case VAR:
 
-            parentNodeID = checkID(term.label, nodes);
-            array = defineNode(array, parentNodeID, "var-node-supp", posX, posY);
+            newNodeID = checkID(term.label, nodes);
+            array = defineNode(array, newNodeID, varNode, posX, posY);
 
-            parentEdgeID = checkID(term.label + " in " + parent + "supp", edges);
-            parentEdgeType = "var-edge-supp";
+            newEdgeID = checkID(term.label + " in " + parent + "supp", edges);
+            newEdgeType = varEdge;
 
             const lambdaVariableSupportNodeID = checkID(term.label + "supp", nodes);
-            array = defineNode(array, lambdaVariableSupportNodeID, "var-node-supp", posX, posY - nodeDistanceY);
+            array = defineNode(array, lambdaVariableSupportNodeID, varNode, posX, posY - nodeDistanceY);
 
             const lambdaVariableSupportEdgeID = checkID(term.label + " in " + parent + "supp1", edges);
-            array = defineEdge(array, lambdaVariableSupportEdgeID, "var-edge-supp", lambdaVariableSupportNodeID, parentNodeID);
+            array = defineEdge(array, lambdaVariableSupportEdgeID, varEdge, lambdaVariableSupportNodeID, newNodeID);
 
             const lambdaVariableAbstractionEdgeID = checkID(term.label + " in " + parent + "supp2", edges);
-            array = defineEdge(array, lambdaVariableAbstractionEdgeID, "var-edge", "\u03BB" + term.label + ".supp", lambdaVariableSupportNodeID);
+            array = defineEdge(array, lambdaVariableAbstractionEdgeID, varLabelEdge, lambda + term.label + ".nsupp1", lambdaVariableSupportNodeID);
 
             break;
     }
 
     /* Create an edge linking the newest node with its parent */
-    array = defineEdge(array, parentEdgeID, parentEdgeType, parentNodeID, parent);
+    array = defineEdge(array, newEdgeID, newEdgeType, newNodeID, parent);
 
     return array;
     
@@ -355,21 +375,21 @@ function updateLabels(labels){
 
     if(labels){
         
-        cy.style().selector('node[type = "abs-node"]').style({'label': '\u03BB'}).update();
-        cy.style().selector('node[type = "app-node"]').style({'label': '@'}).update();
-        cy.style().selector('edge[type = "abs-edge"]').style({'label': 'data(id)'}).update();
+        cy.style().selector('node[type = \"' + absNode + '\"]').style({'label': '\u03BB'}).update();
+        cy.style().selector('node[type = \"' + appNode + '\"]').style({'label': '@'}).update();
+        cy.style().selector('edge[type = \"' + absEdge + '\"]').style({'label': 'data(id)'}).update();
         
         cy.style().selector('edge[type = "id-edge"]').style({'label': function(ele){
             return ele.data().id.substring(3);
         }}).update();
 
-        cy.style().selector('edge[type = "var-edge"]').style({'label': function(ele){
+        cy.style().selector('edge[type = \"' + varLabelEdge + '\"]').style({'label': function(ele){
             var id = ele.data().id.substring(0);
             var res = id.split(" ");
             return res[0];
         }}).update();
         
-        cy.style().selector('edge[type = "app-edge"]').style({'label': function(ele){
+        cy.style().selector('edge[type = \"' + appEdge + '\"]').style({'label': function(ele){
             
             var terms = ele.data().id.substring(2, ele.data().id.length - 2).split(" @ ");
 
@@ -377,7 +397,7 @@ function updateLabels(labels){
                terms[1] = "(" + terms[1] + ")";
             }
 
-            if(terms[0].substring(0,1) === "\u03BB"){
+            if(terms[0].substring(0,1) === lambda){
                 terms[0] = "(" + terms[0] + ")";
             }
 
@@ -420,7 +440,7 @@ function drawGraph(term){
             },
       
             {
-                selector: 'node[type = "var-node-supp"]',
+                selector: 'node[type =\"' + varNode + '\"]',
                 style: {
                     'width': '5',
                     'height': '5',
@@ -442,7 +462,7 @@ function drawGraph(term){
             },
 
             {
-                selector: 'edge[type = "var-edge"]',
+                selector: 'edge[type = \"' + varLabelEdge + '\"]',
                 style: {
                     'curve-style': 'unbundled-bezier',
                     'control-point-weights': '0.5',
