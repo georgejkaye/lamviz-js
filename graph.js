@@ -12,9 +12,9 @@ const RHS = 1;
 /** The current position of the parent */
 var parentPos = [0,0];
 /** The distance between adjacent nodes in the X direction */
-const nodeDistanceX = 100;
+const nodeDistanceX = 30;
 /** The distance between adjacent nodes in the Y direction */
-const nodeDistanceY = 75;
+const nodeDistanceY = 30;
 /** The distance between support nodes and their parent in the X direction */
 const supportDistanceX = 50;
 /** The distance between support nodes and their parent in the Y direction */
@@ -606,15 +606,18 @@ function drawGraph(term){
                 style: {
                     'background-color': '#666',
                     'text-valign': 'center',
-                    'color': 'white'
+                    'color': 'white',
+                    'width': '15',
+                    'height': '15',
+                    'font-size': '10'
                 }
             },
       
             {
                 selector: 'node[type = "var-supp"]',
                 style: {
-                    'width': '10',
-                    'height': '10',
+                    'width': '5',
+                    'height': '5',
                     'background-color': '#ccc',
                     'shape': 'roundrectangle'
                 }
@@ -623,11 +626,12 @@ function drawGraph(term){
             {
                 selector: 'edge',
                 style: {
-                'width': 3,
+                'width': 2,
                 'line-color': '#ccc',
                 'mid-target-arrow-color': '#ccc',
                 'mid-target-arrow-shape': 'triangle',
-                'arrow-scale': 1.2,
+                'arrow-scale': '0.8',
+                'font-size': '10'
                 }
             },
 
