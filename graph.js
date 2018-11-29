@@ -34,112 +34,6 @@ function reset(){
 }
 
 /**
- * Find the node that generates a given function (could be an abstraction or an application!).
- * @param {string} fun The name of the function.
- */
-function findNode(fun){
-
-    var funComps = fun.split(' ');
-    
-    if(funComps.length === 2){
-        fun = funComps[0] + " @ " + funComps[1];
-    }
-
-    console.log("Looking for function " + fun);
-
-    for(i = 0; i < nodeObjs.length; i++){
-
-        var id = nodeObjs[i].data.id;
-
-        if(nodeObjs[i].data.type === "abs-node"){
-
-            if(id.substring(1, id.length - 1) === fun){
-                return nodeObjs[i];
-            }
-
-        } else if(nodeObjs[i].data.type === "app-node"){
-
-            var lhs = id.substring(1, id.length - 1);
-
-            console.log("Comparing function " + fun + " with " + lhs);
-
-            if(lhs === fun){
-                return nodeObjs[i];
-
-            }
-        }
-    }
-
-    return null;
-}
-
-/**
- * Get the furthest left x coordinate of a node in an array of elements
- * @param {Object[]} array - The array of elements
- * @return {number} the furthest left x coordinate
- */
-function furthestLeft(array){
-
-    left = array[0].position.x;
-
-    for(i = 1; i < array.length; i++){
-
-        if(array[i].position !== undefined){
-            const newLeft = array[i].position.x;
-
-            if(newLeft < left){
-                left = newLeft;
-            }
-        }
-    }
-
-    return left;
-}
-
-/**
- * Get the furthest right x coordinate of a node in an array of elements.
- * @param {Object[]} array - The array of elements.
- * @return {number} the furthest left x coordinate.
- */
-function furthestRight(array){
-
-    var right = array[0].position.x;
-
-    for(i = 1; i < array.length; i++){
-
-        if(array[i].position !== undefined){
-            const newRight = array[i].position.x;
-
-            if(newRight > left){
-                right = newRight;
-            }
-        }
-    }
-
-    return right;
-}
-
-/**
- * Shift all the x coordinates of nodes in an array of elements.
- * @param {Object[]} array - The array of elements. 
- * @param {number} x - The amount to shift the x coordinates. 
- * @param {Object[]} - The array with all the elements shifted.
- */
-function shiftXs(array, x){
-
-    for(i = 0; i < array.length; i++){
-        if(array[i].position !== undefined){
-            
-            console.log(array[i].position.x + " is now " + array[i].position.x + x);
-            
-            array[i].position.x += x;
-        } 
-    }
-
-    return array;
-}
-
-/**
  * Generate the elements of the map of a term.
  * @param {Object} term - The lambda term to generate the elements of the map for.  
  * @param {Object[]} array - The array to put the elements in. 
@@ -183,78 +77,134 @@ function generateMapElements(term, array, parent, parentX, parentY, position){
         }
     }
 
-    var newNode;
-    var newEdge;
-    var nodeID = "";
-    var edgeID = "";
-    var edgeType = "";
+    var parentNodeID = "";
+    var parentEdgeID = "";
+    var parentEdgeType = "";
 
     switch(term.getType()){
         case ABS:
 
-            nodeID = checkID("\u03BB" + term.label + ".", nodes);
-            newNode = createNode(nodeID, "abs-node", posX, posY);
+            parentNodeID = checkID("\u03BB" + term.label + ".", nodes);
+            array = defineNode(array, parentNodeID, "abs-node", posX, posY);
+    
+            parentEdgeID = checkID(parentNodeID + " " + term.t.prettyPrintLabels(), edges);
+            parentEdgeType = "abs-edge";
 
-            array = pushNode(array, newNode);
+            const lambdaAbstractionSupportNodeID = checkID("\u03BB" + term.label + ".supp", nodes);
+            array = defineNode(array, lambdaAbstractionSupportNodeID, "var-node-supp", posX + nodeDistanceX, posY - nodeDistanceY);
 
-            edgeID = checkID(nodeID + " " + term.t.prettyPrintLabels(), edges);
-            edgeType = "abs-edge";
+            const lambdaAbstractionSupportEdgeID = checkID("\u03BB" + term.label + ".supp1", edges);
+            array = defineEdge(array, lambdaAbstractionSupportEdgeID, "var-edge-supp", parentNodeID, lambdaAbstractionSupportNodeID);
 
-            array = generateMapElements(term.t, array, nodeID, posX, posY, LHS);
+            const lambdaAbstractionSupportEdge2ID = checkID("\u03BB" + term.label + ".supp2", edges);
+            array = defineEdge(array, lambdaAbstractionSupportEdge2ID, "var-edge-supp", parentNodeID, lambdaAbstractionSupportNodeID);
+
+            var scopeArray = generateMapElements(term.t, array, parentNodeID, posX, posY, LHS);
+            const rightmostScope = furthestRight(scopeArray);
+
+            if(rightmostScope >= posX){
+                scopeArray = shiftXs(scopeArray, -(rightmostScope - posX) - nodeDistanceX);
+            }
+
+            //for(i = 0; i < scopeArray.length; i++){
+                //array = pushNode(array, scopeArray[i]);
+            //}
 
             break;
             
         case APP:
             
-            nodeID = checkID("[" + term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels() + "]", nodes);
-            newNode = createNode(nodeID, "app-node", posX, posY);
+            parentNodeID = checkID("[" + term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels() + "]", nodes);
+            array = defineNode(array, parentNodeID, "app-node", posX, posY);
 
-            array = pushNode(array, newNode);
-
-            edgeID = checkID("(" + nodeID + ")", edges);
-            edgeType = "app-edge";
+            parentEdgeID = checkID("(" + parentNodeID + ")", edges);
+            parentEdgeType = "app-edge";
             
-            var lhsArray = generateMapElements(term.t1, [], nodeID, posX, posY, LHS);
+            var lhsArray = generateMapElements(term.t1, [], parentNodeID, posX, posY, LHS);
             const rightmostLHS = furthestRight(lhsArray);
 
-            var rhsArray = generateMapElements(term.t2, [], nodeID, posX, posY, RHS);
+            var rhsArray = generateMapElements(term.t2, [], parentNodeID, posX, posY, RHS);
             const leftmostRHS = furthestLeft(rhsArray);
 
-            if(rightmostLHS > posX){
-                lhsArray = shiftXs(lhsArray, -(rightmostLHS - posX));
+            if(rightmostLHS >= posX){
+                lhsArray = shiftXs(lhsArray, -(rightmostLHS - posX) - nodeDistanceX);
             }
 
-            if(leftmostRHS < posX){
-                rhsArray = shiftXs(rhsArray, (posX - leftmostRHS));
+            if(leftmostRHS <= posX){
+                rhsArray = shiftXs(rhsArray, (posX - leftmostRHS) + nodeDistanceX);
             }
 
             for(i = 0; i < lhsArray.length; i++){
-                pushNode(array, lhsArray[i]);
+                array = pushNode(array, lhsArray[i]);
             }
 
             for(j = 0; j < rhsArray.length; j++){
-                pushNode(array, rhsArray[j]);
+                array = pushNode(array, rhsArray[j]);
             }
 
             break;
 
         case VAR:
 
-            nodeID = checkID("{" + term.label + "}", nodes);
-            newNode = createNode(nodeID, "var-supp", posX, posY);
-            array = pushNode(array, newNode);
+            parentNodeID = checkID(term.label, nodes);
+            array = defineNode(array, parentNodeID, "var-node-supp", posX, posY);
 
-            edgeID = checkID("{" + term.label + "} in " + parent, edges);
+            parentEdgeID = checkID(term.label + " in " + parent + "supp", edges);
+            parentEdgeType = "var-edge-supp";
+
+            const lambdaVariableSupportNodeID = checkID(term.label + "supp", nodes);
+            array = defineNode(array, lambdaVariableSupportNodeID, "var-node-supp", posX, posY - nodeDistanceY);
+
+            const lambdaVariableSupportEdgeID = checkID(term.label + " in " + parent + "supp1", edges);
+            array = defineEdge(array, lambdaVariableSupportEdgeID, "var-edge-supp", lambdaVariableSupportNodeID, parentNodeID);
+
+            const lambdaVariableAbstractionEdgeID = checkID(term.label + " in " + parent + "supp2", edges);
+            array = defineEdge(array, lambdaVariableAbstractionEdgeID, "var-edge", "\u03BB" + term.label + ".supp", lambdaVariableSupportNodeID);
 
             break;
     }
 
     /* Create an edge linking the newest node with its parent */
-    newEdge = createEdge(edgeID, edgeType, nodeID, parent);
-    array = pushEdge(array, newEdge);
+    array = defineEdge(array, parentEdgeID, parentEdgeType, parentNodeID, parent);
 
     return array;
     
+}
+
+/**
+ * Define a node and add it to the array of map elements
+ * @param {Object[]} array  - The array of all the map elements.
+ * @param {string} id       - The desired node ID.
+ * @param {string} type     - The type of this node. 
+ * @param {number} posX     - The x coordinate of this node.
+ * @param {number} posY     - The y coordinate of this node.
+ * @return {Object[]} The updated array of map elements.
+ */
+function defineNode(array, id, type, posX, posY){
+    
+    const nodeID = checkID(id, nodes);
+    const node = createNode(nodeID, type, posX, posY);
+    array = pushNode(array, node, nodeID);
+
+    return array;
+}
+
+/**
+ * Define an edge and add it to the array of map elements
+ * @param {Object[]} array  - The array of all the map elements.
+ * @param {string} id       - The desired edge ID.
+ * @param {string} type     - The type of edge. 
+ * @param {number} source   - The source of this edge.
+ * @param {number} target   - The target of this edge.
+ * @return {Object[]} The updated array of map elements.
+ */
+function defineEdge(array, id, type, source, target){
+    
+    const edgeID = checkID(id, edges);
+    const edge = createEdge(edgeID, type, source, target);
+    array = pushEdge(array, edge, edgeID);
+
+    return array;
 }
 
 /**
@@ -271,7 +221,7 @@ function createNode(id, type, x, y){
         return { data: { id: id, type: type}};
     }
 
-    return  { data: { id: id,     type: type}, position: {x: x, y: y}};
+    return { data: { id: id, type: type}, position: {x: x, y: y}};
 
 }
 
@@ -285,204 +235,6 @@ function createNode(id, type, x, y){
  */
 function createEdge(id, type, source, target){
     return { data: { id: id, source: source, target: target, type: type}};
-}
-
-/**
- * Convert a lambda expression into an array of all the graph elements
- * @param {Object} term - The term to convert into an array of elements.
- * @param {Object[]} array - The array to place all the elements into.
- * @param {Object} parent - The parent of the current term (can be undefined).
- * @param {number} parentType - The type of the parent node (can be undefined).
- * @return {Object[]} The array containing all of the elements.
- */
-function convertToElems(term, array, parent, parentType){
-
-    var noAbs = 0;
-
-    // At the first level an empty array must be created
-    if(array === undefined){
-        array = [];
-    }
-
-    var posX;
-    var posY;
-
-    // Root of lambda expression is connected to the root (represented as box) node
-    if(parent === undefined){
-        var startNode = { data: { id: ">"}, position: { x: 0, y: 0}};
-        parent = ">";
-
-        posX = 0;
-        posY = -nodeDistanceY;
-
-        array = pushNode(array, startNode, ">");
-
-    } else {
-
-        switch(parentType){
-            case LHS:
-                posX = parentPos[0] - nodeDistanceX;
-                posY = parentPos[1] - nodeDistanceY;
-                break;
-            case RHS:
-                posX = parentPos[0] + nodeDistanceX;
-                posY = parentPos[1] - nodeDistanceY;
-                break;
-        }
-
-    }
-
-    parentPos = [posX, posY];
-
-    switch(term.getType()){
-
-        /*
-         * An abstraction creates a node.
-         * This node has many (linear: only one) outgoing edges that 'feed' the abstracted variable into applications.
-         * This node has one ingoing edge from the scope of the abstraction.
-         */
-        case ABS:
-
-            noAbs++;
-
-            var nodeID = checkID("\u03BB" + term.label + ".", nodes);
-
-            // The lambda node
-
-            var lambdaNode = { data: { id: nodeID, type: "abs-node" }, position: {x: posX, y: posY}};
-
-            console.log(posX + ", " + posY);
-
-            array = pushNode(array, lambdaNode, nodeID);
-
-            // The edge linking the lambda node with its parent
-            
-            var edgeID = checkID(nodeID + " " + term.t.prettyPrintLabels(), edges);
-            var edge = { data: { id: edgeID, source: nodeID, target: parent, type: "abs-edge"}};
-            array = pushEdge(array, edge, edgeID);
-
-            // Go inside the abstraction
-            array = convertToElems(term.t, array, nodeID, LHS);
-
-            break;
-
-        /*
-         * An application creates a node.
-         * This node has one ougoing edge that 'feeds' the application to its parent (be it another application or an abstraction).
-         * This node has two ingoing edges from the two terms that make up the application.
-         */
-        case APP:
-
-            var nodeID = checkID("[" + term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels() + "]", nodes);
-            
-            // The application node
-
-            var appNode = { data: { id: nodeID, type: "app-node" },  position: {x: posX, y: posY}};
-
-            console.log(posX + ", " + posY);
-
-            array = pushNode(array, appNode, nodeID);
-            
-            // Check to see if the lhs is a variable
-            if(term.t1.getType() === VAR){
-
-                var newNode = { data: { id: nodeID + "support-lhs", type: "app-supp" },  position: {x: posX, y: posY - supportDistanceY}};
-                array = pushNode(array, newNode, nodeID + "support-lhs");
-
-                var edgeID = checkID("(" + term.t1.label + " in " + nodeID + ")", edges);
-                var sourceID = "\u03BB" + term.t1.label + ".";
-
-                if(!nodes.includes(sourceID)){
-                    var externalNode = { data: { id: sourceID, type: "abs-node" }, classes: 'global'};
-                    array = pushNode(array, externalNode, sourceID);
-                    classes = 'dashed';
-                }
-
-                var t1edge = { data: { id: edgeID, source: sourceID, target: nodeID + "support-lhs", type: "var-edge" }};
-                array = pushEdge(array, t1edge, edgeID);
-
-                var newEdge = { data: { id: edgeID + "supp-lhs", source: nodeID + "support-lhs", target: nodeID, type: "var-edge-supp" }};
-                array = pushEdge(array, newEdge, edgeID + "supp-lhs");
-
-            } else {
-                array = convertToElems(term.t1, array, nodeID, LHS);
-            }
-
-            // Check to see if the rhs is a variable
-            if(term.t2.getType() === VAR){
-
-                var newNode = { data: { id: nodeID + "support-rhs", type: "app-supp" },  position: {x: posX + supportDistanceX, y: posY - supportDistanceY}};
-                array = pushNode(array, newNode, nodeID + "support-rhs");
-
-                var edgeID = checkID("(" + term.t2.label + " in " + nodeID + ")", edges);
-                var sourceID = "\u03BB" + term.t2.label + "."; 
-                
-                if(!nodes.includes(sourceID)){
-                    var externalNode = { data: { id: sourceID, type: "abs-node" }, classes: 'global' };
-                    array = pushNode(array, externalNode, sourceID);
-                    classes = 'dashed'
-                }
-
-                var t2edge = { data: { id: edgeID, source: sourceID, target: nodeID + "support-rhs", type: "var-edge" }};
-                array = pushEdge(array, t2edge, edgeID);
-
-                var newEdge = { data: { id: edgeID + "supp-rhs", source: nodeID + "support-rhs", target: nodeID, type: "var-edge-supp" }};
-                array = pushEdge(array, newEdge, edgeID + "supp-rhs");
-
-            } else {
-                array = convertToElems(term.t2, array, nodeID, RHS);
-            }
-
-            // The edge linking the application node with its parent
-            var edgeID = checkID("(" + nodeID + ")", edges);
-            var edge = { data: { id: edgeID, source: nodeID, target: parent, type: "app-edge" }};
-            array = pushEdge(array, edge, edgeID);
-
-            break;
-
-        /*
-         * A lone variable creates an edge from where it was abstracted to where it is being applied.
-         */
-        case VAR:
-
-            // If a lone variable has been encountered it's an application with the id function
-            
-            var sourceID = "\u03BB" + term.label + ".";
-
-            if(!nodes.includes(sourceID)){
-                var externalNode = { data: { id: sourceID, type: "abs-node" }, classes: 'global'}
-                array = pushNode(array, externalNode, sourceID);
-            }
-            
-            var edgeID = "id " + term.label;
-            var idEdge = { data: {id: edgeID, source: sourceID, target: parent, type: "id-edge" }};
-            
-            array = pushEdge(array, idEdge, edgeID);
-
-            break;
-
-    }
-
-    return array;
-
-}
-
-/**
- * Fix the support node positions in the array of elements.
- */
-function fixSupports(elems){
-
-    if(elems.length > 0){
-
-        var highest = elems[elems.length - 1].position('y');
-        var j = 0;
-
-        for(i = elems.length - 1; i >= 0; i--){
-            elems[i].position('y', highest - (-(elems[i].position('x')/8 * j)));
-            j++;
-        }
-    }
-
 }
 
 /**
@@ -529,17 +281,71 @@ function checkID(id, array){
     return id;
 }
 
-function getNumber(id){
 
-    for(i = 0; i < edges.length; i++){
+/**
+ * Get the furthest left x coordinate of a node in an array of elements
+ * @param {Object[]} array - The array of elements
+ * @return {number} the furthest left x coordinate
+ */
+function furthestLeft(array){
 
-        if(edges[i] === id){
-            return i;
+    left = array[0].position.x;
+
+    for(i = 1; i < array.length; i++){
+
+        if(array[i].position !== undefined){
+            const newLeft = array[i].position.x;
+
+            if(newLeft < left){
+                left = newLeft;
+            }
         }
     }
 
-    return -1;
+    return left;
 }
+
+/**
+ * Get the furthest right x coordinate of a node in an array of elements.
+ * @param {Object[]} array - The array of elements.
+ * @return {number} the furthest left x coordinate.
+ */
+function furthestRight(array){
+
+    var right = array[0].position.x;
+
+    for(i = 1; i < array.length; i++){
+
+        if(array[i].position !== undefined){
+            const newRight = array[i].position.x;
+
+            if(newRight > right){
+                right = newRight;
+            }
+        }
+    }
+
+    return right;
+}
+
+/**
+ * Shift all the x coordinates of nodes in an array of elements.
+ * @param {Object[]} array - The array of elements. 
+ * @param {number} x - The amount to shift the x coordinates. 
+ * @param {Object[]} - The array with all the elements shifted.
+ */
+function shiftXs(array, x){
+
+    for(i = 0; i < array.length; i++){
+        if(array[i].position !== undefined){
+
+            array[i].position.x += x;
+        } 
+    }
+
+    return array;
+}
+
 
 /**
  * Update the labels on the graph
@@ -558,7 +364,7 @@ function updateLabels(labels){
         }}).update();
 
         cy.style().selector('edge[type = "var-edge"]').style({'label': function(ele){
-            var id = ele.data().id.substring(1);
+            var id = ele.data().id.substring(0);
             var res = id.split(" ");
             return res[0];
         }}).update();
@@ -614,7 +420,7 @@ function drawGraph(term){
             },
       
             {
-                selector: 'node[type = "var-supp"]',
+                selector: 'node[type = "var-node-supp"]',
                 style: {
                     'width': '5',
                     'height': '5',
@@ -631,7 +437,7 @@ function drawGraph(term){
                 'mid-target-arrow-color': '#ccc',
                 'mid-target-arrow-shape': 'triangle',
                 'arrow-scale': '0.8',
-                'font-size': '10'
+                'font-size': '6'
                 }
             },
 
@@ -639,14 +445,6 @@ function drawGraph(term){
                 selector: 'edge[type = "var-edge"]',
                 style: {
                     'curve-style': 'unbundled-bezier',
-                    'control-point-distances': function(ele){
-
-                        var x = getNumber(ele.data().id);
-                        var y = (edges.length * 200) / x;
-
-                        return y;
-
-                    },
                     'control-point-weights': '0.5',
                     'loop-direction': '45deg',
                     'edge-distances': 'node-position'
@@ -674,8 +472,6 @@ function drawGraph(term){
             name: 'preset'
         }
   });
-
-  fixSupports(cy.elements('node[type = "app-supp"]'));
 
   updateLabels(document.getElementById('labels-yes').checked);
 
