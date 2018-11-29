@@ -13,10 +13,6 @@ const RHS = 1;
 const nodeDistanceX = 30;
 /** The distance between adjacent nodes in the Y direction */
 const nodeDistanceY = 30;
-/** The distance between support nodes and their parent in the X direction */
-const supportDistanceX = 50;
-/** The distance between support nodes and their parent in the Y direction */
-const supportDistanceY = 50;
 
 /** Constants for the different types of graph elements */
 /** A node representing an abstraction*/
@@ -492,6 +488,16 @@ function drawGraph(term){
                 selector: 'edge[type = \"' + varEdgeLabel + '\"]',
                 style: {
                     'curve-style': 'unbundled-bezier',
+                    'control-point-distances': function(ele){
+                        
+                        var source = ele.source();
+                        var target = ele.target();
+
+                        var diff = source.position('x') - target.position('x');
+
+                        return diff / 2;
+
+                    },
                     'control-point-weights': '0.5',
                     'loop-direction': '45deg',
                     'edge-distances': 'node-position'
@@ -518,9 +524,23 @@ function drawGraph(term){
         layout: {
             name: 'preset'
         }
-  });
+    });
 
-  updateLabels(document.getElementById('labels-yes').checked);
-  cy.elements('node[type = \"' + varNodeTop + '\"]').position('y', -300);
+    updateLabels(document.getElementById('labels-yes').checked);
+  
+    const nodes = cy.elements("node");
+    var highest = 0;
+
+    for(i = 0; i < nodes.length; i++){
+        
+        const y = nodes[i].position('y');
+        console.log(y);
+
+        if(y < highest){
+            highest = y;
+        }
+    }
+
+    cy.elements('node[type = \"' + varNodeTop + '\"]').position('y', highest - nodeDistanceY / 2);
 
 }
