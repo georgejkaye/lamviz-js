@@ -107,21 +107,25 @@ function generateMapElements(term, array, parent, parentX, parentY, position){
             newEdgeID = checkID(newNodeID + " " + term.t.prettyPrintLabels(), edges);
             newEdgeType = absEdge;
 
+            /* The abstracted variable goes NE */
             const lambdaAbstractionSupportNodeID = checkID(lambda + term.label + ".nsupp", nodes);
             array = defineNode(array, lambdaAbstractionSupportNodeID, varNode, posX + nodeDistanceX, posY - nodeDistanceY);
 
             const lambdaAbstractionSupportEdgeID = checkID(lambda + term.label + ".esupp", edges);
             array = defineEdge(array, lambdaAbstractionSupportEdgeID, varEdge, newNodeID, lambdaAbstractionSupportNodeID);
 
+            /* The abstracted variable travels to the top of the map */
             const lambdaAbstractionSupportNode2ID = checkID(lambda + term.label + ".nsupp1", nodes);
             array = defineNode(array, lambdaAbstractionSupportNode2ID, varNode, posX + nodeDistanceX, posY - (2 * nodeDistanceY));
 
             const lambdaAbstractionSupportEdge2ID = checkID(lambda + term.label + ".esupp1", edges);
             array = defineEdge(array, lambdaAbstractionSupportEdge2ID, varEdge, lambdaAbstractionSupportNodeID, lambdaAbstractionSupportNode2ID);
 
+            /* Generate the elements for the scope of the abstraction */
             var scopeArray = generateMapElements(term.t, [], newNodeID, posX, posY, LHS);
             const rightmostScope = furthestRight(scopeArray);
 
+            /* Make sure the scope is entirely to the left of the abstraction node */
             if(rightmostScope >= posX){
                 scopeArray = shiftXs(scopeArray, -(rightmostScope - posX) - nodeDistanceX);
             }
@@ -140,16 +144,20 @@ function generateMapElements(term, array, parent, parentX, parentY, position){
             newEdgeID = checkID("(" + newNodeID + ")", edges);
             newEdgeType = appEdge;
             
+            /* Generate the elements for the LHS of the application */
             var lhsArray = generateMapElements(term.t1, [], newNodeID, posX, posY, LHS);
             const rightmostLHS = furthestRight(lhsArray);
 
+            /* Generate the elements for the RHS of the application */
             var rhsArray = generateMapElements(term.t2, [], newNodeID, posX, posY, RHS);
             const leftmostRHS = furthestLeft(rhsArray);
 
+            /* Make sure the LHS is entirely to the left of the application node */
             if(rightmostLHS >= posX){
                 lhsArray = shiftXs(lhsArray, -(rightmostLHS - posX) - nodeDistanceX);
             }
 
+            /* Make sure the RHS is entirely to the right of the application node */
             if(leftmostRHS <= posX){
                 rhsArray = shiftXs(rhsArray, (posX - leftmostRHS) + nodeDistanceX);
             }
@@ -172,12 +180,14 @@ function generateMapElements(term, array, parent, parentX, parentY, position){
             newEdgeID = checkID(term.label + " in " + parent + "supp", edges);
             newEdgeType = varEdge;
 
+            /* The variable comes from the NW (LHS/ABS) or NE (RHS) of the node */
             const lambdaVariableSupportNodeID = checkID(term.label + "supp", nodes);
             array = defineNode(array, lambdaVariableSupportNodeID, varNode, posX, posY - nodeDistanceY);
 
             const lambdaVariableSupportEdgeID = checkID(term.label + " in " + parent + "supp1", edges);
             array = defineEdge(array, lambdaVariableSupportEdgeID, varEdge, lambdaVariableSupportNodeID, newNodeID);
 
+            /* The variable comes from the corresponding abstraction node at the top of the map */
             const lambdaVariableAbstractionEdgeID = checkID(term.label + " in " + parent + "supp2", edges);
             array = defineEdge(array, lambdaVariableAbstractionEdgeID, varLabelEdge, lambda + term.label + ".nsupp1", lambdaVariableSupportNodeID);
 
@@ -366,30 +376,42 @@ function shiftXs(array, x){
     return array;
 }
 
+/**
+ * Update a particular part of the style of the map
+ * @param {*} selector 
+ * @param {*} stylePoint 
+ * @param {*} style 
+ */
+function updateStyle(selector, part, style){
+    cy.style().selector(selector).style({[part] : style}).update();
+}
+
+function updateNodeLabels(type, label){
+    updateStyle('node[type = \"' + type + '\"]', 'label', label);
+}
+
+function updateEdgeLabels(type, label){
+    updateStyle('edge[type = \"' + type + '\"]', 'label', label);
+}
 
 /**
- * Update the labels on the graph
+ * Update the labels on the map
  * @param {boolean} labels - Whether labels are shown
  */
 function updateLabels(labels){
 
     if(labels){
         
-        cy.style().selector('node[type = \"' + absNode + '\"]').style({'label': '\u03BB'}).update();
-        cy.style().selector('node[type = \"' + appNode + '\"]').style({'label': '@'}).update();
-        cy.style().selector('edge[type = \"' + absEdge + '\"]').style({'label': 'data(id)'}).update();
-        
-        cy.style().selector('edge[type = "id-edge"]').style({'label': function(ele){
-            return ele.data().id.substring(3);
-        }}).update();
-
-        cy.style().selector('edge[type = \"' + varLabelEdge + '\"]').style({'label': function(ele){
+        updateNodeLabels(absNode, lambda);
+        updateNodeLabels(appNode, '@');
+        updateEdgeLabels(absEdge, 'data(id)');
+        updateEdgeLabels(varLabelEdge, function(ele){
             var id = ele.data().id.substring(0);
             var res = id.split(" ");
             return res[0];
-        }}).update();
-        
-        cy.style().selector('edge[type = \"' + appEdge + '\"]').style({'label': function(ele){
+        });
+
+        updateEdgeLabels(appEdge, function(ele){
             
             var terms = ele.data().id.substring(2, ele.data().id.length - 2).split(" @ ");
 
@@ -403,11 +425,12 @@ function updateLabels(labels){
 
             return terms[0] + " " + terms[1];
 
-        }}).update();
+        });
 
     } else {
-        cy.style().selector('node').style({'label': ''}).update();
-        cy.style().selector('edge').style({'label': ''}).update();
+       updateStyle('node', 'label', '');
+       updateStyle('edge', 'label', '');
+
     }
 }
 
