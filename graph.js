@@ -85,7 +85,7 @@ function furthestLeft(array){
     for(i = 1; i < array.length; i++){
 
         if(array[i].position !== undefined){
-            const newLeft = array[1].position.x;
+            const newLeft = array[i].position.x;
 
             if(newLeft < left){
                 left = newLeft;
@@ -108,7 +108,7 @@ function furthestRight(array){
     for(i = 1; i < array.length; i++){
 
         if(array[i].position !== undefined){
-            const newRight = array[1].position.x;
+            const newRight = array[i].position.x;
 
             if(newRight > left){
                 right = newRight;
@@ -128,7 +128,12 @@ function furthestRight(array){
 function shiftXs(array, x){
 
     for(i = 0; i < array.length; i++){
-        array[i].position.x += x; 
+        if(array[i].position !== undefined){
+            
+            console.log(array[i].position.x + " is now " + array[i].position.x + x);
+            
+            array[i].position.x += x;
+        } 
     }
 
     return array;
@@ -141,7 +146,8 @@ function shiftXs(array, x){
  * @param {string} parent - The ID of the parent of the current term. 
  * @param {number} parentX - The x coordinate of the parent. 
  * @param {number} parentY - The y coordinate of the parent.
- * @param {number} position - The position (LHS or RHS) of the current element.
+ * @param {number} position - The position relative to the parent (LHS or RHS) of the current element.
+ * @return {Object[]} - The array of map elements.
  */
 function generateMapElements(term, array, parent, parentX, parentY, position){
 
@@ -160,7 +166,7 @@ function generateMapElements(term, array, parent, parentX, parentY, position){
         parentX = 0;
         parentY = 0;
 
-        var rootNode = { data: { id: ">"}, position: { x: parentX, y: parentY }};
+        var rootNode = createNode(">", "root-node", parentX, parentY);
         array = pushNode(array, rootNode);
 
         posX = parentX;
@@ -186,60 +192,99 @@ function generateMapElements(term, array, parent, parentX, parentY, position){
     switch(term.getType()){
         case ABS:
 
-        nodeID = checkID("\u03BB" + term.label + ".", nodes);
-        newNode = { data: { id: nodeID, type: "abs-node" }, position: { x: posX, y: posY}};
+            nodeID = checkID("\u03BB" + term.label + ".", nodes);
+            newNode = createNode(nodeID, "abs-node", posX, posY);
 
-        array = pushNode(array, newNode);
+            array = pushNode(array, newNode);
 
-        edgeID = checkID(nodeID + " " + term.t.prettyPrintLabels(), edges);
-        edgeType = "abs-edge";
+            edgeID = checkID(nodeID + " " + term.t.prettyPrintLabels(), edges);
+            edgeType = "abs-edge";
 
-        array = generateMapElements(term.t, array, nodeID, posX, posY, LHS);
+            array = generateMapElements(term.t, array, nodeID, posX, posY, LHS);
 
-        break;
-        
+            break;
+            
         case APP:
-        
-        nodeID = checkID("[" + term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels() + "]", nodes);
-        newNode = { data: { id: nodeID, type: "app-node"}, position: {x: posX, y: posY}};
+            
+            nodeID = checkID("[" + term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels() + "]", nodes);
+            newNode = createNode(nodeID, "app-node", posX, posY);
 
-        array = pushNode(array, newNode);
+            array = pushNode(array, newNode);
 
-        edgeID = checkID("(" + nodeID + ")", edges);
-        edgeType = "app-edge";
-        
-        var lhsArray = generateMapElements(term.t1, [], nodeID, posX, posY, LHS);
-        const rightmostX = furthestRight(lhsArray);
+            edgeID = checkID("(" + nodeID + ")", edges);
+            edgeType = "app-edge";
+            
+            var lhsArray = generateMapElements(term.t1, [], nodeID, posX, posY, LHS);
+            const rightmostLHS = furthestRight(lhsArray);
 
-        var rhsArray = generateMapElements(term.t2, [], nodeID, posX, posY, RHS);
-        const leftmostX = furthestLeft(rhsArray);
+            var rhsArray = generateMapElements(term.t2, [], nodeID, posX, posY, RHS);
+            const leftmostRHS = furthestLeft(rhsArray);
 
-        if(rightmostX >= leftmostX){
-            array = shiftXs(rhsArray, leftmostX - rightmostX + nodeDistanceX);
-        }
+            if(rightmostLHS > posX){
+                lhsArray = shiftXs(lhsArray, -(rightmostLHS - posX));
+            }
 
-        array = array.concat(lhsArray);
-        array = array.concat(rhsArray);
+            if(leftmostRHS < posX){
+                rhsArray = shiftXs(rhsArray, (posX - leftmostRHS));
+            }
 
-        break;
+            for(i = 0; i < lhsArray.length; i++){
+                pushNode(array, lhsArray[i]);
+            }
+
+            for(j = 0; j < rhsArray.length; j++){
+                pushNode(array, rhsArray[j]);
+            }
+
+            break;
 
         case VAR:
 
-        nodeID = checkID("{" + term.label + "}", nodes);
-        newNode = { data: { id: nodeID, type: "var-supp"}, position: {x: posX, y: posY}};
+            nodeID = checkID("{" + term.label + "}", nodes);
+            newNode = createNode(nodeID, "var-supp", posX, posY);
+            array = pushNode(array, newNode);
 
-        array = pushNode(array, newNode);
-        edgeID = checkID("{" + term.label + "} in " + parent, edges);
+            edgeID = checkID("{" + term.label + "} in " + parent, edges);
 
-        break;
+            break;
     }
 
     /* Create an edge linking the newest node with its parent */
-    newEdge = { data: { id: edgeID, source: nodeID, target: parent, type: edgeType}};
+    newEdge = createEdge(edgeID, edgeType, nodeID, parent);
     array = pushEdge(array, newEdge);
 
     return array;
     
+}
+
+/**
+ * Create a node on the map.
+ * @param {string} id   - The id of the node.
+ * @param {string} type - The type of the node.
+ * @param {number} x    - The x coordinate of the node (optional).
+ * @param {number} y    - The y coordinate of the node (optional).
+ * @return {Object} The node object.
+ */
+function createNode(id, type, x, y){
+    
+    if(x === undefined || y === undefined){
+        return { data: { id: id, type: type}};
+    }
+
+    return  { data: { id: id,     type: type}, position: {x: x, y: y}};
+
+}
+
+/**
+ * Create an edge on the map.
+ * @param {string} id       - The id of the edge .
+ * @param {string} type     - The type of the edge.
+ * @param {string} source   - The source of the edge.
+ * @param {string} target   - The target of the edge.
+ * @return {Object} The edge object.
+ */
+function createEdge(id, type, source, target){
+    return { data: { id: id, source: source, target: target, type: type}};
 }
 
 /**
