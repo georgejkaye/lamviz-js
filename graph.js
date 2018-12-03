@@ -599,8 +599,6 @@ function drawGraph(term, ctx){
             name: 'preset'
         }
     });
-
-    updateLabels(document.getElementById('labels-yes').checked);
   
     const nodes = cy.elements("node");
     var highest = 0;
@@ -617,5 +615,7 @@ function drawGraph(term, ctx){
     cy.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
 
     placeFreeVariables(cy.elements(getNodeTypeText(varNodeTop)), cy.elements(getNodeTypeText(absNodeFree)), ctx);
+
+    updateLabels(document.getElementById('labels-yes').checked);
 
 }
