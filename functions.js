@@ -45,6 +45,7 @@ function prettyString(array){
  */
 function execute_button(){
 
+    var error = false;
     var text = tokenise(getText('input'));
     var frees = getText('env').split(" ");
     
@@ -58,14 +59,24 @@ function execute_button(){
 
     if(typeof text !== "string"){
         term = parse(text, ctx)
-        text = term.prettyPrint() + " ~  ~  ~ " + term.prettyPrintLabels();
+
+        if(typeof term !== "string"){
+            text = term.prettyPrint() + " ~  ~  ~ " + term.prettyPrintLabels();
+        } else {
+            text = term;
+            error = true;
+        }
+    } else {
+        error = true;
     }
 
     changeText('result', text);
 
     currentTerm = term;
 
-    drawGraph(currentTerm, ctx);
+    if(!error){
+        drawGraph(currentTerm, ctx);
+    }
 }
 
 /**

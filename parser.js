@@ -13,7 +13,7 @@ function parse(tokens, env){
  * @param {string[]}    tokens  - The array of tokens to parse.
  * @param {number}      initial - The index to start counting from.
  * @param {Object}      env     - The current lambda environment
- * @return {Object} The parsed lambda term.
+ * @return {Object} The parsed lambda term, or an error string if an unknown variable is detected.
  */
 function parseTerm(tokens, initial, env){
 
@@ -35,7 +35,7 @@ function parseTerm(tokens, initial, env){
 
         switch(tokens[i]){
             
-            // lambda abstraction, next token must be a variable
+            /* lambda abstraction, next token must be a variable */
             case '\\':
 
                 i++;
@@ -45,14 +45,21 @@ function parseTerm(tokens, initial, env){
                 i++;
                 var label = env.pushTerm(abstractionVariable);
                 var scope = findScope(tokens.slice(i));
-                t2 = new LambdaAbstraction (parseTerm(scope, initial + i, env), label);
+
+                var t = parseTerm(scope, initial + i, env);
+
+                if(typeof t === "string"){
+                    return t;
+                }
+
+                t2 = new LambdaAbstraction (t, label);
                 i += scope.length;
                 console.log("New abstraction: " + t2.prettyPrint());
                 env.popTerm();
 
                 break;
 
-            // start of a subterm
+            /* start of a subterm */
             case '(':
 
                 i++;
@@ -60,23 +67,32 @@ function parseTerm(tokens, initial, env){
                 console.log("Scope of subterm: " + scope);
                 console.log("Length of scope: " + scope.length);
                 t2 = parseTerm(scope, initial + i, env);
+
+                if(typeof t2 === "string"){
+                    return t2;
+                }
+
                 i += (scope.length - 1);
                 console.log("New subterm: " + t2.prettyPrint());
                 console.log("Remaining tokens: " + tokens.slice(i + 1));
 
                 break;
 
-            // end of a subterm
+            /* end of a subterm */
             case ')':
                 
                 console.log("Returning term: " + t1.prettyPrint());
                 return t1;
 
-            // otherwise
+            /* otherwise */
             default:
 
                 var index = env.find(tokens[i]);
                 var label = env.determine(index);
+
+                if(index === -1){
+                    return "Parse error: Variable " + tokens[i] + " with no associated binding encountered";
+                }
 
                 t2 = new LambdaVariable(index, label);
                 break;
@@ -150,7 +166,7 @@ function tokenise(text){
 
         switch(currentCharacter){
 
-            // a dot can only follow an abstraction
+            /* a dot can only follow an abstraction */
             case '.':
                 if(!abstraction){
                     parseError = true;
@@ -169,7 +185,7 @@ function tokenise(text){
                 }
                 break;
 
-            // a space can only indicate a gap between terms, and cannot occur inside strings
+            /* a space can only indicate a gap between terms, and cannot occur inside strings */
             case ' ':
                 if(abstraction){
                     parseError = true;
@@ -180,7 +196,7 @@ function tokenise(text){
                 }
                 break;
 
-            // a closing bracket must have a matching opening bracket
+            /* a closing bracket must have a matching opening bracket */
             case ')':
                 brackets--;
 
@@ -195,7 +211,7 @@ function tokenise(text){
 
                 break;
 
-            // beginning of an abstraction;
+            /* beginning of an abstraction */
             case '\\':
                 abstraction = true;
                 tokens = pushString(tokens, string);
@@ -203,7 +219,7 @@ function tokenise(text){
                 tokens = pushString(tokens, currentCharacter);
                 break;
 
-            // start of a subterm, need to check there is a matching closing bracket
+            /* start of a subterm, need to check there is a matching closing bracket */
             case '(':
                 tokens = pushString(tokens, string);
                 string = "";
@@ -218,7 +234,7 @@ function tokenise(text){
                 }
                 break;
 
-            // any other character is part of a string
+            /* any other character is part of a string */
             default:
                 string += currentCharacter;
                 awaitingContent = false;
@@ -231,7 +247,7 @@ function tokenise(text){
 
     }
 
-    // push whatever is left at the end
+    /* push whatever is left at the end */
     if(string !== ""){
         tokens = pushString(tokens, string);
     }
