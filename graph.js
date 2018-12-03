@@ -15,8 +15,10 @@ const nodeDistanceX = 30;
 const nodeDistanceY = 30;
 
 /** Constants for the different types of graph elements */
-/** A node representing an abstraction*/
+/** A node representing an abstraction */
 const absNode = "abs-node";
+/** A node representing an abstraction of a free variable */
+const absNodeFree = "abs-node-free";
 /** An edge carrying an abstraction */
 const absEdge = "abs-edge";
 /** A node representing an application */
@@ -173,12 +175,24 @@ function generateMapElements(term, array, parent, parentX, parentY, position){
         case VAR:
 
             newNodeID = checkID(term.label, nodes);
+
             array = defineNode(array, newNodeID, varNode, posX, posY);
 
             newEdgeID = checkID(term.label + " in " + parent + "supp", edges);
             newEdgeType = varEdge;
 
             /* The variable needs to come from the top of the map */
+
+            var id = "";
+
+            if(!nodes.includes(lambda + term.label + ".")){
+                const freeVariableAbstractionID = checkID(lambda + term.label + ".", nodes);
+                array = defineNode(array, freeVariableAbstractionID, absNodeFree, posX, posY - nodeDistanceY);
+                id = freeVariableAbstractionID;
+            } else {
+                id = lambda + term.label + ".nsupp1"
+            }
+
             const lambdaVariableSupportNodeID = checkID(term.label + "supp", nodes);
             array = defineNode(array, lambdaVariableSupportNodeID, varNodeTop, posX, posY - nodeDistanceY);
 
@@ -186,8 +200,10 @@ function generateMapElements(term, array, parent, parentX, parentY, position){
             array = defineEdge(array, lambdaVariableSupportEdgeID, varEdge, lambdaVariableSupportNodeID, newNodeID);
 
             /* The variable comes from the corresponding abstraction node at the top of the map */
+
             const lambdaVariableAbstractionEdgeID = checkID(term.label + " in " + parent + "supp2", edges);
-            array = defineEdge(array, lambdaVariableAbstractionEdgeID, varEdgeLabel, lambda + term.label + ".nsupp1", lambdaVariableSupportNodeID);
+            array = defineEdge(array, lambdaVariableAbstractionEdgeID, varEdgeLabel, id, lambdaVariableSupportNodeID);
+
 
             break;
     }
@@ -376,18 +392,28 @@ function shiftXs(array, x){
 
 /**
  * Update a particular part of the style of the map
- * @param {*} selector 
- * @param {*} stylePoint 
- * @param {*} style 
+ * @param {string} selector - The selector to change the part of the style for. 
+ * @param {string} part     - The part of the style to change.
+ * @param {string} style    - The style to change the part to.
  */
 function updateStyle(selector, part, style){
     cy.style().selector(selector).style({[part] : style}).update();
 }
 
+/**
+ * Update the node labels of a specific type
+ * @param type  - The type of node to change the labels of.
+ * @param label - The label to change the nodes to
+ */
 function updateNodeLabels(type, label){
     updateStyle('node[type = \"' + type + '\"]', 'label', label);
 }
 
+/**
+ * Update the edge labels of a specific type
+ * @param type  - The type of edge to change the labels of.
+ * @param label - The label to change the nodes to
+ */
 function updateEdgeLabels(type, label){
     updateStyle('edge[type = \"' + type + '\"]', 'label', label);
 }
@@ -401,6 +427,7 @@ function updateLabels(labels){
     if(labels){
         
         updateNodeLabels(absNode, lambda);
+        updateNodeLabels(absNodeFree, lambda);
         updateNodeLabels(appNode, '@');
         updateEdgeLabels(absEdge, 'data(id)');
         updateEdgeLabels(varEdgeLabel, function(ele){
@@ -425,8 +452,6 @@ function updateLabels(labels){
 
         });
 
-        //updateNodeLabels(varNodeTop, "top");
-
     } else {
        updateStyle('node', 'label', '');
        updateStyle('edge', 'label', '');
@@ -434,11 +459,53 @@ function updateLabels(labels){
     }
 }
 
+function placeFreeVariables(boundVariables, freeVariables, ctx){
+
+    var rightest = 0;
+
+    for(i = 0; i < boundVariables.length; i++){
+        
+        var newX = boundVariables[i].position('x');
+
+        if(newX > rightest){
+            rightest = newX;
+        }
+
+    }
+
+    for(j = 0; j < freeVariables.length; j++){
+
+        var id = freeVariables[j].data('id');
+        var k = ctx.find(id.substring(1).substring(0, id.length - 2));
+
+        freeVariables[j].position('x', rightest + (k + 1) * nodeDistanceX * 2);
+
+    }
+
+}
+
+/**
+ * Get the text to use in a selector for a type.
+ * @param {string} type - The type to select.
+ */
+function getTypeText(type){
+    return '[type = \"' + type + '\"]';
+}
+
+/**
+ * Get the text to use in a selector for nodes of a given type
+ * @param {string} type - The type of node to select. 
+ */
+function getNodeTypeText(type){
+    return 'node' + getTypeText(type);
+}
+
 /**
  * Draw a graph representing a lambda term into the graph box.
- * @param {Object} term - The term to draw as a graph.
+ * @param {Object} term     - The term to draw as a graph.
+ * @param {string[]} ctx    - The context of the term, containing all free variables.
  */
-function drawGraph(term){
+function drawGraph(term, ctx){
 
     reset();
 
@@ -469,6 +536,13 @@ function drawGraph(term){
                     'height': '5',
                     'background-color': '#ccc',
                     'shape': 'roundrectangle'
+                }
+            },
+
+            {
+                selector: 'node[type =\"' + absNodeFree + '\"]',
+                style: {
+                    'background-color': 'red'
                 }
             },
 
@@ -534,13 +608,14 @@ function drawGraph(term){
     for(i = 0; i < nodes.length; i++){
         
         const y = nodes[i].position('y');
-        console.log(y);
 
         if(y < highest){
             highest = y;
         }
     }
 
-    cy.elements('node[type = \"' + varNodeTop + '\"]').position('y', highest - nodeDistanceY / 2);
+    cy.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
+
+    placeFreeVariables(cy.elements(getNodeTypeText(varNodeTop)), cy.elements(getNodeTypeText(absNodeFree)), ctx);
 
 }

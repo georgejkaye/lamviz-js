@@ -48,16 +48,16 @@ function execute_button(){
     var text = tokenise(getText('input'));
     var frees = getText('env').split(" ");
     
-    var env = new LambdaEnvironment();
+    var ctx = new LambdaEnvironment();
 
     for(i = 0; i < frees.length; i++){
-        env.pushTerm(frees[i]);
+        ctx.pushTerm(frees[i]);
     }
 
     var term;
 
     if(typeof text !== "string"){
-        term = parse(text, env)
+        term = parse(text, ctx)
         text = term.prettyPrint() + " ~  ~  ~ " + term.prettyPrintLabels();
     }
 
@@ -65,7 +65,7 @@ function execute_button(){
 
     currentTerm = term;
 
-    drawGraph(currentTerm);
+    drawGraph(currentTerm, ctx);
 }
 
 /**
@@ -76,17 +76,17 @@ function substitute_button(){
     var s = tokenise(getText('s'));
     var j = getText('j');
 
-    var frees = getText('env').split(" ");
-    var env = new LambdaEnvironment();
+    var frees = getText('ctx').split(" ");
+    var ctx = new LambdaEnvironment();
 
     for(i = 0; i < frees.length; i++){
-        env.pushTerm(frees[i]);
+        ctx.pushTerm(frees[i]);
     }
 
-    j = env.find(j);
+    j = ctx.find(j);
 
     if(j === -1){
-        changeText('result', "Variable not in environment");
+        changeText('result', "Variable not in ctxironment");
     } else if(typeof s === "string"){
         changeText('result', s)
     } else {
@@ -135,15 +135,15 @@ function normalise_button(){
 
 function beta_button(){
 
-    var frees = getText('env').split(" ");
-    var env = new LambdaEnvironment();
+    var frees = getText('ctx').split(" ");
+    var ctx = new LambdaEnvironment();
 
     for(i = 0; i < frees.length; i++){
-        env.pushTerm(frees[i]);
+        ctx.pushTerm(frees[i]);
     }
 
-    var t1 = parse(tokenise(getText('b1')), env);
-    var t2 = parse(tokenise(getText('b2')), env);
+    var t1 = parse(tokenise(getText('b1')), ctx);
+    var t2 = parse(tokenise(getText('b2')), ctx);
 
     var res = applicationAbstraction(t1, t2)
 
