@@ -194,6 +194,23 @@ class LambdaEnvironment{
     constructor(){this.env = [], this.envUnique = [], termHistory = []};
 
     /**
+     * Get the length of this environment.
+     * @return {number} The length of this environment.
+     */
+    length(){
+        return this.envUnique.length;
+    }
+
+    /**
+     * Get the ith variable from this environment.
+     * @param {number} i - The index of the variable to get.
+     * @return {string} The ith variable.
+     */
+    get(i){
+        return this.envUnique[i];
+    }
+
+    /**
      * Push a new variable into the environment. If the element already exists, appends a prime to it (e.g. x -> x').
      * @param {string} variable - The variable to push into the environment.
      * @return {string} The name of the variable as it appears in the 'unique names' environment.

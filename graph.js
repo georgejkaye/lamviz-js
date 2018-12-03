@@ -482,6 +482,16 @@ function placeFreeVariables(boundVariables, freeVariables, ctx){
 
     }
 
+    for(l = 0; l < ctx.length(); l++){
+
+        var free = ctx.get(l);
+        var varID = lambda + free + ".";
+
+        if(!nodes.includes(varID)){
+            cy.add(defineNode([], varID, absNodeFree, rightest + (ctx.find(free) + 1) * nodeDistanceX * 2, 0)[0]);
+        }
+    }
+
 }
 
 /**
@@ -612,9 +622,9 @@ function drawGraph(term, ctx){
         }
     }
 
-    cy.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
-
     placeFreeVariables(cy.elements(getNodeTypeText(varNodeTop)), cy.elements(getNodeTypeText(absNodeFree)), ctx);
+
+    cy.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
 
     updateLabels(document.getElementById('labels-yes').checked);
 
