@@ -26,8 +26,8 @@ enumerateTerms n k = enumerateTerms (n-1) (k+1)
 -}
 enumeratePlanarTerms :: Int -> Int -> Int
 enumeratePlanarTerms 0 _ = 0
-enumeratePlanarTerms 1 0 = 0
-enumeratePlanarTerms 1 _ = 1
+enumeratePlanarTerms 1 1 = 1
+enumeratePlanarTerms 1 _ = 0
 enumeratePlanarTerms n k = enumeratePlanarTerms (n-1) (k+1)
                          + sum [(enumeratePlanarTerms n1 k1) * (enumeratePlanarTerms (n-1-n1) (k-k1)) | n1 <- [1..n-2], k1 <- [0..k]]
 
