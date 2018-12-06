@@ -88,15 +88,36 @@ chooseLists' (x : xs) acc = chooseLists' xs (acc ++ ([x] : map (\ys -> x : ys) (
 {-
   Pretty print a lambda term
 -}                    
-prettyPrint :: Term -> String
-prettyPrint t = prettyPrint' t 0
+prettyPrint :: Term -> IO()
+prettyPrint t = do 
+                  prettyPrint' t 0
+                  putStr "\n"
 
-prettyPrint' :: Term -> Int -> String
-prettyPrint' (Var x) _ = show x
-prettyPrint' (Abs t) 0 = "$ " ++ (prettyPrint' t 0)
-prettyPrint' (Abs t) x = "($ " ++ (prettyPrint' t (x+1)) ++ ")"     
-prettyPrint' (App t1 t2) 0 = (prettyPrint' t1 1) ++ " " ++ (prettyPrint' t2 1)
-prettyPrint' (App t1 t2) x = "(" ++ (prettyPrint' t1 0) ++ " " ++ (prettyPrint' t2 x) ++ ")"             
+prettyPrint' :: Term -> Int -> IO()
+prettyPrint' (Var x) _ = putStr (show x)
+prettyPrint' (Abs t) 0 =      do 
+                                putStr "\\ "
+                                prettyPrint' t 0
+prettyPrint' (Abs t) x =      do
+                                putStr "(\\ "
+                                prettyPrint' t (x+1)
+                                putStr ")"
+prettyPrint' (App t1 t2) 0 =  do
+                                prettyPrint' t1 1
+                                putStr " "
+                                prettyPrint' t2 1
+prettyPrint' (App t1 t2) x =  do
+                                putStr "("
+                                prettyPrint' t1 1
+                                putStr " "
+                                prettyPrint' t2 x
+                                putStr ")"
+
+printTermList :: [Term] -> IO()
+printTermList [] = return ()
+printTermList (x : xs) = do
+                            prettyPrint x
+                            printTermList xs
 
 {-
   Generate a descending list of integers from and including a given x down to and including a given y
