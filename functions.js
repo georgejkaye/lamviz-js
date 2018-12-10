@@ -163,3 +163,25 @@ function beta_button(){
     changeText('result', text)
 
 }
+
+function generate_button(){
+
+    var n = parseInt(getText('n'));
+    var k = parseInt(getText('k'));
+    var string = "";
+
+    console.log(n === NaN);
+
+    if(isNaN(n) || isNaN(k)){
+        string = "Bad input";
+    } else {
+        var terms = generateTerms(n, k);
+
+        for(i = 0; i < terms.length; i++){
+            string += terms[i].prettyPrint() += "\n";
+        }
+    }
+
+    changeText('generated-terms', string);
+
+}
