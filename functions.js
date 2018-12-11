@@ -81,7 +81,7 @@ function execute_button(){
     currentTerm = term;
 
     if(!error){
-        drawGraph(currentTerm, ctx);
+        drawGraph("cy", currentTerm, ctx);
     }
 }
 
@@ -199,6 +199,6 @@ function generate_button(x){
     }
 
     changeText('generated-terms', string);
-    changeText('enumerated-terms', "There are " + terms.length + " terms")
+    changeText('enumerated-terms', "There are " + terms.length + " terms");
 
 }

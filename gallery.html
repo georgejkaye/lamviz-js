@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<meta charset="UTF-8">
+<html>
+<head>
+    <style>
+        .portrait {
+            width: 250px;
+            height: 250px;
+            margin: 5px;
+            display: inline-block;
+          }
+    </style>
+</head>
+<body>
+
+    <h1>Welcome to the Tate &lambda; Gallery</h1>
+
+    Graph display powerered by <a href="http://js.cytoscape.org/">Cytoscape.js</a>
+
+    <h2>&lambda; term generators</h2>
+    n <input type = "text" id = "n" style = "width: 25px"> k <input type = "text" id = "k" style = "width: 25px">
+    <button type = "button" id = "generate-btn" onclick = "generate_button(0);">Pure</button>
+    <button type = "button" id = "generate-btn" onclick = "generate_button(1);">Linear</button>
+    <button type = "button" id = "generate-btn" onclick = "generate_button(2);">Planar</button>
+
+    <p id = "church-room"></p>
+
+    <script src = "definition.js"></script>
+    <script src = "parser.js"></script>
+    <script src = "cytoscape.js"></script>
+    <script src = "graph.js"></script>
+    <script src = "functions2.js"></script>
+    <script src = "evaluator.js"></script>
+    <script src = "generator.js"></script>
+
+</body>
+</html> 

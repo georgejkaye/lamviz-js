@@ -518,17 +518,18 @@ function getNodeTypeText(type){
 
 /**
  * Draw a graph representing a lambda term into the graph box.
+ * @param {string} id       - The id of the graph box.
  * @param {Object} term     - The term to draw as a graph.
  * @param {string[]} ctx    - The context of the term, containing all free variables.
  */
-function drawGraph(term, ctx){
+function drawGraph(id, term, ctx){
 
     reset();
 
     var elems = generateMapElements(term);
 
     cy = cytoscape({
-        container: document.getElementById("cy"),
+        container: document.getElementById(id),
 
         elements: elems,
       
@@ -632,6 +633,7 @@ function drawGraph(term, ctx){
 
     cy.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
 
-    updateLabels(document.getElementById('labels-yes').checked);
+    updateLabels(true);
+    //updateLabels(document.getElementById('labels-yes').checked);
 
 }

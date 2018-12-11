@@ -4,6 +4,13 @@
  * @author George Kaye
  */
 
+var varName = "x";
+
+function genVarName(){
+    varName += "x";
+    return varName;
+}
+
 /**
  * Generate all pure lambda terms with a given number of subterms and free variables.
  * @param {number} n - The number of subterms.
@@ -19,7 +26,7 @@ function generateTerms(n, k){
             break;
         case 1:
             for(i = 0; i <= k-1; i++){
-                terms[i] = new LambdaVariable(i, "");
+                terms[i] = new LambdaVariable(i, genVarName());
             }
             break;
         default:
@@ -90,7 +97,7 @@ function generatePlanarTermsHelper(n, k){
         case 1:
             
             if(k.length === 1){
-                terms[0] = new LambdaVariable(k[0], "");
+                terms[0] = new LambdaVariable(k[0], genVarName());
             }
 
             break;
@@ -162,7 +169,7 @@ function generateLinearTermsHelper(n, k){
         case 1:
             
             if(k.length === 1){
-                terms[0] = new LambdaVariable(k[0], "");
+                terms[0] = new LambdaVariable(k[0], genVarName());
             }
 
             break;
