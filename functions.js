@@ -1,3 +1,9 @@
+/**
+ * Functions related to the html page, such as processing input or changing elements.
+ * 
+ * @author George Kaye
+ */
+
 var currentTerm;
 
 /**

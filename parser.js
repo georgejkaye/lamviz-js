@@ -1,4 +1,10 @@
 /**
+ * Functions for parsing lambda terms from user input.
+ * 
+ * @author George Kaye
+ */
+
+/**
  * Parse a lambda term from an array of tokens.
  * @param {string[]} tokens - The tokens to parse for a lambda term.
  * @return {Object} The parsed lambda term.

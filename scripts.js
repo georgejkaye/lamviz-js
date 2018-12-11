@@ -1,4 +1,10 @@
 /**
+ * Scripts for the page.
+ * 
+ * @author George Kaye
+ */
+
+/**
  * Pressing Enter triggers the 'Execute' button.
  */
 var input = document.getElementById('input');

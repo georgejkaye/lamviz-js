@@ -1,3 +1,15 @@
+/**
+ * Functions to generate terms from various fragments of the lambda calculus.
+ * 
+ * @author George Kaye
+ */
+
+/**
+ * Generate all pure lambda terms with a given number of subterms and free variables.
+ * @param {number} n - The number of subterms.
+ * @param {number} k - The number of free variables.
+ * @return {Object[]} The array of generated terms.
+ */
 function generateTerms(n, k){
 
     var terms = [];

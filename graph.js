@@ -1,3 +1,9 @@
+/**
+ * Functions to generate and draw the lambda term maps.
+ * 
+ * @author George Kaye
+ */
+
 /** Array containing all node ids used in the current graph */
 var nodes = [];
 /** Array containing all node objects used in the current graph */

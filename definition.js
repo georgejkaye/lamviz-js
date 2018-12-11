@@ -1,3 +1,9 @@
+/**
+ * The definition of the lambda calculus, implemented in Javascript.
+ * 
+ * @author George Kaye
+ */
+
 /** Variable e.g. x, y, z */
 const VAR = 0;
 /** Lambda abstraction e.g. \x.t */

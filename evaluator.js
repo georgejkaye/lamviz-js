@@ -1,3 +1,9 @@
+/**
+ * Functions for evaluating and normalising lambda terms.
+ * 
+ * @author George Kaye
+ */
+
 /** Maximum number of operations to perform during normalisation or evaluation */
 const max_execution_ops = 100;
 /** Current number of operations performed during normalisation */
