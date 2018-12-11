@@ -156,10 +156,6 @@ function generateLinearTermsHelper(n, k){
 
     var terms = [];
 
-    if(k === "0"){
-        k = [];
-    }
-
     switch(n){
         case 0:
             break;
@@ -171,8 +167,6 @@ function generateLinearTermsHelper(n, k){
 
             break;
         default:
-
-            console.log(k);
 
             var absTerms = generateLinearTermsHelper(n-1, k.map(function(e){return e + 1;}).concat(0));
 
@@ -186,12 +180,12 @@ function generateLinearTermsHelper(n, k){
             var chooses = chooseArrays(k);
 
             for(var m = 1; m <= n-2; m++){
-                for(ks in k){
+                for(var i = 0; i < chooses.length; i++){
             
-                    var ks2 = k.filter(function(e){return !(ks.includes(e));});
-                    console.log(ks2);
+                    var ks1 = chooses[i];
+                    var ks2 = k.filter(function(e){return !(ks1.includes(e));});
 
-                    var lhsTerms = generateLinearTermsHelper(m, ks);
+                    var lhsTerms = generateLinearTermsHelper(m, ks1);
                     var rhsTerms = generateLinearTermsHelper(n-1-m, ks2);
 
                     for(a = 0; a < lhsTerms.length; a++){
@@ -204,6 +198,7 @@ function generateLinearTermsHelper(n, k){
             }
 
             terms = absTerms.concat(appTerms);
+            break;
     }
 
     return terms;
