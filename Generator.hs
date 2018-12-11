@@ -36,12 +36,11 @@ enumeratePlanarTerms n k = enumeratePlanarTerms (n-1) (k+1)
 -}
 enumerateLinearTerms :: Int -> Int -> Int
 enumerateLinearTerms 0 _ = 0
-enumerateLinearTerms 1 0 = 0
-enumerateLinearTerms 1 _ = 1
+enumerateLinearTerms 1 1 = 1
+enumerateLinearTerms 1 _ = 0
 enumerateLinearTerms n k = enumerateLinearTerms (n-1) (k+1)
                          + sum [(choose k k1) * (enumerateLinearTerms n1 k1) * (enumerateLinearTerms (n-1-n1) (k-k1)) | n1 <- [1..n-2], k1 <- [0..k]]
-
-
+                         
 {-|
   Generate all of the general lambda terms with subterms n and free variables k.
 -}

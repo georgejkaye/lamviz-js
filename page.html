@@ -55,7 +55,11 @@
 
     <h2>&lambda; term generators</h2>
     n <input type = "text" id = "n" style = "width: 25px"> k <input type = "text" id = "k" style = "width: 25px">
-    <button type = "button" id = "generate-btn" onclick = "generate_button();">Generate terms</button>
+    <button type = "button" id = "generate-btn" onclick = "generate_button(0);">Pure</button>
+    <button type = "button" id = "generate-btn" onclick = "generate_button(1);">Linear</button>
+    <button type = "button" id = "generate-btn" onclick = "generate_button(2);">Planar</button>
+
+
 
     <h3 id = "generated-terms">Choose a number of subterms and free variables</h3>
     <p id = "enumerated-terms"></p>

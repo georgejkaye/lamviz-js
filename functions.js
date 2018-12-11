@@ -170,7 +170,7 @@ function beta_button(){
 
 }
 
-function generate_button(){
+function generate_button(x){
 
     var n = parseInt(getText('n'));
     var k = parseInt(getText('k'));
@@ -179,7 +179,19 @@ function generate_button(){
     if(isNaN(n) || isNaN(k)){
         string = "Bad input";
     } else {
-        var terms = generateLinearTerms(n, k);
+        var terms;
+        
+        switch(x){
+            case 0:
+                terms = generateTerms(n, k);
+                break;
+            case 1:
+                terms = generateLinearTerms(n, k);
+                break;
+            case 2:
+                terms = generatePlanarTerms(n, k);
+                break;
+        }
 
         for(i = 0; i < terms.length; i++){
             string += terms[i].prettyPrint() + "<br />";
