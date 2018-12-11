@@ -1,12 +1,12 @@
 function generateTerms(n, k){
-    
+
     var terms = [];
 
     switch(n){
         case 0:
             break;
         case 1:
-            for(i = 0; i < k-1; i++){
+            for(i = 0; i <= k-1; i++){
                 terms[i] = new LambdaVariable(i, "");
             }
             break;
@@ -16,21 +16,19 @@ function generateTerms(n, k){
 
             for(i = 0; i < absTerms.length; i++){
                 absTerms[i] = new LambdaAbstraction(absTerms[i], "");
-                console.log(absTerms[i].prettyPrint());
             }
 
             var appTerms = [];
+            var x = 0;
 
-            for(n1 = 1; n1 < n-2; n1++){
+            for(var m = 1; m <= n-2; m++){
                 
-                var lhsTerms = generateTerms(n1, k);
-                var rhsTerms = generateTerms(n-1-n1, k);
-                var x = 0;
+                var lhsTerms = generateTerms(m, k);
+                var rhsTerms = generateTerms(n-1-m, k);
 
-                for(i = 0; i < lhsTerms.length; i++){
-                    for(j = 0; i < rhsTerms.length; i++){
-                        appTerms[x] = new LambdaApplication(lhsTerms[i], rhsTerms[j]);
-                        console.log(appTerms[x]);
+                for(a = 0; a < lhsTerms.length; a++){
+                    for(b = 0; b < rhsTerms.length; b++){
+                        appTerms[x] = new LambdaApplication(lhsTerms[a], rhsTerms[b]);
                         x++;
                     }
                 }

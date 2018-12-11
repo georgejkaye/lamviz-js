@@ -170,18 +170,17 @@ function generate_button(){
     var k = parseInt(getText('k'));
     var string = "";
 
-    console.log(n === NaN);
-
     if(isNaN(n) || isNaN(k)){
         string = "Bad input";
     } else {
         var terms = generateTerms(n, k);
 
         for(i = 0; i < terms.length; i++){
-            string += terms[i].prettyPrint() += "\n";
+            string += terms[i].prettyPrint() + "<br />";
         }
     }
 
     changeText('generated-terms', string);
+    changeText('enumerated-terms', "There are " + terms.length + " terms")
 
 }
