@@ -80,10 +80,10 @@ class LambdaAbstraction{
         }
 
         if(x === 0){
-            return "\u03BB" + ". " + this.t.prettyPrint(0);
+            return "\u03BB " + this.t.prettyPrint(0);
         }
 
-        return "(\u03BB" + ". " + this.t.prettyPrint(0) + ")";
+        return "(\u03BB " + this.t.prettyPrint(0) + ")";
     }
 
     /**
