@@ -77,13 +77,18 @@ generateLinearTerms' 1 _ = []
 generateLinearTerms' n ks = [Abs t | t <- generateLinearTerms' (n-1) ((map (+1) ks) ++ [0])]
                       ++ [App t1 t2 | n1 <- [1..n-2], ks' <- chooseLists ks, t1 <- generateLinearTerms' n1 (ks'), t2 <- generateLinearTerms' (n-1-n1) (ks \\ ks')]      
 
+                      
+chooseLists :: [a] -> [[a]]
+chooseLists xs = foldr (++) [] [chooseElems xs k | k <- [0..(length xs)]]
 
-chooseLists :: [Int] -> [[Int]]
-chooseLists xs = [] : chooseLists' xs []
+chooseElems :: [a] -> Int -> [[a]]
+chooseElems xs k = chooseElems' xs k []
 
-chooseLists' :: [Int] -> [[Int]] -> [[Int]]
-chooseLists' [] acc = acc
-chooseLists' (x : xs) acc = chooseLists' xs (acc ++ ([x] : map (\ys -> x : ys) (chooseLists' xs [])))
+chooseElems' :: [a] -> Int -> [[a]] -> [[a]]
+chooseElems' _ 0 _ = [[]]
+chooseElems' (x : xs) k acc
+          | length (x : xs) == k = acc ++ [(x : xs)]
+          | otherwise             = chooseElems' xs k (acc ++ (map (\ys -> x : ys) (chooseElems xs (k-1))))
 
 {-
   Pretty print a lambda term

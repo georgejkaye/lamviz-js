@@ -179,7 +179,7 @@ function generate_button(){
     if(isNaN(n) || isNaN(k)){
         string = "Bad input";
     } else {
-        var terms = generatePlanarTerms(n, k);
+        var terms = generateLinearTerms(n, k);
 
         for(i = 0; i < terms.length; i++){
             string += terms[i].prettyPrint() + "<br />";
