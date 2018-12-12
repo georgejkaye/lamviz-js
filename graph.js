@@ -633,7 +633,7 @@ function drawGraph(id, term, ctx){
 
     cy.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
 
-    updateLabels(true);
+    updateLabels(false);
     //updateLabels(document.getElementById('labels-yes').checked);
 
 }
