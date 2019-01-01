@@ -4,11 +4,11 @@
  * @author George Kaye
  */
 
-var varName = "x";
+var varName = 0;
 
 function genVarName(){
-    varName += "x";
-    return varName;
+    varName += 1;
+    return "b" + varName.toString();
 }
 
 /**
@@ -19,6 +19,20 @@ function genVarName(){
  */
 function generateTerms(n, k){
 
+    varName = 0;
+
+    return generateTermsHelper(n, k);
+
+}
+
+/**
+ * Generate all pure lambda terms with a given number of subterms and free variables.
+ * @param {number} n - The number of subterms.
+ * @param {number} k - The number of free variables.
+ * @return {Object[]} The array of generated terms.
+ */
+function generateTermsHelper(n, k){
+
     var terms = [];
 
     switch(n){
@@ -26,15 +40,15 @@ function generateTerms(n, k){
             break;
         case 1:
             for(i = 0; i <= k-1; i++){
-                terms[i] = new LambdaVariable(i, genVarName());
+                terms[i] = new LambdaVariable(i, "");
             }
             break;
         default:
 
-            var absTerms = generateTerms(n-1, k+1);
+            var absTerms = generateTermsHelper(n-1, k+1);
 
             for(i = 0; i < absTerms.length; i++){
-                absTerms[i] = new LambdaAbstraction(absTerms[i], "");
+                absTerms[i] = new LambdaAbstraction(absTerms[i], genVarName());
             }
 
             var appTerms = [];
@@ -42,8 +56,8 @@ function generateTerms(n, k){
 
             for(var m = 1; m <= n-2; m++){
                 
-                var lhsTerms = generateTerms(m, k);
-                var rhsTerms = generateTerms(n-1-m, k);
+                var lhsTerms = generateTermsHelper(m, k);
+                var rhsTerms = generateTermsHelper(n-1-m, k);
 
                 for(a = 0; a < lhsTerms.length; a++){
                     for(b = 0; b < rhsTerms.length; b++){
@@ -70,7 +84,7 @@ function generateTerms(n, k){
  */
 function generatePlanarTerms(n, k){
         
-    console.log(chooseArrays([1,2,3]));
+    varName = 0;
 
     var ks = [];
 
@@ -97,7 +111,7 @@ function generatePlanarTermsHelper(n, k){
         case 1:
             
             if(k.length === 1){
-                terms[0] = new LambdaVariable(k[0], genVarName());
+                terms[0] = new LambdaVariable(k[0], "");
             }
 
             break;
@@ -106,7 +120,7 @@ function generatePlanarTermsHelper(n, k){
             var absTerms = generatePlanarTermsHelper(n-1, k.map(function(e){return e + 1;}).concat(0));
 
             for(i = 0; i < absTerms.length; i++){
-                absTerms[i] = new LambdaAbstraction(absTerms[i], "");
+                absTerms[i] = new LambdaAbstraction(absTerms[i], genVarName());
             }
 
             var appTerms = [];
@@ -143,7 +157,9 @@ function generatePlanarTermsHelper(n, k){
  * @return {Object[]} The array of generated terms.
  */
 function generateLinearTerms(n, k){
-        
+    
+    varName = 0;
+
     var ks = [];
 
     for(var i = k - 1; i >= 0; i--){
@@ -169,7 +185,7 @@ function generateLinearTermsHelper(n, k){
         case 1:
             
             if(k.length === 1){
-                terms[0] = new LambdaVariable(k[0], genVarName());
+                terms[0] = new LambdaVariable(k[0], "");
             }
 
             break;
@@ -178,7 +194,7 @@ function generateLinearTermsHelper(n, k){
             var absTerms = generateLinearTermsHelper(n-1, k.map(function(e){return e + 1;}).concat(0));
 
             for(i = 0; i < absTerms.length; i++){
-                absTerms[i] = new LambdaAbstraction(absTerms[i], "");
+                absTerms[i] = new LambdaAbstraction(absTerms[i], genVarName());
             }
 
             var appTerms = [];

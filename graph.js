@@ -58,15 +58,23 @@ function reset(){
 
 /**
  * Generate the elements of the map of a term.
- * @param {Object} term - The lambda term to generate the elements of the map for.  
- * @param {Object[]} array - The array to put the elements in. 
- * @param {string} parent - The ID of the parent of the current term. 
- * @param {number} parentX - The x coordinate of the parent. 
- * @param {number} parentY - The y coordinate of the parent.
- * @param {number} position - The position relative to the parent (LHS or RHS) of the current element.
- * @return {Object[]} - The array of map elements.
+ * @param   {Object}      term       - The lambda term to generate the elements of the map for.  
+ * @param   {Object[]}    ctx        - The context containing all the free variables.
+ * @param   {Object[]}    array      - The array to put the elements in. 
+ * @param   {string}      parent     - The ID of the parent of the current term. 
+ * @param   {number}      parentX    - The x coordinate of the parent. 
+ * @param   {number}      parentY    - The y coordinate of the parent.
+ * @param   {number}      position   - The position relative to the parent (LHS or RHS) of the current element.
+ * @return  {Object[]}               - The array of map elements.
  */
-function generateMapElements(term, array, parent, parentX, parentY, position){
+function generateMapElements(term, ctx, array, parent, parentX, parentY, position){
+
+    /* If there is no context, create one */
+    if(ctx === undefined){
+        ctx = new LambdaEnvironment();
+    }
+
+    console.log(ctx.prettyPrint());
 
     /* If there is no element array, create one */
     if(array === undefined){
@@ -107,28 +115,34 @@ function generateMapElements(term, array, parent, parentX, parentY, position){
     switch(term.getType()){
         case ABS:
 
-            newNodeID = checkID(lambda + term.label + ".", nodes);
+            var abstractionLabel = term.label;
+
+            newNodeID = checkID(lambda + abstractionLabel + ".", nodes);
+            
             array = defineNode(array, newNodeID, absNode, posX, posY);
     
             newEdgeID = checkID(newNodeID + " " + term.t.prettyPrintLabels(), edges);
             newEdgeType = absEdge;
 
             /* The abstracted variable goes NE */
-            const lambdaAbstractionSupportNodeID = checkID(lambda + term.label + ".nsupp", nodes);
+            const lambdaAbstractionSupportNodeID = checkID(lambda + abstractionLabel + ".nsupp", nodes);
             array = defineNode(array, lambdaAbstractionSupportNodeID, varNode, posX + nodeDistanceX, posY - nodeDistanceY);
 
-            const lambdaAbstractionSupportEdgeID = checkID(lambda + term.label + ".esupp", edges);
+            const lambdaAbstractionSupportEdgeID = checkID(lambda + abstractionLabel + ".esupp", edges);
             array = defineEdge(array, lambdaAbstractionSupportEdgeID, varEdge, newNodeID, lambdaAbstractionSupportNodeID);
 
             /* The abstracted variable travels to the top of the map */
-            const lambdaAbstractionSupportNode2ID = checkID(lambda + term.label + ".nsupp1", nodes);
+            const lambdaAbstractionSupportNode2ID = checkID(lambda + abstractionLabel + ".nsupp1", nodes);
             array = defineNode(array, lambdaAbstractionSupportNode2ID, varNodeTop, posX + nodeDistanceX, posY - (2 * nodeDistanceY));
 
-            const lambdaAbstractionSupportEdge2ID = checkID(lambda + term.label + ".esupp1", edges);
+            const lambdaAbstractionSupportEdge2ID = checkID(lambda + abstractionLabel + ".esupp1", edges);
             array = defineEdge(array, lambdaAbstractionSupportEdge2ID, varEdge, lambdaAbstractionSupportNodeID, lambdaAbstractionSupportNode2ID);
 
             /* Generate the elements for the scope of the abstraction */
-            var scopeArray = generateMapElements(term.t, [], newNodeID, posX, posY, LHS);
+            ctx.pushTerm(abstractionLabel);
+            var scopeArray = generateMapElements(term.t, ctx, [], newNodeID, posX, posY, LHS);
+            ctx.popTerm();
+            
             const rightmostScope = furthestRight(scopeArray);
 
             /* Make sure the scope is entirely to the left of the abstraction node */
@@ -151,11 +165,11 @@ function generateMapElements(term, array, parent, parentX, parentY, position){
             newEdgeType = appEdge;
             
             /* Generate the elements for the LHS of the application */
-            var lhsArray = generateMapElements(term.t1, [], newNodeID, posX, posY, LHS);
+            var lhsArray = generateMapElements(term.t1, ctx, [], newNodeID, posX, posY, LHS);
             const rightmostLHS = furthestRight(lhsArray);
 
             /* Generate the elements for the RHS of the application */
-            var rhsArray = generateMapElements(term.t2, [], newNodeID, posX, posY, RHS);
+            var rhsArray = generateMapElements(term.t2, ctx, [], newNodeID, posX, posY, RHS);
             const leftmostRHS = furthestLeft(rhsArray);
 
             /* Make sure the LHS is entirely to the left of the application node */
@@ -180,34 +194,36 @@ function generateMapElements(term, array, parent, parentX, parentY, position){
 
         case VAR:
 
-            newNodeID = checkID(term.label, nodes);
+            var variableLabel = ctx.determine(term.index);
+            
+            newNodeID = checkID(variableLabel, nodes);
 
             array = defineNode(array, newNodeID, varNode, posX, posY);
 
-            newEdgeID = checkID(term.label + " in " + parent + "supp", edges);
+            newEdgeID = checkID(variableLabel + " in " + parent + "supp", edges);
             newEdgeType = varEdge;
 
             /* The variable needs to come from the top of the map */
 
             var id = "";
 
-            if(!nodes.includes(lambda + term.label + ".")){
-                const freeVariableAbstractionID = checkID(lambda + term.label + ".", nodes);
+            if(!nodes.includes(lambda + variableLabel + ".")){
+                const freeVariableAbstractionID = checkID(lambda + variableLabel + ".", nodes);
                 array = defineNode(array, freeVariableAbstractionID, absNodeFree, posX, posY - nodeDistanceY);
                 id = freeVariableAbstractionID;
             } else {
-                id = lambda + term.label + ".nsupp1"
+                id = lambda + variableLabel + ".nsupp1"
             }
 
-            const lambdaVariableSupportNodeID = checkID(term.label + "supp", nodes);
+            const lambdaVariableSupportNodeID = checkID(variableLabel + "supp", nodes);
             array = defineNode(array, lambdaVariableSupportNodeID, varNodeTop, posX, posY - nodeDistanceY);
 
-            const lambdaVariableSupportEdgeID = checkID(term.label + " in " + parent + "supp1", edges);
+            const lambdaVariableSupportEdgeID = checkID(variableLabel + " in " + parent + "supp1", edges);
             array = defineEdge(array, lambdaVariableSupportEdgeID, varEdge, lambdaVariableSupportNodeID, newNodeID);
 
             /* The variable comes from the corresponding abstraction node at the top of the map */
 
-            const lambdaVariableAbstractionEdgeID = checkID(term.label + " in " + parent + "supp2", edges);
+            const lambdaVariableAbstractionEdgeID = checkID(variableLabel + " in " + parent + "supp2", edges);
             array = defineEdge(array, lambdaVariableAbstractionEdgeID, varEdgeLabel, id, lambdaVariableSupportNodeID);
 
 
@@ -330,7 +346,6 @@ function checkID(id, array){
 
     return id;
 }
-
 
 /**
  * Get the furthest left x coordinate of a node in an array of elements
@@ -465,6 +480,12 @@ function updateLabels(labels){
     }
 }
 
+/**
+ * Place free variables in a pretty way to the right of the map.
+ * @param {Object[]} boundVariables - The bound variables in the map.
+ * @param {Object[]} freeVariables  - The free variables in the map.
+ * @param {Object[]} ctx            - The context of the map (for positioning free variables in order of abstraction)
+ */
 function placeFreeVariables(boundVariables, freeVariables, ctx){
 
     var rightest = 0;
@@ -525,8 +546,8 @@ function getNodeTypeText(type){
 function drawGraph(id, term, ctx){
 
     reset();
-
-    var elems = generateMapElements(term);
+    
+    var elems = generateMapElements(term, ctx);
 
     cy = cytoscape({
         container: document.getElementById(id),
@@ -633,7 +654,7 @@ function drawGraph(id, term, ctx){
 
     cy.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
 
-    updateLabels(false);
+    updateLabels(true);
     //updateLabels(document.getElementById('labels-yes').checked);
 
 }

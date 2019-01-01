@@ -77,8 +77,15 @@ function generate_button(x){
 
         changeText('church-room', string);
 
+        var ctx = new LambdaEnvironment();
+
+        for(var i = 0; i < k; i++){
+            ctx.pushTerm("f" + i);
+        }
+
         for(var i = 0; i < terms.length; i++){
-            drawGraph("portrait" + i, terms[i], new LambdaEnvironment());
+            console.log("Generating map for " + terms[i].prettyPrint());
+            drawGraph("portrait" + i, terms[i], ctx);
         }
     }
 

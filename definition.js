@@ -19,7 +19,14 @@ class LambdaVariable{
      * @param {any} index - Which lambda abstraction this term refers to.
      * @param {string} label - The label this term is associated with.
      */
-    constructor(index, label){this.index = index, this.label = label;}
+    constructor(index, label){
+        this.index = index; 
+        if(label !== ""){
+            this.label = label
+        } else {
+            this.label = index.toString();
+        }
+    }
 
     /**
      * Get the type of this lambda term - a variable.
@@ -295,7 +302,18 @@ class LambdaEnvironment{
             return "?";
         }
 
-        return this.envUnique[this.envUnique.length - 1 - index];
+        return this.env[this.env.length - 1 - index];
 
+    }
+
+    prettyPrint(){
+
+        var string = "";
+
+        for(var i = 0; i < this.env.length; i++){
+            string += this.env[i] + ", "
+        }
+
+        return string.substring(0, string.length - 2);
     }
 }
