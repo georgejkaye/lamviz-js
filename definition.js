@@ -204,14 +204,14 @@ class LambdaEnvironment{
     /**
      * Create a new empty environment.
      */
-    constructor(){this.env = [], this.envUnique = [], termHistory = []};
+    constructor(){this.env = []};
 
     /**
      * Get the length of this environment.
      * @return {number} The length of this environment.
      */
     length(){
-        return this.envUnique.length;
+        return this.env.length;
     }
 
     /**
@@ -220,13 +220,12 @@ class LambdaEnvironment{
      * @return {string} The ith variable.
      */
     get(i){
-        return this.envUnique[i];
+        return this.env[i];
     }
 
     /**
-     * Push a new variable into the environment. If the element already exists, appends a prime to it (e.g. x -> x').
+     * Push a new variable into the environment.
      * @param {string} variable - The variable to push into the environment.
-     * @return {string} The name of the variable as it appears in the 'unique names' environment.
      */
     pushTerm(variable){
         if(this.env[0] === ""){
@@ -234,31 +233,6 @@ class LambdaEnvironment{
         } else {
             this.env.push(variable);
         }
-
-        var i = 0;
-
-        while(i < termHistory.length){
-            if(termHistory[i] === variable){
-                variable += "\'";
-                i = 0;
-            } else {
-                i++;
-            }
-        }
-
-        if(this.envUnique[0] === ""){
-            this.envUnique[0] = variable;
-        } else {
-            this.envUnique.push(variable);
-        }
-
-        if(termHistory[0] === ""){
-            termHistory[0] = variable;
-        } else {
-            termHistory.push(variable);
-        }
-
-        return variable;
     }
 
     /**
@@ -266,11 +240,10 @@ class LambdaEnvironment{
      */
     popTerm(){
         this.env.pop();
-        this.envUnique.pop();
     }
 
     /**
-     * Find the de Bruijn index of a variable.
+     * Find the de Bruijn index of a variable - this might break if a variable name occurs more than once!
      * @param {string} variable - The variable to search for.
      * @returns {number} The de Bruijn index of the variable, or -1 if not found.
      */
@@ -298,7 +271,7 @@ class LambdaEnvironment{
      */
     determine(index){
 
-        if(index < 0 || this.envUnique.length - 1 - index < 0){
+        if(index < 0 || this.env.length - 1 - index < 0){
             return "?";
         }
 
@@ -306,6 +279,10 @@ class LambdaEnvironment{
 
     }
 
+    /**
+     * Pretty print this environment.
+     * @return {string} A pretty version of this environment.
+     */
     prettyPrint(){
 
         var string = "";
