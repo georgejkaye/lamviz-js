@@ -67,7 +67,7 @@ function reset(){
  * @param   {number}      position   - The position relative to the parent (LHS or RHS) of the current element.
  * @return  {Object[]}               - The array of map elements.
  */
-function generateMapElements(term, ctx, array, parent, parentX, parentY, position){
+function generateMapElements(term, ctx, array, parent, parentX, parentY, position, ){
 
     /* If there is no context, create one */
     if(ctx === undefined){
@@ -125,21 +125,21 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
             newEdgeType = absEdge;
 
             /* The abstracted variable goes NE */
-            const lambdaAbstractionSupportNodeID = checkID(lambda + abstractionLabel + ".nsupp", nodes);
+            const lambdaAbstractionSupportNodeID = checkID(lambda + abstractionLabel + "._abstraction_node_right", nodes);
             array = defineNode(array, lambdaAbstractionSupportNodeID, varNode, posX + nodeDistanceX, posY - nodeDistanceY);
 
-            const lambdaAbstractionSupportEdgeID = checkID(lambda + abstractionLabel + ".esupp", edges);
+            const lambdaAbstractionSupportEdgeID = checkID(lambda + abstractionLabel + "._node_from_abstraction_to_right", edges);
             array = defineEdge(array, lambdaAbstractionSupportEdgeID, varEdge, newNodeID, lambdaAbstractionSupportNodeID);
 
             /* The abstracted variable travels to the top of the map */
-            const lambdaAbstractionSupportNode2ID = checkID(lambda + abstractionLabel + ".nsupp1", nodes);
+            const lambdaAbstractionSupportNode2ID = checkID(lambda + abstractionLabel + "._abstraction_node_top", nodes);
             array = defineNode(array, lambdaAbstractionSupportNode2ID, varNodeTop, posX + nodeDistanceX, posY - (2 * nodeDistanceY));
 
-            const lambdaAbstractionSupportEdge2ID = checkID(lambda + abstractionLabel + ".esupp1", edges);
+            const lambdaAbstractionSupportEdge2ID = checkID(lambda + abstractionLabel + "._edge_from_abstraction_to_top", edges);
             array = defineEdge(array, lambdaAbstractionSupportEdge2ID, varEdge, lambdaAbstractionSupportNodeID, lambdaAbstractionSupportNode2ID);
 
             /* Generate the elements for the scope of the abstraction */
-            ctx.pushTerm(abstractionLabel);
+            ctx.pushTerm(abstractionLabel, lambdaAbstractionSupportNode2ID);
             var scopeArray = generateMapElements(term.t, ctx, [], newNodeID, posX, posY, LHS);
             ctx.popTerm();
             
@@ -200,7 +200,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
 
             array = defineNode(array, newNodeID, varNode, posX, posY);
 
-            newEdgeID = checkID(variableLabel + " in " + parent + "supp", edges);
+            newEdgeID = checkID(variableLabel + " in " + parent + "_edge_from_parent_to_variable", edges);
             newEdgeType = varEdge;
 
             /* The variable needs to come from the top of the map */
@@ -212,18 +212,18 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
                 array = defineNode(array, freeVariableAbstractionID, absNodeFree, posX, posY - nodeDistanceY);
                 id = freeVariableAbstractionID;
             } else {
-                id = lambda + variableLabel + ".nsupp1"
+                id = ctx.getNode(term.index);
             }
 
-            const lambdaVariableSupportNodeID = checkID(variableLabel + "supp", nodes);
+            const lambdaVariableSupportNodeID = checkID(variableLabel + "_abstraction_node_top", nodes);
             array = defineNode(array, lambdaVariableSupportNodeID, varNodeTop, posX, posY - nodeDistanceY);
 
-            const lambdaVariableSupportEdgeID = checkID(variableLabel + " in " + parent + "supp1", edges);
+            const lambdaVariableSupportEdgeID = checkID(variableLabel + " in " + parent + "_edge_from_top_to_variable", edges);
             array = defineEdge(array, lambdaVariableSupportEdgeID, varEdge, lambdaVariableSupportNodeID, newNodeID);
 
             /* The variable comes from the corresponding abstraction node at the top of the map */
 
-            const lambdaVariableAbstractionEdgeID = checkID(variableLabel + " in " + parent + "supp2", edges);
+            const lambdaVariableAbstractionEdgeID = checkID(variableLabel + " in " + parent + "_curved_edge_from_abstraction_to_variable", edges);
             array = defineEdge(array, lambdaVariableAbstractionEdgeID, varEdgeLabel, id, lambdaVariableSupportNodeID);
 
 
@@ -450,6 +450,7 @@ function updateLabels(labels){
         updateNodeLabels(absNode, lambda);
         updateNodeLabels(absNodeFree, lambda);
         updateNodeLabels(appNode, '@');
+        updateNodeLabels(varNodeTop, 'data(id)');
         updateEdgeLabels(absEdge, 'data(id)');
         updateEdgeLabels(varEdgeLabel, function(ele){
             var id = ele.data().id.substring(0);
@@ -573,7 +574,8 @@ function drawGraph(id, term, ctx){
                     'width': '5',
                     'height': '5',
                     'background-color': '#ccc',
-                    'shape': 'roundrectangle'
+                    'shape': 'roundrectangle',
+                    'color': 'black'
                 }
             },
 

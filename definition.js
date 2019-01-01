@@ -192,19 +192,13 @@ class LambdaApplication{
     }
 }
 
-/** The terms encountered in the current environment.
- *  
- * (Used to ensure that there are no duplicates for graphing purposes)
- */
-var termHistory = [];
-
 /** Class representing an environment of currently abstracted variables. */
 class LambdaEnvironment{
 
     /**
      * Create a new empty environment.
      */
-    constructor(){this.env = []};
+    constructor(){this.env = [], this.nodeNames = []};
 
     /**
      * Get the length of this environment.
@@ -227,12 +221,20 @@ class LambdaEnvironment{
      * Push a new variable into the environment.
      * @param {string} variable - The variable to push into the environment.
      */
-    pushTerm(variable){
+    pushTerm(variable, node){
+
+        if(node === undefined){
+            node = "";
+        }
+
         if(this.env[0] === ""){
             this.env[0] = variable;
+            this.nodeNames[0] = node;
         } else {
             this.env.push(variable);
+            this.nodeNames.push(node);
         }
+
     }
 
     /**
@@ -240,6 +242,7 @@ class LambdaEnvironment{
      */
     popTerm(){
         this.env.pop();
+        this.nodeNames.pop();
     }
 
     /**
@@ -292,5 +295,18 @@ class LambdaEnvironment{
         }
 
         return string.substring(0, string.length - 2);
+    }
+
+    /**
+     * Get the corresponding lambda node for this variable index
+     * @return {string} The name of the node (? if could not be found)
+     */
+    getNode(index){
+
+        if(index < 0 || this.nodeNames.length - 1 - index < 0){
+            return "?";
+        }
+
+        return this.nodeNames[this.nodeNames.length - 1 - index];
     }
 }

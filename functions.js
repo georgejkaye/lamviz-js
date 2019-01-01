@@ -30,8 +30,6 @@ function getText(id){
  */
 function prettyString(array){
 
-    console.log(array);
-
     if(array.length !== 0){
         var string = array[0];
 
