@@ -71,7 +71,7 @@ function generate_button(x){
 
         for(i = 0; i < terms.length; i++){
             
-            string += '<div class="w3-container portrait" id="portrait' + i + '" style="border-style:solid; border-color: black;"></div>'
+            string += '<div class="w3-container frame"><div class="w3-container portrait" id="portrait' + i + '"></div><br><p class="caption">' + terms[i].prettyPrint() + '</p></div>'
             
         }
 
