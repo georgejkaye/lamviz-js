@@ -450,7 +450,6 @@ function updateLabels(labels){
         updateNodeLabels(absNode, lambda);
         updateNodeLabels(absNodeFree, lambda);
         updateNodeLabels(appNode, '@');
-        updateNodeLabels(varNodeTop, 'data(id)');
         updateEdgeLabels(absEdge, 'data(id)');
         updateEdgeLabels(varEdgeLabel, function(ele){
             var id = ele.data().id.substring(0);
@@ -656,7 +655,7 @@ function drawGraph(id, term, ctx){
 
     cy.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
 
-    updateLabels(true);
+    updateLabels(false);
     //updateLabels(document.getElementById('labels-yes').checked);
 
 }
