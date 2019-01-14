@@ -74,8 +74,6 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
         ctx = new LambdaEnvironment();
     }
 
-    console.log(ctx.prettyPrint());
-
     /* If there is no element array, create one */
     if(array === undefined){
         array = [];
@@ -542,8 +540,10 @@ function getNodeTypeText(type){
  * @param {string} id       - The id of the graph box.
  * @param {Object} term     - The term to draw as a graph.
  * @param {string[]} ctx    - The context of the term, containing all free variables.
+ * @param {boolean} zoom    - Whether zooming is enabled.
+ * @param {boolean} pan     - Whether panning is enabled.
  */
-function drawGraph(id, term, ctx){
+function drawGraph(id, term, ctx, zoom, pan){
 
     reset();
     
@@ -636,7 +636,10 @@ function drawGraph(id, term, ctx){
 
         layout: {
             name: 'preset'
-        }
+        },
+
+        userZoomingEnabled: zoom,
+        userPanningEnabled: pan,
     });
   
     const nodes = cy.elements("node");
@@ -654,6 +657,7 @@ function drawGraph(id, term, ctx){
     placeFreeVariables(cy.elements(getNodeTypeText(varNodeTop)), cy.elements(getNodeTypeText(absNodeFree)), ctx);
 
     cy.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
+    cy.fit(cy.filter(function(ele, i, eles){return true;}), 10);
 
     updateLabels(false);
     //updateLabels(document.getElementById('labels-yes').checked);

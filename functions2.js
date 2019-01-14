@@ -6,6 +6,9 @@
 
 var currentTerm;
 
+var terms;
+var currentTermNo = 0;
+
 /**
  * Change the text of an element with a given id.
  * @param {string} id   - The id of the element.
@@ -46,6 +49,10 @@ function prettyString(array){
     return string;
 }
 
+/**
+ * Action to perform when a generate button is performed.
+ * @param {number} x - The identifier for the type of terms to generate.
+ */
 function generate_button(x){
 
     var n = parseInt(getText('n'));
@@ -55,7 +62,8 @@ function generate_button(x){
     if(isNaN(n) || isNaN(k)){
         string = "Bad input";
     } else {
-        var terms;
+
+        terms = [];
         
         switch(x){
             case 0:
@@ -71,11 +79,20 @@ function generate_button(x){
 
         for(i = 0; i < terms.length; i++){
             
-            string += '<div class="w3-container frame"><div class="w3-container portrait" id="portrait' + i + '"></div><br><p class="caption">' + terms[i].prettyPrint() + '</p></div>'
+            string += '<a href="portrait.html?' + i + '"><div class="w3-container frame"><div class="w3-container portrait" id="portrait' + i + '"></div><br><p class="caption" id="portrait-caption-' + i + '">' + terms[i].prettyPrint() + '</p></div></a>'
+            //string += '<div class="w3-container frame"><div class="w3-container portrait" id="portrait' + i + '"></div><br><p class="caption" id="portrait-caption-' + i + '">' + terms[i].prettyPrint() + '</p></div>'
             
         }
 
         changeText('church-room', string);
+
+        var numString = terms.length + " term";
+
+        if(terms.length !== 1){
+            numString += "s";
+        }
+
+        changeText('number-of-terms', numString + " found");
 
         var ctx = new LambdaEnvironment();
 
@@ -84,9 +101,12 @@ function generate_button(x){
         }
 
         for(var i = 0; i < terms.length; i++){
-            console.log("Generating map for " + terms[i].prettyPrint());
-            drawGraph("portrait" + i, terms[i], ctx);
+            drawGraph("portrait" + i, terms[i], ctx, false, false);
         }
     }
 
+}
+
+function setup_portrait(){
+    console.log("hello!");
 }

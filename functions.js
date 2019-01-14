@@ -79,7 +79,7 @@ function execute_button(){
     currentTerm = term;
 
     if(!error){
-        drawGraph("cy", currentTerm, ctx);
+        drawGraph("cy", currentTerm, ctx, true, true);
     }
 }
 
@@ -121,8 +121,6 @@ function evaluate_button(){
         changeText('result', "Timed out during evaluation");
     } else {
 
-        console.log("Evaluated term: " + res.prettyPrint());
-
         var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels();
 
         changeText('result', text);
@@ -139,8 +137,6 @@ function normalise_button(){
     if(res === "Timeout"){
         changeText('result', "Timed out during normalisation");
     } else {
-
-        console.log("Normalised term: " + res.prettyPrint());
 
         var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels();
 
