@@ -67,7 +67,7 @@ function reset(){
  * @param   {number}      position   - The position relative to the parent (LHS or RHS) of the current element.
  * @return  {Object[]}               - The array of map elements.
  */
-function generateMapElements(term, ctx, array, parent, parentX, parentY, position, ){
+function generateMapElements(term, ctx, array, parent, parentX, parentY, position){
 
     /* If there is no context, create one */
     if(ctx === undefined){
@@ -542,12 +542,16 @@ function getNodeTypeText(type){
  * @param {string[]} ctx    - The context of the term, containing all free variables.
  * @param {boolean} zoom    - Whether zooming is enabled.
  * @param {boolean} pan     - Whether panning is enabled.
+ * @param {Object[]} elems  - The elements of the graph, if already known.
+ * @return {Object[]} - The array of elements in this graph, for future use.
  */
-function drawGraph(id, term, ctx, zoom, pan){
+function drawGraph(id, term, ctx, zoom, pan, elems){
 
     reset();
     
-    var elems = generateMapElements(term, ctx);
+    if(elems === undefined){
+        elems = generateMapElements(term, ctx);
+    }
 
     cy = cytoscape({
         container: document.getElementById(id),
@@ -661,5 +665,7 @@ function drawGraph(id, term, ctx, zoom, pan){
 
     updateLabels(false);
     //updateLabels(document.getElementById('labels-yes').checked);
+
+    return elems;
 
 }

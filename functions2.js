@@ -7,7 +7,10 @@
 var currentTerm;
 
 var terms;
+var elems;
+var ctx;
 var currentTermNo = 0;
+var termString = "";
 
 /**
  * Change the text of an element with a given id.
@@ -64,6 +67,7 @@ function generate_button(x){
     } else {
 
         terms = [];
+        elems = [];
         
         switch(x){
             case 0:
@@ -77,14 +81,16 @@ function generate_button(x){
                 break;
         }
 
+        termString = "";
+
         for(i = 0; i < terms.length; i++){
             
-            string += '<a href="portrait.html?' + i + '"><div class="w3-container frame"><div class="w3-container portrait" id="portrait' + i + '"></div><br><p class="caption" id="portrait-caption-' + i + '">' + terms[i].prettyPrint() + '</p></div></a>'
+            termString += '<a href="portrait.html?' + i + '"><div class="w3-container frame"><div class="w3-container portrait" id="portrait' + i + '"></div><br><p class="caption" id="portrait-caption-' + i + '">' + terms[i].prettyPrint() + '</p></div></a>'
             //string += '<div class="w3-container frame"><div class="w3-container portrait" id="portrait' + i + '"></div><br><p class="caption" id="portrait-caption-' + i + '">' + terms[i].prettyPrint() + '</p></div>'
             
         }
 
-        changeText('church-room', string);
+        changeText('church-room', termString);
 
         var numString = terms.length + " term";
 
@@ -94,19 +100,45 @@ function generate_button(x){
 
         changeText('number-of-terms', numString + " found");
 
-        var ctx = new LambdaEnvironment();
+        ctx = new LambdaEnvironment();
 
         for(var i = 0; i < k; i++){
             ctx.pushTerm("f" + i);
         }
 
-        for(var i = 0; i < terms.length; i++){
-            drawGraph("portrait" + i, terms[i], ctx, false, false);
-        }
+        drawGallery(false, terms, ctx);
+
     }
 
 }
 
+function drawGallery(json, terms, ctx){
+    
+    if(json){
+        for(var i = 0; i < terms.length; i++){
+            drawGraph("portrait" + i, terms[i], ctx, false, false, elems[i]);
+        }
+    }
+    
+    for(var i = 0; i < terms.length; i++){
+        elems[i] = drawGraph("portrait" + i, terms[i], ctx, false, false);
+    }
+}
+
 function setup_portrait(){
     console.log("hello!");
+}
+
+var a = 0;
+
+function test(){
+    
+    if(a === 0){
+        changeText("church-room", "hello");
+        a = 1;
+    } else {
+        changeText("church-room", termString);
+        drawGallery(true, terms, ctx);
+        a = 0;
+    }
 }
