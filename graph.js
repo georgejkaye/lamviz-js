@@ -545,127 +545,131 @@ function getNodeTypeText(type){
  * @param {Object[]} elems  - The elements of the graph, if already known.
  * @return {Object[]} - The array of elements in this graph, for future use.
  */
-function drawGraph(id, term, ctx, zoom, pan, elems){
+function drawGraph(id, term, ctx, zoom, pan, old_cy){
 
     reset();
     
-    if(elems === undefined){
+    //if(old_cy === undefined){
         elems = generateMapElements(term, ctx);
-    }
 
-    cy = cytoscape({
-        container: document.getElementById(id),
+        cy = cytoscape({
+            container: document.getElementById(id),
 
-        elements: elems,
-      
-        style: [
-            {
-                selector: 'node',
-                style: {
-                    'background-color': '#666',
-                    'text-valign': 'center',
-                    'color': 'white',
-                    'width': '15',
-                    'height': '15',
-                    'font-size': '10'
-                }
-            },
-      
-            {
-                selector: 'node[type =\"' + varNode + '\"], node[type =\"' + varNodeTop + '\"]',
-                style: {
-                    'width': '5',
-                    'height': '5',
-                    'background-color': '#ccc',
-                    'shape': 'roundrectangle',
-                    'color': 'black'
-                }
-            },
-
-            {
-                selector: 'node[type =\"' + absNodeFree + '\"]',
-                style: {
-                    'background-color': 'red'
-                }
-            },
-
-            {
-                selector: 'edge',
-                style: {
-                'width': 2,
-                'line-color': '#ccc',
-                'mid-target-arrow-color': '#ccc',
-                'mid-target-arrow-shape': 'triangle',
-                'arrow-scale': '0.8',
-                'font-size': '6'
-                }
-            },
-
-            {
-                selector: 'edge[type = \"' + varEdgeLabel + '\"]',
-                style: {
-                    'curve-style': 'unbundled-bezier',
-                    'control-point-distances': function(ele){
-                        
-                        var source = ele.source();
-                        var target = ele.target();
-
-                        var diff = source.position('x') - target.position('x');
-
-                        return diff / 2;
-
-                    },
-                    'control-point-weights': '0.5',
-                    'loop-direction': '45deg',
-                    'edge-distances': 'node-position'
-                    
-                }
-            },
-
-            {
-                selector: '.global',
-                style: {
-                    'background-color': '#f00'
-                }
-            },
-
-            {
-                selector: '.dashed',
-                style: {
-                    'width': 5
-                }
-            },
-
-        ],
-
-        layout: {
-            name: 'preset'
-        },
-
-        userZoomingEnabled: zoom,
-        userPanningEnabled: pan,
-    });
-  
-    const nodes = cy.elements("node");
-    var highest = 0;
-
-    for(i = 0; i < nodes.length; i++){
+            elements: elems,
         
-        const y = nodes[i].position('y');
+            style: [
+                {
+                    selector: 'node',
+                    style: {
+                        'background-color': '#666',
+                        'text-valign': 'center',
+                        'color': 'white',
+                        'width': '15',
+                        'height': '15',
+                        'font-size': '10'
+                    }
+                },
+        
+                {
+                    selector: 'node[type =\"' + varNode + '\"], node[type =\"' + varNodeTop + '\"]',
+                    style: {
+                        'width': '5',
+                        'height': '5',
+                        'background-color': '#ccc',
+                        'shape': 'roundrectangle',
+                        'color': 'black'
+                    }
+                },
 
-        if(y < highest){
-            highest = y;
+                {
+                    selector: 'node[type =\"' + absNodeFree + '\"]',
+                    style: {
+                        'background-color': 'red'
+                    }
+                },
+
+                {
+                    selector: 'edge',
+                    style: {
+                    'width': 2,
+                    'line-color': '#ccc',
+                    'mid-target-arrow-color': '#ccc',
+                    'mid-target-arrow-shape': 'triangle',
+                    'arrow-scale': '0.8',
+                    'font-size': '6'
+                    }
+                },
+
+                {
+                    selector: 'edge[type = \"' + varEdgeLabel + '\"]',
+                    style: {
+                        'curve-style': 'unbundled-bezier',
+                        'control-point-distances': function(ele){
+                            
+                            var source = ele.source();
+                            var target = ele.target();
+
+                            var diff = source.position('x') - target.position('x');
+
+                            return diff / 2;
+
+                        },
+                        'control-point-weights': '0.5',
+                        'loop-direction': '45deg',
+                        'edge-distances': 'node-position'
+                        
+                    }
+                },
+
+                {
+                    selector: '.global',
+                    style: {
+                        'background-color': '#f00'
+                    }
+                },
+
+                {
+                    selector: '.dashed',
+                    style: {
+                        'width': 5
+                    }
+                },
+
+            ],
+
+            layout: {
+                name: 'preset'
+            },
+
+            userZoomingEnabled: zoom,
+            userPanningEnabled: pan,
+        });
+    
+        const nodes = cy.elements("node");
+        var highest = 0;
+
+        for(i = 0; i < nodes.length; i++){
+            
+            const y = nodes[i].position('y');
+
+            if(y < highest){
+                highest = y;
+            }
         }
-    }
 
-    placeFreeVariables(cy.elements(getNodeTypeText(varNodeTop)), cy.elements(getNodeTypeText(absNodeFree)), ctx);
+        placeFreeVariables(cy.elements(getNodeTypeText(varNodeTop)), cy.elements(getNodeTypeText(absNodeFree)), ctx);
 
-    cy.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
-    cy.fit(cy.filter(function(ele, i, eles){return true;}), 10);
+        cy.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
+        cy.fit(cy.filter(function(ele, i, eles){return true;}), 10);
 
-    updateLabels(false);
-    //updateLabels(document.getElementById('labels-yes').checked);
+        updateLabels(false);
+        //updateLabels(document.getElementById('labels-yes').checked);
 
-    return elems;
+    //} else {
+       // cy = old_cy;
+        //cy.json({container: document.getElementById(id)});
+    //}
+    
+    return cy;
 
 }

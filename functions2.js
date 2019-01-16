@@ -7,7 +7,7 @@
 var currentTerm;
 
 var terms;
-var elems;
+var cys;
 var ctx;
 var currentTermNo = 0;
 var termString = "";
@@ -67,7 +67,7 @@ function generate_button(x){
     } else {
 
         terms = [];
-        elems = [];
+        cys = [];
         
         switch(x){
             case 0:
@@ -85,8 +85,7 @@ function generate_button(x){
 
         for(i = 0; i < terms.length; i++){
             
-            termString += '<a href="portrait.html?' + i + '"><div class="w3-container frame"><div class="w3-container portrait" id="portrait' + i + '"></div><br><p class="caption" id="portrait-caption-' + i + '">' + terms[i].prettyPrint() + '</p></div></a>'
-            //string += '<div class="w3-container frame"><div class="w3-container portrait" id="portrait' + i + '"></div><br><p class="caption" id="portrait-caption-' + i + '">' + terms[i].prettyPrint() + '</p></div>'
+            termString += '<div class="w3-container frame" id="frame' + i + '" onclick="view_portrait(' + i + ');"><div class="w3-container portrait" id="portrait' + i + '"></div><br><p class="caption" id="portrait-caption-' + i + '">' + terms[i].prettyPrint() + '</p></div>'
             
         }
 
@@ -112,16 +111,16 @@ function generate_button(x){
 
 }
 
-function drawGallery(json, terms, ctx){
+function drawGallery(cache, terms, ctx){
     
-    if(json){
+    if(cache){
         for(var i = 0; i < terms.length; i++){
-            drawGraph("portrait" + i, terms[i], ctx, false, false, elems[i]);
+            drawGraph("portrait" + i, terms[i], ctx, false, false, cys[i]);
         }
     }
     
     for(var i = 0; i < terms.length; i++){
-        elems[i] = drawGraph("portrait" + i, terms[i], ctx, false, false);
+        cys[i] = drawGraph("portrait" + i, terms[i], ctx, false, false);
     }
 }
 
@@ -141,4 +140,10 @@ function test(){
         drawGallery(true, terms, ctx);
         a = 0;
     }
+}
+
+function view_portrait(i){
+    changeText("church-room", '<div class="w3-container frame big-frame" id="frame' + i + '"><div class="w3-container portrait" id="portrait' + i + '"></div><br><p class="caption" id="portrait-caption' + i + '">' + terms[i].prettyPrint() + '</p></div>');
+    drawGraph('portrait' + i, terms[i], ctx, true, true, cys[i]);
+
 }
