@@ -111,6 +111,12 @@ function generate_button(x){
 
 }
 
+/**
+ * Draw a gallery of generated terms.
+ * @param {boolean} cache - If the terms have previously been generated.
+ * @param {terms}   terms - The terms in the gallery.
+ * @param {ctx}     ctx   - The context of the gallery.
+ */
 function drawGallery(cache, terms, ctx){
     
     if(cache){
@@ -142,8 +148,50 @@ function test(){
     }
 }
 
+/**
+ * Get the HTML for an element.
+ * @param {string} element - The element type.
+ * @param {string} classname - The class of this element.
+ * @param {string} id - The id of this element.
+ * @param {string} content - The content of this element.
+ * @return {string} The corresponding HTML for this element.
+ */
+function get_element(element, classname, id, content){
+    return '<' + element + ' class="' + classname + '" id="' + id + '">' + content + '</' + element +'>';
+}
+
+/**
+ * Get the HTML for a <div>.
+ * @param {string} classname - The class of this <div>.
+ * @param {string} id - The id of this <div>.
+ * @param {string} content - The content of this <div>.
+ * @return {string} The corresponding HTML for this <div>.
+ */
+function get_div(classname, id, content){
+    return get_element("div", classname, id, content);
+}
+
+/**
+ * Get the HTML for a <p>.
+ * @param {string} classname - The class of this <p>.
+ * @param {string} id - The id of this <p>.
+ * @param {string} content - The content of this <p>.
+ * @return {string} The corresponding HTML for this <p>.
+ */
+function get_p(classname, id, content){
+    return get_element("p", classname, id, content);
+}
+
+/**
+ * Function to execute when a portrait is clicked.
+ * @param i - The portrait id.
+ */
 function view_portrait(i){
-    changeText("church-room", '<div class="w3-container frame big-frame" id="frame' + i + '"><div class="w3-container portrait" id="portrait' + i + '"></div><br><p class="caption" id="portrait-caption' + i + '">' + terms[i].prettyPrint() + '</p></div>');
+    changeText("church-room", get_div("w3-container frame big-frame", "frame" + i, 
+                                        get_div("w3-container portrait", "portrait" + i, "") + '<br>' + 
+                                        get_p('caption', 'portrait-caption' + i, terms[i].prettyPrint())
+                                     )
+               );
     drawGraph('portrait' + i, terms[i], ctx, true, true, cys[i]);
 
 }
