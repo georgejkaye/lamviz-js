@@ -60,7 +60,6 @@ function parseTerm(tokens, initial, env){
                 }
 
                 t2 = new LambdaAbstraction (t, abstractionVariable);
-                pos = t2.shiftPosition(pos);
                 i += scope.length;
                 console.log("New abstraction: " + t2.prettyPrint());
                 env.popTerm();
@@ -80,7 +79,6 @@ function parseTerm(tokens, initial, env){
                     return t2;
                 }
 
-                pos = t2.shiftPosition(pos);
                 i += (scope.length - 1);
                 console.log("New subterm: " + t2.prettyPrint());
                 console.log("Remaining tokens: " + tokens.slice(i + 1));

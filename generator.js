@@ -21,7 +21,7 @@ function generateTerms(n, k){
 
     varName = 0;
 
-    return generateTermsHelper(n, k);
+    return generateTermsHelper(n, k, 0);
 
 }
 
@@ -31,21 +31,22 @@ function generateTerms(n, k){
  * @param {number} k - The number of free variables.
  * @return {Object[]} The array of generated terms.
  */
-function generateTermsHelper(n, k){
+function generateTermsHelper(n, k, p){
 
     var terms = [];
+
 
     switch(n){
         case 0:
             break;
         case 1:
             for(i = 0; i <= k-1; i++){
-                terms[i] = new LambdaVariable(i, "");
+                terms[i] = new LambdaVariable(i, "", 0);
             }
             break;
         default:
 
-            var absTerms = generateTermsHelper(n-1, k+1);
+            var absTerms = generateTermsHelper(n-1, k+1, p);
 
             for(i = 0; i < absTerms.length; i++){
                 absTerms[i] = new LambdaAbstraction(absTerms[i], genVarName());
@@ -56,11 +57,14 @@ function generateTermsHelper(n, k){
 
             for(var m = 1; m <= n-2; m++){
                 
-                var lhsTerms = generateTermsHelper(m, k);
-                var rhsTerms = generateTermsHelper(n-1-m, k);
+                var lhsTerms = generateTermsHelper(m, k, p);
+                var rhsTerms = generateTermsHelper(n-1-m, k, p+1);
 
                 for(a = 0; a < lhsTerms.length; a++){
                     for(b = 0; b < rhsTerms.length; b++){
+                        var p = lhsTerms[a].shiftPosition(0) + 1;
+                        rhsTerms[b].shiftPosition(p);
+
                         appTerms[x] = new LambdaApplication(lhsTerms[a], rhsTerms[b]);
                         x++;
                     }

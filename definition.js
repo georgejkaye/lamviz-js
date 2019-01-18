@@ -141,7 +141,7 @@ class LambdaAbstraction{
      * @return {number} The new largest position.
      */
     shiftPosition(x){
-        return this.t.shiftPosition(x)
+        return 0;
     }
 }
 

@@ -687,7 +687,7 @@ function howManyCrossings(term, ctx){
         case VAR:
             return 0;
         case ABS:
-            return howManyCrossings(term.t1, ctx.pushTerm(term.label);
+            return howManyCrossings(term.t1, ctx.pushTerm(term.label));
         case APP:
             return howManyCrossings(term.t1, ctx) + howManyCrossings(term.t2, ctx) 
     }
