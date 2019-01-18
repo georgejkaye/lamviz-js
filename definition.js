@@ -16,16 +16,18 @@ class LambdaVariable{
 
     /**
      * Create a lambda variable.
-     * @param {any} index - Which lambda abstraction this term refers to.
+     * @param {number} index - Which lambda abstraction this term refers to.
      * @param {string} label - The label this term is associated with.
+     * @param {number} position - The position of this variable in the term.
      */
-    constructor(index, label){
+    constructor(index, label, position){
         this.index = index; 
         if(label !== ""){
             this.label = label
         } else {
             this.label = index.toString();
         }
+        this.position = position;
     }
 
     /**
@@ -42,7 +44,7 @@ class LambdaVariable{
      * @return {string} The pretty string.
      */
     prettyPrint(x){
-        return this.index;
+        return this.index + "{" + this.position + "}";
     }
 
     /**
@@ -54,6 +56,16 @@ class LambdaVariable{
     prettyPrintLabels(env, x){
 
         return this.label;
+    }
+
+    /**
+     * Shift the position of this variable.
+     * @param {number} x - The number of places to move the position by.
+     * @return {number} The new position of this variable.
+     */
+    shiftPosition(x){
+        this.position += x;
+        return this.position;
     }
 }
 
@@ -122,6 +134,15 @@ class LambdaAbstraction{
         env.popTerm();
         return string;
     }
+
+    /**
+     * Shift the position of all variables in this abstraction.
+     * @param {number} x - The number of places to move the positions by.
+     * @return {number} The new largest position.
+     */
+    shiftPosition(x){
+        return this.t.shiftPosition(x)
+    }
 }
 
 /** Class representing a lambda application. */
@@ -189,6 +210,16 @@ class LambdaApplication{
         }
 
         return "(" + this.t1.prettyPrintLabels(env, x) + " " + this.t2.prettyPrintLabels(env, x+1) + ")";
+    }
+
+    /**
+     * Shift the position of all variables in this application.
+     * @param {number} x - The number of places to move the positions by.
+     * @return {number} The new largest position.
+     */
+    shiftPosition(x){
+        this.t1.shiftPosition(x)
+        return this.t2.shiftPosition(x);
     }
 }
 

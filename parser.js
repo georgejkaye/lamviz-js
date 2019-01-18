@@ -34,6 +34,7 @@ function parseTerm(tokens, initial, env){
     var t2;
 
     var i = 0;
+    var pos = 0;
 
     while(i < len){
 
@@ -59,6 +60,7 @@ function parseTerm(tokens, initial, env){
                 }
 
                 t2 = new LambdaAbstraction (t, abstractionVariable);
+                pos = t2.shiftPosition(pos);
                 i += scope.length;
                 console.log("New abstraction: " + t2.prettyPrint());
                 env.popTerm();
@@ -78,6 +80,7 @@ function parseTerm(tokens, initial, env){
                     return t2;
                 }
 
+                pos = t2.shiftPosition(pos);
                 i += (scope.length - 1);
                 console.log("New subterm: " + t2.prettyPrint());
                 console.log("Remaining tokens: " + tokens.slice(i + 1));
@@ -100,7 +103,8 @@ function parseTerm(tokens, initial, env){
                     return "Parse error: Variable " + tokens[i] + " with no associated binding encountered";
                 }
 
-                t2 = new LambdaVariable(index, label);
+                t2 = new LambdaVariable(index, label, pos);
+                pos++;
                 break;
                 
         } 
