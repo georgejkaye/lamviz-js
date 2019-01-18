@@ -138,14 +138,7 @@ var a = 0;
 
 function test(){
     
-    if(a === 0){
-        changeText("church-room", "hello");
-        a = 1;
-    } else {
-        changeText("church-room", termString);
-        drawGallery(true, terms, ctx);
-        a = 0;
-    }
+    howManyCrossings(terms[0], new LambdaEnvironment());
 }
 
 /**
@@ -187,11 +180,10 @@ function get_p(classname, id, content){
  * @param i - The portrait id.
  */
 function view_portrait(i){
-    changeText("church-room", get_div("w3-container frame big-frame", "frame" + i, 
-                                        get_div("w3-container portrait", "portrait" + i, "") + '<br>' + 
-                                        get_p('caption', 'portrait-caption' + i, terms[i].prettyPrint())
-                                     )
-               );
+    changeText("church-room", "<table><tr><td>" + get_div("w3-container frame big-frame", "frame" + i, 
+                                        get_div("w3-container portrait", "portrait" + i, "")) + '<td valign="top" halign="center">' + 
+                                        get_p('portrait-data', 'portrait-data' + i, terms[i].prettyPrint())
+    )
     drawGraph('portrait' + i, terms[i], ctx, true, true, cys[i]);
 
 }

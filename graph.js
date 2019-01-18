@@ -673,3 +673,24 @@ function drawGraph(id, term, ctx, zoom, pan, old_cy){
     return cy;
 
 }
+
+/**
+ * Get how many crossings a term has.
+ * @param {Object} term - The lambda term to calculate the number of crossings. 
+ * @param {Object} ctx - The context of this lambda term.
+ */
+function howManyCrossings(term, ctx){
+
+    console.log(term.prettyPrint());
+
+    switch(term.getType()){
+        case VAR:
+            return 0;
+        case ABS:
+            return howManyCrossings(term.t1, ctx.pushTerm(term.label);
+        case APP:
+            return howManyCrossings(term.t1, ctx) + howManyCrossings(term.t2, ctx) 
+    }
+
+
+}
