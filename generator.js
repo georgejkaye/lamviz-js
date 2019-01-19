@@ -62,8 +62,8 @@ function generateTermsHelper(n, k, p){
 
                 for(a = 0; a < lhsTerms.length; a++){
                     for(b = 0; b < rhsTerms.length; b++){
-                        var p = lhsTerms[a].shiftPosition(0) + 1;
-                        rhsTerms[b].shiftPosition(p);
+                        //var p = lhsTerms[a].shiftPosition(0);
+                        //rhsTerms[b].shiftPosition(1);
 
                         appTerms[x] = new LambdaApplication(lhsTerms[a], rhsTerms[b]);
                         x++;

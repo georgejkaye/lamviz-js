@@ -209,6 +209,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
                 const freeVariableAbstractionID = checkID(lambda + variableLabel + ".", nodes);
                 array = defineNode(array, freeVariableAbstractionID, absNodeFree, posX, posY - nodeDistanceY);
                 id = freeVariableAbstractionID;
+                //ctx.pushTerm(variableLabel, id);
             } else {
                 id = ctx.getNode(term.index);
             }

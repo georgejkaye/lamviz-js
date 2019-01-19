@@ -102,7 +102,7 @@ function generate_button(x){
         ctx = new LambdaEnvironment();
 
         for(var i = 0; i < k; i++){
-            ctx.pushTerm("f" + i);
+            ctx.pushTerm("f" + i, lambda + "f" + i + ".");
         }
 
         drawGallery(false, terms, ctx);
