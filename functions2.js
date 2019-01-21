@@ -138,9 +138,6 @@ var a = 0;
 
 function test(){
     
-    for(var i = 0; i < terms.length; i++){
-        console.log(terms[i].prettyPrint() + ": " + howManyCrossings(terms[i]));
-    }
 }
 
 function print_array(array){
@@ -206,10 +203,13 @@ function view_portrait(i){
                                                     '<td class = "term-fact">' + 'Crossings: ' + terms[i].crossings() + '</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td class = "term-fact">' + 'Abstractions: ' + howManyCrossings(terms[i]) + '</td>' +
+                                                    '<td class = "term-fact">' + 'Abstractions: ' + terms[i].abstractions() + '</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td class = "term-fact">' + 'Applications: ' + howManyCrossings(terms[i]) + '</td>' +
+                                                    '<td class = "term-fact">' + 'Applications: ' + terms[i].applications() + '</td>' +
+                                                '</tr>' +
+                                                '<tr>' +
+                                                    '<td class = "term-fact">' + 'Variables: ' + terms[i].variables() + '</td>' +
                                                 '</tr>' +
                                             '</table>' +
                                         '</td>' +

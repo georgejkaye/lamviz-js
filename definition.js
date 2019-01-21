@@ -80,6 +80,30 @@ class LambdaVariable{
     crossingsHelper(){
         return [0, this.index];
     }
+
+    /**
+     * How many abstractions does this term have?
+     * @return {number} The number of abstractions in this term.
+     */
+    abstractions(){
+        return 0;
+    }
+
+    /**
+     * How many applications does this term have?
+     * @return {number} The number of applications in this term.
+     */
+    applications(){
+        return 0;
+    }
+
+    /**
+     * How many variables does this term have?
+     * @return {number} The number of variables in this term.
+     */
+    variables(){
+        return 1;
+    }
 }
 
 /** Class representing a lambda abstraction. */
@@ -185,6 +209,30 @@ class LambdaAbstraction{
         array = [abs_array[0]].concat(array);
 
         return array;
+    }
+
+    /**
+     * How many abstractions does this term have?
+     * @return {number} The number of abstractions in this term.
+     */
+    abstractions(){
+        return 1 + this.t.abstractions();
+    }
+
+    /**
+     * How many applications does this term have?
+     * @return {number} The number of applications in this term.
+     */
+    applications(){
+        return this.t.applications();
+    }
+
+    /**
+     * How many variables does this term have?
+     * @return {number} The number of variables in this term.
+     */
+    variables(){
+        return this.t.variables();
     }
     
 }
@@ -309,6 +357,31 @@ class LambdaApplication{
 
         return array;
     }
+
+    /**
+     * How many abstractions does this term have?
+     * @return {number} The number of abstractions in this term.
+     */
+    abstractions(){
+        return this.t1.abstractions() + this.t2.abstractions();
+    }
+
+    /**
+     * How many applications does this term have?
+     * @return {number} The number of applications in this term.
+     */
+    applications(){
+        return 1 + this.t1.applications() + this.t2.applications();
+    }
+
+    /**
+     * How many variables does this term have?
+     * @return {number} The number of variables in this term.
+     */
+    variables(){
+        return this.t1.variables() + this.t2.variables();
+    }
+
 }
 
 /** Class representing an environment of currently abstracted variables. */
