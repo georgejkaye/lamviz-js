@@ -203,7 +203,7 @@ function view_portrait(i){
                                                     '<td class = "term-heading"><b>' + terms[i].prettyPrint() + '</b></td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td class = "term-fact">' + 'Crossings: ' + howManyCrossings(terms[i]) + '</td>' +
+                                                    '<td class = "term-fact">' + 'Crossings: ' + terms[i].crossings() + '</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
                                                     '<td class = "term-fact">' + 'Abstractions: ' + howManyCrossings(terms[i]) + '</td>' +

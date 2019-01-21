@@ -64,6 +64,22 @@ class LambdaVariable{
     isClosed(x){
         return (x > this.index);
     }
+
+    /**
+     * How many crossings are there in the map of this term?
+     * @return {number} The number of crossings in this term.
+     */
+    crossings(){
+         return 0;
+    }
+
+    /**
+     * Helper function for crossings().
+     * @return {number[]} An array containing the indices of variables used in this term, with the number of crossings as element 0.
+     */
+    crossingsHelper(){
+        return [0, this.index];
+    }
 }
 
 /** Class representing a lambda abstraction. */
@@ -150,6 +166,27 @@ class LambdaAbstraction{
         return this.closed[x];
 
     }
+
+    /**
+     * How many crossings does this term have?
+     * @return {number} The number of crossings in this term.
+     */
+    crossings(){
+        return this.crossingsHelper()[0];
+    }
+    
+    /**
+     * Helper function for crossings().
+     * @return {number[]} An array containing the indices of variables used in this term, with the number of crossings as element 0.
+     */
+    crossingsHelper(){
+        var abs_array = this.t.crossingsHelper();
+        var array = abs_array.slice(1).map(x => x - 1).filter(x => x >= 0);            
+        array = [abs_array[0]].concat(array);
+
+        return array;
+    }
+    
 }
 
 /** Class representing a lambda application. */
@@ -236,6 +273,41 @@ class LambdaApplication{
 
         return this.closed[x];
 
+    }
+
+    /**
+     * How many crossings does this term have?
+     * @return {number} The number of crossings in this term.
+     */
+    crossings(){
+        return this.crossingsHelper()[0];
+    }
+    
+    /**
+     * Helper function for crossings().
+     * @return {number[]} An array containing the indices of variables used in this term, with the number of crossings as element 0.
+     */
+    crossingsHelper(){
+        var lhs_array = this.t1.crossingsHelper();
+        var rhs_array = this.t2.crossingsHelper();
+
+        var crossings = lhs_array[0] + rhs_array[0];
+
+        for(var i = 1; i < lhs_array.length; i++){
+            for(var j = 1; j < rhs_array.length; j++){
+                if(lhs_array[i] < rhs_array[j]){
+                    crossings++;
+                }
+            }
+        }
+
+        var array = [crossings];
+        lhs_array = lhs_array.slice(1);
+        rhs_array = rhs_array.slice(1);
+
+        array = array.concat(lhs_array.concat(rhs_array));
+
+        return array;
     }
 }
 
