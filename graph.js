@@ -718,7 +718,8 @@ function getOrderOfVariables(term){
         case ABS:
             
             var abs_array = getOrderOfVariables(term.t);
-            array = [abs_array[0]].concat(abs_array.map(x => x - 1).filter(x => x >= 0));            
+            array = (abs_array.slice(1).map(x => x - 1).filter(x => x >= 0));            
+            array = [abs_array[0]].concat(array);
 
             break;
 
