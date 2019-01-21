@@ -682,17 +682,17 @@ function drawGraph(id, term, ctx, zoom, pan, old_cy){
 function howManyCrossings(term){
 
     var order = getOrderOfVariables(term);
-    var crossings = getCrossings(order);
+    //var crossings = getCrossings(order);
 
-    return crossings;
+    return order[0];
 }
 
-function getCrossings(vars){
-    var crossings = vars[0];
+function getCrossings(lhs, rhs){
+    var crossings = lhs[0] + rhs[0];
 
-    for(var i = 1; i < vars.length; i++){
-        for(var j = i + 1; j < vars.length; j++){
-            if(vars[i] < vars[j]){
+    for(var i = 1; i < lhs.length; i++){
+        for(var j = 1; j < rhs.length; j++){
+            if(lhs[i] < rhs[j]){
                 crossings++;
             }
         }
@@ -718,8 +718,8 @@ function getOrderOfVariables(term){
         case ABS:
             
             var abs_array = getOrderOfVariables(term.t);
-    
-            array[0] += getCrossings(abs_array);
+            array = [abs_array[0]].concat(abs_array.map(x => x - 1).filter(x => x >= 0));            
+
             break;
 
         case APP:
@@ -727,7 +727,7 @@ function getOrderOfVariables(term){
             var lhs_array = getOrderOfVariables(term.t1);
             var rhs_array = getOrderOfVariables(term.t2);
 
-            array[0] = array[0] + lhs_array[0] + rhs_array[0];
+            array[0] = getCrossings(lhs_array, rhs_array);
 
             lhs_array = lhs_array.slice(1);
             rhs_array = rhs_array.slice(1);
