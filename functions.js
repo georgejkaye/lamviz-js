@@ -81,6 +81,8 @@ function execute_button(){
     if(!error){
         drawGraph("cy", currentTerm, ctx, true, true);
     }
+
+    console.log(howManyCrossings(currentTerm));
 }
 
 /**

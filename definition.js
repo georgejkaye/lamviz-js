@@ -18,16 +18,14 @@ class LambdaVariable{
      * Create a lambda variable.
      * @param {number} index - Which lambda abstraction this term refers to.
      * @param {string} label - The label this term is associated with.
-     * @param {number} position - The position of this variable in the term.
      */
-    constructor(index, label, position){
+    constructor(index, label){
         this.index = index; 
         if(label !== ""){
             this.label = label
         } else {
             this.label = index.toString();
         }
-        this.position = position;
     }
 
     /**
@@ -44,7 +42,7 @@ class LambdaVariable{
      * @return {string} The pretty string.
      */
     prettyPrint(x){
-        return this.index + "{" + this.position + "}";
+        return this.index;
     }
 
     /**
@@ -59,13 +57,12 @@ class LambdaVariable{
     }
 
     /**
-     * Shift the position of this variable.
-     * @param {number} x - The number of places to move the position by.
-     * @return {number} The new position of this variable.
+     * Is this a closed term?
+     * @param {number} x - The size of the context.
+     * @return {boolean} Is the term closed?
      */
-    shiftPosition(x){
-        this.position += x;
-        return this.position;
+    isClosed(x){
+        return (x > this.index);
     }
 }
 
@@ -77,7 +74,7 @@ class LambdaAbstraction{
      * @param {Object}      t       - The scope of this lambda abstraction.
      * @param {string}      label   - The label this lambda abstraction has.
      */
-    constructor(t, label){this.t = t; this.label = label}
+    constructor(t, label){this.t = t; this.label = label, this.closed = [];}
 
     /**
      * Get the type of this lambda term - an abstraction.
@@ -136,12 +133,22 @@ class LambdaAbstraction{
     }
 
     /**
-     * Shift the position of all variables in this abstraction.
-     * @param {number} x - The number of places to move the positions by.
-     * @return {number} The new largest position.
+     * Is this a closed term?
+     * @param {number} x - The size of the context.
+     * @return {boolean} Is the term closed?
      */
-    shiftPosition(x){
-        return 0;
+    isClosed(x){
+
+        if(this.closed[x] === undefined){
+            if(x === undefined){
+                x = 0;
+            }
+    
+            this.closed[x] = this.t.isClosed(x + 1);
+        }
+
+        return this.closed[x];
+
     }
 }
 
@@ -153,7 +160,7 @@ class LambdaApplication{
      * @param {Object} t1 - the first term in the lambda application (the function).
      * @param {Object} t2 - the second term in the lambda application (the argument).
      */
-    constructor(t1, t2){this.t1 = t1; this.t2 = t2}
+    constructor(t1, t2){this.t1 = t1; this.t2 = t2, this.closed = []}
 
     /**
      * Get the type of this lambda term - an application.
@@ -213,13 +220,22 @@ class LambdaApplication{
     }
 
     /**
-     * Shift the position of all variables in this application.
-     * @param {number} x - The number of places to move the positions by.
-     * @return {number} The new largest position.
+     * Is this a closed term?
+     * @param {number} x - The size of the context.
+     * @return {boolean} Is the term closed?
      */
-    shiftPosition(x){
-        this.t1.shiftPosition(x)
-        return this.t2.shiftPosition(x);
+    isClosed(x){
+
+        if(this.closed[x] === undefined){
+            if(x === undefined){
+                x = 0;
+            }
+
+            this.closed[x] = this.t1.isClosed(x) && this.t2.isClosed(x);
+        }
+
+        return this.closed[x];
+
     }
 }
 

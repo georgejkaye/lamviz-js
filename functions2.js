@@ -138,7 +138,17 @@ var a = 0;
 
 function test(){
     
-    howManyCrossings(terms[0], new LambdaEnvironment());
+    for(var i = 0; i < terms.length; i++){
+        console.log(terms[i].prettyPrint() + ": " + howManyCrossings(terms[i]));
+    }
+}
+
+function print_array(array){
+    var string = "";
+
+    for(var i = 0; i < array.length; i++){
+        string += array[i] + ", ";
+    }
 }
 
 /**

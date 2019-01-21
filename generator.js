@@ -41,7 +41,7 @@ function generateTermsHelper(n, k, p){
             break;
         case 1:
             for(i = 0; i <= k-1; i++){
-                terms[i] = new LambdaVariable(i, "", 0);
+                terms[i] = new LambdaVariable(i, "");
             }
             break;
         default:
@@ -61,9 +61,7 @@ function generateTermsHelper(n, k, p){
                 var rhsTerms = generateTermsHelper(n-1-m, k, p+1);
 
                 for(a = 0; a < lhsTerms.length; a++){
-                    for(b = 0; b < rhsTerms.length; b++){
-                        //var p = lhsTerms[a].shiftPosition(0);
-                        //rhsTerms[b].shiftPosition(1);
+                    for(b = 0; b < rhsTerms.length; b++){   
 
                         appTerms[x] = new LambdaApplication(lhsTerms[a], rhsTerms[b]);
                         x++;

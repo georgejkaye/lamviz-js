@@ -209,7 +209,6 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
                 const freeVariableAbstractionID = checkID(lambda + variableLabel + ".", nodes);
                 array = defineNode(array, freeVariableAbstractionID, absNodeFree, posX, posY - nodeDistanceY);
                 id = freeVariableAbstractionID;
-                //ctx.pushTerm(variableLabel, id);
             } else {
                 id = ctx.getNode(term.index);
             }
@@ -678,20 +677,66 @@ function drawGraph(id, term, ctx, zoom, pan, old_cy){
 /**
  * Get how many crossings a term has.
  * @param {Object} term - The lambda term to calculate the number of crossings. 
- * @param {Object} ctx - The context of this lambda term.
+ * @return {number} The number of crossings.
  */
-function howManyCrossings(term, ctx){
+function howManyCrossings(term){
 
-    console.log(term.prettyPrint());
+    var order = getOrderOfVariables(term);
+    var crossings = getCrossings(order);
 
-    switch(term.getType()){
-        case VAR:
-            return 0;
-        case ABS:
-            return howManyCrossings(term.t1, ctx.pushTerm(term.label));
-        case APP:
-            return howManyCrossings(term.t1, ctx) + howManyCrossings(term.t2, ctx) 
+    return crossings;
+}
+
+function getCrossings(vars){
+    var crossings = vars[0];
+
+    for(var i = 1; i < vars.length; i++){
+        for(var j = i + 1; j < vars.length; j++){
+            if(vars[i] < vars[j]){
+                crossings++;
+            }
+        }
     }
 
+    return crossings;
+}
+
+
+/**
+ * Get an array containing the variables in the order they are used in a term.
+ * @param {Object} term - The lambda term to find the variables from.
+ * @return {number[]} An array containing the indices of variables used, corrected to account for lambda abstractions.
+ */
+function getOrderOfVariables(term){
+
+    var array = [0];
+
+    switch(term.getType()){
+        case VAR:     
+            array[1] = term.index;
+            break;
+        case ABS:
+            
+            var abs_array = getOrderOfVariables(term.t);
+    
+            array[0] += getCrossings(abs_array);
+            break;
+
+        case APP:
+
+            var lhs_array = getOrderOfVariables(term.t1);
+            var rhs_array = getOrderOfVariables(term.t2);
+
+            array[0] = array[0] + lhs_array[0] + rhs_array[0];
+
+            lhs_array = lhs_array.slice(1);
+            rhs_array = rhs_array.slice(1);
+
+            array = array.concat(lhs_array.concat(rhs_array));
+
+            break;
+    }
+
+    return array;
 
 }
