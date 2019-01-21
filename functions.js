@@ -79,10 +79,9 @@ function execute_button(){
     currentTerm = term;
 
     if(!error){
-        drawGraph("cy", currentTerm, ctx, true, true);
+        drawGraph("cy", currentTerm, ctx, true, true, document.getElementById('labels-yes').checked);
     }
 
-    console.log(howManyCrossings(currentTerm));
 }
 
 /**

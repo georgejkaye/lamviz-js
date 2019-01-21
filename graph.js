@@ -542,133 +542,126 @@ function getNodeTypeText(type){
  * @param {string[]} ctx    - The context of the term, containing all free variables.
  * @param {boolean} zoom    - Whether zooming is enabled.
  * @param {boolean} pan     - Whether panning is enabled.
- * @param {Object[]} elems  - The elements of the graph, if already known.
+ * @param {boolean} labels  - Whether labels should be displayed.
  * @return {Object[]} - The array of elements in this graph, for future use.
  */
-function drawGraph(id, term, ctx, zoom, pan, old_cy){
+function drawGraph(id, term, ctx, zoom, pan, labels){
 
     reset();
     
-    //if(old_cy === undefined){
-        elems = generateMapElements(term, ctx);
+    elems = generateMapElements(term, ctx);
 
-        cy = cytoscape({
-            container: document.getElementById(id),
+    cy = cytoscape({
+        container: document.getElementById(id),
 
-            elements: elems,
-        
-            style: [
-                {
-                    selector: 'node',
-                    style: {
-                        'background-color': '#666',
-                        'text-valign': 'center',
-                        'color': 'white',
-                        'width': '15',
-                        'height': '15',
-                        'font-size': '10'
-                    }
-                },
-        
-                {
-                    selector: 'node[type =\"' + varNode + '\"], node[type =\"' + varNodeTop + '\"]',
-                    style: {
-                        'width': '5',
-                        'height': '5',
-                        'background-color': '#ccc',
-                        'shape': 'roundrectangle',
-                        'color': 'black'
-                    }
-                },
-
-                {
-                    selector: 'node[type =\"' + absNodeFree + '\"]',
-                    style: {
-                        'background-color': 'red'
-                    }
-                },
-
-                {
-                    selector: 'edge',
-                    style: {
-                    'width': 2,
-                    'line-color': '#ccc',
-                    'mid-target-arrow-color': '#ccc',
-                    'mid-target-arrow-shape': 'triangle',
-                    'arrow-scale': '0.8',
-                    'font-size': '6'
-                    }
-                },
-
-                {
-                    selector: 'edge[type = \"' + varEdgeLabel + '\"]',
-                    style: {
-                        'curve-style': 'unbundled-bezier',
-                        'control-point-distances': function(ele){
-                            
-                            var source = ele.source();
-                            var target = ele.target();
-
-                            var diff = source.position('x') - target.position('x');
-
-                            return diff / 2;
-
-                        },
-                        'control-point-weights': '0.5',
-                        'loop-direction': '45deg',
-                        'edge-distances': 'node-position'
-                        
-                    }
-                },
-
-                {
-                    selector: '.global',
-                    style: {
-                        'background-color': '#f00'
-                    }
-                },
-
-                {
-                    selector: '.dashed',
-                    style: {
-                        'width': 5
-                    }
-                },
-
-            ],
-
-            layout: {
-                name: 'preset'
+        elements: elems,
+    
+        style: [
+            {
+                selector: 'node',
+                style: {
+                    'background-color': '#666',
+                    'text-valign': 'center',
+                    'color': 'white',
+                    'width': '15',
+                    'height': '15',
+                    'font-size': '10'
+                }
+            },
+    
+            {
+                selector: 'node[type =\"' + varNode + '\"], node[type =\"' + varNodeTop + '\"]',
+                style: {
+                    'width': '5',
+                    'height': '5',
+                    'background-color': '#ccc',
+                    'shape': 'roundrectangle',
+                    'color': 'black'
+                }
             },
 
-            userZoomingEnabled: zoom,
-            userPanningEnabled: pan,
-        });
-    
-        const nodes = cy.elements("node");
-        var highest = 0;
+            {
+                selector: 'node[type =\"' + absNodeFree + '\"]',
+                style: {
+                    'background-color': 'red'
+                }
+            },
 
-        for(i = 0; i < nodes.length; i++){
-            
-            const y = nodes[i].position('y');
+            {
+                selector: 'edge',
+                style: {
+                'width': 2,
+                'line-color': '#ccc',
+                'mid-target-arrow-color': '#ccc',
+                'mid-target-arrow-shape': 'triangle',
+                'arrow-scale': '0.8',
+                'font-size': '6'
+                }
+            },
 
-            if(y < highest){
-                highest = y;
-            }
+            {
+                selector: 'edge[type = \"' + varEdgeLabel + '\"]',
+                style: {
+                    'curve-style': 'unbundled-bezier',
+                    'control-point-distances': function(ele){
+                        
+                        var source = ele.source();
+                        var target = ele.target();
+
+                        var diff = source.position('x') - target.position('x');
+
+                        return diff / 2;
+
+                    },
+                    'control-point-weights': '0.5',
+                    'loop-direction': '45deg',
+                    'edge-distances': 'node-position'
+                    
+                }
+            },
+
+            {
+                selector: '.global',
+                style: {
+                    'background-color': '#f00'
+                }
+            },
+
+            {
+                selector: '.dashed',
+                style: {
+                    'width': 5
+                }
+            },
+
+        ],
+
+        layout: {
+            name: 'preset'
+        },
+
+        userZoomingEnabled: zoom,
+        userPanningEnabled: pan,
+    });
+
+    const nodes = cy.elements("node");
+    var highest = 0;
+
+    for(i = 0; i < nodes.length; i++){
+        
+        const y = nodes[i].position('y');
+
+        if(y < highest){
+            highest = y;
         }
+    }
 
-        placeFreeVariables(cy.elements(getNodeTypeText(varNodeTop)), cy.elements(getNodeTypeText(absNodeFree)), ctx);
+    placeFreeVariables(cy.elements(getNodeTypeText(varNodeTop)), cy.elements(getNodeTypeText(absNodeFree)), ctx);
 
-        cy.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
-        cy.fit(cy.filter(function(ele, i, eles){return true;}), 10);
+    cy.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
+    cy.fit(cy.filter(function(ele, i, eles){return true;}), 10);
 
-        updateLabels(false);
-        //updateLabels(document.getElementById('labels-yes').checked);
-
-    //} else {
-       // cy = old_cy;
-        //cy.json({container: document.getElementById(id)});
-    //}
+    updateLabels(labels);
     
     return cy;
 
@@ -682,11 +675,16 @@ function drawGraph(id, term, ctx, zoom, pan, old_cy){
 function howManyCrossings(term){
 
     var order = getOrderOfVariables(term);
-    //var crossings = getCrossings(order);
 
     return order[0];
 }
 
+/**
+ * Get crossings between the LHS and RHS of an application.
+ * @param {number[]} lhs - The variable indices on the LHS, with the number of crossings as element 0.
+ * @param {number[]} rhs - The variable indices on the RHS, with the number of crossings as element 0.
+ * @return {number} The number of crossings in this application.
+ */
 function getCrossings(lhs, rhs){
     var crossings = lhs[0] + rhs[0];
 
@@ -705,7 +703,7 @@ function getCrossings(lhs, rhs){
 /**
  * Get an array containing the variables in the order they are used in a term.
  * @param {Object} term - The lambda term to find the variables from.
- * @return {number[]} An array containing the indices of variables used, corrected to account for lambda abstractions.
+ * @return {number[]} An array containing the indices of variables used, with the number of crossings as element 0.
  */
 function getOrderOfVariables(term){
 
@@ -718,7 +716,7 @@ function getOrderOfVariables(term){
         case ABS:
             
             var abs_array = getOrderOfVariables(term.t);
-            array = (abs_array.slice(1).map(x => x - 1).filter(x => x >= 0));            
+            array = abs_array.slice(1).map(x => x - 1).filter(x => x >= 0);            
             array = [abs_array[0]].concat(array);
 
             break;

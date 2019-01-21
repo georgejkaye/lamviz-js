@@ -121,12 +121,12 @@ function drawGallery(cache, terms, ctx){
     
     if(cache){
         for(var i = 0; i < terms.length; i++){
-            drawGraph("portrait" + i, terms[i], ctx, false, false, cys[i]);
+            drawGraph("portrait" + i, terms[i], ctx, false, false, false);
         }
     }
     
     for(var i = 0; i < terms.length; i++){
-        cys[i] = drawGraph("portrait" + i, terms[i], ctx, false, false);
+        cys[i] = drawGraph("portrait" + i, terms[i], ctx, false, false, false);
     }
 }
 
@@ -159,8 +159,8 @@ function print_array(array){
  * @param {string} content - The content of this element.
  * @return {string} The corresponding HTML for this element.
  */
-function get_element(element, classname, id, content){
-    return '<' + element + ' class="' + classname + '" id="' + id + '">' + content + '</' + element +'>';
+function get_element(element, classname, id, style, content){
+    return '<' + element + ' class="' + classname + '" id="' + id + '" style="' + style + '">' + content + '</' + element +'>';
 }
 
 /**
@@ -170,8 +170,8 @@ function get_element(element, classname, id, content){
  * @param {string} content - The content of this <div>.
  * @return {string} The corresponding HTML for this <div>.
  */
-function get_div(classname, id, content){
-    return get_element("div", classname, id, content);
+function get_div(classname, id, style, content){
+    return get_element("div", classname, id, style, content);
 }
 
 /**
@@ -181,19 +181,41 @@ function get_div(classname, id, content){
  * @param {string} content - The content of this <p>.
  * @return {string} The corresponding HTML for this <p>.
  */
-function get_p(classname, id, content){
-    return get_element("p", classname, id, content);
+function get_p(classname, id, style, content){
+    return get_element("p", classname, id, style, content);
 }
 
+function get_h(classname, id, num, style, content){
+    return get_element("h" + num, classname, id, style, content);
+}
+ 
 /**
  * Function to execute when a portrait is clicked.
  * @param i - The portrait id.
  */
 function view_portrait(i){
-    changeText("church-room", "<table><tr><td>" + get_div("w3-container frame big-frame", "frame" + i, 
-                                        get_div("w3-container portrait", "portrait" + i, "")) + '<td valign="top" halign="center">' + 
-                                        get_p('portrait-data', 'portrait-data' + i, terms[i].prettyPrint())
+    changeText("church-room", '<table>' +
+                                    '<tr>' +
+                                        '<td>' + get_div("w3-container frame big-frame", "frame" + i, "", get_div("w3-container portrait", "portrait" + i, "", "")) + '</td>' +
+                                        '<td>' +
+                                            '<table>' + 
+                                                '<tr>' +
+                                                    '<td class = "term-heading"><b>' + terms[i].prettyPrint() + '</b></td>' +
+                                                '</tr>' +
+                                                '<tr>' +
+                                                    '<td class = "term-fact">' + 'Crossings: ' + howManyCrossings(terms[i]) + '</td>' +
+                                                '</tr>' +
+                                                '<tr>' +
+                                                    '<td class = "term-fact">' + 'Abstractions: ' + howManyCrossings(terms[i]) + '</td>' +
+                                                '</tr>' +
+                                                '<tr>' +
+                                                    '<td class = "term-fact">' + 'Applications: ' + howManyCrossings(terms[i]) + '</td>' +
+                                                '</tr>' +
+                                            '</table>' +
+                                        '</td>' +
+                                    '<tr>' +
+                                '</table>'
     )
-    drawGraph('portrait' + i, terms[i], ctx, true, true, cys[i]);
+    drawGraph('portrait' + i, terms[i], ctx, true, true, false);
 
 }
