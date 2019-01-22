@@ -50,7 +50,15 @@ function prettyString(array){
 function execute_button(){
 
     var error = false;
-    var text = tokenise(getText('input'));
+    var text = getText('input');
+
+    if(text === ""){
+        error = true;
+        text = "Type an expression";
+    } else {
+        text = tokenise(text);
+    }
+    
     var frees = getText('env').split(" ");
     
     var ctx = new LambdaEnvironment();
