@@ -50,10 +50,10 @@
 
         <h2>&lambda; term generators</h2>
         n <input type = "text" id = "n" style = "width: 25px"> k <input type = "text" id = "k" style = "width: 25px">
-        <button type = "button" id = "generate-btn" onclick = "generate_button(0);">Pure</button>
-        <button type = "button" id = "generate-btn" onclick = "generate_button(1);">Linear</button>
-        <button type = "button" id = "generate-btn" onclick = "generate_button(2);">Planar</button> 
-        <button type = "button" id = "generate-btn" onclick = "test();">Test</button> <span id = "number-of-terms"></span>
+        <button type = "button" id = "generate-btn" onclick = "generate_button(0, false);">Pure</button>
+        <button type = "button" id = "generate-btn" onclick = "generate_button(1, false);">Linear</button>
+        <button type = "button" id = "generate-btn" onclick = "generate_button(2, false);">Planar</button> 
+        <button type = "button" id = "generate-btn" onclick = "clear_button();">Clear</button> <span id = "number-of-terms"></span>
 
         <p id = "church-room"></p>
     </div>

@@ -11,6 +11,9 @@ var cys;
 var ctx;
 var currentTermNo = 0;
 var termString = "";
+var n = 0;
+var k = 0;
+var last_action = 0;
 
 /**
  * Change the text of an element with a given id.
@@ -55,11 +58,17 @@ function prettyString(array){
 /**
  * Action to perform when a generate button is performed.
  * @param {number} x - The identifier for the type of terms to generate.
+ * @param {number} n - A previously specified n (optional).
+ * @param {number} k - A previously specified k (optional).
  */
-function generate_button(x){
+function generate_button(x, prev){
 
-    var n = parseInt(getText('n'));
-    var k = parseInt(getText('k'));
+    if(!prev){
+        n = parseInt(getText('n'));
+        k = parseInt(getText('k'));
+        last_action = x;
+    }
+
     var string = "";
 
     if(isNaN(n) || isNaN(k)){
@@ -69,7 +78,7 @@ function generate_button(x){
         terms = [];
         cys = [];
         
-        switch(x){
+        switch(last_action){
             case 0:
                 terms = generateTerms(n, k);
                 break;
@@ -85,8 +94,9 @@ function generate_button(x){
 
         for(i = 0; i < terms.length; i++){
             
-            termString += '<div class="w3-container frame" id="frame' + i + '" onclick="view_portrait(' + i + ');"><div class="w3-container portrait" id="portrait' + i + '"></div><br><p class="caption" id="portrait-caption-' + i + '">' + terms[i].prettyPrint() + '</p></div>'
-            
+            termString += get_div('w3-container frame', 'frame' + i, "", 'view_portrait(' + i + ');', 
+                            get_div("w3-container portrait", "portrait" + i, "", "", "") + "<br>" + 
+                                get_p("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));            
         }
 
         changeText('church-room', termString);
@@ -136,8 +146,12 @@ function setup_portrait(){
 
 var a = 0;
 
-function test(){
-    
+/**
+ * Function to execute when the clear button is pressed.
+ */
+function clear_button(){
+    changeText('church-room', "");
+    changeText('number-of-terms', "");
 }
 
 function print_array(array){
@@ -156,8 +170,8 @@ function print_array(array){
  * @param {string} content - The content of this element.
  * @return {string} The corresponding HTML for this element.
  */
-function get_element(element, classname, id, style, content){
-    return '<' + element + ' class="' + classname + '" id="' + id + '" style="' + style + '">' + content + '</' + element +'>';
+function get_element(element, classname, id, style, onclick, content){
+    return '<' + element + ' class="' + classname + '" id="' + id + '" style="' + style + '" onclick="' + onclick + '">' + content + '</' + element +'>';
 }
 
 /**
@@ -167,8 +181,8 @@ function get_element(element, classname, id, style, content){
  * @param {string} content - The content of this <div>.
  * @return {string} The corresponding HTML for this <div>.
  */
-function get_div(classname, id, style, content){
-    return get_element("div", classname, id, style, content);
+function get_div(classname, id, style, onclick, content){
+    return get_element("div", classname, id, style, onclick, content);
 }
 
 /**
@@ -178,12 +192,12 @@ function get_div(classname, id, style, content){
  * @param {string} content - The content of this <p>.
  * @return {string} The corresponding HTML for this <p>.
  */
-function get_p(classname, id, style, content){
-    return get_element("p", classname, id, style, content);
+function get_p(classname, id, style, onclick, content){
+    return get_element("p", classname, id, style, onclick, content);
 }
 
-function get_h(classname, id, num, style, content){
-    return get_element("h" + num, classname, id, style, content);
+function get_h(classname, id, num, style, onclick, content){
+    return get_element("h" + num, classname, id, style, onclick, content);
 }
  
 /**
@@ -193,7 +207,7 @@ function get_h(classname, id, num, style, content){
 function view_portrait(i){
     changeText("church-room", '<table>' +
                                     '<tr>' +
-                                        '<td>' + get_div("w3-container frame big-frame", "frame" + i, "", get_div("w3-container portrait", "portrait" + i, "", "")) + '</td>' +
+                                        '<td>' + get_div("w3-container frame big-frame", "frame" + i, "", "", get_div("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
                                         '<td>' +
                                             '<table>' + 
                                                 '<tr>' +
@@ -211,6 +225,9 @@ function view_portrait(i){
                                                 '<tr>' +
                                                     '<td class = "term-fact">' + 'Variables: ' + terms[i].variables() + '</td>' +
                                                 '</tr>' +
+                                                '<tr>' +
+                                                    '<td><button type = "button" id = "back-btn" onclick = "back_button();">Back</button>' +
+                                                '</tr>' +
                                             '</table>' +
                                         '</td>' +
                                     '<tr>' +
@@ -218,4 +235,8 @@ function view_portrait(i){
     )
     drawGraph('portrait' + i, terms[i], ctx, true, true, false);
 
+}
+
+function back_button(){
+    generate_button(last_action, true);
 }
