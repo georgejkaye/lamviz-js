@@ -104,6 +104,22 @@ class LambdaVariable{
     variables(){
         return 1;
     }
+
+    /**
+     * How many free variables does this term have?
+     * @return {number} The number of free variables in this term.
+     */
+    freeVariables(){
+        return 1;
+    }
+
+    /**
+     * What are the indices of the free variables in this term in the order they are used?
+     * @return {number[]} The array of free variables used in this term.
+     */
+    freeVariableIndices(){
+        return [this.index];
+    }
 }
 
 /** Class representing a lambda abstraction. */
@@ -233,6 +249,27 @@ class LambdaAbstraction{
      */
     variables(){
         return this.t.variables();
+    }
+
+    /**
+     * How many free variables does this term have?
+     * @return {number} The number of free variables in this term.
+     */
+    freeVariables(){
+
+        if(this.t.freeVariables() === 0){
+            return 0;
+        }
+
+        return this.t.freeVariables() - 1;
+    }
+
+    /**
+     * What are the indices of the free variables in this term in the order they are used?
+     * @return {number[]} The array of free variables used in this term.
+     */
+    freeVariableIndices(){
+        return this.t.freeVariableIndices().filter(x => x !== 0).map(x => x - 1);
     }
     
 }
@@ -382,6 +419,22 @@ class LambdaApplication{
         return this.t1.variables() + this.t2.variables();
     }
 
+    /**
+     * How many free variables does this term have?
+     * @return {number} The number of free variables in this term.
+     */
+    freeVariables(){
+        return this.t1.freeVariables() + this.t2.freeVariables();
+    }
+
+    /**
+     * What are the indices of the free variables in this term in the order they are used?
+     * @return {number[]} The array of free variables used in this term.
+     */
+    freeVariableIndices(){
+        return this.t1.freeVariableIndices().concat(this.t2.freeVariableIndices());
+    }
+
 }
 
 /** Class representing an environment of currently abstracted variables. */
@@ -390,7 +443,7 @@ class LambdaEnvironment{
     /**
      * Create a new empty environment.
      */
-    constructor(){this.env = [], this.nodeNames = []};
+    constructor(){this.env = []};
 
     /**
      * Get the length of this environment.
@@ -413,18 +466,12 @@ class LambdaEnvironment{
      * Push a new variable into the environment.
      * @param {string} variable - The variable to push into the environment.
      */
-    pushTerm(variable, node){
-
-        if(node === undefined){
-            node = "";
-        }
+    pushTerm(variable){
 
         if(this.env[0] === ""){
             this.env[0] = variable;
-            this.nodeNames[0] = node;
         } else {
             this.env.push(variable);
-            this.nodeNames.push(node);
         }
 
     }
@@ -434,7 +481,6 @@ class LambdaEnvironment{
      */
     popTerm(){
         this.env.pop();
-        this.nodeNames.pop();
     }
 
     /**
@@ -464,7 +510,7 @@ class LambdaEnvironment{
      * @param {number} index - The index to determine the variable name from
      * @return {string} The name of the variable (? if could not be found)
      */
-    determine(index){
+    getCorrespondingVariable(index){
 
         if(index < 0 || this.env.length - 1 - index < 0){
             return "?";

@@ -226,6 +226,9 @@ function view_portrait(i){
                                                     '<td class = "term-fact">' + 'Variables: ' + terms[i].variables() + '</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
+                                                    '<td class = "term-fact">' + 'Free variables: ' + terms[i].freeVariables() + '</td>' +
+                                                '</tr>' +
+                                                '<tr>' +
                                                     '<td><button type = "button" id = "back-btn" onclick = "back_button();">Back</button>' +
                                                 '</tr>' +
                                             '</table>' +

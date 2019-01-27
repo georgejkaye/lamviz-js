@@ -90,6 +90,8 @@ function execute_button(){
         drawGraph("cy", currentTerm, ctx, true, true, document.getElementById('labels-yes').checked);
     }
 
+    console.log(currentTerm.freeVariableIndices());
+
 }
 
 /**

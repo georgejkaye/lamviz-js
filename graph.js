@@ -192,38 +192,38 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
 
         case VAR:
 
-            var variableLabel = ctx.determine(term.index);
+            var variableLabel = ctx.getCorrespondingVariable(term.index);
             
+            /* Create the first node in the variable edge, to pull it away from the parent in the right direction */
             newNodeID = checkID(variableLabel, nodes);
-
             array = defineNode(array, newNodeID, varNode, posX, posY);
 
+            /* Create the edge between the parent and the variable node */
             newEdgeID = checkID(variableLabel + " in " + parent + "_edge_from_parent_to_variable", edges);
             newEdgeType = varEdge;
 
-            /* The variable needs to come from the top of the map */
+            /* Create the node at the top of the page for this variable to travel from */
+            const lambdaVariableSupportNodeID = checkID(variableLabel + "_variable_node_top", nodes);
+            array = defineNode(array, lambdaVariableSupportNodeID, varNodeTop, posX, posY - nodeDistanceY);
 
-            var id = "";
+            /* Create the edge connecting the node at the top of the page to the original node */
+            const lambdaVariableSupportEdgeID = checkID(variableLabel + " in " + parent + "_edge_from_top_to_variable", edges);
+            array = defineEdge(array, lambdaVariableSupportEdgeID, varEdge, lambdaVariableSupportNodeID, newNodeID);
+
+            /* If a free variable node hasn't been drawn yet it needs to be */
+            var lambdaAbstractionNodeID = "";
 
             if(!nodes.includes(lambda + variableLabel + ".")){
                 const freeVariableAbstractionID = checkID(lambda + variableLabel + ".", nodes);
                 array = defineNode(array, freeVariableAbstractionID, absNodeFree, posX, posY - nodeDistanceY);
-                id = freeVariableAbstractionID;
+                lambdaAbstractionNodeID = freeVariableAbstractionID;
             } else {
-                id = ctx.getNode(term.index);
+                lambdaAbstractionNodeID = lambda + variableLabel + "._abstraction_node_top";
             }
 
-            const lambdaVariableSupportNodeID = checkID(variableLabel + "_abstraction_node_top", nodes);
-            array = defineNode(array, lambdaVariableSupportNodeID, varNodeTop, posX, posY - nodeDistanceY);
-
-            const lambdaVariableSupportEdgeID = checkID(variableLabel + " in " + parent + "_edge_from_top_to_variable", edges);
-            array = defineEdge(array, lambdaVariableSupportEdgeID, varEdge, lambdaVariableSupportNodeID, newNodeID);
-
-            /* The variable comes from the corresponding abstraction node at the top of the map */
-
+            /* Create the edge connecting the node at the top to the corresponsing abstraction support node */
             const lambdaVariableAbstractionEdgeID = checkID(variableLabel + " in " + parent + "_curved_edge_from_abstraction_to_variable", edges);
-            array = defineEdge(array, lambdaVariableAbstractionEdgeID, varEdgeLabel, id, lambdaVariableSupportNodeID);
-
+            array = defineEdge(array, lambdaVariableAbstractionEdgeID, varEdgeLabel, lambdaAbstractionNodeID, lambdaVariableSupportNodeID);
 
             break;
     }
@@ -258,8 +258,8 @@ function defineNode(array, id, type, posX, posY){
  * @param {Object[]} array  - The array of all the map elements.
  * @param {string} id       - The desired edge ID.
  * @param {string} type     - The type of edge. 
- * @param {number} source   - The source of this edge.
- * @param {number} target   - The target of this edge.
+ * @param {string} source   - The source of this edge.
+ * @param {string} target   - The target of this edge.
  * @return {Object[]} The updated array of map elements.
  */
 function defineEdge(array, id, type, source, target){

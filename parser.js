@@ -95,7 +95,7 @@ function parseTerm(tokens, initial, env){
             default:
 
                 var index = env.find(tokens[i]);
-                var label = env.determine(index);
+                var label = env.getCorrespondingVariable(index);
 
                 if(index === -1){
                     return "Parse error: Variable " + tokens[i] + " with no associated binding encountered";
