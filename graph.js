@@ -213,10 +213,14 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
             /* If a free variable node hasn't been drawn yet it needs to be */
             var lambdaAbstractionNodeID = "";
 
-            if(!nodes.includes(lambda + variableLabel + ".")){
-                const freeVariableAbstractionID = checkID(lambda + variableLabel + ".", nodes);
-                array = defineNode(array, freeVariableAbstractionID, absNodeFree, posX, posY - nodeDistanceY);
-                lambdaAbstractionNodeID = freeVariableAbstractionID;
+            if(!nodes.includes(lambda + variableLabel + "._abstraction_node_top")){
+                if(!nodes.includes(lambda + variableLabel + ".")){
+                    const freeVariableAbstractionID = checkID(lambda + variableLabel + ".", nodes);
+                    array = defineNode(array, freeVariableAbstractionID, absNodeFree, posX, posY - nodeDistanceY);
+                    lambdaAbstractionNodeID = freeVariableAbstractionID;
+                } else {
+                    lambdaAbstractionNodeID = lambda + variableLabel + ".";
+                }
             } else {
                 lambdaAbstractionNodeID = lambda + variableLabel + "._abstraction_node_top";
             }
