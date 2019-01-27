@@ -66,19 +66,11 @@ class LambdaVariable{
     }
 
     /**
-     * How many crossings are there in the map of this term?
+     * How many crossings does this term have?
      * @return {number} The number of crossings in this term.
      */
     crossings(){
-         return 0;
-    }
-
-    /**
-     * Helper function for crossings().
-     * @return {number[]} An array containing the indices of variables used in this term, with the number of crossings as element 0.
-     */
-    crossingsHelper(){
-        return [0, this.index];
+        return 0;
     }
 
     /**
@@ -212,19 +204,7 @@ class LambdaAbstraction{
      * @return {number} The number of crossings in this term.
      */
     crossings(){
-        return this.crossingsHelper()[0];
-    }
-    
-    /**
-     * Helper function for crossings().
-     * @return {number[]} An array containing the indices of variables used in this term, with the number of crossings as element 0.
-     */
-    crossingsHelper(){
-        var abs_array = this.t.crossingsHelper();
-        var array = abs_array.slice(1).map(x => x - 1).filter(x => x >= 0);            
-        array = [abs_array[0]].concat(array);
-
-        return array;
+        return this.t.newCrossings();
     }
 
     /**
@@ -365,34 +345,23 @@ class LambdaApplication{
      * @return {number} The number of crossings in this term.
      */
     crossings(){
-        return this.crossingsHelper()[0];
-    }
-    
-    /**
-     * Helper function for crossings().
-     * @return {number[]} An array containing the indices of variables used in this term, with the number of crossings as element 0.
-     */
-    crossingsHelper(){
-        var lhs_array = this.t1.crossingsHelper();
-        var rhs_array = this.t2.crossingsHelper();
+        var freeVarsLHS = this.t1.freeVariables();
+        var freeVarsRHS = this.t2.freeVariables();
 
-        var crossings = lhs_array[0] + rhs_array[0];
+        var crossings = this.t1.newCrossings() + this.t2.newCrossings();
+        var n = freeVarsLHS.length;
 
-        for(var i = 1; i < lhs_array.length; i++){
-            for(var j = 1; j < rhs_array.length; j++){
-                if(lhs_array[i] < rhs_array[j]){
-                    crossings++;
-                }
-            }
+        for(var i = 0; i < n; i++){
+            crossings += (freeVarsLHS[i] - (n - 1 - i))
         }
 
-        var array = [crossings];
-        lhs_array = lhs_array.slice(1);
-        rhs_array = rhs_array.slice(1);
+        n = freeVarsRHS.length;
 
-        array = array.concat(lhs_array.concat(rhs_array));
+        for(var i = 0; i < n; i++){
+            crossings += (freeVarsRHS[i] - (n - 1 - i))
+        }
 
-        return array;
+        return crossings;
     }
 
     /**
