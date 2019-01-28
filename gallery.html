@@ -38,6 +38,9 @@
         .term-fact{
             font-size: 24px;
         }
+        .number-box{
+            width: 25px;
+        }
 
     </style>
 </head>
@@ -49,11 +52,14 @@
         Graph display powerered by <a href="http://js.cytoscape.org/">Cytoscape.js</a>
 
         <h2>&lambda; term generators</h2>
-        n <input type = "text" id = "n" style = "width: 25px"> k <input type = "text" id = "k" style = "width: 25px">
+        n <input type = "text" class = "number-box" id = "n"> k <input type = "text" class = "number-box" id = "k">
         <button type = "button" id = "generate-btn" onclick = "generate_button(0, false);">Pure</button>
         <button type = "button" id = "generate-btn" onclick = "generate_button(1, false);">Linear</button>
         <button type = "button" id = "generate-btn" onclick = "generate_button(2, false);">Planar</button> 
         <button type = "button" id = "generate-btn" onclick = "clear_button();">Clear</button> <span id = "number-of-terms"></span>
+
+        <h2>Filtering options</h2>
+        Crossings <input type = "text" class = "number-box" id = "crossings">
 
         <p id = "church-room"></p>
     </div>

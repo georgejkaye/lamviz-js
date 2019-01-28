@@ -204,7 +204,7 @@ class LambdaAbstraction{
      * @return {number} The number of crossings in this term.
      */
     crossings(){
-        return this.t.newCrossings();
+        return this.t.crossings();
     }
 
     /**
@@ -348,7 +348,7 @@ class LambdaApplication{
         var freeVarsLHS = this.t1.freeVariables();
         var freeVarsRHS = this.t2.freeVariables();
 
-        var crossings = this.t1.newCrossings() + this.t2.newCrossings();
+        var crossings = this.t1.crossings() + this.t2.crossings();
         var n = freeVarsLHS.length;
 
         for(var i = 0; i < n; i++){
