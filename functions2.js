@@ -134,7 +134,7 @@ function generate_button(x, prev){
         termString = "";
 
         for(i = 0; i < terms.length; i++){
-            
+
             termString += get_div('w3-container frame', 'frame' + i, "", 'view_portrait(' + i + ');', 
                             get_div("w3-container portrait", "portrait" + i, "", "", "") + "<br>" + 
                                 get_p("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));            
@@ -179,14 +179,16 @@ function generate_button(x, prev){
  */
 function drawGallery(cache, terms, ctx){
     
-    if(cache){
-        for(var i = 0; i < terms.length; i++){
-            drawGraph("portrait" + i, terms[i], ctx, false, false, false);
+    if(document.getElementById("draw").checked){
+        if(cache){
+            for(var i = 0; i < terms.length; i++){
+                drawGraph("portrait" + i, terms[i], ctx, false, false, false);
+            }
         }
-    }
-    
-    for(var i = 0; i < terms.length; i++){
-        cys[i] = drawGraph("portrait" + i, terms[i], ctx, false, false, false);
+        
+        for(var i = 0; i < terms.length; i++){
+            cys[i] = drawGraph("portrait" + i, terms[i], ctx, false, false, false);
+        }
     }
 }
 
