@@ -56,10 +56,15 @@
         <button type = "button" id = "generate-btn" onclick = "generate_button(0, false);">Pure</button>
         <button type = "button" id = "generate-btn" onclick = "generate_button(1, false);">Linear</button>
         <button type = "button" id = "generate-btn" onclick = "generate_button(2, false);">Planar</button> 
-        <button type = "button" id = "generate-btn" onclick = "clear_button();">Clear</button> <span id = "number-of-terms"></span>
+        <button type = "button" id = "generate-btn" onclick = "clear_button();">Clear</button>
 
-        <h2>Filtering options</h2>
+        <h3>Filtering options</h3>
         Crossings <input type = "text" class = "number-box" id = "crossings">
+        Abstractions <input type = "text" class = "number-box" id = "abstractions">
+        Applications <input type = "text" class = "number-box" id = "applications">
+        Variables <input type = "text" class = "number-box" id = "variables">
+
+        <b><p id = "number-of-terms"></p></b>
 
         <p id = "church-room"></p>
     </div>

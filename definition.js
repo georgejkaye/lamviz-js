@@ -345,20 +345,19 @@ class LambdaApplication{
      * @return {number} The number of crossings in this term.
      */
     crossings(){
-        var freeVarsLHS = this.t1.freeVariables();
-        var freeVarsRHS = this.t2.freeVariables();
+        var freeVarsLHS = this.t1.freeVariableIndices();
+        var freeVarsRHS = this.t2.freeVariableIndices();
+        var freeVars = freeVarsLHS.concat(freeVarsRHS);
 
         var crossings = this.t1.crossings() + this.t2.crossings();
-        var n = freeVarsLHS.length;
+        var n = freeVars.length;
 
         for(var i = 0; i < n; i++){
-            crossings += (freeVarsLHS[i] - (n - 1 - i))
-        }
-
-        n = freeVarsRHS.length;
-
-        for(var i = 0; i < n; i++){
-            crossings += (freeVarsRHS[i] - (n - 1 - i))
+            for(var j = i+1; j < n; j++){
+                if(freeVars[i] < freeVars[j]){
+                    crossings++;
+                }
+            }
         }
 
         return crossings;

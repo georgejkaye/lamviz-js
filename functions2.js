@@ -24,6 +24,18 @@ function changeText(id, text){
     document.getElementById(id).innerHTML = text;
 }
 
+function changeValue(id, text){
+    document.getElementById(id).value = text;
+}
+
+function changeValueClass(className, text){
+    var elems = document.getElementsByClassName(className);
+
+    for(var i = 0; i < elems.length; i++){
+        elems[i].value = text;
+    }
+}
+
 /**
  * Get the text of an element with a given id.
  * @param {string} id - The id of the element.
@@ -66,14 +78,22 @@ function generate_button(x, prev){
     if(!prev){
         n = parseInt(getText('n'));
         k = parseInt(getText('k'));
+        cross = parseInt(getText('crossings'));
+        apps = parseInt(getText('applications'));
+        abs = parseInt(getText('abstractions'));
+        vars = parseInt(getText('variables'));
         last_action = x;
     }
 
     var string = "";
 
-    if(isNaN(n) || isNaN(k)){
+    if(isNaN(n)){
         string = "Bad input";
     } else {
+
+        if(isNaN(k)){
+            k = 0;
+        }
 
         terms = [];
         cys = [];
@@ -90,6 +110,27 @@ function generate_button(x, prev){
                 break;
         }
 
+        var totalNumber = terms.length;
+
+        if(!isNaN(cross)){
+            terms = terms.filter(x => x.crossings() === cross);
+        }
+
+        if(!isNaN(apps)){
+            terms = terms.filter(x => x.applications() === apps);
+        }
+        
+        if(!isNaN(abs)){
+            terms = terms.filter(x => x.abstractions() === abs);
+        }
+        
+        if(!isNaN(vars)){
+            terms = terms.filter(x => x.crossings() === vars);
+        }
+
+
+        var filteredNumber = terms.length;
+
         termString = "";
 
         for(i = 0; i < terms.length; i++){
@@ -101,13 +142,22 @@ function generate_button(x, prev){
 
         changeText('church-room', termString);
 
-        var numString = terms.length + " term";
+        var numString = "There ";
+        
+        if(totalNumber === 1){
+            numString += "is 1 term";
+        } else {
+            numString += "are " + totalNumber + " terms"; 
+        }
+
+        numString += " for n = " + n + " and k = " + k + "<br>" +
+                        filteredNumber + "/" + totalNumber + " term";
 
         if(terms.length !== 1){
             numString += "s";
         }
 
-        changeText('number-of-terms', numString + " found");
+        changeText('number-of-terms', numString + " match the filtering criteria: "  + ((filteredNumber / totalNumber) * 100).toFixed(2) + "%");
 
         ctx = new LambdaEnvironment();
 
@@ -152,6 +202,7 @@ var a = 0;
 function clear_button(){
     changeText('church-room', "");
     changeText('number-of-terms', "");
+    changeValueClass('number-box', "");
 }
 
 function print_array(array){
