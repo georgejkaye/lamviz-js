@@ -11,8 +11,15 @@ var cys;
 var ctx;
 var currentTermNo = 0;
 var termString = "";
+
 var n = 0;
 var k = 0;
+var cross = 0;
+var abs = 0;
+var apps = 0;
+var vars = 0;
+var fragment = "";
+
 var last_action = 0;
 
 /**
@@ -95,19 +102,27 @@ function generate_button(x, prev){
             k = 0;
         }
 
-        terms = [];
-        cys = [];
+        if(!prev){
+            fragment = "";
+            terms = [];
+            cys = [];
+        }
         
-        switch(last_action){
-            case 0:
-                terms = generateTerms(n, k);
-                break;
-            case 1:
-                terms = generateLinearTerms(n, k);
-                break;
-            case 2:
-                terms = generatePlanarTerms(n, k);
-                break;
+        if(!prev){
+            switch(last_action){
+                case 0:
+                    terms = generateTerms(n, k);
+                    fragment = "pure";
+                    break;
+                case 1:
+                    terms = generateLinearTerms(n, k);
+                    fragment = "linear";
+                    break;
+                case 2:
+                    terms = generatePlanarTerms(n, k);
+                    fragment = "planar";
+                    break;
+            }
         }
 
         var totalNumber = terms.length;
@@ -150,9 +165,9 @@ function generate_button(x, prev){
         var numString = "There ";
         
         if(totalNumber === 1){
-            numString += "is 1 term";
+            numString += "is 1 " + fragment + " term";
         } else {
-            numString += "are " + totalNumber + " terms"; 
+            numString += "are " + totalNumber + " " + fragment + " terms"; 
         }
 
         numString += " for n = " + n + " and k = " + k + "<br>" +
@@ -163,6 +178,7 @@ function generate_button(x, prev){
         }
 
         changeText('number-of-terms', numString + " match the filtering criteria: "  + ((filteredNumber / totalNumber) * 100).toFixed(2) + "%");
+        changeText('help', "Click on a term to learn more about it.")
 
         ctx = new LambdaEnvironment();
 
