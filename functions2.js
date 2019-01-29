@@ -135,9 +135,14 @@ function generate_button(x, prev){
 
         for(i = 0; i < terms.length; i++){
 
-            termString += get_div('w3-container frame', 'frame' + i, "", 'view_portrait(' + i + ');', 
+            if(document.getElementById("draw").checked){
+                termString += get_div('w3-container frame', 'frame' + i, "", 'view_portrait(' + i + ');', 
                             get_div("w3-container portrait", "portrait" + i, "", "", "") + "<br>" + 
                                 get_p("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));            
+ 
+            } else {
+                termString += get_div('w3-container frame', 'frame ' + i, "", 'view_portrait(' + i + ');', get_p("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));
+            }
         }
 
         changeText('church-room', termString);
