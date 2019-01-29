@@ -141,7 +141,7 @@ function generate_button(x, prev){
                                 get_p("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));            
  
             } else {
-                termString += get_div('w3-container frame', 'frame ' + i, "", 'view_portrait(' + i + ');', get_p("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));
+                termString += get_div('w3-container frame empty', 'frame ' + i, "", 'view_portrait(' + i + ');', get_p("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));
             }
         }
 
