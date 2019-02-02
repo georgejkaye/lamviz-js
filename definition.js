@@ -112,8 +112,36 @@ class LambdaVariable{
     freeVariableIndices(){
         return [this.index];
     }
+
+    /**
+     * Is this term a beta redex?
+     * @return {boolean} Whether this term is a beta redex.
+     */
+    isBetaRedex(){
+        return false;
+    }
+
+    /**
+     * Does this term contain a beta redex?
+     * @return {boolean} Whether this term contains a beta redex.
+     */
+    hasBetaRedex(){
+        return false;
+    }
+
+    /**
+     * How many beta redexes does this term contain?
+     * @return {number} How many beta redexes this term contains.
+     */
+    betaRedexes(){
+        return 0;
+    }
 }
 
+/**
+     * Does this term contain a beta redex?
+     * @return {boolean} Whether this term contains a beta redex.
+     */
 /** Class representing a lambda abstraction. */
 class LambdaAbstraction{
 
@@ -252,6 +280,30 @@ class LambdaAbstraction{
         return this.t.freeVariableIndices().filter(x => x !== 0).map(x => x - 1);
     }
     
+    /**
+     * Is this term a beta redex?
+     * @return {boolean} Whether this term is a beta redex.
+     */
+    isBetaRedex(){
+        return false;
+    }
+
+    /**
+     * Does this term contain a beta redex?
+     * @return {boolean} Whether this term contains a beta redex.
+     */
+    hasBetaRedex(){
+        return this.t.hasBetaRedex();
+    }
+
+    /**
+     * How many beta redexes does this term contain?
+     * @return {number} How many beta redexes this term contains.
+     */
+    betaRedexes(){
+        return this.t.betaRedexes();
+    }
+
 }
 
 /** Class representing a lambda application. */
@@ -347,14 +399,15 @@ class LambdaApplication{
     crossings(){
         var freeVarsLHS = this.t1.freeVariableIndices();
         var freeVarsRHS = this.t2.freeVariableIndices();
-        var freeVars = freeVarsLHS.concat(freeVarsRHS);
+        //var freeVars = freeVarsLHS.concat(freeVarsRHS);
 
         var crossings = this.t1.crossings() + this.t2.crossings();
-        var n = freeVars.length;
+        var m = freeVarsLHS.length;
+        var n = freeVarsRHS.length;
 
-        for(var i = 0; i < n; i++){
-            for(var j = i+1; j < n; j++){
-                if(freeVars[i] < freeVars[j]){
+        for(var i = 0; i < m; i++){
+            for(var j = 0; j < n; j++){
+                if(freeVarsLHS[i] < freeVarsRHS[j]){
                     crossings++;
                 }
             }
@@ -401,6 +454,41 @@ class LambdaApplication{
      */
     freeVariableIndices(){
         return this.t1.freeVariableIndices().concat(this.t2.freeVariableIndices());
+    }
+
+    /**
+     * Is this term a beta redex?
+     * @return {boolean} Whether this term is a beta redex.
+     */
+    isBetaRedex(){
+        if(this.t1.getType() === ABS){
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Does this term contain a beta redex?
+     * @return {boolean} Whether this term contains a beta redex.
+     */
+    hasBetaRedex(){
+        return (this.isBetaRedex() || (this.t1.hasBetaRedex() && this.t2.hasBetaRedex()));
+    }
+
+    /**
+     * How many beta redexes does this term contain?
+     * @return {number} How many beta redexes this term contains.
+     */
+    betaRedexes(){
+
+        var redexes = 0;
+
+        if(this.isBetaRedex()){
+            redexes++;
+        }
+
+        return redexes + this.t1.betaRedexes() + this.t2.betaRedexes();
     }
 
 }
