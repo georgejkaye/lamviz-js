@@ -151,12 +151,12 @@ function generate_button(x, prev){
         for(i = 0; i < terms.length; i++){
 
             if(document.getElementById("draw").checked){
-                termString += get_div('w3-container frame', 'frame' + i, "", 'view_portrait(' + i + ');', 
+                termString += get_div('w3-container frame', 'frame' + i, "", 'view_portrait(terms[' + i + ']);', 
                             get_div("w3-container portrait", "portrait" + i, "", "", "") + "<br>" + 
                                 get_p("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));            
  
             } else {
-                termString += get_div('w3-container frame empty', 'frame ' + i, "", 'view_portrait(' + i + ');', get_p("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));
+                termString += get_div('w3-container frame empty', 'frame ' + i, "", 'view_portrait(terms[' + i + ']);', get_p("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));
             }
         }
 
@@ -276,34 +276,37 @@ function get_h(classname, id, num, style, onclick, content){
  
 /**
  * Function to execute when a portrait is clicked.
- * @param i - The portrait id.
+ * @param term - The term to draw.
  */
-function view_portrait(i){
+function view_portrait(term){
+
+    currentTerm = term;
+
     changeText("church-room", '<table>' +
                                     '<tr>' +
                                         '<td>' + get_div("w3-container frame big-frame", "frame" + i, "", "", get_div("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
                                         '<td>' +
                                             '<table>' + 
                                                 '<tr>' +
-                                                    '<td class = "term-heading"><b>' + terms[i].prettyPrint() + '</b></td>' +
+                                                    '<td class = "term-heading"><b>' + currentTerm.prettyPrint() + '</b></td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td class = "term-fact">' + 'Crossings: ' + terms[i].crossings() + '</td>' +
+                                                    '<td class = "term-fact">' + 'Crossings: ' + currentTerm.crossings() + '</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td class = "term-fact">' + 'Abstractions: ' + terms[i].abstractions() + '</td>' +
+                                                    '<td class = "term-fact">' + 'Abstractions: ' + currentTerm.abstractions() + '</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td class = "term-fact">' + 'Applications: ' + terms[i].applications() + '</td>' +
+                                                    '<td class = "term-fact">' + 'Applications: ' + currentTerm.applications() + '</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td class = "term-fact">' + 'Variables: ' + terms[i].variables() + '</td>' +
+                                                    '<td class = "term-fact">' + 'Variables: ' + currentTerm.variables() + '</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td class = "term-fact">' + 'Free variables: ' + terms[i].freeVariables() + '</td>' +
+                                                    '<td class = "term-fact">' + 'Free variables: ' + currentTerm.freeVariables() + '</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td class = "term-fact">' + 'Beta redexes: ' + terms[i].betaRedexes() + '</td>' +
+                                                    '<td class = "term-fact">' + 'Beta redexes: ' + currentTerm.betaRedexes() + '<button type = "button" id = "reduce-btn" onclick = "reduce_button();">Reduce</button></td>' +
                                                 '</tr>' +
                                                 '<tr>' +
                                                     '<td><button type = "button" id = "back-btn" onclick = "back_button();">Back</button>' +
@@ -313,10 +316,18 @@ function view_portrait(i){
                                     '<tr>' +
                                 '</table>'
     )
-    drawGraph('portrait' + i, terms[i], ctx, true, true, false);
+    drawGraph('portrait' + i, currentTerm, ctx, true, true, false);
 
 }
 
 function back_button(){
     generate_button(last_action, true);
+}
+
+function reduce_button(){
+
+    var normalised_term = normalise(currentTerm);
+    view_portrait(normalised_term);
+
+
 }
