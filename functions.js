@@ -149,10 +149,18 @@ function normalise_button(){
         changeText('result', "Timed out during normalisation");
     } else {
 
+        var frees = getText('env').split(" ");
+        var ctx = new LambdaEnvironment();
+
+        for(i = 0; i < frees.length; i++){
+            ctx.pushTerm(frees[i]);
+        }
+
         currentTerm = res;
         var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels();
 
         changeText('result', text);
+        drawGraph("cy", currentTerm, ctx, true, true, document.getElementById('labels-yes').checked);
     }
 }
 
