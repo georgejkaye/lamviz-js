@@ -5,6 +5,8 @@
  */
 
 var currentTerm;
+var originalTerm;
+var reduced = false;
 
 var terms;
 var cys;
@@ -282,6 +284,12 @@ function view_portrait(term){
 
     currentTerm = term;
 
+    var disabled = '';
+
+    if(!currentTerm.hasBetaRedex()){
+        disabled = 'disabled';
+    }
+
     changeText("church-room", '<table>' +
                                     '<tr>' +
                                         '<td>' + get_div("w3-container frame big-frame", "frame" + i, "", "", get_div("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
@@ -306,10 +314,16 @@ function view_portrait(term){
                                                     '<td class = "term-fact">' + 'Free variables: ' + currentTerm.freeVariables() + '</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td class = "term-fact">' + 'Beta redexes: ' + currentTerm.betaRedexes() + '<button type = "button" id = "reduce-btn" onclick = "reduce_button();">Reduce</button></td>' +
+                                                    '<td class = "term-fact">' + 'Beta redexes: ' + currentTerm.betaRedexes() + '</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td><button type = "button" id = "back-btn" onclick = "back_button();">Back</button>' +
+                                                    '<td><b>Perform reduction</b></td>' +
+                                                '</tr>' +
+                                                '<tr>' +
+                                                    '<td><button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduce_button();">Outermost</button></td>' +
+                                                '</tr>' +
+                                                '<tr>' +
+                                                    '<td><button type = "button" disabled id = "reset-btn" onclick = "reset_button();">Reset</button><button type = "button" id = "back-btn" onclick = "back_button();">Back</button>' +
                                                 '</tr>' +
                                             '</table>' +
                                         '</td>' +
@@ -324,10 +338,23 @@ function back_button(){
     generate_button(last_action, true);
 }
 
+function reset_button(){
+    if(currentTerm !== originalTerm){
+        view_portrait(originalTerm);
+    }
+}
+
 function reduce_button(){
 
-    var normalised_term = normalise(currentTerm);
+    var normalised_term = outermostReduction(currentTerm);
+    
+    if(!reduced){
+        reduced = true;
+        originalTerm = currentTerm;
+    }
+
     view_portrait(normalised_term);
+    document.getElementById("reset-btn").disabled = false; 
 
 
 }

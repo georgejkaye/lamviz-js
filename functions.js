@@ -143,12 +143,13 @@ function evaluate_button(){
  */
 function normalise_button(){
 
-    var res = normalise(currentTerm);
+    var res = outermostReduction(currentTerm);
 
     if(res === "Timeout"){
         changeText('result', "Timed out during normalisation");
     } else {
 
+        currentTerm = res;
         var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels();
 
         changeText('result', text);

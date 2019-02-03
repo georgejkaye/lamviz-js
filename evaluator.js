@@ -72,7 +72,7 @@ function substitute(s, j, t){
  * @param {Object} val - The value to substitute into the abstraction.
  * @return {Object} The beta-reduced expression.
  */
-function applicationAbstraction(abs, val){
+function performBetaReduction(abs, val){
     var term = shift(substitute(shift(val, 1, 0), 0, abs.t), -1, 0);
 
     console.log("Beta reduced term: " + term.prettyPrint());
@@ -117,7 +117,7 @@ function evaluate(t, x){
         var t2 = t.t2;
 
         if(t1.getType() === ABS && t2.getType() === ABS){
-            t = applicationAbstraction(t1, t2);
+            t = performBetaReduction(t1, t2);
         } else if(t1.getType() === ABS){
 
             t2 = evaluate(t2)
@@ -188,7 +188,7 @@ function normalise(t, x){
 
             /* Perform a beta-reduction */
             if(t.t1.getType() === ABS){
-                t1 = applicationAbstraction(t.t1, t.t2);
+                t1 = performBetaReduction(t.t1, t.t2);
                 console.log("Beta reduction performed: " + t1.prettyPrintLabels());
                 return normalise(t1, false);
             }
@@ -204,6 +204,49 @@ function normalise(t, x){
 
             if(t1.getType() === ABS){
                 return normalise(term);
+            }
+
+            return term;
+
+    }
+
+}
+
+/**
+ * Perform the outermost reduction of a lambda term, if this is possible.
+ * @param {Object} term - The lambda term to perform the reduction on.
+ * @return {Object} The reduced term (or the original term if no reduction is possible).
+ */
+function outermostReduction(term){
+
+    if(term.isBetaRedex()){
+        return performBetaReduction(term.t1, term.t2);
+    }
+
+    switch(term.getType()){
+        case VAR:
+            return term;
+        case ABS:
+
+            var reducedScope = outermostReduction(term.t);
+
+            if(reducedScope !== term.t){
+                return new LambdaAbstraction(reducedScope, term.label);
+            }
+
+            return term;
+
+        case APP:
+            var reducedLHS = outermostReduction(term.t1);
+
+            if(reducedLHS !== term.t1){
+                return new LambdaApplication(reducedLHS, term.t2);
+            }
+
+            var reducedRHS = outermostReduction(term.t2);
+
+            if(reducedRHS !== term.t2){
+                return new LambdaApplication(term.t1, reducedRHS);
             }
 
             return term;
