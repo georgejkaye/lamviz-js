@@ -336,11 +336,13 @@ function view_portrait(term){
 
 function back_button(){
     generate_button(last_action, true);
+    reduced = false;
 }
 
 function reset_button(){
     if(currentTerm !== originalTerm){
         view_portrait(originalTerm);
+        reduced = false;
     }
 }
 
