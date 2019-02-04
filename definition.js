@@ -485,7 +485,7 @@ class LambdaApplication{
      * @return {boolean} Whether this term contains a beta redex.
      */
     hasBetaRedex(){
-        return (this.isBetaRedex() || (this.t1.hasBetaRedex() && this.t2.hasBetaRedex()));
+        return (this.isBetaRedex() || (this.t1.hasBetaRedex() || this.t2.hasBetaRedex()));
     }
 
     /**
