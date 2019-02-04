@@ -5,9 +5,9 @@
  */
 
 /** Maximum number of operations to perform during normalisation or evaluation */
-const max_execution_ops = 100;
+const maxExecutionOps = 100;
 /** Current number of operations performed during normalisation */
-var current_execution_ops = 0;
+var currentExecutionOps = 0;
 
 /**
  * Shifts all the de Bruijn indices in a t by a certain amount.
@@ -84,7 +84,7 @@ function performBetaReduction(abs, val){
  * Check if the max execution ops have been reached
  */
 function timeout(){
-    return current_execution_ops > max_execution_ops;
+    return currentExecutionOps > maxExecutionOps;
 }
 
 /**
@@ -100,10 +100,10 @@ function evaluate(t, x){
     }
     
     if(x){
-        current_execution_ops = 0;
+        currentExecutionOps = 0;
     }
 
-    current_execution_ops++;
+    currentExecutionOps++;
 
     if(timeout()){
         return "Timeout";
@@ -157,9 +157,9 @@ function normalise(t, x){
     }
     
     if(x){
-        current_execution_ops = 1;
+        currentExecutionOps = 1;
     } else {
-        current_execution_ops++;
+        currentExecutionOps++;
     }
 
     if(timeout()){
@@ -173,14 +173,14 @@ function normalise(t, x){
             return t;
         case ABS:
 
-            var normalised_subterm = normalise(t.t, false);
+            var normalisedSubterm = normalise(t.t, false);
 
-            if(normalised_subterm === "Timeout"){
+            if(normalisedSubterm === "Timeout"){
                 return "Timeout";
             }
 
-            var new_abstraction = new LambdaAbstraction(normalised_subterm, t.label);
-            return new_abstraction;
+            var newAbstraction = new LambdaAbstraction(normalisedSubterm, t.label);
+            return newAbstraction;
         case APP:
 
             var t1;

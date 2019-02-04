@@ -13,6 +13,7 @@ var cys;
 var ctx;
 var currentTermNo = 0;
 var termString = "";
+var totalNumber = 0;
 
 var n = 0;
 var k = 0;
@@ -23,7 +24,7 @@ var vars = 0;
 var betas = 0;
 var fragment = "";
 
-var last_action = 0;
+var lastAction = 0;
 
 /**
  * Change the text of an element with a given id.
@@ -83,7 +84,7 @@ function prettyString(array){
  * @param {number} n - A previously specified n (optional).
  * @param {number} k - A previously specified k (optional).
  */
-function generate_button(x, prev){
+function generateButton(x, prev){
 
     if(!prev){
         n = parseInt(getText('n'));
@@ -93,7 +94,7 @@ function generate_button(x, prev){
         abs = parseInt(getText('abstractions'));
         vars = parseInt(getText('variables'));
         betas = parseInt(getText('betas'));
-        last_action = x;
+        lastAction = x;
     }
 
     var string = "";
@@ -113,7 +114,7 @@ function generate_button(x, prev){
         }
         
         if(!prev){
-            switch(last_action){
+            switch(lastAction){
                 case 0:
                     terms = generateTerms(n, k);
                     fragment = "pure";
@@ -127,9 +128,9 @@ function generate_button(x, prev){
                     fragment = "planar";
                     break;
             }
-        }
 
-        var totalNumber = terms.length;
+            totalNumber = terms.length;
+        }
 
         if(!isNaN(cross)){
             terms = terms.filter(x => x.crossings() === cross);
@@ -158,12 +159,12 @@ function generate_button(x, prev){
         for(i = 0; i < terms.length; i++){
 
             if(document.getElementById("draw").checked){
-                termString += get_div('w3-container frame', 'frame' + i, "", 'view_portrait(terms[' + i + ']);', 
-                            get_div("w3-container portrait", "portrait" + i, "", "", "") + "<br>" + 
-                                get_p("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));            
+                termString += getDiv('w3-container frame', 'frame' + i, "", 'viewPortrait(terms[' + i + ']);', 
+                            getDiv("w3-container portrait", "portrait" + i, "", "", "") + "<br>" + 
+                                getP("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));            
  
             } else {
-                termString += get_div('w3-container frame empty', 'frame ' + i, "", 'view_portrait(terms[' + i + ']);', get_p("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));
+                termString += getDiv('w3-container frame empty', 'frame ' + i, "", 'viewPortrait(terms[' + i + ']);', getP("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));
             }
         }
 
@@ -220,27 +221,25 @@ function drawGallery(cache, terms, ctx){
     }
 }
 
-function setup_portrait(){
-    console.log("hello!");
-}
-
 var a = 0;
 
 /**
  * Function to execute when the clear button is pressed.
  */
-function clear_button(){
+function clearButton(){
     changeText('church-room', "");
     changeText('number-of-terms', "");
     changeValueClass('number-box', "");
 }
 
-function print_array(array){
+function printArray(array){
     var string = "";
 
     for(var i = 0; i < array.length; i++){
         string += array[i] + ", ";
     }
+
+    return string.substring(0, string.length - 2);
 }
 
 /**
@@ -251,7 +250,7 @@ function print_array(array){
  * @param {string} content - The content of this element.
  * @return {string} The corresponding HTML for this element.
  */
-function get_element(element, classname, id, style, onclick, content){
+function getElement(element, classname, id, style, onclick, content){
     return '<' + element + ' class="' + classname + '" id="' + id + '" style="' + style + '" onclick="' + onclick + '">' + content + '</' + element +'>';
 }
 
@@ -262,8 +261,8 @@ function get_element(element, classname, id, style, onclick, content){
  * @param {string} content - The content of this <div>.
  * @return {string} The corresponding HTML for this <div>.
  */
-function get_div(classname, id, style, onclick, content){
-    return get_element("div", classname, id, style, onclick, content);
+function getDiv(classname, id, style, onclick, content){
+    return getElement("div", classname, id, style, onclick, content);
 }
 
 /**
@@ -273,19 +272,19 @@ function get_div(classname, id, style, onclick, content){
  * @param {string} content - The content of this <p>.
  * @return {string} The corresponding HTML for this <p>.
  */
-function get_p(classname, id, style, onclick, content){
-    return get_element("p", classname, id, style, onclick, content);
+function getP(classname, id, style, onclick, content){
+    return getElement("p", classname, id, style, onclick, content);
 }
 
-function get_h(classname, id, num, style, onclick, content){
-    return get_element("h" + num, classname, id, style, onclick, content);
+function getH(classname, id, num, style, onclick, content){
+    return getElement("h" + num, classname, id, style, onclick, content);
 }
  
 /**
  * Function to execute when a portrait is clicked.
  * @param term - The term to draw.
  */
-function view_portrait(term){
+function viewPortrait(term){
 
     currentTerm = term;
 
@@ -297,7 +296,7 @@ function view_portrait(term){
 
     changeText("church-room", '<table>' +
                                     '<tr>' +
-                                        '<td>' + get_div("w3-container frame big-frame", "frame" + i, "", "", get_div("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
+                                        '<td>' + getDiv("w3-container frame big-frame", "frame" + i, "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
                                         '<td>' +
                                             '<table>' + 
                                                 '<tr>' +
@@ -322,13 +321,16 @@ function view_portrait(term){
                                                     '<td class = "term-fact">' + 'Beta redexes: ' + currentTerm.betaRedexes() + '</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
+                                                    '<td class = "term-fact">' + printArray(currentTerm.printRedexes()) + '</td>' +
+                                                '</tr>' +
+                                                '<tr>' +
                                                     '<td><b>Perform reduction</b></td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td><button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduce_button(0);">Outermost</button><button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduce_button(1);">Innermost</button></td>' +
+                                                    '<td><button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduceButton(0);">Outermost</button><button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduceButton(1);">Innermost</button></td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td><button type = "button" disabled id = "reset-btn" onclick = "reset_button();">Reset</button><button type = "button" id = "back-btn" onclick = "back_button();">Back</button>' +
+                                                    '<td><button type = "button" disabled id = "reset-btn" onclick = "resetButton();">Reset</button><button type = "button" id = "back-btn" onclick = "backButton();">Back</button>' +
                                                 '</tr>' +
                                             '</table>' +
                                         '</td>' +
@@ -342,17 +344,17 @@ function view_portrait(term){
 /**
  * Function to execute when the back button is pressed.
  */
-function back_button(){
-    generate_button(last_action, true);
+function backButton(){
+    generateButton(lastAction, true);
     reduced = false;
 }
 
 /**
  * Function to execute when the reset button is pressed.
  */
-function reset_button(){
+function resetButton(){
     if(currentTerm !== originalTerm){
-        view_portrait(originalTerm);
+        viewPortrait(originalTerm);
         reduced = false;
     }
 }
@@ -361,16 +363,16 @@ function reset_button(){
  * Function to execute when a reduce button is pressed.
  * @param {number} strat - The reduction strategy to use: 0: outermost, 1: innermost
  */
-function reduce_button(strat){
+function reduceButton(strat){
 
-    var normalised_term;
+    var normalisedTerm;
     
     switch(strat){
         case 0:
-            normalised_term = outermostReduction(currentTerm);
+            normalisedTerm = outermostReduction(currentTerm);
             break;
         case 1:
-            normalised_term = innermostReduction(currentTerm);
+            normalisedTerm = innermostReduction(currentTerm);
             break;
     }
     
@@ -379,7 +381,7 @@ function reduce_button(strat){
         originalTerm = currentTerm;
     }
 
-    view_portrait(normalised_term);
+    viewPortrait(normalisedTerm);
     document.getElementById("reset-btn").disabled = false; 
 
 }

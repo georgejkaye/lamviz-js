@@ -136,12 +136,16 @@ class LambdaVariable{
     betaRedexes(){
         return 0;
     }
+
+    /**
+     * Print all of the redexes in this term.
+     * @return {String[]} The array of all redexes in this term.
+     */
+    printRedexes(){
+        return [];
+    }
 }
 
-/**
-     * Does this term contain a beta redex?
-     * @return {boolean} Whether this term contains a beta redex.
-     */
 /** Class representing a lambda abstraction. */
 class LambdaAbstraction{
 
@@ -302,6 +306,14 @@ class LambdaAbstraction{
      */
     betaRedexes(){
         return this.t.betaRedexes();
+    }
+
+    /**
+     * Print all of the redexes in this term.
+     * @return {String[]} The array of all redexes in this term.
+     */
+    printRedexes(){
+        return this.t.printRedexes();
     }
 
 }
@@ -489,6 +501,21 @@ class LambdaApplication{
         }
 
         return redexes + this.t1.betaRedexes() + this.t2.betaRedexes();
+    }
+
+    /**
+     * Print all of the redexes in this term.
+     * @return {String[]} The array of all redexes in this term.
+     */
+    printRedexes(){
+        
+        var array = [];
+        
+        if(this.isBetaRedex()){
+            array[0] = this.prettyPrint();
+        }
+
+        return array.concat(this.t1.printRedexes().concat(this.t2.printRedexes()));
     }
 
 }
