@@ -223,33 +223,50 @@ function outermostReduction(term){
         return performBetaReduction(term.t1, term.t2);
     }
 
+    if(!term.hasBetaRedex()){
+        return term;
+    }
+
     switch(term.getType()){
-        case VAR:
-            return term;
         case ABS:
-
-            var reducedScope = outermostReduction(term.t);
-
-            if(reducedScope !== term.t){
-                return new LambdaAbstraction(reducedScope, term.label);
-            }
-
-            return term;
-
+            return new LambdaAbstraction(outermostReduction(term.t), term.label);
         case APP:
-            var reducedLHS = outermostReduction(term.t1);
 
-            if(reducedLHS !== term.t1){
-                return new LambdaApplication(reducedLHS, term.t2);
+            if(term.t1.hasBetaRedex()){
+                return new LambdaApplication(outermostReduction(term.t1), term.t2);
+            }
+                
+            return new LambdaApplication(term.t1, outermostReduction(term.t2));
+
+    }
+}
+
+/**
+ * Perform the innermost reduction of a lambda term, if this is possible.
+ * @param {Object} term - The lambda term to perform the reduction on.
+ * @return {Object} The reduced term (or the original term if no reduction is possible).
+ */
+function innermostReduction(term){
+
+    if(!term.hasBetaRedex()){
+        return term;
+    }
+
+    switch(term.getType()){
+        case ABS:
+                return new LambdaAbstraction(innermostReduction(term.t), term.label);
+        case APP:
+
+            if(term.t1.hasBetaRedex()){
+                return new LambdaApplication(innermostReduction(term.t1), term.t2);
+                
             }
 
-            var reducedRHS = outermostReduction(term.t2);
-
-            if(reducedRHS !== term.t2){
-                return new LambdaApplication(term.t1, reducedRHS);
+            if(term.t2.hasBetaRedex()){
+                return new LambdaApplication(term.t1, innermostReduction(term.t2));
             }
-
-            return term;
+            
+            return performBetaReduction(term.t1, term.t2);
 
     }
 

@@ -20,6 +20,7 @@ var cross = 0;
 var abs = 0;
 var apps = 0;
 var vars = 0;
+var betas = 0;
 var fragment = "";
 
 var last_action = 0;
@@ -91,6 +92,7 @@ function generate_button(x, prev){
         apps = parseInt(getText('applications'));
         abs = parseInt(getText('abstractions'));
         vars = parseInt(getText('variables'));
+        betas = parseInt(getText('betas'));
         last_action = x;
     }
 
@@ -145,6 +147,9 @@ function generate_button(x, prev){
             terms = terms.filter(x => x.crossings() === vars);
         }
 
+        if(!isNaN(betas)){
+            terms = terms.filter(x => x.betaRedexes() === betas);
+        }
 
         var filteredNumber = terms.length;
 
@@ -320,7 +325,7 @@ function view_portrait(term){
                                                     '<td><b>Perform reduction</b></td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td><button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduce_button();">Outermost</button></td>' +
+                                                    '<td><button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduce_button(0);">Outermost</button><button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduce_button(1);">Innermost</button></td>' +
                                                 '</tr>' +
                                                 '<tr>' +
                                                     '<td><button type = "button" disabled id = "reset-btn" onclick = "reset_button();">Reset</button><button type = "button" id = "back-btn" onclick = "back_button();">Back</button>' +
@@ -334,11 +339,17 @@ function view_portrait(term){
 
 }
 
+/**
+ * Function to execute when the back button is pressed.
+ */
 function back_button(){
     generate_button(last_action, true);
     reduced = false;
 }
 
+/**
+ * Function to execute when the reset button is pressed.
+ */
 function reset_button(){
     if(currentTerm !== originalTerm){
         view_portrait(originalTerm);
@@ -346,9 +357,22 @@ function reset_button(){
     }
 }
 
-function reduce_button(){
+/**
+ * Function to execute when a reduce button is pressed.
+ * @param {number} strat - The reduction strategy to use: 0: outermost, 1: innermost
+ */
+function reduce_button(strat){
 
-    var normalised_term = outermostReduction(currentTerm);
+    var normalised_term;
+    
+    switch(strat){
+        case 0:
+            normalised_term = outermostReduction(currentTerm);
+            break;
+        case 1:
+            normalised_term = innermostReduction(currentTerm);
+            break;
+    }
     
     if(!reduced){
         reduced = true;
@@ -357,6 +381,5 @@ function reduce_button(){
 
     view_portrait(normalised_term);
     document.getElementById("reset-btn").disabled = false; 
-
 
 }
