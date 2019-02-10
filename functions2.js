@@ -1,5 +1,5 @@
 /**
- * Functions related to the html page, such as processing input or changing elements.
+ * Functions related to the gallery page, such as processing input or changing elements.
  * 
  * @author George Kaye
  */
@@ -58,12 +58,17 @@ function changeValueClass(className, value){
 }
 
 /**
- * Set the style of an element with a given id.
- * @param {string} id - The id of the element.
+ * Set the style of an element with a given class.
+ * @param {string} className - The class of the elements.
  * @param {string} style - The style to set.
  */
-function setStyle(id, style){
-    document.getElementById(id).setAttribute("style", style);
+function setStyle(className, style){
+    var elems = document.getElementsByClassName(className);
+    
+    for(var i = 0; i < elems.length; i++){
+        elems[i].setAttribute("style", style);
+    }
+    
 }
 
 /**
@@ -264,46 +269,46 @@ function printArray(array){
 /**
  * Get the HTML for an element.
  * @param {string} element - The element type.
- * @param {string} classname - The class of this element.
+ * @param {string} className - The class of this element.
  * @param {string} id - The id of this element.
  * @param {string} style - The style of this element.
  * @param {string} onclick - The onclick of this element.
  * @param {string} content - The content of this element.
  * @return {string} The corresponding HTML for this element.
  */
-function getElement(element, classname, id, style, onclick, content){
-    return '<' + element + ' class="' + classname + '" id="' + id + '" style="' + style + '" onclick="' + onclick + '">' + content + '</' + element +'>';
+function getElement(element, className, id, style, onclick, content){
+    return '<' + element + ' class="' + className + '" id="' + id + '" style="' + style + '" onclick="' + onclick + '">' + content + '</' + element +'>';
 }
 
 /**
  * Get the HTML for a <div>.
- * @param {string} classname - The class of this <div>.
+ * @param {string} className - The class of this <div>.
  * @param {string} id - The id of this <div>.
  * @param {string} style - The style of this <div>.
  * @param {string} onclick - The onclick of this <div>.
  * @param {string} content - The content of this <div>.
  * @return {string} The corresponding HTML for this <div>.
  */
-function getDiv(classname, id, style, onclick, content){
-    return getElement("div", classname, id, style, onclick, content);
+function getDiv(className, id, style, onclick, content){
+    return getElement("div", className, id, style, onclick, content);
 }
 
 /**
  * Get the HTML for a <p>.
- * @param {string} classname - The class of this <p>.
+ * @param {string} className - The class of this <p>.
  * @param {string} id - The id of this <p>.
  * @param {string} style - The style of this <p>.
  * @param {string} onclick - The onclick of this <p>.
  * @param {string} content - The content of this <p>.
  * @return {string} The corresponding HTML for this <p>.
  */
-function getP(classname, id, style, onclick, content){
-    return getElement("p", classname, id, style, onclick, content);
+function getP(className, id, style, onclick, content){
+    return getElement("p", className, id, style, onclick, content);
 }
 
 /**
  * Get the HTML for a <hx>.
- * @param {string} classname - The class of this <h>.
+ * @param {string} className - The class of this <h>.
  * @param {string} id - The id of this <h>.
  * @param {number} num - The heading number of this <h>.
  * @param {string} style - The style of this <h>.
@@ -311,21 +316,38 @@ function getP(classname, id, style, onclick, content){
  * @param {string} content - The content of this <h>.
  * @return {string} The corresponding HTML for this <h>.
  */
-function getH(classname, id, num, style, onclick, content){
-    return getElement("h" + num, classname, id, style, onclick, content);
+function getH(className, id, num, style, onclick, content){
+    return getElement("h" + num, className, id, style, onclick, content);
+}
+
+/**
+ * Get the HTML for a <tr>.
+ * @param {string} content - The content of this <tr>.
+ * @return {string} The corresponding HTML for this <tr>.
+ */
+function getRow(content){
+    return '<tr>' + content + '</tr>'
 }
  
+
+function getCell(className, content){
+    return '<td class="' + className + '">' + content + "</td>";
+
+}
 /**
  * Get the HTML for a bulleted list of elements in an array.
  * @param {Object[]} array - The array.
+ * @param {string} id - The id to prefix elements with.
+ * @param {string} onmouseenter - The script to execute when on mouseover.
  * @return {string} The HTML code for the bulleted list.
  */
-function bulletsOfArray(array){
+function bulletsOfArray(array, id, onmouseenter){
 
     var string = "<ul>";
 
+    
     for(var i = 0; i < array.length; i++){
-        string += "<li>" + array[i] + "</li>";
+        string += '<li id="' + id + '-' + i + '" onmouseenter="' + onmouseenter.replace("(i)", "(" + i + ")") + '">' + array[i] + "</li>";
     }
 
     string += "</ul>";
@@ -334,6 +356,11 @@ function bulletsOfArray(array){
 
 }
 
+/**
+ * Get an HTML representation of a term.
+ * @param {Object} term - The lambda term.
+ * @return {string} The HTML representation.
+ */
 function printTermHTML(term){
     return term.printHTML()[0];
 }
@@ -357,39 +384,17 @@ function viewPortrait(term){
                                         '<td>' + getDiv("w3-container frame big-frame", "frame" + i, "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
                                         '<td>' +
                                             '<table>' + 
-                                                '<tr>' +
-                                                    '<td class = "term-heading"><b>' + printTermHTML(currentTerm) + '</b></td>' +
-                                                '</tr>' +
-                                                '<tr>' +
-                                                    '<td class = "term-fact">' + 'Crossings: ' + currentTerm.crossings() + '</td>' +
-                                                '</tr>' +
-                                                '<tr>' +
-                                                    '<td class = "term-fact">' + 'Abstractions: ' + currentTerm.abstractions() + '</td>' +
-                                                '</tr>' +
-                                                '<tr>' +
-                                                    '<td class = "term-fact">' + 'Applications: ' + currentTerm.applications() + '</td>' +
-                                                '</tr>' +
-                                                '<tr>' +
-                                                    '<td class = "term-fact">' + 'Variables: ' + currentTerm.variables() + '</td>' +
-                                                '</tr>' +
-                                                '<tr>' +
-                                                    '<td class = "term-fact">' + 'Free variables: ' + currentTerm.freeVariables() + '</td>' +
-                                                '</tr>' +
-                                                '<tr>' +
-                                                    '<td class = "term-fact">' + 'Beta redexes: ' + currentTerm.betaRedexes() + '</td>' +
-                                                '</tr>' +
-                                                '<tr>' +
-                                                    '<td class = "term-fact">' + bulletsOfArray(currentTerm.printRedexes()) + '</td>' +
-                                                '</tr>' +
-                                                '<tr>' +
-                                                    '<td><b>Perform reduction</b></td>' +
-                                                '</tr>' +
-                                                '<tr>' +
-                                                    '<td><button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduceButton(0);">Outermost</button><button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduceButton(1);">Innermost</button></td>' +
-                                                '</tr>' +
-                                                '<tr>' +
-                                                    '<td><button type = "button" disabled id = "reset-btn" onclick = "resetButton();">Reset</button><button type = "button" id = "back-btn" onclick = "backButton();">Back</button>' +
-                                                '</tr>' +
+                                                getRow(getCell("term-heading", '<b>' + printTermHTML(currentTerm) + '</b>')) +
+                                                getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
+                                                getRow(getCell("term-fact", 'Abstractions: ' + currentTerm.abstractions())) +
+                                                getRow(getCell("term-fact", 'Applications: ' + currentTerm.applications())) +
+                                                getRow(getCell("term-fact", 'Variables: ' + currentTerm.variables())) +
+                                                getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
+                                                getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
+                                                getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(), "redex", "highlightRedex(i)"))) +
+                                                getRow(getCell("", '<b>Perform reduction</b>')) +
+                                                getRow(getCell("", '<button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduceButton(0);">Outermost</button><button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduceButton(1);">Innermost</button>')) +
+                                                getRow(getCell("", '<button type = "button" disabled id = "reset-btn" onclick = "resetButton();">Reset</button><button type = "button" id = "back-btn" onclick = "backButton();">Back</button>')) +
                                             '</table>' +
                                         '</td>' +
                                     '<tr>' +
@@ -397,7 +402,7 @@ function viewPortrait(term){
     )
     drawGraph('portrait' + i, currentTerm, ctx, true, true, false);
 
-    setStyle("app-1-beta-1", "color:red");
+    setStyle("app-0-beta-0", "color:red");
 
 }
 
@@ -443,5 +448,12 @@ function reduceButton(strat){
 
     viewPortrait(normalisedTerm);
     document.getElementById("reset-btn").disabled = false; 
+
+}
+
+function highlightRedex(i){
+
+    setStyle("beta", "color:black");
+    setStyle("beta-" + i, "color:red");
 
 }

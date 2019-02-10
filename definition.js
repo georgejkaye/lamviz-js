@@ -164,7 +164,7 @@ class LambdaVariable{
             betas = 0;
         }
 
-        var string = '<span id = "var-' + vars + '">' + this.index + '</span>';
+        var string = '<span class = "var-' + vars + '">' + this.index + '</span>';
         vars++;
 
         return [string, vars, abs, apps, betas];
@@ -362,7 +362,7 @@ class LambdaAbstraction{
             betas = 0;
         }
 
-        var string = '<span id = "abs-' + abs + '">';
+        var string = '<span class = "abs-' + abs + '">';
         abs++;
 
         if(x !== 0){
@@ -603,11 +603,11 @@ class LambdaApplication{
             betas = 0;
         }
 
-        var string = '<span id = "app-' + apps;
+        var string = '<span class = "app-' + apps;
         apps++;
 
         if(this.isBetaRedex()){
-            string += '-beta-' + betas;
+            string += ' beta beta-' + betas;
             betas++;
         }
 
