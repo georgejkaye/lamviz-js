@@ -607,7 +607,7 @@ class LambdaApplication{
         apps++;
 
         if(this.isBetaRedex()){
-            string += ' beta beta-' + betas;
+            string += ' beta-' + betas;
             betas++;
         }
 

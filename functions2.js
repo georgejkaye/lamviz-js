@@ -58,15 +58,24 @@ function changeValueClass(className, value){
 }
 
 /**
- * Set the style of an element with a given class.
+ * Set the style of an span with a given class.
  * @param {string} className - The class of the elements.
  * @param {string} style - The style to set.
  */
-function setStyle(className, style){
+function setStyleSpan(className, style){
     var elems = document.getElementsByClassName(className);
     
+    var re = /<span class="(abs-.|var-.|app-.( beta-.)*)">/
+
     for(var i = 0; i < elems.length; i++){
         elems[i].setAttribute("style", style);
+
+        var subs = elems[i].innerHTML
+        console.log(subs);
+        var content = subs.match(re);
+
+        console.log(content[0]);
+
     }
     
 }
@@ -338,16 +347,16 @@ function getCell(className, content){
  * Get the HTML for a bulleted list of elements in an array.
  * @param {Object[]} array - The array.
  * @param {string} id - The id to prefix elements with.
- * @param {string} onmouseenter - The script to execute when on mouseover.
+ * @param {string} onmouseover - The script to execute when on mouseover.
  * @return {string} The HTML code for the bulleted list.
  */
-function bulletsOfArray(array, id, onmouseenter){
+function bulletsOfArray(array, id, onmouseenter, onmouseout){
 
     var string = "<ul>";
 
     
     for(var i = 0; i < array.length; i++){
-        string += '<li id="' + id + '-' + i + '" onmouseenter="' + onmouseenter.replace("(i)", "(" + i + ")") + '">' + array[i] + "</li>";
+        string += '<li id="' + id + '-' + i + '" onmouseenter="' + onmouseenter.replace("(i)", "(" + i + ")") + '" onmouseout="' + onmouseout.replace("(i)", "(" + i + ")") + '">' + array[i] + "</li>";
     }
 
     string += "</ul>";
@@ -391,7 +400,7 @@ function viewPortrait(term){
                                                 getRow(getCell("term-fact", 'Variables: ' + currentTerm.variables())) +
                                                 getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
                                                 getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
-                                                getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(), "redex", "highlightRedex(i)"))) +
+                                                getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(), "redex", "highlightRedex(i)", "unhighlightRedex(i)"))) +
                                                 getRow(getCell("", '<b>Perform reduction</b>')) +
                                                 getRow(getCell("", '<button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduceButton(0);">Outermost</button><button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduceButton(1);">Innermost</button>')) +
                                                 getRow(getCell("", '<button type = "button" disabled id = "reset-btn" onclick = "resetButton();">Reset</button><button type = "button" id = "back-btn" onclick = "backButton();">Back</button>')) +
@@ -401,8 +410,6 @@ function viewPortrait(term){
                                 '</table>'
     )
     drawGraph('portrait' + i, currentTerm, ctx, true, true, false);
-
-    setStyle("app-0-beta-0", "color:red");
 
 }
 
@@ -453,7 +460,12 @@ function reduceButton(strat){
 
 function highlightRedex(i){
 
-    setStyle("beta", "color:black");
-    setStyle("beta-" + i, "color:red");
+    setStyleSpan("beta-" + i, "color:red");
+
+}
+
+function unhighlightRedex(i){
+
+    setStyleSpan("beta-" + i, "color:black");
 
 }
