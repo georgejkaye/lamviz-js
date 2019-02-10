@@ -144,6 +144,33 @@ class LambdaVariable{
     printRedexes(){
         return [];
     }
+
+    /**
+     * Get an HTML representation of this term.
+     * @param {number} x - The layer this term is at - determines whether brackets are required.
+     * @param {number} vars - The number of variables encountered so far.
+     * @param {number} abs - The number of abstractions encountered so far.
+     * @param {number} apps - The number of applications encountered so far.
+     * @param {number} betas - The number of beta redexes encountered so far.
+     * @return {string} The HTML string.
+     */
+    printHTML(x, vars, abs, apps, betas){
+
+        if(x === undefined){
+            x = 0;
+            vars = 0;
+            abs = 0;
+            apps = 0;
+            betas = 0;
+        }
+
+        var string = '<span id = "var-' + vars + '">' + this.index + '</span>';
+        vars++;
+
+        return [string, vars, abs, apps, betas];
+
+    }
+
 }
 
 /** Class representing a lambda abstraction. */
@@ -314,6 +341,45 @@ class LambdaAbstraction{
      */
     printRedexes(){
         return this.t.printRedexes();
+    }
+
+    /**
+     * Get an HTML representation of this term.
+     * @param {number} x - The layer this term is at - determines whether brackets are required.
+     * @param {number} vars - The number of variables encountered so far.
+     * @param {number} abs - The number of abstractions encountered so far.
+     * @param {number} apps - The number of applications encountered so far.
+     * @param {number} betas - The number of beta redexes encountered so far.
+     * @return {string} The HTML string.
+     */
+    printHTML(x, vars, abs, apps, betas){
+
+        if(x === undefined){
+            x = 0;
+            vars = 0;
+            abs = 0;
+            apps = 0;
+            betas = 0;
+        }
+
+        var string = '<span id = "abs-' + abs + '">';
+        abs++;
+
+        if(x !== 0){
+            string += '(';
+        }
+      
+        var scope = this.t.printHTML(0, vars, abs, apps, betas);
+        string += '&lambda; ' + scope[0];
+        
+        if(x !== 0){
+            string += ')';
+        }
+
+        string += '</span>';
+
+        return [string, scope[1], scope[2], scope[3], scope[4]];
+
     }
 
 }
@@ -516,6 +582,70 @@ class LambdaApplication{
         }
 
         return array.concat(this.t1.printRedexes().concat(this.t2.printRedexes()));
+    }
+
+    /**
+     * Get an HTML representation of this term.
+     * @param {number} x - The layer this term is at - determines whether brackets are required.
+     * @param {number} vars - The number of variables encountered so far.
+     * @param {number} abs - The number of abstractions encountered so far.
+     * @param {number} apps - The number of applications encountered so far.
+     * @param {number} betas - The number of beta redexes encountered so far.
+     * @return {string} The HTML string.
+     */
+    printHTML(x, vars, abs, apps, betas){
+
+        if(x === undefined){
+            x = 0;
+            vars = 0;
+            abs = 0;
+            apps = 0;
+            betas = 0;
+        }
+
+        var string = '<span id = "app-' + apps;
+        apps++;
+
+        if(this.isBetaRedex()){
+            string += '-beta-' + betas;
+            betas++;
+        }
+
+        string += '">';
+
+        var y;
+        var z;
+
+        if(x === 0){
+            if(this.t1.getType() === ABS){
+                y = 1;
+                z = 1;
+            } else {
+                y = 0;
+                z = 0;
+            }
+        } else {
+            y = x;
+            z = x + 1;
+        }
+
+        var lhs = this.t1.printHTML(y, vars, abs, apps, betas);
+        var rhs = this.t2.printHTML(z, lhs[1], lhs[2], lhs[3], lhs[4]);
+
+        if(x !== 0){
+            string += "(";
+        }
+            
+        string += lhs[0] + " " + rhs[0];
+        
+        if(x !== 0){
+            string += ")";
+        }
+
+        string += "</span>";
+
+        return [string, rhs[1], rhs[2], rhs[3], rhs[4]];
+
     }
 
 }

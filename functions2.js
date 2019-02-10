@@ -35,16 +35,35 @@ function changeText(id, text){
     document.getElementById(id).innerHTML = text;
 }
 
-function changeValue(id, text){
-    document.getElementById(id).value = text;
+/**
+ * Change the value of an element with a given id.
+ * @param {string} id   - The id of the element.
+ * @param {string} value - the value to change to
+ */
+function changeValue(id, value){
+    document.getElementById(id).value = value;
 }
 
-function changeValueClass(className, text){
+/**
+ * Change the value of elements with a given class.
+ * @param {string} id   - The class of the elements.
+ * @param {string} value - the value to change to
+ */
+function changeValueClass(className, value){
     var elems = document.getElementsByClassName(className);
 
     for(var i = 0; i < elems.length; i++){
-        elems[i].value = text;
+        elems[i].value = value;
     }
+}
+
+/**
+ * Set the style of an element with a given id.
+ * @param {string} id - The id of the element.
+ * @param {string} style - The style to set.
+ */
+function setStyle(id, style){
+    document.getElementById(id).setAttribute("style", style);
 }
 
 /**
@@ -247,6 +266,8 @@ function printArray(array){
  * @param {string} element - The element type.
  * @param {string} classname - The class of this element.
  * @param {string} id - The id of this element.
+ * @param {string} style - The style of this element.
+ * @param {string} onclick - The onclick of this element.
  * @param {string} content - The content of this element.
  * @return {string} The corresponding HTML for this element.
  */
@@ -258,6 +279,8 @@ function getElement(element, classname, id, style, onclick, content){
  * Get the HTML for a <div>.
  * @param {string} classname - The class of this <div>.
  * @param {string} id - The id of this <div>.
+ * @param {string} style - The style of this <div>.
+ * @param {string} onclick - The onclick of this <div>.
  * @param {string} content - The content of this <div>.
  * @return {string} The corresponding HTML for this <div>.
  */
@@ -269,6 +292,8 @@ function getDiv(classname, id, style, onclick, content){
  * Get the HTML for a <p>.
  * @param {string} classname - The class of this <p>.
  * @param {string} id - The id of this <p>.
+ * @param {string} style - The style of this <p>.
+ * @param {string} onclick - The onclick of this <p>.
  * @param {string} content - The content of this <p>.
  * @return {string} The corresponding HTML for this <p>.
  */
@@ -276,10 +301,43 @@ function getP(classname, id, style, onclick, content){
     return getElement("p", classname, id, style, onclick, content);
 }
 
+/**
+ * Get the HTML for a <hx>.
+ * @param {string} classname - The class of this <h>.
+ * @param {string} id - The id of this <h>.
+ * @param {number} num - The heading number of this <h>.
+ * @param {string} style - The style of this <h>.
+ * @param {string} onclick - The onclick of this <h>.
+ * @param {string} content - The content of this <h>.
+ * @return {string} The corresponding HTML for this <h>.
+ */
 function getH(classname, id, num, style, onclick, content){
     return getElement("h" + num, classname, id, style, onclick, content);
 }
  
+/**
+ * Get the HTML for a bulleted list of elements in an array.
+ * @param {Object[]} array - The array.
+ * @return {string} The HTML code for the bulleted list.
+ */
+function bulletsOfArray(array){
+
+    var string = "<ul>";
+
+    for(var i = 0; i < array.length; i++){
+        string += "<li>" + array[i] + "</li>";
+    }
+
+    string += "</ul>";
+
+    return string;
+
+}
+
+function printTermHTML(term){
+    return term.printHTML()[0];
+}
+
 /**
  * Function to execute when a portrait is clicked.
  * @param term - The term to draw.
@@ -300,7 +358,7 @@ function viewPortrait(term){
                                         '<td>' +
                                             '<table>' + 
                                                 '<tr>' +
-                                                    '<td class = "term-heading"><b>' + currentTerm.prettyPrint() + '</b></td>' +
+                                                    '<td class = "term-heading"><b>' + printTermHTML(currentTerm) + '</b></td>' +
                                                 '</tr>' +
                                                 '<tr>' +
                                                     '<td class = "term-fact">' + 'Crossings: ' + currentTerm.crossings() + '</td>' +
@@ -321,7 +379,7 @@ function viewPortrait(term){
                                                     '<td class = "term-fact">' + 'Beta redexes: ' + currentTerm.betaRedexes() + '</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
-                                                    '<td class = "term-fact">' + printArray(currentTerm.printRedexes()) + '</td>' +
+                                                    '<td class = "term-fact">' + bulletsOfArray(currentTerm.printRedexes()) + '</td>' +
                                                 '</tr>' +
                                                 '<tr>' +
                                                     '<td><b>Perform reduction</b></td>' +
@@ -338,6 +396,8 @@ function viewPortrait(term){
                                 '</table>'
     )
     drawGraph('portrait' + i, currentTerm, ctx, true, true, false);
+
+    setStyle("app-1-beta-1", "color:red");
 
 }
 
