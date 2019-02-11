@@ -65,17 +65,17 @@ function changeValueClass(className, value){
 function setStyleSpan(className, style){
     var elems = document.getElementsByClassName(className);
     
-    var re = /<span class="(abs-.|var-.|app-.( beta-.)*)">/
+    var re = /"(.+?)( |")(.+)/
 
     for(var i = 0; i < elems.length; i++){
         elems[i].setAttribute("style", style);
 
-        var subs = elems[i].innerHTML
-        console.log(subs);
-        var content = subs.match(re);
-
-        console.log(content[0]);
-
+        var subs = elems[i].innerHTML;
+        var matches = re.exec(subs);
+        
+        if(matches !== null){
+            setStyleSpan(matches[1], style);
+        }
     }
     
 }
@@ -94,8 +94,6 @@ function getText(id){
  * @param {array} array - The array to get the string from.
  */
 function prettyString(array){
-
-    console.log(array);
 
     if(array.length !== 0){
         var string = array[0];
@@ -460,7 +458,27 @@ function reduceButton(strat){
 
 function highlightRedex(i){
 
-    setStyleSpan("beta-" + i, "color:red");
+    var colour = "color:";
+
+    switch(i % 5){
+        case 0:
+            colour += "red";
+            break;
+        case 1:
+            colour += "orange";
+            break;
+        case 2:
+            colour += "green";
+            break;
+        case 3:
+            colour += "blue";
+            break;
+        case 4:
+            colour += "violet";
+            break;
+    }
+
+    setStyleSpan("beta-" + i, colour);
 
 }
 
