@@ -65,16 +65,21 @@ function changeValueClass(className, value){
 function setStyleSpan(className, style){
     var elems = document.getElementsByClassName(className);
     
-    var re = /"(.+?)( |")(.+)/
+    var re = /class="(.+?)"/g
 
     for(var i = 0; i < elems.length; i++){
         elems[i].setAttribute("style", style);
 
         var subs = elems[i].innerHTML;
-        var matches = re.exec(subs);
+        var matches = subs.match(re);
         
-        if(matches !== null){
-            setStyleSpan(matches[1], style);
+        for(var j = 0; j < matches.length; j++){
+            console.log(matches[j].substring(7, matches[j].length - 1));
+            var elems2 = document.getElementsByClassName(matches[j].substring(7, matches[j].length - 1));
+
+            for(var k = 0; k < elems2.length; k++){
+                elems2[k].setAttribute("style", style);
+            }
         }
     }
     
