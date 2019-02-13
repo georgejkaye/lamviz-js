@@ -622,7 +622,7 @@ class LambdaApplication{
                 z = 1;
             } else {
                 y = 0;
-                z = 0;
+                z = 1;
             }
         } else {
             y = x;

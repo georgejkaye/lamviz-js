@@ -271,3 +271,49 @@ function innermostReduction(term){
     }
 
 }
+
+function specificReduction(term, i){
+
+    if(!term.hasBetaRedex()){
+        return [term, i];
+    }
+
+    if(term.isBetaRedex()){
+
+        i--;
+
+        if(i === -1){
+            return [performBetaReduction(term.t1, term.t2), i];
+        }
+
+    }
+
+    switch(term.getType()){
+        case ABS:
+
+            var newScope = specificReduction(term.t, i);
+
+            if(newScope[0] === term.t){
+                return [term, newScope[1]];
+            }
+
+            return [new LambdaAbstraction(specificReduction(term.t, i), term.label), newScope[1]];
+        case APP:
+            if(term.t1.hasBetaRedex()){
+                var newLHS = specificReduction(term.t1, i);
+
+                if(newLHS[0] === term.t1){
+                    var newRHS = specificReduction(term.t2, newLHS[1]);
+                    
+                    if(newRHS[0] === term.t2){
+                        return [term, newRHS[1]];
+                    }
+
+                    return [new LambdaApplication(term.t1, newRHS[0]), newRHS[1]];
+                }
+
+                return [new LambdaApplication(newLHS[0], term.t2), newLHS[1]];
+            }
+    }
+
+}

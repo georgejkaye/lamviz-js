@@ -74,7 +74,6 @@ function setStyleSpan(className, style){
         var matches = subs.match(re);
         
         for(var j = 0; j < matches.length; j++){
-            console.log(matches[j].substring(7, matches[j].length - 1));
             var elems2 = document.getElementsByClassName(matches[j].substring(7, matches[j].length - 1));
 
             for(var k = 0; k < elems2.length; k++){
@@ -353,13 +352,13 @@ function getCell(className, content){
  * @param {string} onmouseover - The script to execute when on mouseover.
  * @return {string} The HTML code for the bulleted list.
  */
-function bulletsOfArray(array, id, onmouseenter, onmouseout){
+function bulletsOfArray(array, id, onclick, onmouseenter, onmouseout){
 
     var string = "<ul>";
 
     
     for(var i = 0; i < array.length; i++){
-        string += '<li id="' + id + '-' + i + '" onmouseenter="' + onmouseenter.replace("(i)", "(" + i + ")") + '" onmouseout="' + onmouseout.replace("(i)", "(" + i + ")") + '">' + array[i] + "</li>";
+        string += '<li id="' + id + '-' + i + '" onclick="' + onclick.replace("(i)", "(" + i + ")") + '" onmouseenter="' + onmouseenter.replace("(i)", "(" + i + ")") + '" onmouseout="' + onmouseout.replace("(i)", "(" + i + ")") + '">' + array[i] + "</li>";
     }
 
     string += "</ul>";
@@ -403,7 +402,7 @@ function viewPortrait(term){
                                                 getRow(getCell("term-fact", 'Variables: ' + currentTerm.variables())) +
                                                 getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
                                                 getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
-                                                getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(), "redex", "highlightRedex(i)", "unhighlightRedex(i)"))) +
+                                                getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(), "redex", "clickRedex(i)", "highlightRedex(i)", "unhighlightRedex(i)"))) +
                                                 getRow(getCell("", '<b>Perform reduction</b>')) +
                                                 getRow(getCell("", '<button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduceButton(0);">Outermost</button><button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduceButton(1);">Innermost</button>')) +
                                                 getRow(getCell("", '<button type = "button" disabled id = "reset-btn" onclick = "resetButton();">Reset</button><button type = "button" id = "back-btn" onclick = "backButton();">Back</button>')) +
@@ -491,4 +490,10 @@ function unhighlightRedex(i){
 
     setStyleSpan("beta-" + i, "color:black");
 
+}
+
+function clickRedex(i){
+    var normalisedTerm = specificReduction(currentTerm, i)[0];
+    viewPortrait(normalisedTerm);
+    document.getElementById("reset-btn").disabled = false; viewPor
 }
