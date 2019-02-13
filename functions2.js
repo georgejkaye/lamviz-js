@@ -434,6 +434,7 @@ function viewPortrait(term){
  * Function to execute when the back button is pressed.
  */
 function backButton(){
+    changeText('normalisation-studio', "");
     generateButton(lastAction, true);
     reduced = false;
 }
@@ -442,9 +443,12 @@ function backButton(){
  * Function to execute when the reset button is pressed.
  */
 function resetButton(){
-    if(currentTerm !== originalTerm){
+    changeText('normalisation-studio', "");
+    if(reduced && currentTerm !== originalTerm){
         viewPortrait(originalTerm);
         reduced = false;
+    } else { 
+        document.getElementById("reset-btn").disabled = true; 
     }
 }
 
@@ -540,5 +544,7 @@ function showNormalisationGraph(){
     var reductions = generateReductionTree(currentTerm);
    
     changeText('normalisation-studio', reductions.printTree());
+    
+    document.getElementById("reset-btn").disabled = false;
 
 }
