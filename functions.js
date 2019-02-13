@@ -83,6 +83,7 @@ function execute_button(){
     }
 
     changeText('result', text);
+    changeText('normalisation-tree', "");
 
     currentTerm = term;
 

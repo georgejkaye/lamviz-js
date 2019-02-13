@@ -271,6 +271,7 @@ var a = 0;
 function clearButton(){
     changeText('church-room', "");
     changeText('number-of-terms', "");
+    changeText('normalisation-studio', "");
     changeValueClass('number-box', "");
 }
 

@@ -109,6 +109,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
     var newNodeID = "";
     var newEdgeID = "";
     var newEdgeType = "";
+    var newEdgeLabel = "";
 
     switch(term.getType()){
         case ABS:
@@ -117,10 +118,13 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
 
             newNodeID = checkID(lambda + abstractionLabel, nodes);
             
-            array = defineNode(array, newNodeID, absNode, posX, posY);
+            var nodeLabel = lambda + abstractionLabel + "."
+
+            array = defineNode(array, newNodeID, absNode, posX, posY, nodeLabel);
     
             newEdgeID = checkID(newNodeID + " " + term.t.prettyPrintLabels(), edges);
             newEdgeType = absEdge;
+            newEdgeLabel = nodeLabel + " " + term.t.prettyPrintLabels();
 
             /* The abstracted variable goes NE */
             const lambdaAbstractionSupportNodeID = checkID(newNodeID + "._abstraction_node_right", nodes);
@@ -193,7 +197,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
         case VAR:
 
             var variableLabel = ctx.getCorrespondingVariable(term.index);
-            
+
             /* Create the first node in the variable edge, to pull it away from the parent in the right direction */
             newNodeID = checkID(variableLabel + "_variable_node", nodes);
             array = defineNode(array, newNodeID, varNode, posX, posY);
@@ -227,13 +231,13 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
 
             /* Create the edge connecting the node at the top to the corresponsing abstraction support node */
             const lambdaVariableAbstractionEdgeID = checkID(variableLabel + " in " + parent + "_curved_edge_from_abstraction_to_variable", edges);
-            array = defineEdge(array, lambdaVariableAbstractionEdgeID, varEdgeLabel, lambdaAbstractionNodeID, lambdaVariableSupportNodeID);
+            array = defineEdge(array, lambdaVariableAbstractionEdgeID, varEdgeLabel, lambdaAbstractionNodeID, lambdaVariableSupportNodeID, );
 
             break;
     }
 
     /* Create an edge linking the newest node with its parent */
-    array = defineEdge(array, newEdgeID, newEdgeType, newNodeID, parent);
+    array = defineEdge(array, newEdgeID, newEdgeType, newNodeID, parent, newEdgeLabel);
 
     return array;
     
@@ -248,10 +252,10 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
  * @param {number} posY     - The y coordinate of this node.
  * @return {Object[]} The updated array of map elements.
  */
-function defineNode(array, id, type, posX, posY){
+function defineNode(array, id, type, posX, posY, label){
     
     const nodeID = checkID(id, nodes);
-    const node = createNode(nodeID, type, posX, posY);
+    const node = createNode(nodeID, type, posX, posY, label);
     array = pushNode(array, node, nodeID);
 
     return array;
@@ -266,10 +270,10 @@ function defineNode(array, id, type, posX, posY){
  * @param {string} target   - The target of this edge.
  * @return {Object[]} The updated array of map elements.
  */
-function defineEdge(array, id, type, source, target){
+function defineEdge(array, id, type, source, target, label){
     
     const edgeID = checkID(id, edges);
-    const edge = createEdge(edgeID, type, source, target);
+    const edge = createEdge(edgeID, type, source, target, label);
     array = pushEdge(array, edge, edgeID);
 
     return array;
@@ -283,13 +287,17 @@ function defineEdge(array, id, type, source, target){
  * @param {number} y    - The y coordinate of the node (optional).
  * @return {Object} The node object.
  */
-function createNode(id, type, x, y){
+function createNode(id, type, x, y, label){
     
     if(x === undefined || y === undefined){
         return { data: { id: id, type: type}};
     }
 
-    return { data: { id: id, type: type}, position: {x: x, y: y}};
+    if(label === undefined){
+        label = "";
+    }
+
+    return { data: { id: id, type: type, label: label}, position: {x: x, y: y}};
 
 }
 
@@ -301,8 +309,13 @@ function createNode(id, type, x, y){
  * @param {string} target   - The target of the edge.
  * @return {Object} The edge object.
  */
-function createEdge(id, type, source, target){
-    return { data: { id: id, source: source, target: target, type: type}};
+function createEdge(id, type, source, target, label){
+
+    if(label === undefined){
+        label = "";
+    }
+
+    return { data: { id: id, source: source, target: target, type: type, label: label}};
 }
 
 /**
@@ -452,9 +465,9 @@ function updateLabels(labels){
         updateNodeLabels(absNode, lambda);
         updateNodeLabels(absNodeFree, lambda);
         updateNodeLabels(appNode, '@');
-        updateEdgeLabels(absEdge, 'data(id)');
+        updateEdgeLabels(absEdge, 'data(label)');
         updateEdgeLabels(varEdgeLabel, function(ele){
-            var id = ele.data().id.substring(1);
+            var id = ele.data().label.substring(1);
             var res = id.split(" ");
             return res[0];
         });
