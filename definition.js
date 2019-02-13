@@ -778,6 +778,10 @@ class ReductionTree{
         this.reductions = reductions;
     }
 
+    /**
+     * Get a 'pretty' depiction of the tree, with different layers at different indentations
+     * @param {number} x - The current layer of the tree.
+     */
     printTree(x){
 
         if(x === undefined){
@@ -787,13 +791,13 @@ class ReductionTree{
         var string = "";
 
         for(var i = 0; i < x; i++){
-            string += "    ";
+            string += "----";
         }
 
         string += this.term.prettyPrint();
 
         for(var i = 0; i < this.reductions.length; i++){
-            string += '\n' + this.reductions[i].printTree(x+1);
+            string += '<br>' + this.reductions[i].printTree(x+1);
         }
 
         return string;

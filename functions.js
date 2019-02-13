@@ -216,3 +216,9 @@ function generate_button(x){
     changeText('enumerated-terms', "There are " + terms.length + " terms");
 
 }
+
+function normalise_tree_button(){
+
+    changeText('normalisation-tree', generateReductionTree(currentTerm).printTree());
+
+}

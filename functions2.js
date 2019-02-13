@@ -537,8 +537,7 @@ function clickRedex(i){
 function showNormalisationGraph(){
 
     var reductions = generateReductionTree(currentTerm);
-    console.log(reductions.printTree());
-
-    
+   
+    changeText('normalisation-studio', reductions.printTree());
 
 }
