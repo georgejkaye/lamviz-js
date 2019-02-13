@@ -47,8 +47,6 @@ function shift (t, d, c){
  */
 function substitute(s, j, t){
 
-    console.log("Substituting " + s.prettyPrint() + " for " + j + " in " + t.prettyPrint());
-
     switch(t.getType()){
         case VAR:
             if(t.index === j){
@@ -74,8 +72,6 @@ function substitute(s, j, t){
  */
 function performBetaReduction(abs, val){
     var term = shift(substitute(shift(val, 1, 0), 0, abs.t), -1, 0);
-
-    console.log("Beta reduced term: " + term.prettyPrint());
 
     return term
 }
@@ -109,8 +105,6 @@ function evaluate(t, x){
         return "Timeout";
     }
 
-    console.log("Evaluating " + t.prettyPrint());
-
     while(t.getType() === APP){
 
         var t1 = t.t1;
@@ -140,7 +134,6 @@ function evaluate(t, x){
         }
     }
 
-    console.log("Returning " + t.prettyPrint());
     return t;
 }
 
@@ -166,8 +159,6 @@ function normalise(t, x){
         return "Timeout";
     }
 
-    console.log("Normalising term: " + t.prettyPrint());
-
     switch(t.getType()){
         case VAR:
             return t;
@@ -189,7 +180,6 @@ function normalise(t, x){
             /* Perform a beta-reduction */
             if(t.t1.getType() === ABS){
                 t1 = performBetaReduction(t.t1, t.t2);
-                console.log("Beta reduction performed: " + t1.prettyPrintLabels());
                 return normalise(t1, false);
             }
 
@@ -272,6 +262,11 @@ function innermostReduction(term){
 
 }
 
+/**
+ * Perform a specific reduction, as if they are numbered from left to right, outwards in.
+ * @param {Object} term - The lambda term to perform the reduction on.
+ * @return {Object[]} The reduced lambda term and a number displaying how many reductions need to be encountered.
+ */
 function specificReduction(term, i){
 
     if(!term.hasBetaRedex()){
@@ -315,5 +310,71 @@ function specificReduction(term, i){
                 return [new LambdaApplication(newLHS[0], term.t2), newLHS[1]];
             }
     }
+
+}
+
+/**
+ * Get all reductions accessible by one beta reduction step from a lambda term.
+ * @param {Object} term - The lambda term to find the reductions in.
+ * @return {Object[]} All of the reductions accessible from one beta reduction (empty if none).
+ */
+function getAllOneStepReductions(term){
+
+    var reductions = [];
+    var x = 0;
+
+    if(term.isBetaRedex()){
+        reductions[0] = performBetaReduction(term.t1, term.t2);
+        x++;
+    }
+
+    if(term.hasBetaRedex()){
+        switch(term.getType()){
+            case ABS:
+                var scopeReductions = getAllOneStepReductions(term.t);
+
+                for(var i = 0; i < scopeReductions.length; i++){
+                    reductions[x] = new LambdaAbstraction(scopeReductions[i], term.label);
+                    x++;
+                }
+                break;
+            case APP:
+                var lhsReductions = getAllOneStepReductions(term.t1);
+
+                for(var i = 0; i < lhsReductions.length; i++){
+                    reductions[x] = new LambdaApplication(lhsReductions[i], term.t2);
+                    x++;
+                }
+
+                var rhsReductions = getAllOneStepReductions(term.t2);
+                
+                for(var i = 0; i < rhsReductions.length; i++){
+                    reductions[x] = new LambdaApplication(term.t1, rhsReductions[i]);
+                    x++;
+                }
+
+                break;
+        }
+    }
+
+    return reductions;
+
+}
+
+function generateReductionTree(term){
+
+    var subtrees = [];
+
+    if(term.hasBetaRedex()){
+
+        var reductions = getAllOneStepReductions(term);
+
+        for(var i = 0; i < reductions.length; i++){
+            subtrees[i] = generateReductionTree(reductions[i]);
+        }
+
+    }
+
+    return new ReductionTree(term, subtrees);
 
 }

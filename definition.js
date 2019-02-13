@@ -26,6 +26,7 @@ class LambdaVariable{
         } else {
             this.label = index.toString();
         }
+        this.print = this.prettyPrint();
     }
 
     /**
@@ -181,7 +182,7 @@ class LambdaAbstraction{
      * @param {Object}      t       - The scope of this lambda abstraction.
      * @param {string}      label   - The label this lambda abstraction has.
      */
-    constructor(t, label){this.t = t; this.label = label, this.closed = [];}
+    constructor(t, label){this.t = t; this.label = label, this.closed = [], this.print = this.prettyPrint();}
 
     /**
      * Get the type of this lambda term - an abstraction.
@@ -392,7 +393,7 @@ class LambdaApplication{
      * @param {Object} t1 - the first term in the lambda application (the function).
      * @param {Object} t2 - the second term in the lambda application (the argument).
      */
-    constructor(t1, t2){this.t1 = t1; this.t2 = t2, this.closed = []}
+    constructor(t1, t2){this.t1 = t1; this.t2 = t2, this.closed = [], this.print = this.prettyPrint();}
 
     /**
      * Get the type of this lambda term - an application.
@@ -760,4 +761,43 @@ class LambdaEnvironment{
 
         return this.nodeNames[this.nodeNames.length - 1 - index];
     }
+}
+
+/**
+ * A reduction tree for a lambda term, showing all the different ways it can be reduced.
+ */
+class ReductionTree{
+
+    /**
+     * Create a new reduction tree.
+     * @param {Object} - The lamdba term at the root of the tree.
+     * @param {Object} - All of the reduction subtrees.
+     */
+    constructor(term, reductions){
+        this.term = term;
+        this.reductions = reductions;
+    }
+
+    printTree(x){
+
+        if(x === undefined){
+            x = 0;
+        }
+
+        var string = "";
+
+        for(var i = 0; i < x; i++){
+            string += "    ";
+        }
+
+        string += this.term.prettyPrint();
+
+        for(var i = 0; i < this.reductions.length; i++){
+            string += '\n' + this.reductions[i].printTree(x+1);
+        }
+
+        return string;
+
+    }
+
 }

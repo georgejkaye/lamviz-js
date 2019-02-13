@@ -410,16 +410,23 @@ function viewPortrait(term){
                                                 getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
                                                 getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
                                                 getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(), "redex", "clickRedex(i)", "highlightRedex(i)", "unhighlightRedex(i)"))) +
-                                                getRow(getCell("", '<b>Perform reduction</b>')) +
-                                                getRow(getCell("", '<button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduceButton(0);">Outermost</button><button type = "button" ' + disabled + ' id = "reduce-btn" onclick = "reduceButton(1);">Innermost</button>')) +
                                                 getRow(getCell("", '<button type = "button" disabled id = "reset-btn" onclick = "resetButton();">Reset</button><button type = "button" id = "back-btn" onclick = "backButton();">Back</button>')) +
+                                                getRow(getCell("", '<button type = "button" id = "norm-btn" onclick = "showNormalisationGraph();">View normalisation graph</button>')) +   
                                             '</table>' +
                                         '</td>' +
-                                    '<tr>' +
+                                    '</tr>' +
                                 '</table>'
     )
-    drawGraph('portrait' + i, currentTerm, ctx, true, true, false);
 
+    //changeText("normalisation-studio", '<table>' +
+    //                                        '<tr>' +
+    //                                            '<td>' + getDiv("w3-container frame", "nframe" + i + "1", "", "", getDiv("w3-container portrait", "nportrait" + i, "", "", "")) + '</td>' +
+    //                                        '</tr>' +
+    //                                    '</table>'
+    //)
+
+    drawGraph('portrait' + i, currentTerm, ctx, true, true, false);
+    //drawGraph('nportrait' + i, currentTerm, ctx, true, true, false);
 }
 
 /**
@@ -467,6 +474,10 @@ function reduceButton(strat){
 
 }
 
+/**
+ * Highlight a redex.
+ * @param {number} i - The redex to highlight.
+ */
 function highlightRedex(i){
 
     var colour = "color:";
@@ -493,12 +504,20 @@ function highlightRedex(i){
 
 }
 
+/**
+ * Unhighlight an already highlighted redex.
+ * @param {number} i - The redex to unhighlight.
+ */
 function unhighlightRedex(i){
 
     setStyleSpan("beta-" + i, "color:black");
 
 }
 
+/**
+ * Function to execute when you click a redex.
+ * @param {number} i - The redex clicked.
+ */
 function clickRedex(i){
 
     var normalisedTerm = specificReduction(currentTerm, i)[0];
@@ -510,4 +529,16 @@ function clickRedex(i){
 
     viewPortrait(normalisedTerm);
     document.getElementById("reset-btn").disabled = false;
+}
+
+/**
+ * Show the normalisation graph for the current term.
+ */
+function showNormalisationGraph(){
+
+    var reductions = generateReductionTree(currentTerm);
+    console.log(reductions.printTree());
+
+    
+
 }
