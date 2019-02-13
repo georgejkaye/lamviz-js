@@ -297,7 +297,7 @@ function specificReduction(term, i){
                 return [term, newScope[1]];
             }
 
-            return [new LambdaAbstraction(specificReduction(term.t, i), term.label), newScope[1]];
+            return [new LambdaAbstraction(newScope[0], term.label), newScope[1]];
         case APP:
             if(term.t1.hasBetaRedex()){
                 var newLHS = specificReduction(term.t1, i);

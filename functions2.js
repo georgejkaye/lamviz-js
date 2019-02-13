@@ -193,10 +193,17 @@ function generateButton(x, prev){
 
         for(i = 0; i < terms.length; i++){
 
+            var x = terms[i].prettyPrint().length;
+            var size = 200;
+
+            if(x > 10){
+                size -= (x - 10) * 2;
+            }
+
             if(document.getElementById("draw").checked){
                 termString += getDiv('w3-container frame', 'frame' + i, "", 'viewPortrait(terms[' + i + ']);', 
-                            getDiv("w3-container portrait", "portrait" + i, "", "", "") + "<br>" + 
-                                getP("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));            
+                            getDiv("w3-container inner-frame", "", "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + "<br>" + 
+                                getP("caption", "portrait-caption-" + i, "font-size:" + size + "%", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));            
  
             } else {
                 termString += getDiv('w3-container frame empty', 'frame ' + i, "", 'viewPortrait(terms[' + i + ']);', getP("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));
@@ -493,7 +500,14 @@ function unhighlightRedex(i){
 }
 
 function clickRedex(i){
+
     var normalisedTerm = specificReduction(currentTerm, i)[0];
+
+    if(!reduced){
+        reduced = true;
+        originalTerm = currentTerm;
+    }
+
     viewPortrait(normalisedTerm);
-    document.getElementById("reset-btn").disabled = false; viewPor
+    document.getElementById("reset-btn").disabled = false;
 }
