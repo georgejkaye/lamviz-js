@@ -11,6 +11,26 @@ const ABS = 1;
 /** Lambda application e.g. t1 t2 */
 const APP = 2;
 
+var currentVariableIndex = 0;
+const variableNames = ['x', 'y', 'z', 'w', 'u', 'v', 'a', 'b', 'c', 'd', 'e']
+
+/**
+ * Get the 
+ */
+function getNextVariableName(){
+
+    var index = currentVariableIndex % variableNames.length;
+    var name = variableNames[index];
+
+    for(var i = 0; i < currentVariableIndex / index; i++){
+        name += "\'";
+    }
+
+    currentVariableIndex++;
+    return name;
+
+}
+
 /** Class representing a lambda variable (stored as a de Bruijn index). */
 class LambdaVariable{
 
@@ -155,7 +175,7 @@ class LambdaVariable{
      * @param {number} betas - The number of beta redexes encountered so far.
      * @return {string} The HTML string.
      */
-    printHTML(x, vars, abs, apps, betas){
+    printHTML(x, vars, abs, apps, betas, ctx){
 
         if(x === undefined){
             x = 0;
@@ -163,9 +183,10 @@ class LambdaVariable{
             abs = 0;
             apps = 0;
             betas = 0;
+            ctx = new LambdaEnvironment();
         }
 
-        var string = '<span class = "var-' + vars + '">' + this.index + '</span>';
+        var string = '<span class = "var-' + vars + '">' + ctx.getCorrespondingVariable(this.index) + '</span>';
         vars++;
 
         return [string, vars, abs, apps, betas];
@@ -353,7 +374,7 @@ class LambdaAbstraction{
      * @param {number} betas - The number of beta redexes encountered so far.
      * @return {string} The HTML string.
      */
-    printHTML(x, vars, abs, apps, betas){
+    printHTML(x, vars, abs, apps, betas, ctx){
 
         if(x === undefined){
             x = 0;
@@ -361,6 +382,7 @@ class LambdaAbstraction{
             abs = 0;
             apps = 0;
             betas = 0;
+            ctx = new LambdaEnvironment();
         }
 
         var string = '<span class = "abs-' + abs + '">';
@@ -370,8 +392,11 @@ class LambdaAbstraction{
             string += '(';
         }
       
-        var scope = this.t.printHTML(0, vars, abs, apps, betas);
-        string += '&lambda; ' + scope[0];
+        var variableName = getNextVariableName();
+        ctx.pushTerm(variableName);
+        var scope = this.t.printHTML(0, vars, abs, apps, betas, ctx);
+        ctx.popTerm();
+        string += '&lambda;' + variableName + '. ' + scope[0];
         
         if(x !== 0){
             string += ')';
@@ -594,7 +619,7 @@ class LambdaApplication{
      * @param {number} betas - The number of beta redexes encountered so far.
      * @return {string} The HTML string.
      */
-    printHTML(x, vars, abs, apps, betas){
+    printHTML(x, vars, abs, apps, betas, ctx){
 
         if(x === undefined){
             x = 0;
@@ -602,6 +627,7 @@ class LambdaApplication{
             abs = 0;
             apps = 0;
             betas = 0;
+            ctx = new LambdaEnvironment();
         }
 
         var string = '<span class = "app-' + apps;
@@ -630,8 +656,8 @@ class LambdaApplication{
             z = x + 1;
         }
 
-        var lhs = this.t1.printHTML(y, vars, abs, apps, betas);
-        var rhs = this.t2.printHTML(z, lhs[1], lhs[2], lhs[3], lhs[4]);
+        var lhs = this.t1.printHTML(y, vars, abs, apps, betas, ctx);
+        var rhs = this.t2.printHTML(z, lhs[1], lhs[2], lhs[3], lhs[4], ctx);
 
         if(x !== 0){
             string += "(";
