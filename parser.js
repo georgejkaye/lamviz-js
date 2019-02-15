@@ -23,8 +23,6 @@ function parse(tokens, env){
  */
 function parseTerm(tokens, initial, env){
 
-    console.log("Parsing term: " + tokens);
-
     const len = tokens.length;
 
     var abstractionVariable = "";
@@ -38,15 +36,12 @@ function parseTerm(tokens, initial, env){
 
     while(i < len){
 
-        console.log("Looking at token " + (initial + i) + ": " + tokens[i]);
-
         switch(tokens[i]){
             
             /* lambda abstraction, next token must be a variable */
             case '\\':
 
                 i++;
-                console.log("Looking at token " + (initial + i) + ": " + tokens[i]);
                 abstractionVariable = tokens[i]; 
 
                 i++;
@@ -61,7 +56,6 @@ function parseTerm(tokens, initial, env){
 
                 t2 = new LambdaAbstraction (t, abstractionVariable);
                 i += scope.length;
-                console.log("New abstraction: " + t2.prettyPrint());
                 env.popTerm();
 
                 break;
@@ -71,8 +65,6 @@ function parseTerm(tokens, initial, env){
 
                 i++;
                 var scope = findScope(tokens.slice(i));
-                console.log("Scope of subterm: " + scope);
-                console.log("Length of scope: " + scope.length);
                 t2 = parseTerm(scope, initial + i, env);
 
                 if(typeof t2 === "string"){
@@ -80,15 +72,12 @@ function parseTerm(tokens, initial, env){
                 }
 
                 i += (scope.length - 1);
-                console.log("New subterm: " + t2.prettyPrint());
-                console.log("Remaining tokens: " + tokens.slice(i + 1));
 
                 break;
 
             /* end of a subterm */
             case ')':
                 
-                console.log("Returning term: " + t1.prettyPrint());
                 return t1;
 
             /* otherwise */
@@ -108,7 +97,6 @@ function parseTerm(tokens, initial, env){
         } 
 
         if(secondTerm){
-                console.log("Applying " + t2.prettyPrint() + " to " + t1.prettyPrint());
                 t1 = new LambdaApplication(t1, t2);
         } else {
                 t1 = t2;
@@ -118,7 +106,6 @@ function parseTerm(tokens, initial, env){
         i++;
     }
 
-    console.log("Returning term: " + t1.prettyPrint());
     return t1;
 }
 

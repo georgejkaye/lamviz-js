@@ -141,7 +141,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
             array = defineEdge(array, lambdaAbstractionSupportEdge2ID, varEdge, lambdaAbstractionSupportNodeID, lambdaAbstractionSupportNode2ID);
 
             /* Generate the elements for the scope of the abstraction */
-            ctx.pushTerm(newNodeID, lambdaAbstractionSupportNode2ID);
+            ctx.pushTerm(newNodeID.substring(1), abstractionLabel);
             var scopeArray = generateMapElements(term.t, ctx, [], newNodeID, posX, posY, LHS);
             ctx.popTerm();
             
@@ -196,42 +196,43 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
 
         case VAR:
 
-            var variableLabel = ctx.getCorrespondingVariable(term.index);
+            var variableID = ctx.getCorrespondingVariable(term.index);
+            var variableLabel = ctx.getCorrespondingVariable(term.index, true);
 
             /* Create the first node in the variable edge, to pull it away from the parent in the right direction */
-            newNodeID = checkID(variableLabel + "_variable_node", nodes);
+            newNodeID = checkID(variableID + "_variable_node", nodes);
             array = defineNode(array, newNodeID, varNode, posX, posY);
 
             /* Create the edge between the parent and the variable node */
-            newEdgeID = checkID(variableLabel + " in " + parent + "_edge_from_parent_to_variable", edges);
+            newEdgeID = checkID(variableID + " in " + parent + "_edge_from_parent_to_variable", edges);
             newEdgeType = varEdge;
 
             /* Create the node at the top of the page for this variable to travel from */
-            const lambdaVariableSupportNodeID = checkID(variableLabel + "_variable_node_top", nodes);
+            const lambdaVariableSupportNodeID = checkID(variableID + "_variable_node_top", nodes);
             array = defineNode(array, lambdaVariableSupportNodeID, varNodeTop, posX, posY - nodeDistanceY);
 
             /* Create the edge connecting the node at the top of the page to the original node */
-            const lambdaVariableSupportEdgeID = checkID(variableLabel + " in " + parent + "_edge_from_top_to_variable", edges);
+            const lambdaVariableSupportEdgeID = checkID(variableID + " in " + parent + "_edge_from_top_to_variable", edges);
             array = defineEdge(array, lambdaVariableSupportEdgeID, varEdge, lambdaVariableSupportNodeID, newNodeID);
 
             /* If a free variable node hasn't been drawn yet it needs to be */
             var lambdaAbstractionNodeID = "";
 
-            if(!nodes.includes(variableLabel + "._abstraction_node_top")){
-                if(!nodes.includes(lambda + variableLabel + ".")){
-                    const freeVariableAbstractionID = checkID(lambda + variableLabel + ".", nodes);
+            if(!nodes.includes(lambda + variableID + "._abstraction_node_top")){
+                if(!nodes.includes(lambda + variableID + ".")){
+                    const freeVariableAbstractionID = checkID(lambda + variableID + ".", nodes);
                     array = defineNode(array, freeVariableAbstractionID, absNodeFree, posX, posY - nodeDistanceY);
                     lambdaAbstractionNodeID = freeVariableAbstractionID;
                 } else {
-                    lambdaAbstractionNodeID = lambda + variableLabel + ".";
+                    lambdaAbstractionNodeID = lambda + variableID + ".";
                 }
             } else {
-                lambdaAbstractionNodeID = variableLabel + "._abstraction_node_top";
+                lambdaAbstractionNodeID = lambda + variableID + "._abstraction_node_top";
             }
 
             /* Create the edge connecting the node at the top to the corresponsing abstraction support node */
-            const lambdaVariableAbstractionEdgeID = checkID(variableLabel + " in " + parent + "_curved_edge_from_abstraction_to_variable", edges);
-            array = defineEdge(array, lambdaVariableAbstractionEdgeID, varEdgeLabel, lambdaAbstractionNodeID, lambdaVariableSupportNodeID, );
+            const lambdaVariableAbstractionEdgeID = checkID(variableID + " in " + parent + "_curved_edge_from_abstraction_to_variable", edges);
+            array = defineEdge(array, lambdaVariableAbstractionEdgeID, varEdgeLabel, lambdaAbstractionNodeID, lambdaVariableSupportNodeID, variableLabel);
 
             break;
     }
@@ -467,21 +468,25 @@ function updateLabels(labels){
         updateNodeLabels(appNode, '@');
         updateEdgeLabels(absEdge, 'data(label)');
         updateEdgeLabels(varEdgeLabel, function(ele){
-            var id = ele.data().label.substring(1);
-            var res = id.split(" ");
-            return res[0];
+            return ele.data().label;
         });
 
         updateEdgeLabels(appEdge, function(ele){
-            
-            var terms = ele.data().id.substring(2, ele.data().id.length - 3).split(" @ ");
+        
+            var re = /\[(.+)\]/;
 
-            if(terms[1].split(" ").length > 1){
-               terms[1] = "(" + terms[1] + ")";
-            }
+            var id = ele.data().id;
+            id = id.match(re)[1];
+            var terms = id.split(" @ ");
 
             if(terms[0].substring(0,1) === lambda){
                 terms[0] = "(" + terms[0] + ")";
+            }
+
+            if(terms[1].substring(0,1) === lambda){
+                terms[1] = "(" + terms[1] + ")";
+            } else if(terms[1].split(" ").length > 1){
+                terms[1] = "(" + terms[1] + ")";
             }
 
             return terms[0] + " " + terms[1];

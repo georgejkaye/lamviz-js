@@ -687,7 +687,7 @@ class LambdaEnvironment{
     /**
      * Create a new empty environment.
      */
-    constructor(){this.env = []};
+    constructor(){this.env = [], this.labels = []};
 
     /**
      * Get the length of this environment.
@@ -709,13 +709,20 @@ class LambdaEnvironment{
     /**
      * Push a new variable into the environment.
      * @param {string} variable - The variable to push into the environment.
+     * @param {string} label - (optional) The label of the variable to push into the environment. 
      */
-    pushTerm(variable){
+    pushTerm(variable, label){
+
+        if(label === undefined){
+            label = variable;
+        }
 
         if(this.env[0] === ""){
             this.env[0] = variable;
+            this.labels[0] = label;
         } else {
             this.env.push(variable);
+            this.labels.push(label);
         }
 
     }
@@ -725,6 +732,7 @@ class LambdaEnvironment{
      */
     popTerm(){
         this.env.pop();
+        this.labels.pop();
     }
 
     /**
@@ -751,17 +759,21 @@ class LambdaEnvironment{
 
     /**
      * Get the name of a variable with a certain de Bruijn index.
-     * @param {number} index - The index to determine the variable name from
+     * @param {number} index - The index to determine the variable name from.
+     * @param {boolean} label - Whether to return the actual label of this variable.
      * @return {string} The name of the variable (? if could not be found)
      */
-    getCorrespondingVariable(index){
+    getCorrespondingVariable(index, label){
 
         if(index < 0 || this.env.length - 1 - index < 0){
             return "?";
         }
 
-        return this.env[this.env.length - 1 - index];
+        if(label === undefined){
+            return this.env[this.env.length - 1 - index];
+        }
 
+        return this.labels[this.labels.length - 1 - index]
     }
 
     /**

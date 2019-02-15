@@ -412,6 +412,7 @@ function viewPortrait(term){
                                         '<td>' +
                                             '<table>' + 
                                                 getRow(getCell("term-heading", '<b>' + printTermHTML(currentTerm) + '</b>')) +
+                                                getRow(getCell("term-subheading", '<b>' + currentTerm.prettyPrint() + '</b>')) +
                                                 getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
                                                 getRow(getCell("term-fact", 'Abstractions: ' + currentTerm.abstractions())) +
                                                 getRow(getCell("term-fact", 'Applications: ' + currentTerm.applications())) +
