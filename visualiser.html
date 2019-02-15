@@ -16,12 +16,13 @@
 </head>
 <body>
 
-    <h1>&lambda;-calculus visualiser</h1>
+    <h1>&lambda;-term visualiser</h1>
 
-    Type a term t and an environment &Gamma; below!
+    <p><b><a href="gallery.html">&lambda;-term gallery</a></b></p>
 
-    <br>
-    <br>
+    <p>Graph display powerered by <a href="http://js.cytoscape.org/">Cytoscape.js</a></p>
+
+    <p>Type a term t and an environment &Gamma; below!</p>
 
     <b>Example:</b> (&lambda;x. &lambda;y. x y) a b
     <br>t = (\x. \y. x y) a b
@@ -56,15 +57,7 @@
     <div class="w3-container" id="cy" style="border-style:solid; border-color: black;">
     </div>
 
-    Graph display powerered by <a href="http://js.cytoscape.org/">Cytoscape.js</a>
-
     <div id = "normalisation-tree"></div>
-
-    <h2>&lambda; term generators</h2>
-    n <input type = "text" id = "n" style = "width: 25px"> k <input type = "text" id = "k" style = "width: 25px">
-    <button type = "button" id = "generate-btn" onclick = "generate_button(0);">Pure</button>
-    <button type = "button" id = "generate-btn" onclick = "generate_button(1);">Linear</button>
-    <button type = "button" id = "generate-btn" onclick = "generate_button(2);">Planar</button>
 
     <script src = "definition.js"></script>
     <script src = "parser.js"></script>
