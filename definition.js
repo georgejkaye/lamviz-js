@@ -15,14 +15,15 @@ var currentVariableIndex = 0;
 const variableNames = ['x', 'y', 'z', 'w', 'u', 'v', 'a', 'b', 'c', 'd', 'e']
 
 /**
- * Get the 
+ * Get the next variable name in the list of variable names, appending a ' if the list is looped.
+ * @return {string} The next variable name.
  */
-function getNextVariableName(){
+function getNextVariableName(x){
 
     var index = currentVariableIndex % variableNames.length;
     var name = variableNames[index];
 
-    for(var i = 0; i < currentVariableIndex / index; i++){
+    for(var i = 0; i < Math.floor(currentVariableIndex / variableNames.length); i++){
         name += "\'";
     }
 
@@ -184,6 +185,7 @@ class LambdaVariable{
             apps = 0;
             betas = 0;
             ctx = new LambdaEnvironment();
+            currentVariableIndex = 0;
         }
 
         var string = '<span class = "var-' + vars + '">' + ctx.getCorrespondingVariable(this.index) + '</span>';
@@ -383,6 +385,7 @@ class LambdaAbstraction{
             apps = 0;
             betas = 0;
             ctx = new LambdaEnvironment();
+            currentVariableIndex = 0;
         }
 
         var string = '<span class = "abs-' + abs + '">';
@@ -628,6 +631,7 @@ class LambdaApplication{
             apps = 0;
             betas = 0;
             ctx = new LambdaEnvironment();
+            currentVariableIndex = 0;
         }
 
         var string = '<span class = "app-' + apps;

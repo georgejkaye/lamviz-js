@@ -200,10 +200,18 @@ function generateButton(x, prev){
                 size -= (x - 10) * 2;
             }
 
+            var termName = "";
+
+            if(document.getElementById('de-bruijn').checked){
+                termName = terms[i].prettyPrint();
+            } else {
+                termName = printTermHTML(terms[i]);
+            }
+
             if(document.getElementById("draw").checked){
                 termString += getDiv('w3-container frame', 'frame' + i, "", 'viewPortrait(terms[' + i + ']);', 
                             getDiv("w3-container inner-frame", "", "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + "<br>" + 
-                                getP("caption", "portrait-caption-" + i, "font-size:" + size + "%", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));            
+                                getP("caption", "portrait-caption-" + i, "font-size:" + size + "%", "", termName + "<br>" + terms[i].crossings() + " crossings"));            
  
             } else {
                 termString += getDiv('w3-container frame empty', 'frame ' + i, "", 'viewPortrait(terms[' + i + ']);', getP("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));
