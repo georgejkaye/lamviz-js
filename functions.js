@@ -73,7 +73,7 @@ function execute_button(){
         term = parse(text, ctx)
 
         if(typeof term !== "string"){
-            text = term.prettyPrint() + " ~  ~  ~ " + term.prettyPrintLabels();
+            text = term.prettyPrint() + " ~  ~  ~ " + term.prettyPrintLabels(true);
         } else {
             text = term;
             error = true;
@@ -88,11 +88,8 @@ function execute_button(){
     currentTerm = term;
 
     if(!error){
-        drawGraph("cy", currentTerm, ctx, true, true, document.getElementById('labels-yes').checked);
+        drawMap("cy", currentTerm, ctx, true, true, document.getElementById('labels-yes').checked);
     }
-
-    console.log(currentTerm.freeVariableIndices());
-
 }
 
 /**
@@ -161,7 +158,7 @@ function normalise_button(){
         var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels();
 
         changeText('result', text);
-        drawGraph("cy", currentTerm, ctx, true, true, document.getElementById('labels-yes').checked);
+        drawMap("cy", currentTerm, ctx, true, true, document.getElementById('labels-yes').checked);
     }
 }
 

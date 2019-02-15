@@ -254,10 +254,9 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
  * @return {Object[]} The updated array of map elements.
  */
 function defineNode(array, id, type, posX, posY, label){
-    
-    const nodeID = checkID(id, nodes);
-    const node = createNode(nodeID, type, posX, posY, label);
-    array = pushNode(array, node, nodeID);
+
+    const node = createNode(id, type, posX, posY, label);
+    array = pushNode(array, node, id);
 
     return array;
 }
@@ -273,9 +272,8 @@ function defineNode(array, id, type, posX, posY, label){
  */
 function defineEdge(array, id, type, source, target, label){
     
-    const edgeID = checkID(id, edges);
-    const edge = createEdge(edgeID, type, source, target, label);
-    array = pushEdge(array, edge, edgeID);
+    const edge = createEdge(id, type, source, target, label);
+    array = pushEdge(array, edge, id);
 
     return array;
 }
@@ -567,7 +565,7 @@ function getNodeTypeText(type){
  * @param {boolean} labels  - Whether labels should be displayed.
  * @return {Object[]} - The array of elements in this graph, for future use.
  */
-function drawGraph(id, term, ctx, zoom, pan, labels){
+function drawMap(id, term, ctx, zoom, pan, labels){
 
     reset();
     
@@ -686,5 +684,71 @@ function drawGraph(id, term, ctx, zoom, pan, labels){
     updateLabels(labels);
     
     return cy;
+
+}
+
+function generateNormalisationGraphElements(tree, labels, parent){
+
+    var array = [];
+    currentVariableIndex = 0;
+    
+    var nodeID = tree.term.prettyPrintLabels(labels);
+
+    defineNode(array, nodeID);
+
+    if(parent !== undefined){
+        defineEdge(array, checkID(parent + " reduction", edges), "", parent, nodeID);
+    }
+
+    for(var i = 0; i < tree.reductions.length; i++){
+        array = array.concat(generateNormalisationGraphElements(tree.reductions[i], labels, nodeID));
+    }
+
+    return array;
+
+}
+
+function drawNormalisationGraph(id, term, labels){
+
+    reset();
+
+    var tree = generateReductionTree(term);
+    var elems = generateNormalisationGraphElements(tree, labels);
+
+    console.log(elems);
+
+    cy = cytoscape({
+        container: document.getElementById(id),
+
+        elements: elems,
+    
+        style: [
+            {
+                selector: 'node',
+                style: {
+                    'background-color': '#666',
+                    'text-valign': 'center',
+                    'color': 'white',
+                    'width': '100',
+                    'height': '15',
+                    'font-size': '10',
+                    'label': 'data(id)',
+                    'shape': 'square'
+                }
+            },
+
+            {
+                selector: 'edge',
+                style: {
+                'width': 2,
+                'line-color': '#ccc',
+                'mid-target-arrow-color': '#ccc',
+                'mid-target-arrow-shape': 'triangle',
+                'arrow-scale': '0.8',
+                'font-size': '6'
+                }
+            }
+        ]
+    })
 
 }

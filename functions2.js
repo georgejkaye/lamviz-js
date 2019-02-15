@@ -261,12 +261,12 @@ function drawGallery(cache, terms, ctx){
     if(document.getElementById("draw").checked){
         if(cache){
             for(var i = 0; i < terms.length; i++){
-                drawGraph("portrait" + i, terms[i], ctx, false, false, false);
+                drawMap("portrait" + i, terms[i], ctx, false, false, false);
             }
         }
         
         for(var i = 0; i < terms.length; i++){
-            cys[i] = drawGraph("portrait" + i, terms[i], ctx, false, false, false);
+            cys[i] = drawMap("portrait" + i, terms[i], ctx, false, false, false);
         }
     }
 }
@@ -428,15 +428,7 @@ function viewPortrait(term){
                                 '</table>'
     )
 
-    //changeText("normalisation-studio", '<table>' +
-    //                                        '<tr>' +
-    //                                            '<td>' + getDiv("w3-container frame", "nframe" + i + "1", "", "", getDiv("w3-container portrait", "nportrait" + i, "", "", "")) + '</td>' +
-    //                                        '</tr>' +
-    //                                    '</table>'
-    //)
-
-    drawGraph('portrait' + i, currentTerm, ctx, true, true, false);
-    //drawGraph('nportrait' + i, currentTerm, ctx, true, true, false);
+    drawMap('portrait' + i, currentTerm, ctx, true, true, false);
 }
 
 /**
@@ -550,9 +542,10 @@ function clickRedex(i){
  */
 function showNormalisationGraph(){
 
-    var reductions = generateReductionTree(currentTerm);
-   
-    changeText('normalisation-studio', reductions.printTree());
+    changeText('normalisation-studio', getDiv("w3-container frame big-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")));
+    drawNormalisationGraph("normalisation-graph", currentTerm, false);
+
+    var reductions = generateReductionTree(currentTerm);    
     
     document.getElementById("reset-btn").disabled = false;
 

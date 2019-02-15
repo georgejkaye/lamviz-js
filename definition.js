@@ -18,7 +18,7 @@ const variableNames = ['x', 'y', 'z', 'w', 'u', 'v', 'a', 'b', 'c', 'd', 'e']
  * Get the next variable name in the list of variable names, appending a ' if the list is looped.
  * @return {string} The next variable name.
  */
-function getNextVariableName(x){
+function getNextVariableName(){
 
     var index = currentVariableIndex % variableNames.length;
     var name = variableNames[index];
@@ -69,13 +69,22 @@ class LambdaVariable{
 
     /**
      * Get a pretty print of this term using the actual labels.
+     * @param {boolean} labels - Whether or not to use the predefined labels in the terms or generate new ones.
      * @param {Object} env - The environment of this lambda term.
      * @param {number} x - The layer this term is at - determines whether brackets are required.
      * @return {string} The pretty string.
      */
-    prettyPrintLabels(env, x){
+    prettyPrintLabels(labels, env, x){
 
-        return this.label;
+        if(env === undefined){
+            env = new LambdaEnvironment();
+        }
+
+        if(labels){
+            return this.label;
+        }
+
+        return env.getCorrespondingVariable(this.index);
     }
 
     /**
@@ -235,11 +244,12 @@ class LambdaAbstraction{
 
     /**
      * Get a pretty print of this term using the actual labels.
+     * @param {boolean} labels - Whether or not to use the predefined labels in the terms or generate new ones.
      * @param {Object} env  - The environment of this lambda term.
      * @param {number} x    - The layer this term is at - determines whether brackets are required.
      * @return {string} The pretty string.
      */
-    prettyPrintLabels(env, x){
+    prettyPrintLabels(labels, env, x){
 
         if(env === undefined){
             env = new LambdaEnvironment();
@@ -249,14 +259,22 @@ class LambdaAbstraction{
             x = 0;
         }
 
-        env.pushTerm(this.label);
+        var termLabel;
+
+        if(labels){
+            termLabel = this.label;
+        } else {
+            termLabel = getNextVariableName();
+        }
+
+        env.pushTerm(termLabel);
 
         var string = "";
 
         if(x === 0){
-            string = "\u03BB" + this.label + ". " + this.t.prettyPrintLabels(env, 0);
+            string = "\u03BB" + termLabel + ". " + this.t.prettyPrintLabels(labels, env, 0);
         } else {
-            string = "(\u03BB" + this.label + ". " + this.t.prettyPrintLabels(env, 0) + ")";
+            string = "(\u03BB" + termLabel + ". " + this.t.prettyPrintLabels(labels, env, 0) + ")";
         }
         
         env.popTerm();
@@ -455,11 +473,12 @@ class LambdaApplication{
 
     /**
      * Get a pretty print of this term using the actual labels.
+     * @param {boolean} labels - Whether or not to use the predefined labels in the terms or generate new ones.
      * @param {Object} env  - The environment of this lambda term.
      * @param {number} x    - The layer this term is at - determines whether brackets are required.
      * @return {string} The pretty string.
      */
-    prettyPrintLabels(env, x){
+    prettyPrintLabels(labels, env, x){
 
         if(env === undefined){
             env = new LambdaEnvironment();
@@ -471,13 +490,13 @@ class LambdaApplication{
 
         if(x === 0){
             if(this.t1.getType() === ABS){
-                return this.t1.prettyPrintLabels(env, 1) + " " + this.t2.prettyPrintLabels(env, 1);
+                return this.t1.prettyPrintLabels(labels, env, 1) + " " + this.t2.prettyPrintLabels(labels, env, 1);
             }
 
-            return this.t1.prettyPrintLabels(env, 0) + " " + this.t2.prettyPrintLabels(env, 1);
+            return this.t1.prettyPrintLabels(labels, env, 0) + " " + this.t2.prettyPrintLabels(labels, env, 1);
         }
 
-        return "(" + this.t1.prettyPrintLabels(env, x) + " " + this.t2.prettyPrintLabels(env, x+1) + ")";
+        return "(" + this.t1.prettyPrintLabels(labels, env, x) + " " + this.t2.prettyPrintLabels(labels, env, x+1) + ")";
     }
 
     /**
@@ -818,6 +837,16 @@ class ReductionTree{
     constructor(term, reductions){
         this.term = term;
         this.reductions = reductions;
+    }
+
+    size(){
+        var size = 1;
+
+        for(var i = 0; i < this.reductions.length; i++){
+            size += this.reductions[i].size();
+        }
+
+        return size;
     }
 
     /**
