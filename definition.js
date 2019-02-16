@@ -80,10 +80,6 @@ class LambdaVariable{
             env = new LambdaEnvironment();
         }
 
-        if(labels){
-            return this.label;
-        }
-
         return env.getCorrespondingVariable(this.index);
     }
 
@@ -261,20 +257,16 @@ class LambdaAbstraction{
 
         var termLabel;
 
-        if(labels){
-            termLabel = this.label;
-        } else {
-            termLabel = getNextVariableName();
+        if(!labels){
+            this.label = getNextVariableName();
         }
 
-        env.pushTerm(termLabel);
+        env.pushTerm(this.label);
 
-        var string = "";
-
-        if(x === 0){
-            string = "\u03BB" + termLabel + ". " + this.t.prettyPrintLabels(labels, env, 0);
-        } else {
-            string = "(\u03BB" + termLabel + ". " + this.t.prettyPrintLabels(labels, env, 0) + ")";
+        var string = "\u03BB" + this.label + ". " + this.t.prettyPrintLabels(labels, env, 0);
+        
+        if(x !== 0){
+            string = "(" + string + ")";
         }
         
         env.popTerm();
@@ -490,7 +482,7 @@ class LambdaApplication{
 
         if(x === 0){
             if(this.t1.getType() === ABS){
-                return this.t1.prettyPrintLabels(labels, env, 1) + " " + this.t2.prettyPrintLabels(labels, env, 1);
+                return "(" + this.t1.prettyPrintLabels(labels, env, 0) + ") " + this.t2.prettyPrintLabels(labels, env, 1);
             }
 
             return this.t1.prettyPrintLabels(labels, env, 0) + " " + this.t2.prettyPrintLabels(labels, env, 1);
@@ -868,7 +860,7 @@ class ReductionTree{
         string += this.term.prettyPrint();
 
         for(var i = 0; i < this.reductions.length; i++){
-            string += '<br>' + this.reductions[i].printTree(x+1);
+            string += '<br>' + this.reductions[i][0].printTree(x+1);
         }
 
         return string;

@@ -316,40 +316,41 @@ function specificReduction(term, i){
 /**
  * Get all reductions accessible by one beta reduction step from a lambda term.
  * @param {Object} term - The lambda term to find the reductions in.
+ * @param {boolean} labels - Whether to use the predefined labels or generate new ones.
  * @return {Object[]} All of the reductions accessible from one beta reduction (empty if none).
  */
-function getAllOneStepReductions(term){
+function getAllOneStepReductions(term, labels){
 
     var reductions = [];
     var x = 0;
 
     if(term.isBetaRedex()){
-        reductions[0] = performBetaReduction(term.t1, term.t2);
+        reductions[0] = [performBetaReduction(term.t1, term.t2), term];
         x++;
     }
 
     if(term.hasBetaRedex()){
         switch(term.getType()){
             case ABS:
-                var scopeReductions = getAllOneStepReductions(term.t);
+                var scopeReductions = getAllOneStepReductions(term.t, labels);
 
                 for(var i = 0; i < scopeReductions.length; i++){
-                    reductions[x] = new LambdaAbstraction(scopeReductions[i], term.label);
+                    reductions[x] = [new LambdaAbstraction(scopeReductions[i][0], term.label), scopeReductions[i][1]];
                     x++;
                 }
                 break;
             case APP:
-                var lhsReductions = getAllOneStepReductions(term.t1);
+                var lhsReductions = getAllOneStepReductions(term.t1, labels);
 
                 for(var i = 0; i < lhsReductions.length; i++){
-                    reductions[x] = new LambdaApplication(lhsReductions[i], term.t2);
+                    reductions[x] = [new LambdaApplication(lhsReductions[i][0], term.t2), lhsReductions[i][1]];
                     x++;
                 }
 
-                var rhsReductions = getAllOneStepReductions(term.t2);
+                var rhsReductions = getAllOneStepReductions(term.t2, labels);
                 
                 for(var i = 0; i < rhsReductions.length; i++){
-                    reductions[x] = new LambdaApplication(term.t1, rhsReductions[i]);
+                    reductions[x] = [new LambdaApplication(term.t1, rhsReductions[i][0]), rhsReductions[i][1]];
                     x++;
                 }
 
@@ -361,16 +362,16 @@ function getAllOneStepReductions(term){
 
 }
 
-function generateReductionTree(term){
+function generateReductionTree(term, labels){
 
     var subtrees = [];
 
     if(term.hasBetaRedex()){
 
-        var reductions = getAllOneStepReductions(term);
+        var reductions = getAllOneStepReductions(term, labels);
 
         for(var i = 0; i < reductions.length; i++){
-            subtrees[i] = generateReductionTree(reductions[i]);
+            subtrees[i] = [generateReductionTree(reductions[i][0]), reductions[i][1]];
         }
 
     }

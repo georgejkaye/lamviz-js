@@ -8,6 +8,8 @@
 var nodes = [];
 /** Array containing all node objects used in the current graph */
 var nodeObjs = [];
+/** Array containing all edge objects used in the current graph */
+var edgeObjs = [];
 /** Array containing all edge ids used in the current graph */
 var edges = [];
 /** The graph object */
@@ -19,6 +21,10 @@ const RHS = 1;
 const nodeDistanceX = 30;
 /** The distance between adjacent nodes in the Y direction */
 const nodeDistanceY = 30;
+/** The distance between adjacent normalisation nodes in the X direction */
+const normalisationDistanceX = 50;
+/** The distance between adjacent normalisation nodes in the Y direction */
+const normalisationDistanceY = 100;
 
 /** Constants for the different types of graph elements */
 /** A node representing an abstraction */
@@ -50,6 +56,7 @@ function reset(){
     nodes = [];
     nodeObjs = [];
     edges = [];
+    edgeObjs = [];
     cy = undefined;
     firstNode = undefined;
     parent = [0,0];
@@ -251,6 +258,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
  * @param {string} type     - The type of this node. 
  * @param {number} posX     - The x coordinate of this node.
  * @param {number} posY     - The y coordinate of this node.
+ * @param {string} label    - The label of this node.
  * @return {Object[]} The updated array of map elements.
  */
 function defineNode(array, id, type, posX, posY, label){
@@ -268,6 +276,7 @@ function defineNode(array, id, type, posX, posY, label){
  * @param {string} type     - The type of edge. 
  * @param {string} source   - The source of this edge.
  * @param {string} target   - The target of this edge.
+ * @param {string} label    - The label of this edge.
  * @return {Object[]} The updated array of map elements.
  */
 function defineEdge(array, id, type, source, target, label){
@@ -342,6 +351,7 @@ function pushNode(array, node, nodeID){
 function pushEdge(array, edge, edgeID){
     smartPush(array, edge);
     smartPush(edges, edgeID);
+    smartPush(edgeObjs, edge);
 
     return array;
 }
@@ -687,32 +697,73 @@ function drawMap(id, term, ctx, zoom, pan, labels){
 
 }
 
-function generateNormalisationGraphElements(tree, labels, parent){
+function checkForNode(array, nodeID){
+    for(var i = 0; i < array.length; i++){
+        if(array[0].data.id === nodeID){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function checkForIdenticalReduction(id, source, target){
+
+    for(var i = 0; i < edgeObjs.length; i++){
+
+        if(edgeObjs[i].data.id === id && edgeObjs[i].data.source === source && edgeObjs[i].data.target === target){
+            return true;
+        }
+    }
+
+    return false;
+
+}
+
+/**
+ * Generate the elements of the normalisation graph.
+ * @param {Object} tree - The normalisation tree object.
+ * @param {boolean} labels - Whether to use predefined labels in the terms.
+ * @param {string} parent - The node ID of the parent.
+ * @param {string} parentReduction - The reduction that led to this term.
+ * @return {Object[]} The graph elements.
+ */
+function generateNormalisationGraphElements(tree, labels, parent, parentReduction, height){
 
     var array = [];
     currentVariableIndex = 0;
     
-    var nodeID = tree.term.prettyPrintLabels(labels);
-
-    defineNode(array, nodeID);
-
-    if(parent !== undefined){
-        defineEdge(array, checkID(parent + " reduction", edges), "", parent, nodeID);
+    if(height === undefined){
+        height = 0;
     }
 
+    var nodeID = tree.term.prettyPrint();
+
+    array = defineNode(array, nodeID, "", 0, height, tree.term.prettyPrintLabels());  
+
     for(var i = 0; i < tree.reductions.length; i++){
-        array = array.concat(generateNormalisationGraphElements(tree.reductions[i], labels, nodeID));
+        array = array.concat(generateNormalisationGraphElements(tree.reductions[i][0], labels, nodeID, tree.reductions[i][1].prettyPrintLabels(true), height + normalisationDistanceY));
+    }
+
+    if(parent !== undefined && !checkForIdenticalReduction(parentReduction, parent, nodeID)){
+        array = defineEdge(array, checkID(parentReduction, edges), "", parent, nodeID, parentReduction);
     }
 
     return array;
 
 }
 
+/**
+ * Draw the normalisation graph for a given term.
+ * @param {string} id - The id of the graph box.
+ * @param {Object} term - The term to draw the normalisation graph of.
+ * @param {boolean} labels - Whether to use the predefined labels in the term.
+ */
 function drawNormalisationGraph(id, term, labels){
 
     reset();
 
-    var tree = generateReductionTree(term);
+    var tree = generateReductionTree(term, labels);
     var elems = generateNormalisationGraphElements(tree, labels);
 
     console.log(elems);
@@ -732,7 +783,9 @@ function drawNormalisationGraph(id, term, labels){
                     'width': '100',
                     'height': '15',
                     'font-size': '10',
-                    'label': 'data(id)',
+                    'label': function(ele){
+                        return ele.data().label;
+                    },
                     'shape': 'square'
                 }
             },
@@ -742,13 +795,22 @@ function drawNormalisationGraph(id, term, labels){
                 style: {
                 'width': 2,
                 'line-color': '#ccc',
-                'mid-target-arrow-color': '#ccc',
-                'mid-target-arrow-shape': 'triangle',
+                'target-arrow-color': '#ccc',
+                'target-arrow-shape': 'triangle',
                 'arrow-scale': '0.8',
-                'font-size': '6'
+                'font-size': '6',
+                'curve-style': 'bezier',
+                'control-point-step=size': '100',
+                'label': function(ele){
+                    return ele.data().label;
+                },
                 }
             }
-        ]
+        ],
+
+        layout: {
+            name: 'preset'
+        },
     })
 
 }
