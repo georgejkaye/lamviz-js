@@ -12,22 +12,39 @@ const ABS = 1;
 const APP = 2;
 
 var currentVariableIndex = 0;
-const variableNames = ['x', 'y', 'z', 'w', 'u', 'v', 'a', 'b', 'c', 'd', 'e']
+const variableNames = ['x', 'y', 'z', 'w', 'u', 'v']
+var currentFreeVariableIndex = 0;
+const freeVariableNames = ['a', 'b', 'c', 'd', 'e']
 
 /**
  * Get the next variable name in the list of variable names, appending a ' if the list is looped.
  * @return {string} The next variable name.
  */
-function getNextVariableName(){
+function getNextVariableName(free){
 
-    var index = currentVariableIndex % variableNames.length;
-    var name = variableNames[index];
+    var variableArray;
+
+    if(free){
+        variableArray = freeVariableNames;
+        variableIndex = currentVariableIndex;
+    } else {
+        variableArray = variableNames;
+        variableIndex = currentFreeVariableIndex;
+    }
+
+    var index = variableIndex % variableArray.length;
+    var name = variableArray[index];
 
     for(var i = 0; i < Math.floor(currentVariableIndex / variableNames.length); i++){
         name += "\'";
     }
 
-    currentVariableIndex++;
+    if(free){
+        currentFreeVariableIndex++;
+    } else {
+        currentVariableIndex++;
+    }
+
     return name;
 
 }
@@ -80,7 +97,13 @@ class LambdaVariable{
             env = new LambdaEnvironment();
         }
 
-        return env.getCorrespondingVariable(this.index);
+        var label = env.getCorrespondingVariable(this.index);
+
+        if(label === "?"){
+            label = getNextVariableName(true);
+        }
+
+        return label;
     }
 
     /**
@@ -258,7 +281,7 @@ class LambdaAbstraction{
         var termLabel;
 
         if(!labels){
-            this.label = getNextVariableName();
+            this.label = getNextVariableName(false);
         }
 
         env.pushTerm(this.label);
