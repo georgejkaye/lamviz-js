@@ -22,7 +22,7 @@ const nodeDistanceX = 30;
 /** The distance between adjacent nodes in the Y direction. */
 const nodeDistanceY = 30;
 /** The distance between adjacent normalisation nodes in the X direction. */
-const normalisationDistanceX = 50;
+const normalisationDistanceX = 100;
 /** The distance between adjacent normalisation nodes in the Y direction. */
 const normalisationDistanceY = 100;
 /** The width of one normalisation node. */

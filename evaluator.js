@@ -73,7 +73,7 @@ function substitute(s, j, t){
 function performBetaReduction(abs, val){
     var term = shift(substitute(shift(val, 1, 0), 0, abs.t), -1, 0);
 
-    return term
+    return term;
 }
 
 /**
@@ -269,10 +269,6 @@ function innermostReduction(term){
  */
 function specificReduction(term, i){
 
-    if(!term.hasBetaRedex()){
-        return [term, i];
-    }
-
     if(term.isBetaRedex()){
 
         i--;
@@ -283,33 +279,45 @@ function specificReduction(term, i){
 
     }
 
+    if(!term.hasBetaRedexInside()){
+        return [term, i];
+    }
+
     switch(term.getType()){
         case ABS:
 
-            var newScope = specificReduction(term.t, i);
+            var scopeReduction = specificReduction(term.t, i);
+            i = scopeReduction[1];
 
-            if(newScope[0] === term.t){
-                return [term, newScope[1]];
+            if(i === -1){
+                return [new LambdaAbstraction(scopeReduction[0], term.label), i];
             }
 
-            return [new LambdaAbstraction(newScope[0], term.label), newScope[1]];
+            break;
+
         case APP:
-            if(term.t1.hasBetaRedex()){
-                var newLHS = specificReduction(term.t1, i);
 
-                if(newLHS[0] === term.t1){
-                    var newRHS = specificReduction(term.t2, newLHS[1]);
-                    
-                    if(newRHS[0] === term.t2){
-                        return [term, newRHS[1]];
-                    }
+            if(term.t1.hasBetaRedex){
 
-                    return [new LambdaApplication(term.t1, newRHS[0]), newRHS[1]];
+                var lhsReduction = specificReduction(term.t1, i);
+                i = lhsReduction[1];
+
+                if(i === -1){
+                    return [new LambdaApplication(lhsReduction[0], term.t2), i];
                 }
-
-                return [new LambdaApplication(newLHS[0], term.t2), newLHS[1]];
             }
+
+            var rhsReduction = specificReduction(term.t2, i);
+            i = rhsReduction[1];
+
+            if(i === -1){
+                return [new LambdaApplication(term.t1, rhsReduction[0]), i];
+            }
+
+            break;
     }
+
+    return [term, i];
 
 }
 

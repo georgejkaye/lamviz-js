@@ -162,6 +162,14 @@ class LambdaVariable{
     }
 
     /**
+     * Does this term contain a beta redex (not including itself)?
+     * @return {boolean} Whether this term contains a beta redex (not including itself).
+     */
+    hasBetaRedexInside(){
+        return false;
+    }
+
+    /**
      * How many beta redexes does this term contain?
      * @return {number} How many beta redexes this term contains.
      */
@@ -198,9 +206,12 @@ class LambdaVariable{
             currentVariableIndex = 0;
         }
 
-        var string = '<span class = "var-' + vars + '">' + ctx.getCorrespondingVariable(this.index) + '</span>';
+        this.label = ctx.getCorrespondingVariable(this.index)
+        var string = '<span class = "var-' + vars + '">' + this.label + '</span>';
         vars++;
 
+
+        
         return [string, vars, abs, apps, betas];
 
     }
@@ -367,6 +378,14 @@ class LambdaAbstraction{
     }
 
     /**
+     * Does this term contain a beta redex (not including itself)?
+     * @return {boolean} Whether this term contains a beta redex (not including itself).
+     */
+    hasBetaRedexInside(){
+        return this.t.hasBetaRedex();
+    }
+
+    /**
      * How many beta redexes does this term contain?
      * @return {number} How many beta redexes this term contains.
      */
@@ -379,6 +398,7 @@ class LambdaAbstraction{
      * @return {String[]} The array of all redexes in this term.
      */
     printRedexes(){
+
         return this.t.printRedexes();
     }
 
@@ -411,6 +431,7 @@ class LambdaAbstraction{
         }
       
         var variableName = getNextVariableName();
+        this.label = variableName;
         ctx.pushTerm(variableName);
         var scope = this.t.printHTML(0, vars, abs, apps, betas, ctx);
         ctx.popTerm();
@@ -600,6 +621,14 @@ class LambdaApplication{
     }
 
     /**
+     * Does this term contain a beta redex (not including itself)?
+     * @return {boolean} Whether this term contains a beta redex (not including itself).
+     */
+    hasBetaRedexInside(){
+        return (this.t1.hasBetaRedex() || this.t2.hasBetaRedex());
+    }
+
+    /**
      * How many beta redexes does this term contain?
      * @return {number} How many beta redexes this term contains.
      */
@@ -619,11 +648,11 @@ class LambdaApplication{
      * @return {String[]} The array of all redexes in this term.
      */
     printRedexes(){
-        
+
         var array = [];
         
         if(this.isBetaRedex()){
-            array[0] = this.prettyPrint();
+            array[0] = this.prettyPrintLabels(true);
         }
 
         return array.concat(this.t1.printRedexes().concat(this.t2.printRedexes()));
