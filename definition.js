@@ -14,6 +14,14 @@ const APP = 2;
 var currentVariableIndex = 0;
 const variableNames = ['x', 'y', 'z', 'w', 'u', 'v']
 
+var currentFreeVariableIndex = 0;
+const freeVariableNames = ['a', 'b', 'c', 'd', 'e'];
+
+function resetVariableIndices(){
+    currentVariableIndex = 0;
+    currentFreeVariableIndex = 0;
+}
+
 /**
  * Get the next variable name in the list of variable names, appending a ' if the list is looped.
  * @return {string} The next variable name.
@@ -28,6 +36,25 @@ function getNextVariableName(){
     }
 
     currentVariableIndex++;
+
+    return name;
+
+}
+
+/**
+ * Get the next variable name in the list of variable names, appending a ' if the list is looped.
+ * @return {string} The next variable name.
+ */
+function getNextFreeVariableName(){
+
+    var index = currentFreeVariableIndex % freeVariableNames.length;
+    var name = freeVariableNames[index];
+
+    for(var i = 0; i < Math.floor(currentFreeVariableIndex / freeVariableNames.length); i++){
+        name += "\'";
+    }
+
+    currentFreeVariableIndex++;
 
     return name;
 
@@ -83,6 +110,11 @@ class LambdaVariable{
 
         if(!labels){
             this.label = env.getCorrespondingVariable(this.index);
+
+            if(this.label === "?"){
+                this.label = getNextFreeVariableName();
+            }
+
         }
 
         return this.label;
@@ -203,15 +235,18 @@ class LambdaVariable{
             apps = 0;
             betas = 0;
             ctx = new LambdaEnvironment();
-            currentVariableIndex = 0;
+            resetVariableIndices();
         }
 
         this.label = ctx.getCorrespondingVariable(this.index)
+
+        if(this.label === "?"){
+            this.label = getNextFreeVariableName();
+        }
+
         var string = '<span class = "var-' + vars + '">' + this.label + '</span>';
         vars++;
 
-
-        
         return [string, vars, abs, apps, betas];
 
     }
@@ -420,7 +455,7 @@ class LambdaAbstraction{
             apps = 0;
             betas = 0;
             ctx = new LambdaEnvironment();
-            currentVariableIndex = 0;
+            resetVariableIndices();
         }
 
         var string = '<span class = "abs-' + abs + '">';
@@ -676,7 +711,7 @@ class LambdaApplication{
             apps = 0;
             betas = 0;
             ctx = new LambdaEnvironment();
-            currentVariableIndex = 0;
+            resetVariableIndices();
         }
 
         var string = '<span class = "app-' + apps;

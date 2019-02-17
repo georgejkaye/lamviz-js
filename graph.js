@@ -26,7 +26,7 @@ const normalisationDistanceX = 100;
 /** The distance between adjacent normalisation nodes in the Y direction. */
 const normalisationDistanceY = 100;
 /** The width of one normalisation node. */
-const normalisationNodeWidth = 100;
+const normalisationNodeWidth = 150;
 
 
 /** Constants for the different types of graph elements. */
@@ -132,9 +132,9 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
 
             array = defineNode(array, newNodeID, absNode, posX, posY, nodeLabel);
     
-            newEdgeID = checkID(newNodeID + " " + term.t.prettyPrintLabels(), edges);
+            newEdgeID = checkID(newNodeID + " " + term.t.prettyPrintLabels(true), edges);
             newEdgeType = absEdge;
-            newEdgeLabel = nodeLabel + " " + term.t.prettyPrintLabels();
+            newEdgeLabel = nodeLabel + " " + term.t.prettyPrintLabels(true);
 
             /* The abstracted variable goes NE */
             const lambdaAbstractionSupportNodeID = checkID(newNodeID + "._abstraction_node_right", nodes);
@@ -170,7 +170,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
             
         case APP:
             
-            newNodeID = checkID("[" + term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels() + "]", nodes);
+            newNodeID = checkID("[" + term.t1.prettyPrintLabels(true) + " @ " + term.t2.prettyPrintLabels(true) + "]", nodes);
             array = defineNode(array, newNodeID, appNode, posX, posY);
 
             newEdgeID = checkID("(" + newNodeID + ")", edges);
@@ -588,7 +588,8 @@ function getNodeTypeText(type){
 function drawMap(id, term, ctx, zoom, pan, labels){
 
     reset();
-    
+    resetVariableIndices();
+
     elems = generateMapElements(term, ctx);
 
     cy = cytoscape({
@@ -742,7 +743,6 @@ function checkForIdenticalReduction(id, source, target){
 function generateNormalisationGraphElements(tree, labels, parent, parentReduction, level){
 
     var array = [];
-    currentVariableIndex = 0;
     
     if(level === undefined){
         level = 0;
@@ -750,7 +750,9 @@ function generateNormalisationGraphElements(tree, labels, parent, parentReductio
 
     var nodeID = tree.term.prettyPrint();
 
-    array = defineNode(array, nodeID, "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(), level);  
+    //var termElems = generateMapElements(tree.term);
+
+    array = defineNode(array, nodeID, "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(true), level);  
 
     for(var i = 0; i < tree.reductions.length; i++){
         array = array.concat(generateNormalisationGraphElements(tree.reductions[i][0], labels, nodeID, tree.reductions[i][1].prettyPrintLabels(true), level + 1));
@@ -773,6 +775,7 @@ function generateNormalisationGraphElements(tree, labels, parent, parentReductio
 function drawNormalisationGraph(id, term, labels){
 
     reset();
+    resetVariableIndices();
 
     var tree = generateReductionTree(term, labels);
     var elems = generateNormalisationGraphElements(tree, labels);
@@ -789,7 +792,7 @@ function drawNormalisationGraph(id, term, labels){
                     'background-color': '#666',
                     'text-valign': 'center',
                     'color': 'white',
-                    'width': '100',
+                    'width': normalisationNodeWidth,
                     'height': '15',
                     'font-size': '10',
                     'label': function(ele){
