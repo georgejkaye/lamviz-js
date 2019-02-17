@@ -4,53 +4,56 @@
  * @author George Kaye
  */
 
-/** Array containing all node ids used in the current graph */
+/** Array containing all node ids used in the current graph. */
 var nodes = [];
-/** Array containing all node objects used in the current graph */
+/** Array containing all node objects used in the current graph. */
 var nodeObjs = [];
-/** Array containing all edge objects used in the current graph */
+/** Array containing all edge objects used in the current graph. */
 var edgeObjs = [];
-/** Array containing all edge ids used in the current graph */
+/** Array containing all edge ids used in the current graph. */
 var edges = [];
 /** The graph object */
 var cy = undefined;
-/** Constants to represent the location of a child relative to its parent */
+/** Constants to represent the location of a child relative to its parent. */
 const LHS = 0;
 const RHS = 1;
-/** The distance between adjacent nodes in the X direction */
+/** The distance between adjacent nodes in the X direction. */
 const nodeDistanceX = 30;
-/** The distance between adjacent nodes in the Y direction */
+/** The distance between adjacent nodes in the Y direction. */
 const nodeDistanceY = 30;
-/** The distance between adjacent normalisation nodes in the X direction */
+/** The distance between adjacent normalisation nodes in the X direction. */
 const normalisationDistanceX = 50;
-/** The distance between adjacent normalisation nodes in the Y direction */
+/** The distance between adjacent normalisation nodes in the Y direction. */
 const normalisationDistanceY = 100;
+/** The width of one normalisation node. */
+const normalisationNodeWidth = 100;
 
-/** Constants for the different types of graph elements */
-/** A node representing an abstraction */
+
+/** Constants for the different types of graph elements. */
+/** A node representing an abstraction. */
 const absNode = "abs-node";
-/** A node representing an abstraction of a free variable */
+/** A node representing an abstraction of a free variable. */
 const absNodeFree = "abs-node-free";
-/** An edge carrying an abstraction */
+/** An edge carrying an abstraction. */
 const absEdge = "abs-edge";
-/** A node representing an application */
+/** A node representing an application. */
 const appNode = "app-node";
-/** An edge carrying an application */
+/** An edge carrying an application. */
 const appEdge = "app-edge";
 /** A node supporting a variable */
 const varNode = "var-node";
-/** A node supporting a variable at the top of the page */
+/** A node supporting a variable at the top of the page. */
 const varNodeTop = "var-node-top";
-/** An edge carrying a variable (no label) */
+/** An edge carrying a variable (no label). */
 const varEdge = "var-edge";
-/** An edge carrying a variable (with label) */
+/** An edge carrying a variable (with label). */
 const varEdgeLabel = "var-label-edge";
 
 /** A lambda character */
 const lambda = "\u03BB";
 
 /**
- * Reset the nodes and edges arrays
+ * Reset the nodes and edges arrays.
  */
 function reset(){
     nodes = [];
@@ -259,11 +262,12 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
  * @param {number} posX     - The x coordinate of this node.
  * @param {number} posY     - The y coordinate of this node.
  * @param {string} label    - The label of this node.
+ * @param {number} level    - The level of this node.
  * @return {Object[]} The updated array of map elements.
  */
-function defineNode(array, id, type, posX, posY, label){
+function defineNode(array, id, type, posX, posY, label, level){
 
-    const node = createNode(id, type, posX, posY, label);
+    const node = createNode(id, type, posX, posY, label, level);
     array = pushNode(array, node, id);
 
     return array;
@@ -289,13 +293,15 @@ function defineEdge(array, id, type, source, target, label){
 
 /**
  * Create a node on the map.
- * @param {string} id   - The id of the node.
- * @param {string} type - The type of the node.
- * @param {number} x    - The x coordinate of the node (optional).
- * @param {number} y    - The y coordinate of the node (optional).
+ * @param {string} id       - The id of the node.
+ * @param {string} type     - The type of the node.
+ * @param {number} x        - The x coordinate of the node (optional).
+ * @param {number} y        - The y coordinate of the node (optional).
+ * @param {string} label    - The label of this node.
+ * @param {number} level    - The level of this node.
  * @return {Object} The node object.
  */
-function createNode(id, type, x, y, label){
+function createNode(id, type, x, y, label, level){
     
     if(x === undefined || y === undefined){
         return { data: { id: id, type: type}};
@@ -305,7 +311,11 @@ function createNode(id, type, x, y, label){
         label = "";
     }
 
-    return { data: { id: id, type: type, label: label}, position: {x: x, y: y}};
+    if(level === undefined){
+        level = "";
+    }
+
+    return { data: { id: id, type: type, label: label, level: level}, position: {x: x, y: y}};
 
 }
 
@@ -726,23 +736,24 @@ function checkForIdenticalReduction(id, source, target){
  * @param {boolean} labels - Whether to use predefined labels in the terms.
  * @param {string} parent - The node ID of the parent.
  * @param {string} parentReduction - The reduction that led to this term.
+ * @param {number} level - The current level of the graph.
  * @return {Object[]} The graph elements.
  */
-function generateNormalisationGraphElements(tree, labels, parent, parentReduction, height){
+function generateNormalisationGraphElements(tree, labels, parent, parentReduction, level){
 
     var array = [];
     currentVariableIndex = 0;
     
-    if(height === undefined){
-        height = 0;
+    if(level === undefined){
+        level = 0;
     }
 
     var nodeID = tree.term.prettyPrint();
 
-    array = defineNode(array, nodeID, "", 0, height, tree.term.prettyPrintLabels());  
+    array = defineNode(array, nodeID, "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(), level);  
 
     for(var i = 0; i < tree.reductions.length; i++){
-        array = array.concat(generateNormalisationGraphElements(tree.reductions[i][0], labels, nodeID, tree.reductions[i][1].prettyPrintLabels(true), height + normalisationDistanceY));
+        array = array.concat(generateNormalisationGraphElements(tree.reductions[i][0], labels, nodeID, tree.reductions[i][1].prettyPrintLabels(true), level + 1));
     }
 
     if(parent !== undefined && !checkForIdenticalReduction(parentReduction, parent, nodeID)){
@@ -765,8 +776,6 @@ function drawNormalisationGraph(id, term, labels){
 
     var tree = generateReductionTree(term, labels);
     var elems = generateNormalisationGraphElements(tree, labels);
-
-    console.log(elems);
 
     cy = cytoscape({
         container: document.getElementById(id),
@@ -811,5 +820,30 @@ function drawNormalisationGraph(id, term, labels){
             name: 'preset'
         },
     })
+
+    var x = normalisationDistanceX;
+    var w = normalisationNodeWidth;
+
+    for(var i = 0; i < tree.height() + 1; i++){
+        
+        var elems = cy.elements('node[level = ' + i + ']');
+
+        var c = Math.floor(elems.length / 2);
+
+
+        for(var j = 0; j < elems.length; j++){
+            
+            var posX = 0;
+            
+            if(elems.length % 2 === 0){
+                posX = (0.5) * x + ((j-c) * (w+x)); 
+            } else {
+                posX = (-0.5) * w + ((j-c) * (w+x));
+            }
+
+            elems[j].position('x', posX);
+        }
+        
+    }
 
 }

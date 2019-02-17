@@ -542,10 +542,12 @@ function clickRedex(i){
  */
 function showNormalisationGraph(){
 
-    changeText('normalisation-studio', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")));
+    var reductions = generateReductionTree(currentTerm);  
+
+    changeText('normalisation-studio', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")) + "<br>" + reductions.printTree());
     drawNormalisationGraph("normalisation-graph", currentTerm, false);
 
-    var reductions = generateReductionTree(currentTerm);    
+      
     
     document.getElementById("reset-btn").disabled = false;
 

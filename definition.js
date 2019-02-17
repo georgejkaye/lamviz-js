@@ -836,6 +836,10 @@ class ReductionTree{
         this.reductions = reductions;
     }
 
+    /**
+     * Get the total number of nodes in this tree.
+     * @return {number} The total number of nodes in this tree.
+     */
     size(){
         var size = 1;
 
@@ -844,6 +848,27 @@ class ReductionTree{
         }
 
         return size;
+    }
+
+    /**
+     * Get the height of this tree.
+     * @return {number} The height of this tree.
+     */
+    height(){
+        
+        var maxSubtreeHeight = 0;
+
+        for(var i = 0; i < this.reductions.length; i++){
+
+            var subtreeHeight = this.reductions[i][0].height() + 1;
+
+            if(subtreeHeight > maxSubtreeHeight){
+                maxSubtreeHeight = subtreeHeight;
+            }
+        }
+
+        return maxSubtreeHeight;
+
     }
 
     /**

@@ -369,6 +369,12 @@ function getAllOneStepReductions(term, labels){
 
 }
 
+/**
+ * Generate the reduction tree for a given lambda term.
+ * @param {Object} term - The term to generate the reduction tree for.
+ * @param {boolean} labels - Whether to use the predefined labels or generate new ones.
+ * @return {Object} The reduction tree for this term.
+ */
 function generateReductionTree(term, labels){
 
     var subtrees = [];
