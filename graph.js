@@ -798,9 +798,8 @@ function drawNormalisationGraph(id, term, labels){
                 'target-arrow-color': '#ccc',
                 'target-arrow-shape': 'triangle',
                 'arrow-scale': '0.8',
-                'font-size': '6',
+                'font-size': '2',
                 'curve-style': 'bezier',
-                'control-point-step=size': '100',
                 'label': function(ele){
                     return ele.data().label;
                 },

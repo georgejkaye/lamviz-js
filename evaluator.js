@@ -317,12 +317,18 @@ function specificReduction(term, i){
  * Get all reductions accessible by one beta reduction step from a lambda term.
  * @param {Object} term - The lambda term to find the reductions in.
  * @param {boolean} labels - Whether to use the predefined labels or generate new ones.
+ * @param {Object} env - The environment of this lambda term (used for labelling purposes).
  * @return {Object[]} All of the reductions accessible from one beta reduction (empty if none).
  */
 function getAllOneStepReductions(term, labels){
 
     var reductions = [];
     var x = 0;
+
+    if(!labels){
+        term.prettyPrintLabels();
+        labels = true;
+    }
 
     if(term.isBetaRedex()){
         reductions[0] = [performBetaReduction(term.t1, term.t2), term];
@@ -332,6 +338,7 @@ function getAllOneStepReductions(term, labels){
     if(term.hasBetaRedex()){
         switch(term.getType()){
             case ABS:
+
                 var scopeReductions = getAllOneStepReductions(term.t, labels);
 
                 for(var i = 0; i < scopeReductions.length; i++){
