@@ -634,7 +634,7 @@ function drawMap(id, term, ctx, zoom, pan, labels){
                 'line-color': '#ccc',
                 'mid-target-arrow-color': '#ccc',
                 'mid-target-arrow-shape': 'triangle',
-                'arrow-scale': '0.8',
+                'arrow-scale': '1',
                 'font-size': '6'
                 }
             },
@@ -854,7 +854,8 @@ function drawNormalisationGraph(id, term, ctx){
             {
                 selector: 'node[type="norm"]',
                 style: {
-                    'background-color': 'white'
+                    'background-color': 'white',
+                    'border-width': '0'
                 }
             },
 
@@ -870,13 +871,13 @@ function drawNormalisationGraph(id, term, ctx){
             },
 
             {
-                selector: 'edge',
+                selector: 'edge[type!="norm"]',
                 style: {
                 'width': 2,
                 'line-color': '#ccc',
                 'mid-target-arrow-color': '#ccc',
                 'mid-target-arrow-shape': 'triangle',
-                'arrow-scale': '0.8',
+                'arrow-scale': '1',
                 'font-size': '2',
                 'curve-style': 'bezier',
                 'label': ""
@@ -886,8 +887,9 @@ function drawNormalisationGraph(id, term, ctx){
             {
                 selector: 'edge[type="norm"]',
                 style: {
-                'target-arrow-color': 'black',
-                'target-arrow-shape': 'triangle',
+                'mid-target-arrow-color': 'black',
+                'mid-target-arrow-shape': 'triangle',
+                'arrow-scale': '2',
                 'line-color': 'black',
                 }
             },
