@@ -102,21 +102,7 @@ class LambdaVariable{
      * @param {number} x - The layer this term is at - determines whether brackets are required.
      * @return {string} The pretty string.
      */
-    prettyPrintLabels(labels, env, x){
-
-        if(env === undefined){
-            env = new LambdaEnvironment();
-        }
-
-        if(!labels){
-            this.label = env.getCorrespondingVariable(this.index);
-
-            if(this.label === "?"){
-                this.label = getNextFreeVariableName();
-            }
-
-        }
-
+    prettyPrintLabels(x){
         return this.label;
     }
 
@@ -226,7 +212,7 @@ class LambdaVariable{
      * @param {number} betas - The number of beta redexes encountered so far.
      * @return {string} The HTML string.
      */
-    printHTML(x, vars, abs, apps, betas, ctx){
+    printHTML(x, vars, abs, apps, betas){
 
         if(x === undefined){
             x = 0;
@@ -234,20 +220,28 @@ class LambdaVariable{
             abs = 0;
             apps = 0;
             betas = 0;
-            ctx = new LambdaEnvironment();
-            resetVariableIndices();
-        }
-
-        this.label = ctx.getCorrespondingVariable(this.index)
-
-        if(this.label === "?"){
-            this.label = getNextFreeVariableName();
         }
 
         var string = '<span class = "var-' + vars + '">' + this.label + '</span>';
         vars++;
 
         return [string, vars, abs, apps, betas];
+
+    }
+
+    /**
+     * Generate 'pretty' variable names (e.g. x,y,z...) for this term.
+     * @param {Object} ctx - The context for this lambda term.
+     * @param {boolean} x - Flag to indicate if this is a subcall.
+     */
+    generatePrettyVariableNames(ctx, x){
+
+        if(x === undefined){
+            resetVariableIndices();
+            ctx.generatePrettyVariableNames();
+        }
+
+        this.label = ctx.getCorrespondingVariable(this.index);
 
     }
 
@@ -296,31 +290,18 @@ class LambdaAbstraction{
      * @param {number} x    - The layer this term is at - determines whether brackets are required.
      * @return {string} The pretty string.
      */
-    prettyPrintLabels(labels, env, x){
-
-        if(env === undefined){
-            env = new LambdaEnvironment();
-        }
+    prettyPrintLabels(x){
 
         if(x === undefined){
             x = 0;
         }
 
-        var termLabel;
-
-        if(!labels){
-            this.label = getNextVariableName();
-        }
-
-        env.pushTerm(this.label);
-
-        var string = "\u03BB" + this.label + ". " + this.t.prettyPrintLabels(labels, env, 0);
+        var string = "\u03BB" + this.label + ". " + this.t.prettyPrintLabels(0);
         
         if(x !== 0){
             string = "(" + string + ")";
         }
-        
-        env.popTerm();
+
         return string;
     }
 
@@ -446,7 +427,7 @@ class LambdaAbstraction{
      * @param {number} betas - The number of beta redexes encountered so far.
      * @return {string} The HTML string.
      */
-    printHTML(x, vars, abs, apps, betas, ctx){
+    printHTML(x, vars, abs, apps, betas){
 
         if(x === undefined){
             x = 0;
@@ -454,8 +435,6 @@ class LambdaAbstraction{
             abs = 0;
             apps = 0;
             betas = 0;
-            ctx = new LambdaEnvironment();
-            resetVariableIndices();
         }
 
         var string = '<span class = "abs-' + abs + '">';
@@ -465,12 +444,9 @@ class LambdaAbstraction{
             string += '(';
         }
       
-        var variableName = getNextVariableName();
-        this.label = variableName;
-        ctx.pushTerm(variableName);
-        var scope = this.t.printHTML(0, vars, abs, apps, betas, ctx);
-        ctx.popTerm();
-        string += '&lambda;' + variableName + '. ' + scope[0];
+        var scope = this.t.printHTML(0, vars, abs, apps, betas);
+
+        string += '&lambda;' + this.label + '. ' + scope[0];
         
         if(x !== 0){
             string += ')';
@@ -479,6 +455,25 @@ class LambdaAbstraction{
         string += '</span>';
 
         return [string, scope[1], scope[2], scope[3], scope[4]];
+
+    }
+
+    /**
+     * Generate 'pretty' variable names (e.g. x,y,z...) for this term.
+     * @param {Object} ctx - The context for this lambda term.
+     * @param {boolean} x - Flag to indicate if this is a subcall.
+     */
+    generatePrettyVariableNames(ctx, x){
+
+        if(x === undefined){
+            resetVariableIndices();
+            ctx.generatePrettyVariableNames();
+        }
+
+        this.label = getNextVariableName();
+        ctx.pushTerm(this.label);
+        this.t.generatePrettyVariableNames(ctx, true);
+        ctx.popTerm(this.label);
 
     }
 
@@ -531,11 +526,7 @@ class LambdaApplication{
      * @param {number} x    - The layer this term is at - determines whether brackets are required.
      * @return {string} The pretty string.
      */
-    prettyPrintLabels(labels, env, x){
-
-        if(env === undefined){
-            env = new LambdaEnvironment();
-        }
+    prettyPrintLabels(x){
 
         if(x === undefined){
             x = 0;
@@ -543,13 +534,13 @@ class LambdaApplication{
 
         if(x === 0){
             if(this.t1.getType() === ABS){
-                return "(" + this.t1.prettyPrintLabels(labels, env, 0) + ") " + this.t2.prettyPrintLabels(labels, env, 1);
+                return "(" + this.t1.prettyPrintLabels(0) + ") " + this.t2.prettyPrintLabels(1);
             }
 
-            return this.t1.prettyPrintLabels(labels, env, 0) + " " + this.t2.prettyPrintLabels(labels, env, 1);
+            return this.t1.prettyPrintLabels(0) + " " + this.t2.prettyPrintLabels(1);
         }
 
-        return "(" + this.t1.prettyPrintLabels(labels, env, x) + " " + this.t2.prettyPrintLabels(labels, env, x+1) + ")";
+        return "(" + this.t1.prettyPrintLabels(x) + " " + this.t2.prettyPrintLabels(x+1) + ")";
     }
 
     /**
@@ -578,7 +569,6 @@ class LambdaApplication{
     crossings(){
         var freeVarsLHS = this.t1.freeVariableIndices();
         var freeVarsRHS = this.t2.freeVariableIndices();
-        //var freeVars = freeVarsLHS.concat(freeVarsRHS);
 
         var crossings = this.t1.crossings() + this.t2.crossings();
         var m = freeVarsLHS.length;
@@ -702,7 +692,7 @@ class LambdaApplication{
      * @param {number} betas - The number of beta redexes encountered so far.
      * @return {string} The HTML string.
      */
-    printHTML(x, vars, abs, apps, betas, ctx){
+    printHTML(x, vars, abs, apps, betas){
 
         if(x === undefined){
             x = 0;
@@ -710,8 +700,6 @@ class LambdaApplication{
             abs = 0;
             apps = 0;
             betas = 0;
-            ctx = new LambdaEnvironment();
-            resetVariableIndices();
         }
 
         var string = '<span class = "app-' + apps;
@@ -740,8 +728,8 @@ class LambdaApplication{
             z = x + 1;
         }
 
-        var lhs = this.t1.printHTML(y, vars, abs, apps, betas, ctx);
-        var rhs = this.t2.printHTML(z, lhs[1], lhs[2], lhs[3], lhs[4], ctx);
+        var lhs = this.t1.printHTML(y, vars, abs, apps, betas);
+        var rhs = this.t2.printHTML(z, lhs[1], lhs[2], lhs[3], lhs[4]);
 
         if(x !== 0){
             string += "(";
@@ -756,6 +744,23 @@ class LambdaApplication{
         string += "</span>";
 
         return [string, rhs[1], rhs[2], rhs[3], rhs[4]];
+
+    }
+
+    /**
+     * Generate 'pretty' variable names (e.g. x,y,z...) for this term.
+     * @param {Object} ctx - The context for this lambda term.
+     * @param {boolean} x - Flag to indicate whether this is a subcall.
+     */
+    generatePrettyVariableNames(ctx, x){
+        
+        if(x === undefined){
+            resetVariableIndices();
+            ctx.generatePrettyVariableNames();
+        }
+
+        this.t1.generatePrettyVariableNames(ctx, true);
+        this.t2.generatePrettyVariableNames(ctx, true);
 
     }
 
@@ -882,6 +887,18 @@ class LambdaEnvironment{
         }
 
         return this.nodeNames[this.nodeNames.length - 1 - index];
+    }
+
+    /**
+     * Generate 'pretty' names for the free variables in this context (e.g. a, b, c...).
+     */
+    generatePrettyVariableNames(){
+
+        for(var i = 0; i < this.env.length; i++){
+
+            this.env[i] = getNextFreeVariableName();
+
+        }
     }
 }
 

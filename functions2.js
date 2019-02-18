@@ -8,6 +8,8 @@ var currentTerm;
 var originalTerm;
 var reduced = false;
 
+var freeVariables = new LambdaEnvironment();
+
 var terms;
 var cys;
 var ctx;
@@ -146,9 +148,12 @@ function generateButton(x, prev){
             fragment = "";
             terms = [];
             cys = [];
-        }
-        
-        if(!prev){
+            freeVariables = new LambdaEnvironment();
+
+            for(var i = 0; i < k; i++){
+                freeVariables.pushTerm(i);
+            }
+
             switch(lastAction){
                 case 0:
                     terms = generateTerms(n, k);
@@ -192,6 +197,8 @@ function generateButton(x, prev){
         termString = "";
 
         for(i = 0; i < terms.length; i++){
+
+            terms[i].generatePrettyVariableNames(freeVariables);
 
             var x = terms[i].prettyPrint().length;
             var size = 200;
@@ -547,8 +554,6 @@ function showNormalisationGraph(){
     changeText('normalisation-studio', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")) + "<br>" + reductions.printTree());
     drawNormalisationGraph("normalisation-graph", currentTerm, true);
 
-      
-    
     document.getElementById("reset-btn").disabled = false;
 
 }

@@ -132,9 +132,9 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
 
             array = defineNode(array, newNodeID, absNode, posX, posY, nodeLabel);
     
-            newEdgeID = checkID(newNodeID + " " + term.t.prettyPrintLabels(true), edges);
+            newEdgeID = checkID(newNodeID + " " + term.t.prettyPrintLabels(), edges);
             newEdgeType = absEdge;
-            newEdgeLabel = nodeLabel + " " + term.t.prettyPrintLabels(true);
+            newEdgeLabel = nodeLabel + " " + term.t.prettyPrintLabels();
 
             /* The abstracted variable goes NE */
             const lambdaAbstractionSupportNodeID = checkID(newNodeID + "._abstraction_node_right", nodes);
@@ -170,7 +170,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
             
         case APP:
             
-            newNodeID = checkID("[" + term.t1.prettyPrintLabels(true) + " @ " + term.t2.prettyPrintLabels(true) + "]", nodes);
+            newNodeID = checkID("[" + term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels() + "]", nodes);
             array = defineNode(array, newNodeID, appNode, posX, posY);
 
             newEdgeID = checkID("(" + newNodeID + ")", edges);
@@ -588,7 +588,6 @@ function getNodeTypeText(type){
 function drawMap(id, term, ctx, zoom, pan, labels){
 
     reset();
-    resetVariableIndices();
 
     elems = generateMapElements(term, ctx);
 
@@ -752,10 +751,10 @@ function generateNormalisationGraphElements(tree, labels, parent, parentReductio
 
     //var termElems = generateMapElements(tree.term);
 
-    array = defineNode(array, nodeID, "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(true), level);  
+    array = defineNode(array, nodeID, "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(), level);  
 
     for(var i = 0; i < tree.reductions.length; i++){
-        array = array.concat(generateNormalisationGraphElements(tree.reductions[i][0], labels, nodeID, tree.reductions[i][1].prettyPrintLabels(true), level + 1));
+        array = array.concat(generateNormalisationGraphElements(tree.reductions[i][0], labels, nodeID, tree.reductions[i][1].prettyPrintLabels(), level + 1));
     }
 
     if(parent !== undefined && !checkForIdenticalReduction(parentReduction, parent, nodeID)){
@@ -775,7 +774,6 @@ function generateNormalisationGraphElements(tree, labels, parent, parentReductio
 function drawNormalisationGraph(id, term, labels){
 
     reset();
-    resetVariableIndices();
 
     var tree = generateReductionTree(term, labels);
     var elems = generateNormalisationGraphElements(tree, labels);
