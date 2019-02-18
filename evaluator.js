@@ -383,13 +383,13 @@ function getAllOneStepReductions(term, labels){
  * @param {boolean} labels - Whether to use the predefined labels or generate new ones.
  * @return {Object} The reduction tree for this term.
  */
-function generateReductionTree(term, labels){
+function generateReductionTree(term){
 
     var subtrees = [];
 
     if(term.hasBetaRedex()){
 
-        var reductions = getAllOneStepReductions(term, labels);
+        var reductions = getAllOneStepReductions(term);
 
         for(var i = 0; i < reductions.length; i++){
             subtrees[i] = [generateReductionTree(reductions[i][0]), reductions[i][1]];

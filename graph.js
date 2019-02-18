@@ -22,9 +22,9 @@ const nodeDistanceX = 30;
 /** The distance between adjacent nodes in the Y direction. */
 const nodeDistanceY = 30;
 /** The distance between adjacent normalisation nodes in the X direction. */
-const normalisationDistanceX = 100;
+const normalisationDistanceX = 500;
 /** The distance between adjacent normalisation nodes in the Y direction. */
-const normalisationDistanceY = 100;
+const normalisationDistanceY = 1000;
 /** The width of one normalisation node. */
 const normalisationNodeWidth = 150;
 
@@ -315,7 +315,7 @@ function createNode(id, type, x, y, label, level){
         level = "";
     }
 
-    return { data: { id: id, type: type, label: label, level: level}, position: {x: x, y: y}};
+    return { group: 'nodes', data: { id: id, type: type, label: label, level: level}, position: {x: x, y: y}};
 
 }
 
@@ -333,7 +333,7 @@ function createEdge(id, type, source, target, label){
         label = "";
     }
 
-    return { data: { id: id, source: source, target: target, type: type, label: label}};
+    return { group: 'edges', data: { id: id, source: source, target: target, type: type, label: label}};
 }
 
 /**
@@ -732,14 +732,15 @@ function checkForIdenticalReduction(id, source, target){
 
 /**
  * Generate the elements of the normalisation graph.
+ * @param {string} id - The id of where the graph will be drawn.
  * @param {Object} tree - The normalisation tree object.
- * @param {boolean} labels - Whether to use predefined labels in the terms.
+ * @param {Object} ctx - The context of the lambda term.
  * @param {string} parent - The node ID of the parent.
  * @param {string} parentReduction - The reduction that led to this term.
  * @param {number} level - The current level of the graph.
  * @return {Object[]} The graph elements.
  */
-function generateNormalisationGraphElements(tree, labels, parent, parentReduction, level){
+function generateNormalisationGraphElements(id, tree, ctx, parent, parentReduction, level){
 
     var array = [];
     
@@ -749,12 +750,37 @@ function generateNormalisationGraphElements(tree, labels, parent, parentReductio
 
     var nodeID = tree.term.prettyPrint();
 
-    //var termElems = generateMapElements(tree.term);
+    tree.term.generatePrettyVariableNames(ctx);
 
-    array = defineNode(array, nodeID, "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(), level);  
+    /*var mapPic = drawMap(id, tree.term, ctx).png;
+    document.querySelector('#png-eg').setAttribute('src', mapPic);*/
+
+    var termElems = generateMapElements(tree.term, ctx);
+
+    console.log(termElems);
+
+    for(var i = 0; i < termElems.length; i++){
+        
+        if(termElems[i].group === "nodes"){
+            termElems[i].data.parent = nodeID;
+        }
+
+        if(termElems[i].group === "edges"){
+            termElems[i].data.source += "_child_of_" + nodeID;
+            termElems[i].data.target += "_child_of_" + nodeID;
+        }
+
+        termElems[i].data.id += "_child_of_" + nodeID;
+    }
+
+    array = array.concat(termElems);
+
+    console.log(termElems);
+
+    array = defineNode(array, nodeID, "norm", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(), level);  
 
     for(var i = 0; i < tree.reductions.length; i++){
-        array = array.concat(generateNormalisationGraphElements(tree.reductions[i][0], labels, nodeID, tree.reductions[i][1].prettyPrintLabels(), level + 1));
+        array = array.concat(generateNormalisationGraphElements(id, tree.reductions[i][0], ctx, nodeID, tree.reductions[i][1].prettyPrintLabels(), level + 1));
     }
 
     if(parent !== undefined && !checkForIdenticalReduction(parentReduction, parent, nodeID)){
@@ -769,14 +795,14 @@ function generateNormalisationGraphElements(tree, labels, parent, parentReductio
  * Draw the normalisation graph for a given term.
  * @param {string} id - The id of the graph box.
  * @param {Object} term - The term to draw the normalisation graph of.
- * @param {boolean} labels - Whether to use the predefined labels in the term.
+ * @param {Object[]} ctx - The free variables in the term.
  */
-function drawNormalisationGraph(id, term, labels){
+function drawNormalisationGraph(id, term, ctx){
 
     reset();
 
-    var tree = generateReductionTree(term, labels);
-    var elems = generateNormalisationGraphElements(tree, labels);
+    var tree = generateReductionTree(term);
+    var elems = generateNormalisationGraphElements(id, tree, ctx);
 
     cy = cytoscape({
         container: document.getElementById(id),
@@ -790,13 +816,28 @@ function drawNormalisationGraph(id, term, labels){
                     'background-color': '#666',
                     'text-valign': 'center',
                     'color': 'white',
-                    'width': normalisationNodeWidth,
+                    'width': '15',
                     'height': '15',
                     'font-size': '10',
-                    'label': function(ele){
-                        return ele.data().label;
-                    },
-                    'shape': 'square'
+                    'label': "",
+                }
+            },
+
+            {
+                selector: 'node[type="norm"]',
+                style: {
+                    'background-color': 'white'
+                }
+            },
+
+            {
+                selector: 'node[type =\"' + varNode + '\"], node[type =\"' + varNodeTop + '\"]',
+                style: {
+                    'width': '5',
+                    'height': '5',
+                    'background-color': '#ccc',
+                    'shape': 'roundrectangle',
+                    'color': 'black'
                 }
             },
 
@@ -805,8 +846,8 @@ function drawNormalisationGraph(id, term, labels){
                 style: {
                 'width': 2,
                 'line-color': '#ccc',
-                'target-arrow-color': '#ccc',
-                'target-arrow-shape': 'triangle',
+                'mid-target-arrow-color': '#ccc',
+                'mid-target-arrow-shape': 'triangle',
                 'arrow-scale': '0.8',
                 'font-size': '2',
                 'curve-style': 'bezier',
@@ -814,7 +855,36 @@ function drawNormalisationGraph(id, term, labels){
                     return ele.data().label;
                 },
                 }
-            }
+            },
+
+            {
+                selector: 'edge[type="norm"]',
+                style: {
+                'target-arrow-color': '#ccc',
+                'target-arrow-shape': 'triangle'
+                }
+            },
+
+            {
+                selector: 'edge[type = \"' + varEdgeLabel + '\"]',
+                style: {
+                    'curve-style': 'unbundled-bezier',
+                    'control-point-distances': function(ele){
+                        
+                        var source = ele.source();
+                        var target = ele.target();
+
+                        var diff = source.position('x') - target.position('x');
+
+                        return diff / 2;
+
+                    },
+                    'control-point-weights': '0.5',
+                    'loop-direction': '45deg',
+                    'edge-distances': 'node-position'
+                    
+                }
+            },
         ],
 
         layout: {

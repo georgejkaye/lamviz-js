@@ -552,7 +552,7 @@ function showNormalisationGraph(){
     var reductions = generateReductionTree(currentTerm);  
 
     changeText('normalisation-studio', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")) + "<br>" + reductions.printTree());
-    drawNormalisationGraph("normalisation-graph", currentTerm, true);
+    drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables);
 
     document.getElementById("reset-btn").disabled = false;
 
