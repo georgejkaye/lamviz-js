@@ -5,6 +5,34 @@
  */
 
 var currentTerm;
+var freeVariables = new LambdaEnvironment();
+
+/**
+ * Get the HTML for an element.
+ * @param {string} element - The element type.
+ * @param {string} className - The class of this element.
+ * @param {string} id - The id of this element.
+ * @param {string} style - The style of this element.
+ * @param {string} onclick - The onclick of this element.
+ * @param {string} content - The content of this element.
+ * @return {string} The corresponding HTML for this element.
+ */
+function getElement(element, className, id, style, onclick, content){
+    return '<' + element + ' class="' + className + '" id="' + id + '" style="' + style + '" onclick="' + onclick + '">' + content + '</' + element +'>';
+}
+
+/**
+ * Get the HTML for a <div>.
+ * @param {string} className - The class of this <div>.
+ * @param {string} id - The id of this <div>.
+ * @param {string} style - The style of this <div>.
+ * @param {string} onclick - The onclick of this <div>.
+ * @param {string} content - The content of this <div>.
+ * @return {string} The corresponding HTML for this <div>.
+ */
+function getDiv(className, id, style, onclick, content){
+    return getElement("div", className, id, style, onclick, content);
+}
 
 /**
  * Change the text of an element with a given id.
@@ -60,17 +88,16 @@ function execute_button(){
     }
     
     var frees = getText('env').split(" ");
-    
-    var ctx = new LambdaEnvironment();
+    freeVariables = new LambdaEnvironment();
 
     for(i = 0; i < frees.length; i++){
-        ctx.pushTerm(frees[i]);
+        freeVariables.pushTerm(frees[i]);
     }
 
     var term;
 
     if(typeof text !== "string"){
-        term = parse(text, ctx)
+        term = parse(text, freeVariables)
 
         if(typeof term !== "string"){
             text = term.prettyPrint() + " ~  ~  ~ " + term.prettyPrintLabels(true);
@@ -88,7 +115,7 @@ function execute_button(){
     currentTerm = term;
 
     if(!error){
-        drawMap("cy", currentTerm, ctx, true, true, document.getElementById('labels-yes').checked);
+        drawMap("cy", currentTerm, freeVariables, true, true, document.getElementById('labels-yes').checked);
     }
 }
 
@@ -101,16 +128,16 @@ function substitute_button(){
     var j = getText('j');
 
     var frees = getText('ctx').split(" ");
-    var ctx = new LambdaEnvironment();
+    freeVariables = new LambdaEnvironment();
 
     for(i = 0; i < frees.length; i++){
-        ctx.pushTerm(frees[i]);
+        freeVariables.pushTerm(frees[i]);
     }
 
-    j = ctx.find(j);
+    j = freeVariables.find(j);
 
     if(j === -1){
-        changeText('result', "Variable not in ctxironment");
+        changeText('result', "Variable not in environment");
     } else if(typeof s === "string"){
         changeText('result', s)
     } else {
@@ -148,10 +175,10 @@ function normalise_button(){
     } else {
 
         var frees = getText('env').split(" ");
-        var ctx = new LambdaEnvironment();
+        freeVariables = new LambdaEnvironment();
 
         for(i = 0; i < frees.length; i++){
-            ctx.pushTerm(frees[i]);
+            freeVariables.pushTerm(frees[i]);
         }
 
         currentTerm = res;
@@ -162,17 +189,20 @@ function normalise_button(){
     }
 }
 
+/**
+ * Function to execute when the beta button is pressed.
+ */
 function beta_button(){
 
     var frees = getText('ctx').split(" ");
-    var ctx = new LambdaEnvironment();
+    freeVariables = new LambdaEnvironment();
 
     for(i = 0; i < frees.length; i++){
-        ctx.pushTerm(frees[i]);
+        freeVariables.pushTerm(frees[i]);
     }
 
-    var t1 = parse(tokenise(getText('b1')), ctx);
-    var t2 = parse(tokenise(getText('b2')), ctx);
+    var t1 = parse(tokenise(getText('b1')), freeVariables);
+    var t2 = parse(tokenise(getText('b2')), freeVariables);
 
     var res = applicationAbstraction(t1, t2)
 
@@ -182,6 +212,9 @@ function beta_button(){
 
 }
 
+/**
+ * Function to execute when the generate button is pressed.
+ */
 function generate_button(x){
 
     var n = parseInt(getText('n'));
@@ -215,8 +248,12 @@ function generate_button(x){
 
 }
 
+/**
+ * Function to execute when the normalisation tree button is pressed.
+ */
 function normalise_tree_button(){
 
-    changeText('normalisation-tree', generateReductionTree(currentTerm).printTree());
+    changeText('normalisation-tree', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")));
+    drawNormalisationGraph("normalisation-tree", currentTerm, freeVariables);
 
 }
