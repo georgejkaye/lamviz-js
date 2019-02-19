@@ -855,7 +855,12 @@ function drawNormalisationGraph(id, term, ctx){
                 selector: 'node[type="norm"]',
                 style: {
                     'background-color': 'white',
-                    'border-width': '0'
+                    'border-width': '5',
+                    'label': 'data(label)',
+                    'color': 'black',
+                    'text-valign': 'bottom',
+                    'font-size': '20'
+
                 }
             },
 
