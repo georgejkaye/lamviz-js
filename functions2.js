@@ -123,6 +123,8 @@ function prettyString(array){
  */
 function generateButton(x, prev){
 
+    changeText("normalisation-studio", "");
+
     if(!prev){
         n = parseInt(getText('n'));
         k = parseInt(getText('k'));
@@ -200,11 +202,12 @@ function generateButton(x, prev){
 
             terms[i].generatePrettyVariableNames(freeVariables);
 
-            var x = terms[i].prettyPrint().length;
+            var x = terms[i].prettyPrintLabels().length;
             var size = 200;
 
-            if(x > 10){
-                size -= (x - 10) * 2;
+            while(x > 20){
+                size -= 2;
+                x--;
             }
 
             var termName = "";
@@ -215,13 +218,15 @@ function generateButton(x, prev){
                 termName = printTermHTML(terms[i]);
             }
 
+            var caption = getP("caption", "portrait-caption-" + i, "font-size:" + size + "%", "", termName + "<br>" + terms[i].crossings() + " crossings");
+
             if(document.getElementById("draw").checked){
                 termString += getDiv('w3-container frame', 'frame' + i, "", 'viewPortrait(terms[' + i + ']);', 
                             getDiv("w3-container inner-frame", "", "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + "<br>" + 
-                                getP("caption", "portrait-caption-" + i, "font-size:" + size + "%", "", termName + "<br>" + terms[i].crossings() + " crossings"));            
+                                caption);            
  
             } else {
-                termString += getDiv('w3-container frame empty', 'frame ' + i, "", 'viewPortrait(terms[' + i + ']);', getP("caption", "portrait-caption-" + i, "", "", terms[i].prettyPrint() + "<br>" + terms[i].crossings() + " crossings"));
+                termString += getDiv('w3-container frame empty', 'frame ' + i, "", 'viewPortrait(terms[' + i + ']);', caption);
             }
         }
 
@@ -242,7 +247,13 @@ function generateButton(x, prev){
             numString += "s";
         }
 
-        changeText('number-of-terms', numString + " match the filtering criteria: "  + ((filteredNumber / totalNumber) * 100).toFixed(2) + "%");
+        var percentage = 0;
+
+        if(totalNumber != 0){
+            percentage = (filteredNumber / totalNumber) * 100;
+        }
+
+        changeText('number-of-terms', numString + " match the filtering criteria: "  + percentage.toFixed(2) + "%");
         changeText('help', "Click on a term to learn more about it.")
 
         ctx = new LambdaEnvironment();
