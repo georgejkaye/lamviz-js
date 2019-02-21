@@ -28,7 +28,6 @@ const normalisationDistanceY = 400;
 /** The width of one normalisation node. */
 const normalisationNodeWidth = 150;
 
-
 /** Constants for the different types of graph elements. */
 /** A node representing an abstraction. */
 const absNode = "abs-node";
@@ -52,6 +51,11 @@ const varEdgeLabel = "var-label-edge";
 /** A lambda character */
 const lambda = "\u03BB";
 
+/** How many redexes have been encountered so far. */
+var redexIndex = 0;
+/** An array of nodes that need to have redexes propogated to their abstraction. */
+var redexList = [];
+
 /**
  * Reset the nodes and edges arrays.
  */
@@ -64,6 +68,8 @@ function reset(){
     firstNode = undefined;
     parent = [0,0];
     parentType = undefined;
+    redexIndex = 0;
+    redexList = [];
 }
 
 /**
@@ -75,9 +81,11 @@ function reset(){
  * @param   {number}      parentX    - The x coordinate of the parent. 
  * @param   {number}      parentY    - The y coordinate of the parent.
  * @param   {number}      position   - The position relative to the parent (LHS or RHS) of the current element.
+ * @param   {number[]}    redexes    - The indices of the redexes that the current term is inside.
+ * @param   {boolean}     redexEdge  - If a redex has just occurred.
  * @return  {Object[]}               - The array of map elements.
  */
-function generateMapElements(term, ctx, array, parent, parentX, parentY, position){
+function generateMapElements(term, ctx, array, parent, parentX, parentY, position, redexes, redexEdge){
 
     /* If there is no context, create one */
     if(ctx === undefined){
@@ -116,6 +124,16 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
         }
     }
 
+    if(redexes === undefined){
+        redexes = [];
+    }
+
+    if(redexEdge === undefined){
+        redexEdge = false;
+    }
+
+    var classes = betaClasses(redexes);
+
     var newNodeID = "";
     var newEdgeID = "";
     var newEdgeType = "";
@@ -130,7 +148,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
             
             var nodeLabel = lambda + abstractionLabel + "."
 
-            array = defineNode(array, newNodeID, absNode, posX, posY, nodeLabel);
+            array = defineNode(array, newNodeID, absNode, classes, posX, posY, nodeLabel);
     
             newEdgeID = checkID(newNodeID + " " + term.t.prettyPrintLabels(), edges);
             newEdgeType = absEdge;
@@ -138,21 +156,21 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
 
             /* The abstracted variable goes NE */
             const lambdaAbstractionSupportNodeID = checkID(newNodeID + "._abstraction_node_right", nodes);
-            array = defineNode(array, lambdaAbstractionSupportNodeID, varNode, posX + nodeDistanceX, posY - nodeDistanceY);
+            array = defineNode(array, lambdaAbstractionSupportNodeID, varNode, classes, posX + nodeDistanceX, posY - nodeDistanceY);
 
             const lambdaAbstractionSupportEdgeID = checkID(newNodeID + "._node_from_abstraction_to_right", edges);
-            array = defineEdge(array, lambdaAbstractionSupportEdgeID, varEdge, newNodeID, lambdaAbstractionSupportNodeID);
+            array = defineEdge(array, lambdaAbstractionSupportEdgeID, varEdge, classes, newNodeID, lambdaAbstractionSupportNodeID);
 
             /* The abstracted variable travels to the top of the map */
             const lambdaAbstractionSupportNode2ID = checkID(newNodeID + "._abstraction_node_top", nodes);
-            array = defineNode(array, lambdaAbstractionSupportNode2ID, varNodeTop, posX + nodeDistanceX, posY - (2 * nodeDistanceY));
+            array = defineNode(array, lambdaAbstractionSupportNode2ID, varNodeTop, classes, posX + nodeDistanceX, posY - (2 * nodeDistanceY));
 
             const lambdaAbstractionSupportEdge2ID = checkID(newNodeID + "._edge_from_abstraction_to_top", edges);
-            array = defineEdge(array, lambdaAbstractionSupportEdge2ID, varEdge, lambdaAbstractionSupportNodeID, lambdaAbstractionSupportNode2ID);
+            array = defineEdge(array, lambdaAbstractionSupportEdge2ID, varEdge, classes, lambdaAbstractionSupportNodeID, lambdaAbstractionSupportNode2ID);
 
             /* Generate the elements for the scope of the abstraction */
             ctx.pushTerm(newNodeID.substring(1), abstractionLabel);
-            var scopeArray = generateMapElements(term.t, ctx, [], newNodeID, posX, posY, LHS);
+            var scopeArray = generateMapElements(term.t, ctx, [], newNodeID, posX, posY, LHS, redexes);
             ctx.popTerm();
             
             const rightmostScope = furthestRight(scopeArray);
@@ -170,18 +188,27 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
             
         case APP:
             
+            var isRedex = false;
+
+            if(term.isBetaRedex()){
+                smartPush(redexes, redexIndex);
+                redexIndex++;
+                classes = betaClasses(redexes);
+                isRedex = true;
+            }
+
             newNodeID = checkID("[" + term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels() + "]", nodes);
-            array = defineNode(array, newNodeID, appNode, posX, posY);
+            array = defineNode(array, newNodeID, appNode, classes, posX, posY);
 
             newEdgeID = checkID("(" + newNodeID + ")", edges);
             newEdgeType = appEdge;
             
             /* Generate the elements for the LHS of the application */
-            var lhsArray = generateMapElements(term.t1, ctx, [], newNodeID, posX, posY, LHS);
+            var lhsArray = generateMapElements(term.t1, ctx, [], newNodeID, posX, posY, LHS, redexes, isRedex);
             const rightmostLHS = furthestRight(lhsArray);
 
             /* Generate the elements for the RHS of the application */
-            var rhsArray = generateMapElements(term.t2, ctx, [], newNodeID, posX, posY, RHS);
+            var rhsArray = generateMapElements(term.t2, ctx, [], newNodeID, posX, posY, RHS, redexes);
             const leftmostRHS = furthestLeft(rhsArray);
 
             /* Make sure the LHS is entirely to the left of the application node */
@@ -202,6 +229,9 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
                 array.push(rhsArray[j]);
             }
 
+            redexes.pop();
+            classes = betaClasses(redexes);
+
             break;
 
         case VAR:
@@ -211,7 +241,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
 
             /* Create the first node in the variable edge, to pull it away from the parent in the right direction */
             newNodeID = checkID(variableID + "_variable_node", nodes);
-            array = defineNode(array, newNodeID, varNode, posX, posY);
+            array = defineNode(array, newNodeID, varNode, classes, posX, posY);
 
             /* Create the edge between the parent and the variable node */
             newEdgeID = checkID(variableID + " in " + parent + "_edge_from_parent_to_variable", edges);
@@ -219,11 +249,11 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
 
             /* Create the node at the top of the page for this variable to travel from */
             const lambdaVariableSupportNodeID = checkID(variableID + "_variable_node_top", nodes);
-            array = defineNode(array, lambdaVariableSupportNodeID, varNodeTop, posX, posY - nodeDistanceY);
+            array = defineNode(array, lambdaVariableSupportNodeID, varNodeTop, classes, posX, posY - nodeDistanceY);
 
             /* Create the edge connecting the node at the top of the page to the original node */
             const lambdaVariableSupportEdgeID = checkID(variableID + " in " + parent + "_edge_from_top_to_variable", edges);
-            array = defineEdge(array, lambdaVariableSupportEdgeID, varEdge, lambdaVariableSupportNodeID, newNodeID);
+            array = defineEdge(array, lambdaVariableSupportEdgeID, varEdge, classes, lambdaVariableSupportNodeID, newNodeID);
 
             /* If a free variable node hasn't been drawn yet it needs to be */
             var lambdaAbstractionNodeID = "";
@@ -231,7 +261,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
             if(!nodes.includes(lambda + variableID + "._abstraction_node_top")){
                 if(!nodes.includes(lambda + variableID + ".")){
                     const freeVariableAbstractionID = checkID(lambda + variableID + ".", nodes);
-                    array = defineNode(array, freeVariableAbstractionID, absNodeFree, posX, posY - nodeDistanceY);
+                    array = defineNode(array, freeVariableAbstractionID, absNodeFree, classes, posX, posY - nodeDistanceY);
                     lambdaAbstractionNodeID = freeVariableAbstractionID;
                 } else {
                     lambdaAbstractionNodeID = lambda + variableID + ".";
@@ -242,13 +272,25 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
 
             /* Create the edge connecting the node at the top to the corresponsing abstraction support node */
             const lambdaVariableAbstractionEdgeID = checkID(variableID + " in " + parent + "_curved_edge_from_abstraction_to_variable", edges);
-            array = defineEdge(array, lambdaVariableAbstractionEdgeID, varEdgeLabel, lambdaAbstractionNodeID, lambdaVariableSupportNodeID, variableLabel);
+            array = defineEdge(array, lambdaVariableAbstractionEdgeID, varEdgeLabel, classes, lambdaAbstractionNodeID, lambdaVariableSupportNodeID, variableLabel);
+
+            /* Mark the redex to be applied later */
+            smartPush(redexList, [lambdaAbstractionNodeID, classes]);
 
             break;
     }
 
+    if(redexEdge){
+        smartPush(classes, 'redex');
+    }
+
     /* Create an edge linking the newest node with its parent */
-    array = defineEdge(array, newEdgeID, newEdgeType, newNodeID, parent, newEdgeLabel);
+    array = defineEdge(array, newEdgeID, newEdgeType, classes, newNodeID, parent, newEdgeLabel);
+
+
+    if(redexEdge){
+        classes.pop();
+    }
 
     return array;
     
@@ -256,18 +298,19 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
 
 /**
  * Define a node and add it to the array of map elements
- * @param {Object[]} array  - The array of all the map elements.
- * @param {string} id       - The desired node ID.
- * @param {string} type     - The type of this node. 
- * @param {number} posX     - The x coordinate of this node.
- * @param {number} posY     - The y coordinate of this node.
- * @param {string} label    - The label of this node.
- * @param {number} level    - The level of this node.
+ * @param {Object[]} array      - The array of all the map elements.
+ * @param {string} id           - The desired node ID.
+ * @param {string} type         - The type of this node. 
+ * @param {string[]} classes    - The classes of this node.
+ * @param {number} posX         - The x coordinate of this node.
+ * @param {number} posY         - The y coordinate of this node.
+ * @param {string} label        - The label of this node.
+ * @param {number} level        - The level of this node.
  * @return {Object[]} The updated array of map elements.
  */
-function defineNode(array, id, type, posX, posY, label, level){
+function defineNode(array, id, type, classes, posX, posY, label, level){
 
-    const node = createNode(id, type, posX, posY, label, level);
+    const node = createNode(id, type, classes, posX, posY, label, level);
     array = pushNode(array, node, id);
 
     return array;
@@ -277,15 +320,16 @@ function defineNode(array, id, type, posX, posY, label, level){
  * Define an edge and add it to the array of map elements
  * @param {Object[]} array  - The array of all the map elements.
  * @param {string} id       - The desired edge ID.
- * @param {string} type     - The type of edge. 
+ * @param {string} type     - The type of edge.
+ * @param {string[]} classes - The classes of this edge 
  * @param {string} source   - The source of this edge.
  * @param {string} target   - The target of this edge.
  * @param {string} label    - The label of this edge.
  * @return {Object[]} The updated array of map elements.
  */
-function defineEdge(array, id, type, source, target, label){
+function defineEdge(array, id, type, classes, source, target, label){
     
-    const edge = createEdge(id, type, source, target, label);
+    const edge = createEdge(id, type, classes, source, target, label);
     array = pushEdge(array, edge, id);
 
     return array;
@@ -295,13 +339,14 @@ function defineEdge(array, id, type, source, target, label){
  * Create a node on the map.
  * @param {string} id       - The id of the node.
  * @param {string} type     - The type of the node.
+ * @param {string[]} classes - The classes of the node.
  * @param {number} x        - The x coordinate of the node (optional).
  * @param {number} y        - The y coordinate of the node (optional).
  * @param {string} label    - The label of this node.
  * @param {number} level    - The level of this node.
  * @return {Object} The node object.
  */
-function createNode(id, type, x, y, label, level){
+function createNode(id, type, classes, x, y, label, level){
     
     if(x === undefined || y === undefined){
         return { data: { id: id, type: type}};
@@ -315,25 +360,27 @@ function createNode(id, type, x, y, label, level){
         level = "";
     }
 
-    return { group: 'nodes', data: { id: id, type: type, label: label, level: level}, position: {x: x, y: y}};
+
+    return { group: 'nodes', data: { id: id, type: type, label: label, level: level}, position: {x: x, y: y}, classes: classes};
 
 }
 
 /**
  * Create an edge on the map.
- * @param {string} id       - The id of the edge .
+ * @param {string} id       - The id of the edge.
  * @param {string} type     - The type of the edge.
+ * @param {string[]} classes - The classes of the edge.
  * @param {string} source   - The source of the edge.
  * @param {string} target   - The target of the edge.
  * @return {Object} The edge object.
  */
-function createEdge(id, type, source, target, label){
+function createEdge(id, type, classes, source, target, label){
 
     if(label === undefined){
         label = "";
     }
 
-    return { group: 'edges', data: { id: id, source: source, target: target, type: type, label: label}};
+    return { group: 'edges', data: { id: id, source: source, target: target, type: type, label: label}, classes: classes};
 }
 
 /**
@@ -364,6 +411,22 @@ function pushEdge(array, edge, edgeID){
     smartPush(edgeObjs, edge);
 
     return array;
+}
+
+/**
+ * Generate the classes array from an array of redexes.
+ * @param {number[]} redexes - The array containing the indices of the redexes.
+ * @return {string[]} The classes array corresponding to these redexes.
+ */
+function betaClasses(redexes){
+
+    var classes = [];
+
+    for(var i = 0; i < redexes.length; i++){
+        classes[i] = "beta-" + redexes[i];
+    }
+
+    return classes;
 }
 
 /**
@@ -512,9 +575,10 @@ function updateLabels(labels){
         });
 
     } else {
-       updateStyle('node', 'label', '');
-       updateStyle('edge', 'label', '');
-
+        updateStyle('node', 'label', "");
+        updateStyle('edge', 'label', function(ele){
+            return ele.hasClass('redex');
+        });
     }
 }
 
@@ -553,7 +617,7 @@ function placeFreeVariables(boundVariables, freeVariables, ctx){
         var varID = lambda + free + ".";
 
         if(!nodes.includes(varID)){
-            cy.add(defineNode([], varID, absNodeFree, rightest + (ctx.find(free) + 1) * nodeDistanceX * 2, 0)[0]);
+            cy.add(defineNode([], varID, absNodeFree, "", rightest + (ctx.find(free) + 1) * nodeDistanceX * 2, 0)[0]);
         }
     }
 
@@ -595,7 +659,7 @@ function drawMap(id, term, ctx, zoom, pan, labels){
         container: document.getElementById(id),
 
         elements: elems,
-    
+
         style: [
             {
                 selector: 'node',
@@ -635,7 +699,7 @@ function drawMap(id, term, ctx, zoom, pan, labels){
                 'mid-target-arrow-color': '#ccc',
                 'mid-target-arrow-shape': 'triangle',
                 'arrow-scale': '1',
-                'font-size': '6'
+                'font-size': '6',
                 }
             },
 
@@ -657,6 +721,15 @@ function drawMap(id, term, ctx, zoom, pan, labels){
                     'loop-direction': '45deg',
                     'edge-distances': 'node-position'
                     
+                }
+            },
+
+            {
+                selector: '.redex',
+                style: {
+                    'background-color': 'green',
+                    'line-color': 'green',
+                    'mid-target-arrow-color': 'green'
                 }
             },
 
@@ -687,7 +760,7 @@ function drawMap(id, term, ctx, zoom, pan, labels){
     const nodes = cy.elements("node");
     var highest = 0;
 
-    for(i = 0; i < nodes.length; i++){
+    for(var i = 0; i < nodes.length; i++){
         
         const y = nodes[i].position('y');
 
@@ -701,8 +774,24 @@ function drawMap(id, term, ctx, zoom, pan, labels){
     cy.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
     cy.fit(cy.filter(function(ele, i, eles){return true;}), 10);
 
-    updateLabels(labels);
+    for(var i = 0; i < redexList.length; i++){
+
+        var abstractionNodeTop = cy.$id(redexList[i][0]);
+        var edgeFromAbstractionToTop = cy.elements('edge[target="' + redexList[i][0] + '"]');
+        var abstractionNodeRight = edgeFromAbstractionToTop.source();
+        var edgeFromAbstractionRight = cy.elements('edge[target="' + abstractionNodeRight.id() + '"]');
+        var abstractionNode = edgeFromAbstractionRight.source();
     
+        cy.$id(redexList[i][0]).addClass(redexList[i][1]);
+        cy.elements('edge[target="' + redexList[i][0] + '"]').addClass(redexList[i][1]);
+        edgeFromAbstractionToTop.source().addClass(redexList[i][1]);
+        cy.elements('edge[target="' + abstractionNodeRight.id() + '"]').addClass(redexList[i][1]);
+        edgeFromAbstractionRight.source().addClass(redexList[i][1]);
+
+    }   
+
+    updateLabels(labels);
+
     return cy;
 
 }
@@ -803,7 +892,7 @@ function generateNormalisationGraphElements(id, tree, ctx, parent, parentReducti
     array = array.concat(termElems);
 
     /* Define the node */
-    array = defineNode(array, nodeID, "norm", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(), level);  
+    array = defineNode(array, nodeID, "norm", "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(), level);  
 
     /* Generate the elements for the various branches from this node */
     for(var i = 0; i < tree.reductions.length; i++){
@@ -812,7 +901,7 @@ function generateNormalisationGraphElements(id, tree, ctx, parent, parentReducti
 
     /* Only define edges that represent distinct reductions (i.e. not alpha-equivalent) */
     if(parent !== undefined && !checkForIdenticalReduction(parentReduction, parent, nodeID)){
-        array = defineEdge(array, checkID(parentReduction, edges), "norm", parent, nodeID, parentReduction);
+        array = defineEdge(array, checkID(parentReduction, edges), "norm", "", parent, nodeID, parentReduction);
     }
 
     return array;
