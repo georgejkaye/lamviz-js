@@ -589,12 +589,8 @@ function updateLabels(labels){
         });
 
     } else {
-        updateStyle(true, 'node', 'label', function(ele){
-            return ele.data('free');
-        });
-        updateStyle(true, 'edge', 'label', function(ele){
-            return ele.hasClass('redex-0');
-        });
+        updateStyle(true, 'node', 'label', "");
+        updateStyle(true, 'edge', 'label', "");
     }
 }
 
@@ -939,7 +935,7 @@ function highlightClass(className, colour){
         updateStyle(true, className, 'line-color', '#ccc');
         updateStyle(true, className, 'mid-target-arrow-color', '#ccc');
         updateStyle(true, 'node', 'background-color', '#666');
-        updateStyle(true, 'node[type =\"' + varNode + '\"]', '#ccc');
+        updateStyle(true, 'node[type =\"' + varNode + '\"], node[type =\"' + varNodeTop + '\"]', '#ccc');
         updateStyle(true, '.global', 'background=color', '#f00');
     } else {
         updateStyle(true, className, 'background-color', colour);
