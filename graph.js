@@ -12,8 +12,10 @@ var nodeObjs = [];
 var edgeObjs = [];
 /** Array containing all edge ids used in the current graph. */
 var edges = [];
-/** The graph object */
-var cy = undefined;
+/** The map object */
+var cyMap = undefined;
+/** The normalisation graph object */
+var cyNorm = undefined;
 /** Constants to represent the location of a child relative to its parent. */
 const LHS = 0;
 const RHS = 1;
@@ -27,6 +29,9 @@ const normalisationDistanceX = 500;
 const normalisationDistanceY = 400;
 /** The width of one normalisation node. */
 const normalisationNodeWidth = 150;
+/** The original style sheet */
+var style = undefined;
+
 
 /** Constants for the different types of graph elements. */
 /** A node representing an abstraction. */
@@ -514,8 +519,12 @@ function shiftXs(array, x){
  * @param {string} part     - The part of the style to change.
  * @param {string} style    - The style to change the part to.
  */
-function updateStyle(selector, part, style){
-    cy.style().selector(selector).style({[part] : style}).update();
+function updateStyle(map, selector, part, style){
+    if(map){
+        cyMap.style().selector(selector).style({[part] : style}).update();
+    } else {
+        cyNorm.style().selector(selector).style({[part] : style}).update();
+    }
 }
 
 /**
@@ -524,7 +533,7 @@ function updateStyle(selector, part, style){
  * @param label - The label to change the nodes to
  */
 function updateNodeLabels(type, label){
-    updateStyle('node[type = \"' + type + '\"]', 'label', label);
+    updateStyle(true, 'node[type = \"' + type + '\"]', 'label', label);
 }
 
 /**
@@ -533,7 +542,7 @@ function updateNodeLabels(type, label){
  * @param label - The label to change the nodes to
  */
 function updateEdgeLabels(type, label){
-    updateStyle('edge[type = \"' + type + '\"]', 'label', label);
+    updateStyle(true, 'edge[type = \"' + type + '\"]', 'label', label);
 }
 
 /**
@@ -575,8 +584,8 @@ function updateLabels(labels){
         });
 
     } else {
-        updateStyle('node', 'label', "");
-        updateStyle('edge', 'label', function(ele){
+        updateStyle(true, 'node', 'label', "");
+        updateStyle(true, 'edge', 'label', function(ele){
             return ele.hasClass('redex');
         });
     }
@@ -655,7 +664,7 @@ function drawMap(id, term, ctx, zoom, pan, labels){
 
     elems = generateMapElements(term, ctx);
 
-    cy = cytoscape({
+    cyMap = cytoscape({
         container: document.getElementById(id),
 
         elements: elems,
@@ -757,7 +766,8 @@ function drawMap(id, term, ctx, zoom, pan, labels){
         userPanningEnabled: pan,
     });
 
-    const nodes = cy.elements("node");
+    style = cyMap.style();
+    const nodes = cyMap.elements("node");
     var highest = 0;
 
     for(var i = 0; i < nodes.length; i++){
@@ -769,30 +779,30 @@ function drawMap(id, term, ctx, zoom, pan, labels){
         }
     }
 
-    placeFreeVariables(cy.elements(getNodeTypeText(varNodeTop)), cy.elements(getNodeTypeText(absNodeFree)), ctx);
+    placeFreeVariables(cyMap.elements(getNodeTypeText(varNodeTop)), cyMap.elements(getNodeTypeText(absNodeFree)), ctx);
 
-    cy.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
-    cy.fit(cy.filter(function(ele, i, eles){return true;}), 10);
+    cyMap.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
+    cyMap.fit(cyMap.filter(function(ele, i, eles){return true;}), 10);
 
     for(var i = 0; i < redexList.length; i++){
 
-        var abstractionNodeTop = cy.$id(redexList[i][0]);
-        var edgeFromAbstractionToTop = cy.elements('edge[target="' + redexList[i][0] + '"]');
+        var abstractionNodeTop = cyMap.$id(redexList[i][0]);
+        var edgeFromAbstractionToTop = cyMap.elements('edge[target="' + redexList[i][0] + '"]');
         var abstractionNodeRight = edgeFromAbstractionToTop.source();
-        var edgeFromAbstractionRight = cy.elements('edge[target="' + abstractionNodeRight.id() + '"]');
+        var edgeFromAbstractionRight = cyMap.elements('edge[target="' + abstractionNodeRight.id() + '"]');
         var abstractionNode = edgeFromAbstractionRight.source();
     
-        cy.$id(redexList[i][0]).addClass(redexList[i][1]);
-        cy.elements('edge[target="' + redexList[i][0] + '"]').addClass(redexList[i][1]);
+        cyMap.$id(redexList[i][0]).addClass(redexList[i][1]);
+        cyMap.elements('edge[target="' + redexList[i][0] + '"]').addClass(redexList[i][1]);
         edgeFromAbstractionToTop.source().addClass(redexList[i][1]);
-        cy.elements('edge[target="' + abstractionNodeRight.id() + '"]').addClass(redexList[i][1]);
+        cyMap.elements('edge[target="' + abstractionNodeRight.id() + '"]').addClass(redexList[i][1]);
         edgeFromAbstractionRight.source().addClass(redexList[i][1]);
 
     }   
 
     updateLabels(labels);
 
-    return cy;
+    return cyMap;
 
 }
 
@@ -909,6 +919,28 @@ function generateNormalisationGraphElements(id, tree, ctx, parent, parentReducti
 }
 
 /**
+ * Highlight elements of a certain class a certain colour.
+ * @param {string} className = The class name to affect.
+ * @param {string} colour - The colour to change to. 
+ */
+function highlightClass(className, colour){
+
+    className = '.' + className;
+
+    if(colour === undefined){
+        updateStyle(true, className, 'line-color', '#ccc');
+        updateStyle(true, className, 'mid-target-arrow-color', '#ccc');
+        updateStyle(true, 'node', 'background-color', '#666');
+        updateStyle(true, 'node[type =\"' + varNode + '\"]', '#ccc');
+        updateStyle(true, '.global', 'background=color', '#f00');
+    } else {
+        updateStyle(true, className, 'background-color', colour);
+        updateStyle(true, className, 'line-color', colour);
+        updateStyle(true, className, 'mid-target-arrow-color', colour);
+    }
+}
+
+/**
  * Draw the normalisation graph for a given term.
  * @param {string} id - The id of the graph box.
  * @param {Object} term - The term to draw the normalisation graph of.
@@ -921,7 +953,7 @@ function drawNormalisationGraph(id, term, ctx){
     var tree = generateReductionTree(term);
     var elems = generateNormalisationGraphElements(id, tree, ctx);
 
-    cy = cytoscape({
+    cyNorm = cytoscape({
         container: document.getElementById(id),
 
         elements: elems,
@@ -1020,7 +1052,7 @@ function drawNormalisationGraph(id, term, ctx){
 
     for(var i = 0; i < tree.height() + 1; i++){
         
-        var elems = cy.elements('node[level = ' + i + ']');
+        var elems = cyNorm.elements('node[level = ' + i + ']');
 
         var c = Math.floor(elems.length / 2);
 
@@ -1040,6 +1072,6 @@ function drawNormalisationGraph(id, term, ctx){
         
     }
 
-    cy.fit(cy.filter(function(ele, i, eles){return true;}), 10);
+    cyNorm.fit(cyNorm.filter(function(ele, i, eles){return true;}), 10);
 
 }

@@ -504,7 +504,7 @@ function reduceButton(strat){
  */
 function highlightRedex(i){
 
-    var colour = "color:";
+    var colour = "";
 
     switch(i % 5){
         case 0:
@@ -524,7 +524,8 @@ function highlightRedex(i){
             break;
     }
 
-    setStyleSpan("beta-" + i, colour);
+    setStyleSpan("beta-" + i, "color:" + colour);
+    highlightClass("beta-" + i, colour);
 
 }
 
@@ -535,6 +536,7 @@ function highlightRedex(i){
 function unhighlightRedex(i){
 
     setStyleSpan("beta-" + i, "color:black");
+    highlightClass("beta-" + i);
 
 }
 
