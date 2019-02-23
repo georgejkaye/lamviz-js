@@ -238,8 +238,10 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
                 array.push(rhsArray[j]);
             }
 
-            redexes.pop();
-            classes = betaClasses(redexes);
+            if(term.isBetaRedex()){
+                redexes.pop();               
+                classes = betaClasses(redexes);
+            }
 
             break;
 
@@ -590,7 +592,9 @@ function updateLabels(labels){
 
     } else {
         updateStyle(true, 'node', 'label', "");
-        updateStyle(true, 'edge', 'label', "");
+        updateStyle(true, 'edge', 'label', function(ele){
+            return ele.hasClass('beta-0');
+        });
     }
 }
 
