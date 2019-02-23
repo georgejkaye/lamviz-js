@@ -24,9 +24,9 @@ const nodeDistanceX = 30;
 /** The distance between adjacent nodes in the Y direction. */
 const nodeDistanceY = 30;
 /** The distance between adjacent normalisation nodes in the X direction. */
-const normalisationDistanceX = 500;
+const normalisationDistanceX = 2000;
 /** The distance between adjacent normalisation nodes in the Y direction. */
-const normalisationDistanceY = 400;
+const normalisationDistanceY = 2000;
 /** The width of one normalisation node. */
 const normalisationNodeWidth = 150;
 /** The original style sheet */
@@ -62,7 +62,8 @@ var redexIndex = 0;
 var redexList = [];
 /** IDs of the actual redex edges */
 var redexEdgeIDs = [];
-
+/** Images for the reduction graph */
+var imgs = [];
 
 /**
  * Reset the nodes and edges arrays.
@@ -904,13 +905,16 @@ function generateNormalisationGraphElements(id, tree, ctx, parent, parentReducti
     tree.term.generatePrettyVariableNames(ctx);
 
     /* Draw the term represented by this normalisation node */
-    var termElems = generateMapElements(tree.term, ctx);
-    termElems = setupNormalisationNode(termElems, nodeID);
+    //var termElems = generateMapElements(tree.term, ctx);
+    //termElems = setupNormalisationNode(termElems, nodeID);
 
-    array = array.concat(termElems);
+    var map = drawMap(id, tree.term, ctx);
+    smartPush(imgs, [tree.term.prettyPrint(), map.png()]);
+
+    //array = array.concat(termElems);
 
     /* Define the node */
-    array = defineNode(array, nodeID, "norm", "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(), level);  
+    array = defineNode(array, nodeID, "norm", "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(), level, "", png);  
 
     /* Generate the elements for the various branches from this node */
     for(var i = 0; i < tree.reductions.length; i++){
@@ -957,6 +961,7 @@ function highlightClass(className, colour){
 function drawNormalisationGraph(id, term, ctx){
 
     reset();
+    imgs = [];
 
     var tree = generateReductionTree(term);
     var elems = generateNormalisationGraphElements(id, tree, ctx);
@@ -973,10 +978,11 @@ function drawNormalisationGraph(id, term, ctx){
                     'background-color': '#666',
                     'text-valign': 'center',
                     'color': 'white',
-                    'width': '15',
-                    'height': '15',
-                    'font-size': '10',
+                    'width': '1500',
+                    'height': '1500',
+                    'font-size': '100',
                     'label': "",
+                    'shape': 'rectangle'
                 }
             },
 
@@ -988,7 +994,7 @@ function drawNormalisationGraph(id, term, ctx){
                     'label': 'data(label)',
                     'color': 'black',
                     'text-valign': 'bottom',
-                    'font-size': '20'
+                    'font-size': '200'
 
                 }
             },
@@ -1054,6 +1060,11 @@ function drawNormalisationGraph(id, term, ctx){
             name: 'preset'
         },
     })
+
+    
+    for(var i = 0; i < imgs.length; i++){
+        updateStyle(false, "[id='" + imgs[i][0] + "']", 'background-image', imgs[i][1]);
+    }
 
     var x = normalisationDistanceX;
     var w = normalisationNodeWidth;
