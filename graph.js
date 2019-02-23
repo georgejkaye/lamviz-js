@@ -60,6 +60,9 @@ const lambda = "\u03BB";
 var redexIndex = 0;
 /** An array of nodes that need to have redexes propogated to their abstraction. */
 var redexList = [];
+/** IDs of the actual redex edges */
+var redexEdgeIDs = [];
+
 
 /**
  * Reset the nodes and edges arrays.
@@ -75,6 +78,7 @@ function reset(){
     parentType = undefined;
     redexIndex = 0;
     redexList = [];
+    redexEdgeIDs = [];
 }
 
 /**
@@ -112,7 +116,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
         parentX = 0;
         parentY = 0;
 
-        var rootNode = createNode(">", "root-node", parentX, parentY);
+        var rootNode = createNode(">", "root-node", "", parentX, parentY);
         array = pushNode(array, rootNode);
 
         posX = parentX;
@@ -266,7 +270,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
             if(!nodes.includes(lambda + variableID + "._abstraction_node_top")){
                 if(!nodes.includes(lambda + variableID + ".")){
                     const freeVariableAbstractionID = checkID(lambda + variableID + ".", nodes);
-                    array = defineNode(array, freeVariableAbstractionID, absNodeFree, classes, posX, posY - nodeDistanceY);
+                    array = defineNode(array, freeVariableAbstractionID, absNodeFree, classes, posX, posY - nodeDistanceY, "", 0, "true");
                     lambdaAbstractionNodeID = freeVariableAbstractionID;
                 } else {
                     lambdaAbstractionNodeID = lambda + variableID + ".";
@@ -286,16 +290,11 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
     }
 
     if(redexEdge){
-        smartPush(classes, 'redex');
+        smartPush(redexEdgeIDs, newEdgeID);
     }
 
     /* Create an edge linking the newest node with its parent */
     array = defineEdge(array, newEdgeID, newEdgeType, classes, newNodeID, parent, newEdgeLabel);
-
-
-    if(redexEdge){
-        classes.pop();
-    }
 
     return array;
     
@@ -311,11 +310,12 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
  * @param {number} posY         - The y coordinate of this node.
  * @param {string} label        - The label of this node.
  * @param {number} level        - The level of this node.
+ * @param {string} free         - If the node is a free variable.
  * @return {Object[]} The updated array of map elements.
  */
-function defineNode(array, id, type, classes, posX, posY, label, level){
+function defineNode(array, id, type, classes, posX, posY, label, level, free){
 
-    const node = createNode(id, type, classes, posX, posY, label, level);
+    const node = createNode(id, type, classes, posX, posY, label, level, free);
     array = pushNode(array, node, id);
 
     return array;
@@ -349,9 +349,10 @@ function defineEdge(array, id, type, classes, source, target, label){
  * @param {number} y        - The y coordinate of the node (optional).
  * @param {string} label    - The label of this node.
  * @param {number} level    - The level of this node.
+ * @param {string} free     - If this node is a free variable.
  * @return {Object} The node object.
  */
-function createNode(id, type, classes, x, y, label, level){
+function createNode(id, type, classes, x, y, label, level, free){
     
     if(x === undefined || y === undefined){
         return { data: { id: id, type: type}};
@@ -365,8 +366,12 @@ function createNode(id, type, classes, x, y, label, level){
         level = "";
     }
 
+    if(free === undefined){
+        free = "false";
+    }
 
-    return { group: 'nodes', data: { id: id, type: type, label: label, level: level}, position: {x: x, y: y}, classes: classes};
+
+    return { group: 'nodes', data: { id: id, type: type, label: label, level: level, free: free}, position: {x: x, y: y}, classes: classes};
 
 }
 
@@ -584,9 +589,11 @@ function updateLabels(labels){
         });
 
     } else {
-        updateStyle(true, 'node', 'label', "");
+        updateStyle(true, 'node', 'label', function(ele){
+            return ele.data('free');
+        });
         updateStyle(true, 'edge', 'label', function(ele){
-            return ele.hasClass('redex');
+            return ele.hasClass('redex-0');
         });
     }
 }
@@ -743,13 +750,6 @@ function drawMap(id, term, ctx, zoom, pan, labels){
             },
 
             {
-                selector: '.global',
-                style: {
-                    'background-color': '#f00'
-                }
-            },
-
-            {
                 selector: '.dashed',
                 style: {
                     'width': 5
@@ -787,18 +787,29 @@ function drawMap(id, term, ctx, zoom, pan, labels){
     for(var i = 0; i < redexList.length; i++){
 
         var abstractionNodeTop = cyMap.$id(redexList[i][0]);
-        var edgeFromAbstractionToTop = cyMap.elements('edge[target="' + redexList[i][0] + '"]');
-        var abstractionNodeRight = edgeFromAbstractionToTop.source();
-        var edgeFromAbstractionRight = cyMap.elements('edge[target="' + abstractionNodeRight.id() + '"]');
-        var abstractionNode = edgeFromAbstractionRight.source();
-    
         cyMap.$id(redexList[i][0]).addClass(redexList[i][1]);
-        cyMap.elements('edge[target="' + redexList[i][0] + '"]').addClass(redexList[i][1]);
-        edgeFromAbstractionToTop.source().addClass(redexList[i][1]);
-        cyMap.elements('edge[target="' + abstractionNodeRight.id() + '"]').addClass(redexList[i][1]);
-        edgeFromAbstractionRight.source().addClass(redexList[i][1]);
+
+        if(abstractionNodeTop.data('free') !== 'true'){
+
+            var edgeFromAbstractionToTop = cyMap.elements('edge[target="' + redexList[i][0] + '"]');
+            var abstractionNodeRight = edgeFromAbstractionToTop.source();
+            var edgeFromAbstractionRight = cyMap.elements('edge[target="' + abstractionNodeRight.id() + '"]');
+            var abstractionNode = edgeFromAbstractionRight.source();
+        
+
+            cyMap.elements('edge[target="' + redexList[i][0] + '"]').addClass(redexList[i][1]);
+            edgeFromAbstractionToTop.source().addClass(redexList[i][1]);
+            cyMap.elements('edge[target="' + abstractionNodeRight.id() + '"]').addClass(redexList[i][1]);
+            edgeFromAbstractionRight.source().addClass(redexList[i][1]);
+        }
 
     }   
+
+    for(var i = 0; i < redexEdgeIDs.length; i++){
+
+        //cyMap.$('#' + redexEdgeIDs[i]).addClass('beta-' + i);
+
+    }
 
     updateLabels(labels);
 
@@ -806,16 +817,13 @@ function drawMap(id, term, ctx, zoom, pan, labels){
 
 }
 
-function checkForNode(array, nodeID){
-    for(var i = 0; i < array.length; i++){
-        if(array[0].data.id === nodeID){
-            return true;
-        }
-    }
-
-    return false;
-}
-
+/**
+ * Check to make sure that a reduction does not already exist in the graph (e.g. alpha-equivalence)
+ * @param {string} id - The id of the reduction (in de Bruijn notation).
+ * @param {string} source - The source of the reduction.
+ * @param {string} target - The target of the reduction.
+ * @return {boolean} Whether the reduction exists.
+ */
 function checkForIdenticalReduction(id, source, target){
 
     for(var i = 0; i < edgeObjs.length; i++){
