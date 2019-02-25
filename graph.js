@@ -835,50 +835,6 @@ function checkForIdenticalReduction(id, source, target){
 }
 
 /**
- * Perform adjustments on a map to ready it for being the child of a normalisation node.
- * @param {Object[]} termElems - The elements generated for the map of the term.
- * @param {string} nodeID - The node that this map belongs to.
- * @return {Object []} The terms adjusted for prettiness.
- */
-function setupNormalisationNode(termElems, nodeID){
-    var highest = 0;
-
-    for(var i = 0; i < termElems.length; i++){
-        
-        if(termElems[i].group === "nodes"){
-        
-            /* Make this node a child of the normalisation node */
-            termElems[i].data.parent = nodeID;
-
-            const y = termElems[i].position.y;
-
-            if(y < highest){
-                highest = y;
-            }
-
-        }
-
-        /* Associate elements with this node to avoid id clashes later */
-        termElems[i].data.id += "_child_of_" + nodeID;
-
-        /* Make sure the source and target point to the new ids */
-        if(termElems[i].group === "edges"){
-            termElems[i].data.source += "_child_of_" + nodeID;
-            termElems[i].data.target += "_child_of_" + nodeID;
-        }
-    }
-
-    /* Extend all variable paths to the top to avoid unnecessary crossings */
-    for(var i = 0; i < termElems.length; i++){
-        if(termElems[i].data.type === varNodeTop || termElems[i].data.type === absNodeFree){
-            termElems[i].position.y = highest - nodeDistanceY / 2;
-        }
-    }
-
-    return termElems;
-}
-
-/**
  * Generate the elements of the normalisation graph.
  * @param {string} id - The id of where the graph will be drawn.
  * @param {Object} tree - The normalisation tree object.
@@ -899,24 +855,26 @@ function generateNormalisationGraphElements(id, tree, ctx, parent, parentReducti
 
     /* Nodes use de Bruijn notation to ensure only distinct ones are created (i.e. not alpha-equivalent) */
     var nodeID = tree.term.prettyPrint();
-    tree.term.generatePrettyVariableNames(ctx);
 
-    var map = drawMap(id, tree.term, ctx);
-    smartPush(imgs, [tree.term.prettyPrint(), map.png()]);
+    if(checkID(nodeID, nodes) === nodeID){
 
-    //array = array.concat(termElems);
+        tree.term.generatePrettyVariableNames(ctx);
 
-    /* Define the node */
-    array = defineNode(array, nodeID, "norm", "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(), level, "", png);  
+        var map = drawMap(id, tree.term, ctx);
+        smartPush(imgs, [tree.term.prettyPrint(), map.png()]);
 
-    /* Generate the elements for the various branches from this node */
-    for(var i = 0; i < tree.reductions.length; i++){
-        array = array.concat(generateNormalisationGraphElements(id, tree.reductions[i][0], ctx, nodeID, tree.reductions[i][1].prettyPrintLabels(), level + 1));
+        /* Define the node */
+        array = defineNode(array, nodeID, "norm", "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(), level, "", png);  
+
+        /* Generate the elements for the various branches from this node */
+        for(var i = 0; i < tree.reductions.length; i++){
+            array = array.concat(generateNormalisationGraphElements(id, tree.reductions[i][0], ctx, nodeID, tree.reductions[i][1].prettyPrint(), level + 1));
+        }
     }
 
     /* Only define edges that represent distinct reductions (i.e. not alpha-equivalent) */
     if(parent !== undefined && !checkForIdenticalReduction(parentReduction, parent, nodeID)){
-        array = defineEdge(array, checkID(parentReduction, edges), "norm", "", parent, nodeID, parentReduction);
+        array = defineEdge(array, parent + '->' + parentReduction + '->' + tree.term.prettyPrintLabels(), "norm", "", parent, nodeID, parentReduction);
     }
 
     cyMap = originalTerm;
@@ -985,21 +943,16 @@ function drawNormalisationGraph(id, term, ctx){
             },
 
             {
-                selector: 'node[type="norm"]',
-                style: {
-                   
-
-                }
-            },
-
-            {
                 selector: 'edge',
                 style: {
-                'source-arrow-color': '#ccc',
-                'source-arrow-shape': 'triangle',
-                'arrow-scale': '1.5',
-                'line-color': '#ccc',
-                'width': '30'
+                    'target-arrow-color': '#ccc',
+                    'target-arrow-shape': 'triangle',
+                    'arrow-scale': '1.5',
+                    'line-color': '#ccc',
+                    'width': '30',
+                    'curve-style': 'bezier',
+                    'control-point-step-size': '200',
+                    'font-size': '200',
                 }
             },
 
