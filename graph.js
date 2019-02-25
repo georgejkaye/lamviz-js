@@ -32,6 +32,7 @@ const normalisationNodeWidth = 150;
 /** The original style sheet */
 var style = undefined;
 
+var originalTerm = undefined;
 
 /** Constants for the different types of graph elements. */
 /** A node representing an abstraction. */
@@ -68,18 +69,21 @@ var imgs = [];
 /**
  * Reset the nodes and edges arrays.
  */
-function reset(){
+function reset(map){
+    
     nodes = [];
     nodeObjs = [];
     edges = [];
     edgeObjs = [];
-    cy = undefined;
-    firstNode = undefined;
-    parent = [0,0];
-    parentType = undefined;
     redexIndex = 0;
     redexList = [];
     redexEdgeIDs = [];
+
+    if(map){
+        cyMap = undefined;
+    } else {
+        cyNorm = undefined;
+    }
 }
 
 /**
@@ -593,9 +597,7 @@ function updateLabels(labels){
 
     } else {
         updateStyle(true, 'node', 'label', "");
-        updateStyle(true, 'edge', 'label', function(ele){
-            return ele.hasClass('beta-0');
-        });
+        updateStyle(true, 'edge', 'label', "");
     }
 }
 
@@ -668,7 +670,7 @@ function getNodeTypeText(type){
  */
 function drawMap(id, term, ctx, zoom, pan, labels){
 
-    reset();
+    reset(true);
 
     elems = generateMapElements(term, ctx);
 
@@ -806,12 +808,6 @@ function drawMap(id, term, ctx, zoom, pan, labels){
 
     }   
 
-    for(var i = 0; i < redexEdgeIDs.length; i++){
-
-        //cyMap.$('#' + redexEdgeIDs[i]).addClass('beta-' + i);
-
-    }
-
     updateLabels(labels);
 
     return cyMap;
@@ -897,16 +893,13 @@ function generateNormalisationGraphElements(id, tree, ctx, parent, parentReducti
     var array = [];
     
     if(level === undefined){
+        originalTerm = cyMap;
         level = 0;
     }
 
     /* Nodes use de Bruijn notation to ensure only distinct ones are created (i.e. not alpha-equivalent) */
     var nodeID = tree.term.prettyPrint();
     tree.term.generatePrettyVariableNames(ctx);
-
-    /* Draw the term represented by this normalisation node */
-    //var termElems = generateMapElements(tree.term, ctx);
-    //termElems = setupNormalisationNode(termElems, nodeID);
 
     var map = drawMap(id, tree.term, ctx);
     smartPush(imgs, [tree.term.prettyPrint(), map.png()]);
@@ -925,6 +918,8 @@ function generateNormalisationGraphElements(id, tree, ctx, parent, parentReducti
     if(parent !== undefined && !checkForIdenticalReduction(parentReduction, parent, nodeID)){
         array = defineEdge(array, checkID(parentReduction, edges), "norm", "", parent, nodeID, parentReduction);
     }
+
+    cyMap = originalTerm;
 
     return array;
 
@@ -960,7 +955,7 @@ function highlightClass(className, colour){
  */
 function drawNormalisationGraph(id, term, ctx){
 
-    reset();
+    reset(false);
     imgs = [];
 
     var tree = generateReductionTree(term);
@@ -975,85 +970,39 @@ function drawNormalisationGraph(id, term, ctx){
             {
                 selector: 'node',
                 style: {
-                    'background-color': '#666',
-                    'text-valign': 'center',
-                    'color': 'white',
-                    'width': '1500',
-                    'height': '1500',
+                    'color': 'black',
+                    'width': '1700',
+                    'height': '1200',
                     'font-size': '100',
                     'label': "",
-                    'shape': 'rectangle'
+                    'shape': 'rectangle',
+                    'background-color': 'white',
+                    'border-width': '5',
+                    'label': 'data(label)',
+                    'text-valign': 'bottom',
+                    'font-size': '200'
                 }
             },
 
             {
                 selector: 'node[type="norm"]',
                 style: {
-                    'background-color': 'white',
-                    'border-width': '5',
-                    'label': 'data(label)',
-                    'color': 'black',
-                    'text-valign': 'bottom',
-                    'font-size': '200'
+                   
 
                 }
             },
 
             {
-                selector: 'node[type =\"' + varNode + '\"], node[type =\"' + varNodeTop + '\"]',
+                selector: 'edge',
                 style: {
-                    'width': '5',
-                    'height': '5',
-                    'background-color': '#ccc',
-                    'shape': 'roundrectangle',
-                    'color': 'black'
-                }
-            },
-
-            {
-                selector: 'edge[type!="norm"]',
-                style: {
-                'width': 2,
+                'source-arrow-color': '#ccc',
+                'source-arrow-shape': 'triangle',
+                'arrow-scale': '1.5',
                 'line-color': '#ccc',
-                'mid-target-arrow-color': '#ccc',
-                'mid-target-arrow-shape': 'triangle',
-                'arrow-scale': '1',
-                'font-size': '2',
-                'curve-style': 'bezier',
-                'label': ""
+                'width': '30'
                 }
             },
 
-            {
-                selector: 'edge[type="norm"]',
-                style: {
-                'mid-target-arrow-color': 'black',
-                'mid-target-arrow-shape': 'triangle',
-                'arrow-scale': '2',
-                'line-color': 'black',
-                }
-            },
-
-            {
-                selector: 'edge[type = \"' + varEdgeLabel + '\"]',
-                style: {
-                    'curve-style': 'unbundled-bezier',
-                    'control-point-distances': function(ele){
-                        
-                        var source = ele.source();
-                        var target = ele.target();
-
-                        var diff = source.position('x') - target.position('x');
-
-                        return diff / 2;
-
-                    },
-                    'control-point-weights': '0.5',
-                    'loop-direction': '45deg',
-                    'edge-distances': 'node-position'
-                    
-                }
-            },
         ],
 
         layout: {
