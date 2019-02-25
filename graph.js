@@ -697,7 +697,6 @@ function drawMap(id, term, ctx, zoom, pan, labels){
                 style: {
                     'width': '5',
                     'height': '5',
-                    'background-color': '#ccc',
                     'shape': 'roundrectangle',
                     'color': 'black'
                 }
@@ -864,7 +863,7 @@ function generateNormalisationGraphElements(id, tree, ctx, parent, parentReducti
         smartPush(imgs, [tree.term.prettyPrint(), map.png()]);
 
         /* Define the node */
-        array = defineNode(array, nodeID, "norm", "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(), level, "", png);  
+        array = defineNode(array, nodeID, "norm", "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(), level, "");  
 
         /* Generate the elements for the various branches from this node */
         for(var i = 0; i < tree.reductions.length; i++){

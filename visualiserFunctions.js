@@ -8,74 +8,9 @@ var currentTerm;
 var freeVariables = new LambdaEnvironment();
 
 /**
- * Get the HTML for an element.
- * @param {string} element - The element type.
- * @param {string} className - The class of this element.
- * @param {string} id - The id of this element.
- * @param {string} style - The style of this element.
- * @param {string} onclick - The onclick of this element.
- * @param {string} content - The content of this element.
- * @return {string} The corresponding HTML for this element.
- */
-function getElement(element, className, id, style, onclick, content){
-    return '<' + element + ' class="' + className + '" id="' + id + '" style="' + style + '" onclick="' + onclick + '">' + content + '</' + element +'>';
-}
-
-/**
- * Get the HTML for a <div>.
- * @param {string} className - The class of this <div>.
- * @param {string} id - The id of this <div>.
- * @param {string} style - The style of this <div>.
- * @param {string} onclick - The onclick of this <div>.
- * @param {string} content - The content of this <div>.
- * @return {string} The corresponding HTML for this <div>.
- */
-function getDiv(className, id, style, onclick, content){
-    return getElement("div", className, id, style, onclick, content);
-}
-
-/**
- * Change the text of an element with a given id.
- * @param {string} id   - The id of the element.
- * @param {string} text - the text to change to
- */
-function changeText(id, text){
-    document.getElementById(id).innerHTML = text;
-}
-
-/**
- * Get the text of an element with a given id.
- * @param {string} id - The id of the element.
- * @return {string} The text of the element.
- */
-function getText(id){
-    return document.getElementById(id).value;
-}
-
-/**
- * Get a 'pretty' string of an array with spaces in between each element.
- * @param {array} array - The array to get the string from.
- */
-function prettyString(array){
-
-    if(array.length !== 0){
-        var string = array[0];
-
-        if(array.length > 0){
-            for(i = 1; i < array.length; i++){
-                string += " ";
-                string += array[i];
-            }
-        }
-    }
-
-    return string;
-}
-
-/**
  * Function to execute when the 'execute' button is pressed.
  */
-function execute_button(){
+function executeButton(){
 
     var error = false;
     var text = getText('input');
@@ -122,7 +57,7 @@ function execute_button(){
 /**
  * Function to execute when the 'substitute' button is pressed.
  */
-function substitute_button(){
+function substituteButton(){
 
     var s = tokenise(getText('s'));
     var j = getText('j');
@@ -149,7 +84,7 @@ function substitute_button(){
 /**
  * Function to execute when the 'evaluate' button is pressed.
  */
-function evaluate_button(){
+function evaluateButton(){
 
     var res = evaluate(currentTerm);
 
@@ -166,7 +101,7 @@ function evaluate_button(){
 /**
  * Function to execute when the 'normalise' button is pressed.
  */
-function normalise_button(){
+function normaliseButton(){
 
     var res = outermostReduction(currentTerm);
 
@@ -192,7 +127,7 @@ function normalise_button(){
 /**
  * Function to execute when the beta button is pressed.
  */
-function beta_button(){
+function betaButton(){
 
     var frees = getText('ctx').split(" ");
     freeVariables = new LambdaEnvironment();
@@ -215,7 +150,7 @@ function beta_button(){
 /**
  * Function to execute when the generate button is pressed.
  */
-function generate_button(x){
+function generateButton(x){
 
     var n = parseInt(getText('n'));
     var k = parseInt(getText('k'));
@@ -251,9 +186,9 @@ function generate_button(x){
 /**
  * Function to execute when the normalisation tree button is pressed.
  */
-function normalise_tree_button(){
+function normaliseTreeButton(){
 
     changeText('normalisation-tree', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")));
-    drawNormalisationGraph("normalisation-tree", currentTerm, freeVariables);
+    drawNormalisationGraph('normalisation-graph', currentTerm, freeVariables);
 
 }

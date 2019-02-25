@@ -12,12 +12,66 @@
             height: 750px;
             display: block;
           }
+          body {
+            font-family: 'Lato', sans-serif;
+        }
+        h1, h2, h3 {
+            font-weight: 'black';
+        }
+        .portrait {
+            height: 100%;
+            width: 100%;
+            border-style:solid; 
+            border-color: black;
+            display: inline-block;
+        }
+        .frame {
+            text-align: left;
+            display: inline-block;
+            padding: 0px 10px 0px 10px;
+            vertical-align: text-top;
+            width: 20%;
+        }
+        .empty {
+            height: 100px;
+        }
+        .inner-frame {
+            width: 250px;
+            height: 250px;
+        }
+        .big-frame {
+            width: 400px;
+            height: 400px;
+            display: block;
+            padding: 0px;
+        }
         .graph-frame {
             width: 1500px;
             height: 1000px;
             display: block;
             padding: 0px;
         }
+        .caption {
+            font-size: 200%;
+            margin-top: 0;
+        }
+        table,td{
+            padding-left: 5px;
+            vertical-align: top;
+        }
+        .term-heading{
+            font-size: 48px;
+        }
+        .term-subheading{
+            font-size: 36px;
+        }
+        .term-fact{
+            font-size: 24px;
+        }
+        .number-box{
+            width: 25px;
+        }
+
     </style>
 </head>
 <body>
@@ -42,10 +96,10 @@
     <br> 
     <br>
     
-    <button type = "button" id = "execute-btn" onclick =   "execute_button();">Execute</button>
-    <button type = "button" id = "eval-btn" onclick = "evaluate_button();">Evaluate</button>
-    <button type = "button" id = "norm-btn" onclick = "normalise_button();">Normalise</button>
-    <button type = "button" id = "norm-tree-btn" onclick = "normalise_tree_button();">Show normalisation graph</button>
+    <button type = "button" id = "execute-btn" onclick =   "executeButton();">Execute</button>
+    <button type = "button" id = "eval-btn" onclick = "evaluateButton();">Evaluate</button>
+    <button type = "button" id = "norm-btn" onclick = "normaliseButton();">Normalise</button>
+    <button type = "button" id = "norm-tree-btn" onclick = "normaliseTreeButton();">Show normalisation graph</button>
 
     <br>
 
@@ -60,16 +114,21 @@
 
     <br>
     <br>
-    <div class="w3-container" id="cy" style="border-style:solid; border-color: black;">
+
+    <table>
+        <div class="w3-container" id="cy" style="border-style:solid; border-color: black;">
+
+    </table>
     </div>
 
-    <div id = "normalisation-tree"></div>
+    <p id = "normalisation-tree"></p>
 
     <script src = "definition.js"></script>
     <script src = "parser.js"></script>
     <script src = "cytoscape.min.js"></script>
     <script src = "graph.js"></script>
-    <script src = "functions.js"></script>
+    <script src = "sharedFunctions.js"></script>
+    <script src = "visualiserFunctions.js"></script>
     <script src = "scripts.js"></script>
     <script src = "evaluator.js"></script>
     <script src = "generator.js"></script>
