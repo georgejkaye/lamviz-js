@@ -953,6 +953,16 @@ class ReductionTree{
     }
 
     /**
+     * Remove duplicate nodes from this tree.
+     */
+    compressTree(){
+
+
+
+
+    }
+
+    /**
      * Get a 'pretty' depiction of the tree, with different layers at different indentations
      * @param {number} x - The current layer of the tree.
      */

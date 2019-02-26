@@ -46,7 +46,6 @@ function executeButton(){
 
     if(!error){
         viewPortrait("curry-exhibit", term, document.getElementById('labels-yes').checked);
-        //drawMap("cy", currentTerm, freeVariables, true, true, document.getElementById('labels-yes').checked);
     }
 }
 

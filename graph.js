@@ -784,7 +784,6 @@ function drawMap(id, term, ctx, zoom, pan, labels){
     placeFreeVariables(cyMap.elements(getNodeTypeText(varNodeTop)), cyMap.elements(getNodeTypeText(absNodeFree)), ctx);
 
     cyMap.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
-    cyMap.fit(cyMap.filter(function(ele, i, eles){return true;}), 10);
 
     for(var i = 0; i < redexList.length; i++){
 
@@ -808,6 +807,7 @@ function drawMap(id, term, ctx, zoom, pan, labels){
     }   
 
     updateLabels(labels);
+    cyMap.fit(cyMap.filter(function(ele, i, eles){return true;}), 10);
 
     return cyMap;
 
