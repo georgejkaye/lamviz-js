@@ -212,9 +212,10 @@ function printTermHTML(term){
 /**
  * Get the stats for a lambda term in an HTML table format.
  * @param {Object} currentTerm - The lambda term.
+ * @param {boolean} labels - If the labels should be displayed on the map.
  * @return {string} The HTML table code for the stats.
  */
-function getStats(currentTerm){
+function getStats(currentTerm, labels){
     return getRow(getCell("term-heading", '<b>' + printTermHTML(currentTerm) + '</b>')) +
                                                 getRow(getCell("term-subheading", '<b>' + currentTerm.prettyPrint() + '</b>')) +
                                                 getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
@@ -223,7 +224,7 @@ function getStats(currentTerm){
                                                 getRow(getCell("term-fact", 'Variables: ' + currentTerm.variables())) +
                                                 getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
                                                 getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
-                                                getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(), "redex", "clickRedex(i)", "highlightRedex(i)", "unhighlightRedex(i)"))) +
+                                                getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(), "redex", "clickRedex(i, " + labels + ")", "highlightRedex(i)", "unhighlightRedex(i)"))) +
                                                 getRow(getCell("", '<button type = "button" disabled id = "reset-btn" onclick = "resetButton();">Reset</button><button type = "button" id = "back-btn" onclick = "backButton();">Back</button>')) +
                                                 getRow(getCell("", '<button type = "button" id = "norm-btn" onclick = "showNormalisationGraph();">View normalisation graph</button>'));
 }
@@ -249,7 +250,7 @@ function viewPortrait(exhibit, term, labels){
                                         '<td>' + getDiv("w3-container frame big-frame", "frame" + i, "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
                                         '<td>' +
                                             '<table>' + 
-                                                getStats(currentTerm) +   
+                                                getStats(currentTerm, labels) +   
                                             '</table>' +
                                         '</td>' +
                                     '</tr>' +
@@ -304,8 +305,9 @@ function unhighlightRedex(i){
 /**
  * Function to execute when you click a redex.
  * @param {number} i - The redex clicked.
+ * @param {boolean} labels - Whether the labels should be displayed on the map.
  */
-function clickRedex(i){
+function clickRedex(i, labels){
 
     var normalisedTerm = specificReduction(currentTerm, i)[0];
 
@@ -314,7 +316,7 @@ function clickRedex(i){
         originalTerm = currentTerm;
     }
 
-    viewPortrait("church-room", normalisedTerm);
+    viewPortrait("church-room", normalisedTerm, labels);
     document.getElementById("reset-btn").disabled = false;
 }
 

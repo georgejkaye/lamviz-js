@@ -45,7 +45,7 @@ function executeButton(){
     changeText('normalisation-studio', "");
 
     if(!error){
-        viewPortrait("curry-exhibit", term, document.getElementById('labels-yes').checked);
+        viewPortrait("church-room", term, document.getElementById('labels-yes').checked);
     }
 }
 
