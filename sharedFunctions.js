@@ -4,6 +4,11 @@
  * @author George Kaye
  */
 
+var currentTerm;
+var freeVariables = new LambdaEnvironment();
+var originalTerm;
+var reduced = false;
+
 /**
  * Change the text of an element with a given id.
  * @param {string} id   - The id of the element.
@@ -221,4 +226,108 @@ function getStats(currentTerm){
                                                 getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(), "redex", "clickRedex(i)", "highlightRedex(i)", "unhighlightRedex(i)"))) +
                                                 getRow(getCell("", '<button type = "button" disabled id = "reset-btn" onclick = "resetButton();">Reset</button><button type = "button" id = "back-btn" onclick = "backButton();">Back</button>')) +
                                                 getRow(getCell("", '<button type = "button" id = "norm-btn" onclick = "showNormalisationGraph();">View normalisation graph</button>'));
+}
+
+/**
+ * Function to execute when a portrait is clicked.
+ * @param {string} exhibit - The id of where the portrait is to be drawn.
+ * @param {Object} term - The term to draw.
+ * @param {boolean} labels - If the labels should be drawn on the map.
+ */
+function viewPortrait(exhibit, term, labels){
+
+    currentTerm = term;
+
+    var disabled = '';
+
+    if(!currentTerm.hasBetaRedex()){
+        disabled = 'disabled';
+    }
+
+    changeText(exhibit, '<table>' +
+                                    '<tr>' +
+                                        '<td>' + getDiv("w3-container frame big-frame", "frame" + i, "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
+                                        '<td>' +
+                                            '<table>' + 
+                                                getStats(currentTerm) +   
+                                            '</table>' +
+                                        '</td>' +
+                                    '</tr>' +
+                                '</table>'
+    )
+
+    drawMap('portrait' + i, currentTerm, freeVariables, true, true, labels);
+}
+
+/**
+ * Highlight a redex.
+ * @param {number} i - The redex to highlight.
+ */
+function highlightRedex(i){
+
+    var colour = "";
+
+    switch(i % 5){
+        case 0:
+            colour += "red";
+            break;
+        case 1:
+            colour += "orange";
+            break;
+        case 2:
+            colour += "green";
+            break;
+        case 3:
+            colour += "blue";
+            break;
+        case 4:
+            colour += "violet";
+            break;
+    }
+
+    setStyleSpan("beta-" + i, "color:" + colour);
+    highlightClass("beta-" + i, colour);
+
+}
+
+/**
+ * Unhighlight an already highlighted redex.
+ * @param {number} i - The redex to unhighlight.
+ */
+function unhighlightRedex(i){
+
+    setStyleSpan("beta-" + i, "color:black");
+    highlightClass("beta-" + i);
+
+}
+
+/**
+ * Function to execute when you click a redex.
+ * @param {number} i - The redex clicked.
+ */
+function clickRedex(i){
+
+    var normalisedTerm = specificReduction(currentTerm, i)[0];
+
+    if(!reduced){
+        reduced = true;
+        originalTerm = currentTerm;
+    }
+
+    viewPortrait("church-room", normalisedTerm);
+    document.getElementById("reset-btn").disabled = false;
+}
+
+/**
+ * Show the normalisation graph for the current term.
+ */
+function showNormalisationGraph(){
+
+    var reductions = generateReductionTree(currentTerm);  
+
+    changeText('normalisation-studio', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")));
+    drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables);
+
+    document.getElementById("reset-btn").disabled = false;
+
 }

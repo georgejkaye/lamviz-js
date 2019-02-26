@@ -4,6 +4,12 @@
  * @author George Kaye
  */
 
+var currentTerm;
+var originalTerm;
+var reduced = false;
+
+var freeVariables = new LambdaEnvironment();
+
 var terms;
 var cys;
 var ctx;
@@ -21,93 +27,6 @@ var betas = 0;
 var fragment = "";
 
 var lastAction = 0;
-
-/**
- * Change the text of an element with a given id.
- * @param {string} id   - The id of the element.
- * @param {string} text - the text to change to
- */
-function changeText(id, text){
-    document.getElementById(id).innerHTML = text;
-}
-
-/**
- * Change the value of an element with a given id.
- * @param {string} id   - The id of the element.
- * @param {string} value - the value to change to
- */
-function changeValue(id, value){
-    document.getElementById(id).value = value;
-}
-
-/**
- * Change the value of elements with a given class.
- * @param {string} id   - The class of the elements.
- * @param {string} value - the value to change to
- */
-function changeValueClass(className, value){
-    var elems = document.getElementsByClassName(className);
-
-    for(var i = 0; i < elems.length; i++){
-        elems[i].value = value;
-    }
-}
-
-/**
- * Set the style of an span with a given class.
- * @param {string} className - The class of the elements.
- * @param {string} style - The style to set.
- */
-function setStyleSpan(className, style){
-    var elems = document.getElementsByClassName(className);
-    
-    var re = /class="(.+?)"/g
-
-    for(var i = 0; i < elems.length; i++){
-        elems[i].setAttribute("style", style);
-
-        var subs = elems[i].innerHTML;
-        var matches = subs.match(re);
-        
-        for(var j = 0; j < matches.length; j++){
-            var elems2 = document.getElementsByClassName(matches[j].substring(7, matches[j].length - 1));
-
-            for(var k = 0; k < elems2.length; k++){
-                elems2[k].setAttribute("style", style);
-            }
-        }
-    }
-    
-}
-
-/**
- * Get the text of an element with a given id.
- * @param {string} id - The id of the element.
- * @return {string} The text of the element.
- */
-function getText(id){
-    return document.getElementById(id).value;
-}
-
-/**
- * Get a 'pretty' string of an array with spaces in between each element.
- * @param {array} array - The array to get the string from.
- */
-function prettyString(array){
-
-    if(array.length !== 0){
-        var string = array[0];
-
-        if(array.length > 0){
-            for(i = 1; i < array.length; i++){
-                string += " ";
-                string += array[i];
-            }
-        }
-    }
-
-    return string;
-}
 
 /**
  * Action to perform when a generate button is performed.
@@ -215,12 +134,12 @@ function generateButton(x, prev){
             var caption = getP("caption", "portrait-caption-" + i, "font-size:" + size + "%", "", termName + "<br>" + terms[i].crossings() + " crossings");
 
             if(document.getElementById("draw").checked){
-                termString += getDiv('w3-container frame', 'frame' + i, "", "viewPortrait('church-room', terms[" + i + "], false);", 
+                termString += getDiv('w3-container frame', 'frame' + i, "", 'viewPortrait(terms[' + i + ']);', 
                             getDiv("w3-container inner-frame", "", "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + "<br>" + 
                                 caption);            
  
             } else {
-                termString += getDiv('w3-container frame empty', 'frame ' + i, "", "viewPortrait('church-room', terms[" + i + "], false);", caption);
+                termString += getDiv('w3-container frame empty', 'frame ' + i, "", 'viewPortrait(terms[' + i + ']);', caption);
             }
         }
 
@@ -295,13 +214,44 @@ function clearButton(){
     changeValueClass('number-box', "");
 }
 
+
 /**
- * Get an HTML representation of a term.
- * @param {Object} term - The lambda term.
- * @return {string} The HTML representation.
+ * Function to execute when a portrait is clicked.
+ * @param term - The term to draw.
  */
-function printTermHTML(term){
-    return term.printHTML()[0];
+function viewPortrait(term){
+
+    currentTerm = term;
+
+    var disabled = '';
+
+    if(!currentTerm.hasBetaRedex()){
+        disabled = 'disabled';
+    }
+
+    changeText("church-room", '<table>' +
+                                    '<tr>' +
+                                        '<td>' + getDiv("w3-container frame big-frame", "frame" + i, "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
+                                        '<td>' +
+                                            '<table>' + 
+                                                getRow(getCell("term-heading", '<b>' + printTermHTML(currentTerm) + '</b>')) +
+                                                getRow(getCell("term-subheading", '<b>' + currentTerm.prettyPrint() + '</b>')) +
+                                                getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
+                                                getRow(getCell("term-fact", 'Abstractions: ' + currentTerm.abstractions())) +
+                                                getRow(getCell("term-fact", 'Applications: ' + currentTerm.applications())) +
+                                                getRow(getCell("term-fact", 'Variables: ' + currentTerm.variables())) +
+                                                getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
+                                                getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
+                                                getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(), "redex", "clickRedex(i)", "highlightRedex(i)", "unhighlightRedex(i)"))) +
+                                                getRow(getCell("", '<button type = "button" disabled id = "reset-btn" onclick = "resetButton();">Reset</button><button type = "button" id = "back-btn" onclick = "backButton();">Back</button>')) +
+                                                getRow(getCell("", '<button type = "button" id = "norm-btn" onclick = "showNormalisationGraph();">View normalisation graph</button>')) +   
+                                            '</table>' +
+                                        '</td>' +
+                                    '</tr>' +
+                                '</table>'
+    )
+
+    drawMap('portrait' + i, currentTerm, ctx, true, true, false);
 }
 
 /**
@@ -319,7 +269,7 @@ function backButton(){
 function resetButton(){
     changeText('normalisation-studio', "");
     if(reduced && currentTerm !== originalTerm){
-        viewPortrait("church-room", originalTerm);
+        viewPortrait(originalTerm);
         reduced = false;
     } else { 
         document.getElementById("reset-btn").disabled = true; 
@@ -348,7 +298,80 @@ function reduceButton(strat){
         originalTerm = currentTerm;
     }
 
-    viewPortrait("church-room", normalisedTerm);
+    viewPortrait(normalisedTerm);
     document.getElementById("reset-btn").disabled = false; 
+
+}
+
+/**
+ * Highlight a redex.
+ * @param {number} i - The redex to highlight.
+ */
+function highlightRedex(i){
+
+    var colour = "";
+
+    switch(i % 5){
+        case 0:
+            colour += "red";
+            break;
+        case 1:
+            colour += "orange";
+            break;
+        case 2:
+            colour += "green";
+            break;
+        case 3:
+            colour += "blue";
+            break;
+        case 4:
+            colour += "violet";
+            break;
+    }
+
+    setStyleSpan("beta-" + i, "color:" + colour);
+    highlightClass("beta-" + i, colour);
+
+}
+
+/**
+ * Unhighlight an already highlighted redex.
+ * @param {number} i - The redex to unhighlight.
+ */
+function unhighlightRedex(i){
+
+    setStyleSpan("beta-" + i, "color:black");
+    highlightClass("beta-" + i);
+
+}
+
+/**
+ * Function to execute when you click a redex.
+ * @param {number} i - The redex clicked.
+ */
+function clickRedex(i){
+
+    var normalisedTerm = specificReduction(currentTerm, i)[0];
+
+    if(!reduced){
+        reduced = true;
+        originalTerm = currentTerm;
+    }
+
+    viewPortrait(normalisedTerm);
+    document.getElementById("reset-btn").disabled = false;
+}
+
+/**
+ * Show the normalisation graph for the current term.
+ */
+function showNormalisationGraph(){
+
+    var reductions = generateReductionTree(currentTerm);  
+
+    changeText('normalisation-studio', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")));
+    drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables);
+
+    document.getElementById("reset-btn").disabled = false;
 
 }

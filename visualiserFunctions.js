@@ -4,9 +4,6 @@
  * @author George Kaye
  */
 
-var currentTerm;
-var freeVariables = new LambdaEnvironment();
-
 /**
  * Function to execute when the 'execute' button is pressed.
  */
@@ -45,12 +42,11 @@ function executeButton(){
     }
 
     changeText('result', text);
-    changeText('normalisation-tree', "");
-
-    currentTerm = term;
+    changeText('normalisation-studio', "");
 
     if(!error){
-        drawMap("cy", currentTerm, freeVariables, true, true, document.getElementById('labels-yes').checked);
+        viewPortrait("curry-exhibit", term, document.getElementById('labels-yes').checked);
+        //drawMap("cy", currentTerm, freeVariables, true, true, document.getElementById('labels-yes').checked);
     }
 }
 
