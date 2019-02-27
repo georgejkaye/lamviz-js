@@ -12,7 +12,12 @@ const ABS = 1;
 const APP = 2;
 
 /** The number of reduction steps to perform before halting operations. */
-const cutoff = 100;
+const cutoff = 20;
+
+/** Constants to represent different modes */
+const MAX = 0;
+const MIN = 1;
+const AVERAGE = 2;
 
 var currentVariableIndex = 0;
 const variableNames = ['x', 'y', 'z', 'w', 'u', 'v']
@@ -967,10 +972,10 @@ class ReductionTree{
 
     /**
      * Get the length of a path to a normal form, whether it be the longest or shortest.
-     * @param {boolean} max - True for longest path, false for shortest path.
+     * @param {number} mode - What type of path to count (longest, shortest, average)
      * @return {number} The length of the requested path (or the cutoff if it's too long/infinite).
      */
-    pathToNormalForm(steps, max){
+    pathToNormalForm(steps, mode){
         /* First execution of function */
         if(steps === undefined){
             steps = 0;
@@ -990,17 +995,24 @@ class ReductionTree{
         var lengths = [];
 
         for(var i = 0; i < this.reductions.length; i++){
-            lengths[i] = this.reductions[i][0].pathToNormalForm(steps, max);
+            lengths[i] = this.reductions[i][0].pathToNormalForm(steps, mode);
         }
 
         /* Find the appropriate path */
         var x = 0;
 
-        if(max){
-            x = Math.max.apply(null, lengths);
-        } else {
-            x = Math.min.apply(null, lengths);
+        switch(mode){
+            case MIN:
+                x = Math.min.apply(null, lengths);
+                break;
+            case MAX:
+                x = Math.max.apply(null, lengths);
+                break;
+            case AVERAGE:
+                x = lengths.reduce((a,b) => a + b, 0) / lengths.length;
+                break;
         }
+
         /* Add this step in the graph */
         return 1 + x;
     }
@@ -1010,7 +1022,7 @@ class ReductionTree{
      * @return {number} The shortest path to the normal form of this term, or the cutoff.
      */
     shortestPathToNormalForm(){
-        return this.pathToNormalForm(0, false);
+        return this.pathToNormalForm(0, MIN);
     }
 
     /**
@@ -1018,15 +1030,76 @@ class ReductionTree{
      * @return {number} The longest path to the normal form of this term, or the cutoff.
      */
     longestPathToNormalForm(){
-        return this.pathToNormalForm(0, true);
+        return this.pathToNormalForm(0, MAX);
+    }
+
+    /**
+     * Get the average path to the normal form of this term (if one exists).
+     * @return {number} The average path to the normal form of this term, or the cutoff.
+     */
+    averagePathToNormalForm(){
+        return this.pathToNormalForm(0, AVERAGE);
+    }
+
+    /**
+     * Get a list of unique states in this graph.
+     * @param {string[]} seen - All the states seen so far.
+     * @return {string[]} The unique states in this graph.
+     */
+    allStates(seen){
+
+        if(seen === undefined){
+            seen = [];
+        }
+
+        if(seen.includes(this.term.prettyPrint())){
+            return seen;
+        }
+
+        smartPush(seen, this.term.prettyPrint());
+
+        for(var i = 0; i < this.reductions.length; i++){
+            seen = this.reductions[i][0].allStates(seen);
+        }
+
+        return seen;
+    }
+
+    /**
+     * Get a list of all unique reductions in this graph.
+     * @param {string[]} seen - All the reduction states seen so far.
+     * @return {string[]} The unique reductions in this graph.
+     */
+    allReductions(seen){
+
+        if(seen === undefined){
+            seen = [];
+        }
+
+        for(var i = 0; i < seen.length; i++){
+            if(this.term.prettyPrint() === seen[i][0]){
+                return seen;
+            }
+        }
+
+        for(var i = 0; i < this.reductions.length; i++){
+            smartPush(seen, [this.term.prettyPrint(), this.reductions[i][1].prettyPrint(), this.reductions[i][0].term.prettyPrint()]);
+            seen = this.reductions[i][0].allReductions(seen);
+        }
+
+        return seen;
     }
 
     /**
      * Get the number of vertices in this normalisation graph (excluding duplicates).
-     * @param {Get the number of vertices in} x 
+     * @return {number} - The number of vertices in the graph. 
      */
-    vertices(x){
+    vertices(){
+        return this.allStates().length;
+    }
 
+    edges(){
+        return this.allReductions().length;
     }
 
     /**
