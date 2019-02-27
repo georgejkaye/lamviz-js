@@ -32,20 +32,23 @@ function executeButton(){
         term = parse(text, freeVariables)
 
         if(typeof term !== "string"){
+            currentTerm = term;
             text = term.prettyPrint() + " ~  ~  ~ " + term.prettyPrintLabels(true);
         } else {
             text = term;
             error = true;
         }
+        changeText('result', "");
     } else {
         error = true;
+        changeText('result', text);
+        changeText('church-room', "");
     }
 
-    changeText('result', text);
     changeText('normalisation-studio', "");
 
     if(!error){
-        viewPortrait("church-room", term, document.getElementById('labels-yes').checked);
+        viewPortrait("church-room", currentTerm, document.getElementById('labels-yes').checked);
     }
 }
 
@@ -186,4 +189,26 @@ function normaliseTreeButton(){
     changeText('normalisation-tree', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")));
     drawNormalisationGraph('normalisation-graph', currentTerm, freeVariables);
 
+}
+
+/**
+ * Function to execute when the reset button is pressed.
+ */
+function resetButton(labels){
+    changeText('normalisation-studio', "");
+    if(reduced && currentTerm !== originalTerm){
+        viewPortrait("church-room", originalTerm, document.getElementById("labels-yes").checked);
+        reduced = false;
+    } else { 
+        document.getElementById("reset-btn").disabled = true; 
+    }
+}
+
+/**
+ * Function to execute when the back button is pressed.
+ */
+function backButton(){
+    changeText('church-room', "");
+    changeText('normalisation-studio', "");
+    reduced = false;
 }

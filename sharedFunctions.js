@@ -191,7 +191,10 @@ function bulletsOfArray(array, id, onclick, onmouseenter, onmouseout){
 
     
     for(var i = 0; i < array.length; i++){
-        string += '<li id="' + id + '-' + i + '" onclick="' + onclick.replace("(i)", "(" + i + ")") + '" onmouseenter="' + onmouseenter.replace("(i)", "(" + i + ")") + '" onmouseout="' + onmouseout.replace("(i)", "(" + i + ")") + '">' + array[i] + "</li>";
+
+
+
+        string += '<li id="' + id + '-' + i + '" onclick="' + onclick.replace("i,", i + ",") + '" onmouseenter="' + onmouseenter.replace("i,", i + ",") + '" onmouseout="' + onmouseout.replace("i,", i + ",") + '">' + array[i] + "</li>";
     }
 
     string += "</ul>";
@@ -224,7 +227,7 @@ function getStats(currentTerm, labels){
                                                 getRow(getCell("term-fact", 'Variables: ' + currentTerm.variables())) +
                                                 getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
                                                 getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
-                                                getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(), "redex", "clickRedex(i, " + labels + ")", "highlightRedex(i)", "unhighlightRedex(i)"))) +
+                                                getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(), "redex", "clickRedex(i, " + labels + ")", "highlightRedex(i, true)", "unhighlightRedex(i, true)"))) +
                                                 getRow(getCell("", '<button type = "button" disabled id = "reset-btn" onclick = "resetButton();">Reset</button><button type = "button" id = "back-btn" onclick = "backButton();">Back</button>')) +
                                                 getRow(getCell("", '<button type = "button" id = "norm-btn" onclick = "showNormalisationGraph();">View normalisation graph</button>'));
 }
@@ -328,6 +331,21 @@ function showNormalisationGraph(){
     var reductions = generateReductionTree(currentTerm);  
 
     changeText('normalisation-studio', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")));
+    
+    changeText('normalisation-studio', '<table>' +
+                                    '<tr>' +
+                                        '<td>' + getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")) + '</td>' +
+                                        '<td>' +
+                                            '<table>' + 
+                                                getRow(getCell("term-fact", 'Shortest path: ' + reductions.shortestPathToNormalForm())) +
+                                                getRow(getCell("term-fact", 'Longest path: ' + reductions.longestPathToNormalForm())) + 
+                                            '</table>' +
+                                        '</td>' +
+                                    '</tr>' +
+                                '</table>'
+    )
+
+    
     drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables);
 
     document.getElementById("reset-btn").disabled = false;

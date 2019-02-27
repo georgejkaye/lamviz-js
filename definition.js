@@ -11,6 +11,9 @@ const ABS = 1;
 /** Lambda application e.g. t1 t2 */
 const APP = 2;
 
+/** The number of reduction steps to perform before halting operations. */
+const cutoff = 100;
+
 var currentVariableIndex = 0;
 const variableNames = ['x', 'y', 'z', 'w', 'u', 'v']
 
@@ -959,6 +962,70 @@ class ReductionTree{
 
 
 
+
+    }
+
+    /**
+     * Get the length of a path to a normal form, whether it be the longest or shortest.
+     * @param {boolean} max - True for longest path, false for shortest path.
+     * @return {number} The length of the requested path (or the cutoff if it's too long/infinite).
+     */
+    pathToNormalForm(steps, max){
+        /* First execution of function */
+        if(steps === undefined){
+            steps = 0;
+        }
+
+        /* Cut off infinite execution */
+        if(steps >= cutoff){
+            return cutoff;
+        }
+
+        /* Already in normal form, path = 0 */
+        if(this.reductions.length === 0){
+            return 0;
+        }
+
+        steps++;
+        var lengths = [];
+
+        for(var i = 0; i < this.reductions.length; i++){
+            lengths[i] = this.reductions[i][0].pathToNormalForm(steps, max);
+        }
+
+        /* Find the appropriate path */
+        var x = 0;
+
+        if(max){
+            x = Math.max.apply(null, lengths);
+        } else {
+            x = Math.min.apply(null, lengths);
+        }
+        /* Add this step in the graph */
+        return 1 + x;
+    }
+
+    /**
+     * Get the shortest path to the normal form of this term (if one exists).
+     * @return {number} The shortest path to the normal form of this term, or the cutoff.
+     */
+    shortestPathToNormalForm(){
+        return this.pathToNormalForm(0, false);
+    }
+
+    /**
+     * Get the longest path to the normal form of this term (if one exists).
+     * @return {number} The longest path to the normal form of this term, or the cutoff.
+     */
+    longestPathToNormalForm(){
+        return this.pathToNormalForm(0, true);
+    }
+
+    /**
+     * Get the number of vertices in this normalisation graph (excluding duplicates).
+     * @param {Get the number of vertices in} x 
+     */
+    vertices(x){
 
     }
 

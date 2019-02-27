@@ -807,7 +807,7 @@ function drawMap(id, term, ctx, zoom, pan, labels){
     }   
 
     updateLabels(labels);
-    cyMap.fit(cyMap.filter(function(ele, i, eles){return true;}), 10);
+    cyMap.fit(cyMap.filter(function(ele, i, eles){return true;}), 5);
 
     return cyMap;
 
@@ -928,7 +928,7 @@ function drawNormalisationGraph(id, term, ctx){
                 selector: 'node',
                 style: {
                     'color': 'black',
-                    'width': '1700',
+                    'width': '1200',
                     'height': '1200',
                     'font-size': '100',
                     'label': "",
