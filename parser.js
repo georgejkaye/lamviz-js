@@ -83,8 +83,20 @@ function parseTerm(tokens, initial, env){
             /* otherwise */
             default:
 
-                if(getFunctionBody(tokens[i]) !== null){
-                    t2 = new LambdaFunction(tokens[i]);
+                var body = getFunctionBody(tokens[i]);
+
+                if(body !== null){
+                    switch(body.getType()){
+                        case APP:
+                            t2 = new LambdaApplication(body.t1, body.t2, tokens[i]);
+                            break;
+                        case ABS:
+                            t2 = new LambdaAbstraction(body.t, body.label, tokens[i]);
+                            break;
+                        case VAR:
+                            t2 = new LambdaVariable(body.index, body.label, tokens[i]);
+                            break;
+                    }
                 } else {
 
                     var index = env.find(tokens[i]);
@@ -94,7 +106,7 @@ function parseTerm(tokens, initial, env){
                         return "Parse error: Variable " + tokens[i] + " with no associated binding encountered";
                     }
 
-                    t2 = new LambdaVariable(index, label, pos);
+                    t2 = new LambdaVariable(index, label);
                 }
 
                 pos++;

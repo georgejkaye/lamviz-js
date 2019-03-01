@@ -76,13 +76,21 @@ class LambdaVariable{
      * @param {number} index - Which lambda abstraction this term refers to.
      * @param {string} label - The label this term is associated with.
      */
-    constructor(index, label){
-        this.index = index; 
+    constructor(index, label, name){
+
+        if(name === undefined){
+            name = "";
+        }
+
+        this.index = index;
+        this.name = name;
+
         if(label !== ""){
             this.label = label
         } else {
             this.label = index.toString();
         }
+
         this.print = this.prettyPrint();
     }
 
@@ -100,6 +108,11 @@ class LambdaVariable{
      * @return {string} The pretty string.
      */
     prettyPrint(x){
+
+        if(this.name !== ""){
+            return this.name;
+        }
+
         return this.index;
     }
 
@@ -111,6 +124,11 @@ class LambdaVariable{
      * @return {string} The pretty string.
      */
     prettyPrintLabels(x){
+
+        if(this.name !== ""){
+            return this.name;
+        }
+
         return this.label;
     }
 
@@ -230,7 +248,13 @@ class LambdaVariable{
             betas = 0;
         }
 
-        var string = '<span class = "var-' + vars + '">' + this.label + '</span>';
+        var label = this.label;
+
+        if(this.name !== ""){
+            label = this.name;
+        }
+
+        var string = '<span class = "var-' + vars + '">' + label + '</span>';
         vars++;
 
         return [string, vars, abs, apps, betas];
@@ -263,7 +287,17 @@ class LambdaAbstraction{
      * @param {Object}      t       - The scope of this lambda abstraction.
      * @param {string}      label   - The label this lambda abstraction has.
      */
-    constructor(t, label){this.t = t; this.label = label, this.closed = [], this.print = this.prettyPrint();}
+    constructor(t, label, name){
+        if(name === undefined){
+            name = "";
+        }
+
+        this.t = t; 
+        this.label = label; 
+        this.closed = []
+        this.name = name;
+        this.print = this.prettyPrint();
+    }
 
     /**
      * Get the type of this lambda term - an abstraction.
@@ -279,6 +313,10 @@ class LambdaAbstraction{
      * @return {string} The pretty string.
      */
     prettyPrint(x){
+
+        if(this.name !== ""){
+            return this.name;
+        }
 
         if(x === undefined){
             x = 0;
@@ -299,6 +337,10 @@ class LambdaAbstraction{
      * @return {string} The pretty string.
      */
     prettyPrintLabels(x){
+
+        if(this.name !== ""){
+            return this.name;
+        }
 
         if(x === undefined){
             x = 0;
@@ -448,21 +490,29 @@ class LambdaAbstraction{
         var string = '<span class = "abs-' + abs + '">';
         abs++;
 
-        if(x !== 0){
-            string += '(';
-        }
-      
-        var scope = this.t.printHTML(0, vars, abs, apps, betas);
-
-        string += '&lambda;' + this.label + '. ' + scope[0];
+        if(this.name !== ""){
+            string += this.name;
+        } else {
+            if(x !== 0){
+                string += '(';
+            }
         
-        if(x !== 0){
-            string += ')';
+            var scope = this.t.printHTML(0, vars, abs, apps, betas);
+
+            string += '&lambda;' + this.label + '. ' + scope[0];
+            vars = scope[1];
+            abs = scope[2];
+            apps = scope[3];
+            betas = scope[4];
+
+            if(x !== 0){
+                string += ')';
+            }
         }
 
         string += '</span>';
 
-        return [string, scope[1], scope[2], scope[3], scope[4]];
+        return [string, vars, abs, apps, betas];
 
     }
 
@@ -495,7 +545,13 @@ class LambdaApplication{
      * @param {Object} t1 - the first term in the lambda application (the function).
      * @param {Object} t2 - the second term in the lambda application (the argument).
      */
-    constructor(t1, t2){this.t1 = t1; this.t2 = t2, this.closed = [], this.print = this.prettyPrint();}
+    constructor(t1, t2, name){
+        if(name === undefined){
+            name = "";
+        }
+
+        this.t1 = t1; this.t2 = t2, this.closed = [], this.name = name, this.print = this.prettyPrint();
+    }
 
     /**
      * Get the type of this lambda term - an application.
@@ -511,6 +567,10 @@ class LambdaApplication{
      * @return {string} The pretty string.
      */
     prettyPrint(x){
+
+        if(this.name !== ""){
+            return this.name;
+        }
 
         if(x === undefined){
             x = 0;
@@ -535,6 +595,10 @@ class LambdaApplication{
      * @return {string} The pretty string.
      */
     prettyPrintLabels(x){
+
+        if(this.name !== ""){
+            return this.name;
+        }
 
         if(x === undefined){
             x = 0;
@@ -720,33 +784,38 @@ class LambdaApplication{
 
         string += '">';
 
-        var y;
-        var z;
-
-        if(x === 0){
-            if(this.t1.getType() === ABS){
-                y = 1;
-                z = 1;
-            } else {
-                y = 0;
-                z = 1;
-            }
+        if(this.name !== ""){
+            string += this.name;
         } else {
-            y = x;
-            z = x + 1;
-        }
 
-        var lhs = this.t1.printHTML(y, vars, abs, apps, betas);
-        var rhs = this.t2.printHTML(z, lhs[1], lhs[2], lhs[3], lhs[4]);
+            var y;
+            var z;
 
-        if(x !== 0){
-            string += "(";
-        }
+            if(x === 0){
+                if(this.t1.getType() === ABS){
+                    y = 1;
+                    z = 1;
+                } else {
+                    y = 0;
+                    z = 1;
+                }
+            } else {
+                y = x;
+                z = x + 1;
+            }
+
+            var lhs = this.t1.printHTML(y, vars, abs, apps, betas);
+            var rhs = this.t2.printHTML(z, lhs[1], lhs[2], lhs[3], lhs[4]);
+
+            if(x !== 0){
+                string += "(";
+            }
+                
+            string += lhs[0] + " " + rhs[0];
             
-        string += lhs[0] + " " + rhs[0];
-        
-        if(x !== 0){
-            string += ")";
+            if(x !== 0){
+                string += ")";
+            }
         }
 
         string += "</span>";
@@ -780,175 +849,6 @@ function getFunction(functionName){
             return functions[i][1];
         }
     }
-}
-
-/** Class representing a lambda variable (stored as a de Bruijn index). */
-class LambdaFunction{
-
-    /**
-     * Create a lambda variable.
-     * @param {string} name - The name of this function.
-     */
-    constructor(name){
-        this.name = name;
-        this.t = function(){getFunction(this.name).t};
-        this.t1 = function(){getFunction(this.name).t1};
-        this.t2 = function(){getFunction(this.name).t2};
-        this.index = function(){getFunction(this.name).index};
-        this.label = function(){getFunction(this.name).label};
-    }
-
-    /**
-     * Get the type of this lambda term - a variable.
-     * @return {number} The type of this lambda term.
-     */
-    getType(){
-        return getFunction(this.name).getType();
-    }
-
-    /**
-     * Get a pretty print of this term.
-     * @param {number} x - The layer this term is at - determines whether brackets are required.
-     * @return {string} The pretty string.
-     */
-    prettyPrint(x){
-        return this.name;
-    }
-
-    /**
-     * Get a pretty print of this term using the actual labels.
-     * @param {boolean} labels - Whether or not to use the predefined labels in the terms or generate new ones.
-     * @param {Object} env - The environment of this lambda term.
-     * @param {number} x - The layer this term is at - determines whether brackets are required.
-     * @return {string} The pretty string.
-     */
-    prettyPrintLabels(x){
-        return this.name;
-    }
-
-    /**
-     * Is this a closed term?
-     * @param {number} x - The size of the context.
-     * @return {boolean} Is the term closed?
-     */
-    isClosed(x){
-        return getFunction(this.name).isClosed(x);
-    }
-
-    /**
-     * How many crossings does this term have?
-     * @return {number} The number of crossings in this term.
-     */
-    crossings(){
-        return getFunction(this.name).crossings();
-    }
-
-    /**
-     * How many abstractions does this term have?
-     * @return {number} The number of abstractions in this term.
-     */
-    abstractions(){
-        return getFunction(this.name).abstractions();
-    }
-
-    /**
-     * How many applications does this term have?
-     * @return {number} The number of applications in this term.
-     */
-    applications(){
-        return getFunction(this.name).applications();
-    }
-
-    /**
-     * How many variables does this term have?
-     * @return {number} The number of variables in this term.
-     */
-    variables(){
-        return getFunction(this.name).variables;
-    }
-
-    /**
-     * How many free variables does this term have?
-     * @return {number} The number of free variables in this term.
-     */
-    freeVariables(){
-        return getFunction(this.name).freeVariables;
-    }
-
-    /**
-     * What are the indices of the free variables in this term in the order they are used?
-     * @return {number[]} The array of free variables used in this term.
-     */
-    freeVariableIndices(){
-        return getFunction(this.name).freeVariableIndices();
-    }
-
-    /**
-     * Is this term a beta redex?
-     * @return {boolean} Whether this term is a beta redex.
-     */
-    isBetaRedex(){
-        return getFunction(this.name).isBetaRedex();
-    }
-
-    /**
-     * Does this term contain a beta redex?
-     * @return {boolean} Whether this term contains a beta redex.
-     */
-    hasBetaRedex(){
-        return getFunction(this.name).hasBetaRedex();
-    }
-
-    /**
-     * Does this term contain a beta redex (not including itself)?
-     * @return {boolean} Whether this term contains a beta redex (not including itself).
-     */
-    hasBetaRedexInside(){
-        return getFunction(this.name).hasBetaRedexInside();
-    }
-
-    /**
-     * How many beta redexes does this term contain?
-     * @return {number} How many beta redexes this term contains.
-     */
-    betaRedexes(){
-        return getFunction(this.name).betaRedexes();
-    }
-
-    /**
-     * Print all of the redexes in this term.
-     * @return {String[]} The array of all redexes in this term.
-     */
-    printRedexes(){
-        return getFunction(this.name).printRedexes();
-    }
-
-    /**
-     * Get an HTML representation of this term.
-     * @param {number} x - The layer this term is at - determines whether brackets are required.
-     * @param {number} vars - The number of variables encountered so far.
-     * @param {number} abs - The number of abstractions encountered so far.
-     * @param {number} apps - The number of applications encountered so far.
-     * @param {number} betas - The number of beta redexes encountered so far.
-     * @return {string} The HTML string.
-     */
-    printHTML(x, vars, abs, apps, betas){
-
-        return [this.name, vars, abs, apps, betas];
-
-    }
-
-    /**
-     * Generate 'pretty' variable names (e.g. x,y,z...) for this term.
-     * @param {Object} ctx - The context for this lambda term.
-     * @param {boolean} x - Flag to indicate if this is a subcall.
-     */
-    generatePrettyVariableNames(ctx, x){
-
-        getFunction(this.name).generatePrettyVariableNames(ctx, x);
-
-    }
-
 }
 
 /** Class representing an environment of currently abstracted variables. */
