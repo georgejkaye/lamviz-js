@@ -795,13 +795,11 @@ function drawMap(id, term, ctx, zoom, pan, labels){
             var edgeFromAbstractionToTop = cyMap.elements('edge[target="' + redexList[i][0] + '"]');
             var abstractionNodeRight = edgeFromAbstractionToTop.source();
             var edgeFromAbstractionRight = cyMap.elements('edge[target="' + abstractionNodeRight.id() + '"]');
-            var abstractionNode = edgeFromAbstractionRight.source();
         
 
             cyMap.elements('edge[target="' + redexList[i][0] + '"]').addClass(redexList[i][1]);
             edgeFromAbstractionToTop.source().addClass(redexList[i][1]);
             cyMap.elements('edge[target="' + abstractionNodeRight.id() + '"]').addClass(redexList[i][1]);
-            edgeFromAbstractionRight.source().addClass(redexList[i][1]);
         }
 
     }   
