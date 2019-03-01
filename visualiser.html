@@ -84,17 +84,13 @@
 
     <p>Type a term t and an environment &Gamma; below!</p>
 
-    <b>Example:</b> (&lambda;x. &lambda;y. x y) a b
+    <p><b>Example:</b> (&lambda;x. &lambda;y. x y) a b
     <br>t = (\x. \y. x y) a b
-    <br>&Gamma; = a b
+    <br>&Gamma; = a b</b>
 
-    <br>
-    <br>
-
-    t = <input type = "text" id = "input"> &Gamma; = <input type = "text" id = "env"> 
+    <p>t = <input type = "text" id = "input"> &Gamma; = <input type = "text" id = "env"></p> 
     
-    <br> 
-    <br>
+    <p>Define a function <input type = "text" id = "function-name"> = <input type = "text" id = "function-body"> <button type = "button" id = "function-btn" onclick = "defineButton();">Define</button><button type = "button" id = "clear-all-btn" onclick = "removeFunctionsButton();">Clear all</button></p>
     
     <button type = "button" id = "execute-btn" onclick =   "executeButton();">Execute</button>
     <button type = "button" id = "eval-btn" onclick = "evaluateButton();">Evaluate</button>

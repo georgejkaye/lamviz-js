@@ -11,5 +11,6 @@
 * ~~Actually do proposal~~
 * ~~Graph labels are pretty dodgy, fix these~~
 * ~~Make Haskell functions for generating and enumerating terms of various types~~
-* Convert these Haskell functions into Javascript
-* Generate 'galleries' of terms from various fragments
+* ~~Convert these Haskell functions into Javascript~~
+* ~~Generate 'galleries' of terms from various fragments~~
+* Fix map drawing bug involving free variables with the same name as bound variables (e.g. (\x.x) x)

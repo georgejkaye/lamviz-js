@@ -4,6 +4,8 @@
  * @author George Kaye
  */
 
+var functions = [];
+
 /**
  * Function to execute when the 'execute' button is pressed.
  */
@@ -37,8 +39,8 @@ function executeButton(){
         } else {
             text = term;
             error = true;
+            changeText('result', text);
         }
-        changeText('result', "");
     } else {
         error = true;
         changeText('result', text);
@@ -211,4 +213,45 @@ function backButton(){
     changeText('church-room', "");
     changeText('normalisation-studio', "");
     reduced = false;
+}
+
+/**
+ * Function to execute when the define button is pressed.
+ */
+function defineButton(){
+
+    var functionName = getText("function-name");
+
+    var frees = getText('env').split(" ");
+    freeVariables = new LambdaEnvironment();
+
+    for(i = 0; i < frees.length; i++){
+        freeVariables.pushTerm(frees[i]);
+    }
+
+    var functionBody = parse(tokenise(getText("function-body")), freeVariables);
+
+    if(typeof(functionBody) !== "string"){
+        var functionDefinition = [functionName, functionBody];
+        var exists = false;
+
+        for(var i = 0; i < functions.length; i++){
+            if(functions[i][0] === functionName){
+                exists = true;
+                functions[i][1] = functionBody;
+            }
+        }
+
+        if(!exists){
+            smartPush(functions, functionDefinition);
+    
+        }
+    }
+
+    console.log(functions[0][0] + " = " + functions[0][1].prettyPrint());
+
+}
+
+function removeFunctionsButton(){
+    functions = [];
 }

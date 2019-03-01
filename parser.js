@@ -83,14 +83,20 @@ function parseTerm(tokens, initial, env){
             /* otherwise */
             default:
 
-                var index = env.find(tokens[i]);
-                var label = env.getCorrespondingVariable(index);
+                t2 = getFunctionBody(tokens[i]);
 
-                if(index === -1){
-                    return "Parse error: Variable " + tokens[i] + " with no associated binding encountered";
+                if(t2 === null){
+
+                    var index = env.find(tokens[i]);
+                    var label = env.getCorrespondingVariable(index);
+
+                    if(index === -1){
+                        return "Parse error: Variable " + tokens[i] + " with no associated binding encountered";
+                    }
+
+                    t2 = new LambdaVariable(index, label, pos);
                 }
 
-                t2 = new LambdaVariable(index, label, pos);
                 pos++;
                 break;
                 
@@ -321,5 +327,22 @@ function findClosingBracket(initial, text){
     }
 
     return -1;
+
+}
+
+/**
+ * Checks if a word corresponds to a function in the context, and returns it if so.
+ * @param {string} functionName - The function name to check.
+ * @return {Object} The corresponding function, or null if none exist.
+ */
+function getFunctionBody(functionName){
+    
+    for(var i = 0; i < functions.length; i++){
+        if(functions[i][0] === functionName){
+            return functions[i][1];
+        }
+    }
+
+    return null;
 
 }

@@ -636,7 +636,7 @@ function placeFreeVariables(boundVariables, freeVariables, ctx){
         var varID = lambda + free + ".";
 
         if(!nodes.includes(varID)){
-            cy.add(defineNode([], varID, absNodeFree, "", rightest + (ctx.find(free) + 1) * nodeDistanceX * 2, 0)[0]);
+            cyMap.add(defineNode([], varID, absNodeFree, "", rightest + (ctx.find(free) + 1) * nodeDistanceX * 2, 0)[0]);
         }
     }
 
