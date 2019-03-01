@@ -83,9 +83,9 @@ function parseTerm(tokens, initial, env){
             /* otherwise */
             default:
 
-                t2 = getFunctionBody(tokens[i]);
-
-                if(t2 === null){
+                if(getFunctionBody(tokens[i]) !== null){
+                    t2 = new LambdaFunction(tokens[i]);
+                } else {
 
                     var index = env.find(tokens[i]);
                     var label = env.getCorrespondingVariable(index);

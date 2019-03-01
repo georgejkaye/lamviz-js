@@ -774,6 +774,183 @@ class LambdaApplication{
 
 }
 
+function getFunction(functionName){
+    for(var i = 0; i < functions.length; i++){
+        if(functions[i][0] === functionName){
+            return functions[i][1];
+        }
+    }
+}
+
+/** Class representing a lambda variable (stored as a de Bruijn index). */
+class LambdaFunction{
+
+    /**
+     * Create a lambda variable.
+     * @param {string} name - The name of this function.
+     */
+    constructor(name){
+        this.name = name;
+        this.t = function(){getFunction(this.name).t};
+        this.t1 = function(){getFunction(this.name).t1};
+        this.t2 = function(){getFunction(this.name).t2};
+        this.index = function(){getFunction(this.name).index};
+        this.label = function(){getFunction(this.name).label};
+    }
+
+    /**
+     * Get the type of this lambda term - a variable.
+     * @return {number} The type of this lambda term.
+     */
+    getType(){
+        return getFunction(this.name).getType();
+    }
+
+    /**
+     * Get a pretty print of this term.
+     * @param {number} x - The layer this term is at - determines whether brackets are required.
+     * @return {string} The pretty string.
+     */
+    prettyPrint(x){
+        return this.name;
+    }
+
+    /**
+     * Get a pretty print of this term using the actual labels.
+     * @param {boolean} labels - Whether or not to use the predefined labels in the terms or generate new ones.
+     * @param {Object} env - The environment of this lambda term.
+     * @param {number} x - The layer this term is at - determines whether brackets are required.
+     * @return {string} The pretty string.
+     */
+    prettyPrintLabels(x){
+        return this.name;
+    }
+
+    /**
+     * Is this a closed term?
+     * @param {number} x - The size of the context.
+     * @return {boolean} Is the term closed?
+     */
+    isClosed(x){
+        return getFunction(this.name).isClosed(x);
+    }
+
+    /**
+     * How many crossings does this term have?
+     * @return {number} The number of crossings in this term.
+     */
+    crossings(){
+        return getFunction(this.name).crossings();
+    }
+
+    /**
+     * How many abstractions does this term have?
+     * @return {number} The number of abstractions in this term.
+     */
+    abstractions(){
+        return getFunction(this.name).abstractions();
+    }
+
+    /**
+     * How many applications does this term have?
+     * @return {number} The number of applications in this term.
+     */
+    applications(){
+        return getFunction(this.name).applications();
+    }
+
+    /**
+     * How many variables does this term have?
+     * @return {number} The number of variables in this term.
+     */
+    variables(){
+        return getFunction(this.name).variables;
+    }
+
+    /**
+     * How many free variables does this term have?
+     * @return {number} The number of free variables in this term.
+     */
+    freeVariables(){
+        return getFunction(this.name).freeVariables;
+    }
+
+    /**
+     * What are the indices of the free variables in this term in the order they are used?
+     * @return {number[]} The array of free variables used in this term.
+     */
+    freeVariableIndices(){
+        return getFunction(this.name).freeVariableIndices();
+    }
+
+    /**
+     * Is this term a beta redex?
+     * @return {boolean} Whether this term is a beta redex.
+     */
+    isBetaRedex(){
+        return getFunction(this.name).isBetaRedex();
+    }
+
+    /**
+     * Does this term contain a beta redex?
+     * @return {boolean} Whether this term contains a beta redex.
+     */
+    hasBetaRedex(){
+        return getFunction(this.name).hasBetaRedex();
+    }
+
+    /**
+     * Does this term contain a beta redex (not including itself)?
+     * @return {boolean} Whether this term contains a beta redex (not including itself).
+     */
+    hasBetaRedexInside(){
+        return getFunction(this.name).hasBetaRedexInside();
+    }
+
+    /**
+     * How many beta redexes does this term contain?
+     * @return {number} How many beta redexes this term contains.
+     */
+    betaRedexes(){
+        return getFunction(this.name).betaRedexes();
+    }
+
+    /**
+     * Print all of the redexes in this term.
+     * @return {String[]} The array of all redexes in this term.
+     */
+    printRedexes(){
+        return getFunction(this.name).printRedexes();
+    }
+
+    /**
+     * Get an HTML representation of this term.
+     * @param {number} x - The layer this term is at - determines whether brackets are required.
+     * @param {number} vars - The number of variables encountered so far.
+     * @param {number} abs - The number of abstractions encountered so far.
+     * @param {number} apps - The number of applications encountered so far.
+     * @param {number} betas - The number of beta redexes encountered so far.
+     * @return {string} The HTML string.
+     */
+    printHTML(x, vars, abs, apps, betas){
+
+        return [this.name, vars, abs, apps, betas];
+
+    }
+
+    /**
+     * Generate 'pretty' variable names (e.g. x,y,z...) for this term.
+     * @param {Object} ctx - The context for this lambda term.
+     * @param {boolean} x - Flag to indicate if this is a subcall.
+     */
+    generatePrettyVariableNames(ctx, x){
+
+        getFunction(this.name).generatePrettyVariableNames(ctx, x);
+
+    }
+
+}
+
 /** Class representing an environment of currently abstracted variables. */
 class LambdaEnvironment{
 
