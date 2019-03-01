@@ -313,6 +313,7 @@ function unhighlightRedex(i){
 function clickRedex(i, labels){
 
     var normalisedTerm = specificReduction(currentTerm, i)[0];
+    normalisedTerm.generatePrettyVariableNames(freeVariables);
 
     if(!reduced){
         reduced = true;

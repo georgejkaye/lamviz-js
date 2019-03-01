@@ -232,7 +232,10 @@ function defineButton(){
     var functionBody = parse(tokenise(getText("function-body")), freeVariables);
 
     if(typeof(functionBody) !== "string"){
-        var functionDefinition = [functionName, functionBody];
+
+        functionBody.generatePrettyVariableNames(freeVariables);
+
+        var functionDefinition = [functionName, functionBody, functionBody.prettyPrintLabels()];
         var exists = false;
 
         for(var i = 0; i < functions.length; i++){
@@ -261,7 +264,7 @@ function updateFunctionsList(){
     var string = "";
     
     for(var i = 0; i < functions.length; i++){
-        string += "<b>" + functions[i][0] + "</b> = " + functions[i][1].prettyPrintLabels() + "<br>";
+        string += "<b>" + functions[i][0] + "</b> = " + functions[i][2] + "<br>";
     }
 
     changeText("function-list", string);

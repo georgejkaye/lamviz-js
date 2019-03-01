@@ -1,0 +1,3 @@
+True	\x.\y. Pair x y
+False	\x.\y. Pair y x
+Not	\p. swap p
