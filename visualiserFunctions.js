@@ -248,10 +248,21 @@ function defineButton(){
         }
     }
 
-    console.log(functions[0][0] + " = " + functions[0][1].prettyPrint());
-
+    updateFunctionsList();
 }
 
 function removeFunctionsButton(){
     functions = [];
+    updateFunctionsList();
+}
+
+function updateFunctionsList(){
+    
+    var string = "";
+    
+    for(var i = 0; i < functions.length; i++){
+        string += "<b>" + functions[i][0] + "</b> = " + functions[i][1].prettyPrintLabels() + "<br>";
+    }
+
+    changeText("function-list", string);
 }
