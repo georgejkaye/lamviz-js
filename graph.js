@@ -109,6 +109,31 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
     /* If there is no element array, create one */
     if(array === undefined){
         array = [];
+
+        /** Add all of the free variables to the map first. */
+        for(var i = 0; i < ctx.length(); i++){
+            const freeVariableLabel = ctx.get(i);
+            const newFreeVariableID = checkID(lambda + freeVariableLabel, nodes);
+            const nodeLabel = lambda + freeVariableLabel + "."
+
+            array = defineNode(array, newFreeVariableID, absNodeFree, [], 0, 0, nodeLabel);
+
+            /* The abstracted variable goes NE */
+            const lambdaAbstractionSupportNodeID = checkID(newFreeVariableID + "._abstraction_node_right", nodes);
+            array = defineNode(array, lambdaAbstractionSupportNodeID, varNode, []);
+
+            const lambdaAbstractionSupportEdgeID = checkID(newFreeVariableID + "._node_from_abstraction_to_right", edges);
+            array = defineEdge(array, lambdaAbstractionSupportEdgeID, varEdge, [], newFreeVariableID, lambdaAbstractionSupportNodeID);
+
+            /* The abstracted variable travels to the top of the map */
+            const lambdaAbstractionSupportNode2ID = checkID(newFreeVariableID + "._abstraction_node_top", nodes);
+            array = defineNode(array, lambdaAbstractionSupportNode2ID, varNodeTop, []);
+
+            const lambdaAbstractionSupportEdge2ID = checkID(newFreeVariableID + "._edge_from_abstraction_to_top", edges);
+            array = defineEdge(array, lambdaAbstractionSupportEdge2ID, varEdge, [], lambdaAbstractionSupportNodeID, lambdaAbstractionSupportNode2ID);
+
+        }
+
     }
 
     var posX = 0;
@@ -272,19 +297,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
             array = defineEdge(array, lambdaVariableSupportEdgeID, varEdge, classes, lambdaVariableSupportNodeID, newNodeID);
 
             /* If a free variable node hasn't been drawn yet it needs to be */
-            var lambdaAbstractionNodeID = "";
-
-            if(!nodes.includes(lambda + variableID + "._abstraction_node_top")){
-                if(!nodes.includes(lambda + variableID + ".")){
-                    const freeVariableAbstractionID = checkID(lambda + variableID + ".", nodes);
-                    array = defineNode(array, freeVariableAbstractionID, absNodeFree, classes, posX, posY - nodeDistanceY, "", 0, "true");
-                    lambdaAbstractionNodeID = freeVariableAbstractionID;
-                } else {
-                    lambdaAbstractionNodeID = lambda + variableID + ".";
-                }
-            } else {
-                lambdaAbstractionNodeID = lambda + variableID + "._abstraction_node_top";
-            }
+            var lambdaAbstractionNodeID = lambda + variableID + "._abstraction_node_top";
 
             /* Create the edge connecting the node at the top to the corresponsing abstraction support node */
             const lambdaVariableAbstractionEdgeID = checkID(variableID + " in " + parent + "_curved_edge_from_abstraction_to_variable", edges);
@@ -549,24 +562,24 @@ function updateNodeLabels(type, label){
 }
 
 /**
- * Update the edge labels of a specific type
+ * Update the edge labels of a specific type.
  * @param type  - The type of edge to change the labels of.
- * @param label - The label to change the nodes to
+ * @param label - The label to change the nodes to.
  */
 function updateEdgeLabels(type, label){
     updateStyle(true, 'edge[type = \"' + type + '\"]', 'label', label);
 }
 
 /**
- * Update the labels on the map
- * @param {boolean} labels - Whether labels are shown
+ * Update the labels on the map.
+ * @param {boolean} labels - Whether labels are shown.
  */
 function updateLabels(labels){
 
     if(labels){
         
         updateNodeLabels(absNode, lambda);
-        updateNodeLabels(absNodeFree, lambda);
+        updateNodeLabels(absNodeFree, "*" + lambda);
         updateNodeLabels(appNode, '@');
         updateEdgeLabels(absEdge, 'data(label)');
         updateEdgeLabels(varEdgeLabel, function(ele){
@@ -611,6 +624,7 @@ function placeFreeVariables(boundVariables, freeVariables, ctx){
 
     var rightest = 0;
 
+    /** Find the furthest point right the map extends. */
     for(i = 0; i < boundVariables.length; i++){
         
         var newX = boundVariables[i].position('x');
@@ -618,28 +632,26 @@ function placeFreeVariables(boundVariables, freeVariables, ctx){
         if(newX > rightest){
             rightest = newX;
         }
-
     }
 
-    for(j = 0; j < freeVariables.length; j++){
+    /** Set the free variables to the right of the map in reverse order of abstraction. */
+    for(j = freeVariables.length - 1; j >= 0; j--){
 
         var id = freeVariables[j].data('id');
-        var k = ctx.find(id.substring(1).substring(0, id.length - 2));
 
-        freeVariables[j].position('x', rightest + (k + 1) * nodeDistanceX * 2);
+        /* Calculate how far right along the page the node should be placed. */
+        var x = rightest + (freeVariables.length - j) * nodeDistanceX * 2;
+
+        /* Place the free variable at the bottom of the map. */
+        freeVariables[j].position('x', x);
+        freeVariables[j].position('y', 0);
+
+        /** Move the attached nodes around relative to the newly placed node. */
+        cyMap.elements("[id = '" + id + "._abstraction_node_right']").position('x', x + nodeDistanceX);
+        cyMap.elements("[id = '" + id + "._abstraction_node_right']").position('y', -nodeDistanceY);
+        cyMap.elements("[id = '" + id + "._abstraction_node_top']").position('x', x + nodeDistanceX);
 
     }
-
-    for(l = 0; l < ctx.length(); l++){
-
-        var free = ctx.get(l);
-        var varID = lambda + free + ".";
-
-        if(!nodes.includes(varID)){
-            cyMap.add(defineNode([], varID, absNodeFree, "", rightest + (ctx.find(free) + 1) * nodeDistanceX * 2, 0)[0]);
-        }
-    }
-
 }
 
 /**
@@ -672,8 +684,10 @@ function drawMap(id, term, ctx, zoom, pan, labels){
 
     reset(true);
 
+    /** Generate the map elements from the term. */
     elems = generateMapElements(term, ctx);
 
+    /** Create the map object. */
     cyMap = cytoscape({
         container: document.getElementById(id),
 
@@ -699,13 +713,6 @@ function drawMap(id, term, ctx, zoom, pan, labels){
                     'height': '5',
                     'shape': 'roundrectangle',
                     'color': 'black'
-                }
-            },
-
-            {
-                selector: 'node[type =\"' + absNodeFree + '\"]',
-                style: {
-                    'background-color': 'red'
                 }
             },
 
@@ -768,7 +775,7 @@ function drawMap(id, term, ctx, zoom, pan, labels){
         userPanningEnabled: pan,
     });
 
-    style = cyMap.style();
+    /** Find the highest node so that all variable nodes at the top of page can be aligned */
     const nodes = cyMap.elements("node");
     var highest = 0;
 
@@ -781,10 +788,13 @@ function drawMap(id, term, ctx, zoom, pan, labels){
         }
     }
 
+    /** Rearrange the free variables so they sit prettily at the right of the map. */
     placeFreeVariables(cyMap.elements(getNodeTypeText(varNodeTop)), cyMap.elements(getNodeTypeText(absNodeFree)), ctx);
 
-    cyMap.elements(getNodeTypeText(varNodeTop) + ', ' + getNodeTypeText(absNodeFree)).position('y', highest - nodeDistanceY / 2);
+    /** Pull all the variable arcs to the top of the map so crossings are clear. */
+    cyMap.elements(getNodeTypeText(varNodeTop)).position('y', highest - nodeDistanceY / 2);
 
+    /** Add redex classes appropriately so all relevant elements can be highlighted. */
     for(var i = 0; i < redexList.length; i++){
 
         var abstractionNodeTop = cyMap.$id(redexList[i][0]);
@@ -794,8 +804,6 @@ function drawMap(id, term, ctx, zoom, pan, labels){
 
             var edgeFromAbstractionToTop = cyMap.elements('edge[target="' + redexList[i][0] + '"]');
             var abstractionNodeRight = edgeFromAbstractionToTop.source();
-            var edgeFromAbstractionRight = cyMap.elements('edge[target="' + abstractionNodeRight.id() + '"]');
-        
 
             cyMap.elements('edge[target="' + redexList[i][0] + '"]').addClass(redexList[i][1]);
             edgeFromAbstractionToTop.source().addClass(redexList[i][1]);
@@ -804,7 +812,10 @@ function drawMap(id, term, ctx, zoom, pan, labels){
 
     }   
 
+    /** Update the labels appropriately. */
     updateLabels(labels);
+
+    /** Fit the map to the frame. */
     cyMap.fit(cyMap.filter(function(ele, i, eles){return true;}), 5);
 
     return cyMap;
