@@ -490,20 +490,16 @@ class LambdaAbstraction{
         var string = '<span class = "abs-' + abs + '">';
         abs++;
 
+        var scope = this.t.printHTML(0, vars, abs, apps, betas);
+
         if(this.name !== ""){
             string += this.name;
         } else {
             if(x !== 0){
                 string += '(';
             }
-        
-            var scope = this.t.printHTML(0, vars, abs, apps, betas);
 
             string += '&lambda;' + this.label + '. ' + scope[0];
-            vars = scope[1];
-            abs = scope[2];
-            apps = scope[3];
-            betas = scope[4];
 
             if(x !== 0){
                 string += ')';
@@ -512,7 +508,7 @@ class LambdaAbstraction{
 
         string += '</span>';
 
-        return [string, vars, abs, apps, betas];
+        return [string, scope[1], scope[2], scope[3], scope[4]];
 
     }
 
@@ -784,28 +780,28 @@ class LambdaApplication{
 
         string += '">';
 
+        var y;
+        var z;
+
+        if(x === 0){
+            if(this.t1.getType() === ABS){
+                y = 1;
+                z = 1;
+            } else {
+                y = 0;
+                z = 1;
+            }
+        } else {
+            y = x;
+            z = x + 1;
+        }
+
+        var lhs = this.t1.printHTML(y, vars, abs, apps, betas);
+        var rhs = this.t2.printHTML(z, lhs[1], lhs[2], lhs[3], lhs[4]);
+
         if(this.name !== ""){
             string += this.name;
         } else {
-
-            var y;
-            var z;
-
-            if(x === 0){
-                if(this.t1.getType() === ABS){
-                    y = 1;
-                    z = 1;
-                } else {
-                    y = 0;
-                    z = 1;
-                }
-            } else {
-                y = x;
-                z = x + 1;
-            }
-
-            var lhs = this.t1.printHTML(y, vars, abs, apps, betas);
-            var rhs = this.t2.printHTML(z, lhs[1], lhs[2], lhs[3], lhs[4]);
 
             if(x !== 0){
                 string += "(";

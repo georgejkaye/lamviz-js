@@ -231,7 +231,7 @@ function defineButton(){
 
     var functionBody = parse(tokenise(getText("function-body")), freeVariables);
 
-    if(typeof(functionBody) !== "string"){
+    if(typeof functionBody !== "string"){
 
         functionBody.generatePrettyVariableNames(freeVariables);
 
@@ -247,8 +247,12 @@ function defineButton(){
 
         if(!exists){
             smartPush(functions, functionDefinition);
-    
         }
+
+        changeValue("function-name", "");
+        changeValue("function-body", "");
+    } else {
+        changeText("result", functionBody)
     }
 
     updateFunctionsList();
