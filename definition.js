@@ -109,10 +109,6 @@ class LambdaVariable{
      */
     prettyPrint(x){
 
-        if(this.name !== ""){
-            return this.name;
-        }
-
         return this.index;
     }
 
@@ -313,10 +309,6 @@ class LambdaAbstraction{
      * @return {string} The pretty string.
      */
     prettyPrint(x){
-
-        if(this.name !== ""){
-            return this.name;
-        }
 
         if(x === undefined){
             x = 0;
@@ -563,10 +555,6 @@ class LambdaApplication{
      * @return {string} The pretty string.
      */
     prettyPrint(x){
-
-        if(this.name !== ""){
-            return this.name;
-        }
 
         if(x === undefined){
             x = 0;

@@ -313,6 +313,10 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
         smartPush(redexEdgeIDs, newEdgeID);
     }
 
+    if(term.name != ""){
+        newEdgeId = term.name;
+    }
+
     /* Create an edge linking the newest node with its parent */
     array = defineEdge(array, newEdgeID, newEdgeType, classes, newNodeID, parent, newEdgeLabel);
 
@@ -924,7 +928,7 @@ function drawNormalisationGraph(id, term, ctx){
     reset(false);
     imgs = [];
 
-    var tree = generateReductionTree(term);
+    var tree = generateReductionTree(term, ctx);
     var elems = generateNormalisationGraphElements(id, tree, ctx);
 
     cyNorm = cytoscape({

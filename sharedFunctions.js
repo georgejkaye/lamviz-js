@@ -313,7 +313,7 @@ function unhighlightRedex(i){
 function clickRedex(i, labels){
 
     var normalisedTerm = specificReduction(currentTerm, i)[0];
-    normalisedTerm.generatePrettyVariableNames(freeVariables);
+    //normalisedTerm.generatePrettyVariableNames(freeVariables);
 
     if(!reduced){
         reduced = true;
@@ -329,7 +329,7 @@ function clickRedex(i, labels){
  */
 function showNormalisationGraph(){
 
-    var reductions = generateReductionTree(currentTerm);  
+    var reductions = generateReductionTree(currentTerm, freeVariables);  
 
     changeText('normalisation-studio', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")));
     
