@@ -640,7 +640,7 @@ function placeFreeVariables(boundVariables, freeVariables, ctx){
         var id = freeVariables[j].data('id');
 
         /* Calculate how far right along the page the node should be placed. */
-        var x = rightest + (freeVariables.length - j) * nodeDistanceX * 2;
+        var x = rightest + ((freeVariables.length - j) * nodeDistanceX * 2) - nodeDistanceX;
 
         /* Place the free variable at the bottom of the map. */
         freeVariables[j].position('x', x);
