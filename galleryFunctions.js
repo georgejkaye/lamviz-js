@@ -207,7 +207,7 @@ function generateButton(x, prev){
             var termName = "";
 
             if(document.getElementById('de-bruijn').checked){
-                termName = terms[i].prettyPrint(freeVariables);
+                termName = terms[i].prettyPrint();
             } else {
                 termName = printTermHTML(terms[i]);
             }

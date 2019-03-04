@@ -220,7 +220,7 @@ function printTermHTML(term){
  */
 function getStats(currentTerm, labels){
     return getRow(getCell("term-heading", '<b>' + printTermHTML(currentTerm) + '</b>')) +
-                                                getRow(getCell("term-subheading", '<b>' + currentTerm.prettyPrint(freeVariables) + '</b>')) +
+                                                getRow(getCell("term-subheading", '<b>' + currentTerm.prettyPrint() + '</b>')) +
                                                 getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
                                                 getRow(getCell("term-fact", 'Abstractions: ' + currentTerm.abstractions())) +
                                                 getRow(getCell("term-fact", 'Applications: ' + currentTerm.applications())) +
@@ -229,7 +229,7 @@ function getStats(currentTerm, labels){
                                                 getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
                                                 getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(freeVariables), "redex", "clickRedex(i, " + labels + ")", "highlightRedex(i, true)", "unhighlightRedex(i, true)"))) +
                                                 getRow(getCell("", '<button type = "button" disabled id = "reset-btn" onclick = "resetButton();">Reset</button><button type = "button" id = "back-btn" onclick = "backButton();">Back</button>')) +
-                                                getRow(getCell("", '<button type = "button" id = "norm-btn" onclick = "showNormalisationGraph();">View normalisation graph</button>'));
+                                                getRow(getCell("", '<button type = "button" id = "norm-btn" onclick = "showNormalisationGraph();">View normalisation graph</button> Draw maps (very costly) <input type = "checkbox" id = "normalisation-maps" checked>'));
 }
 
 /**
@@ -351,7 +351,7 @@ function showNormalisationGraph(){
     )
 
     
-    drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables);
+    drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables, document.getElementById('normalisation-maps').checked);
 
     document.getElementById("reset-btn").disabled = false;
 

@@ -324,12 +324,9 @@ function specificReduction(term, i){
 /**
  * Get all reductions accessible by one beta reduction step from a lambda term.
  * @param {Object} term - The lambda term to find the reductions in.
- * @param {Object} ctx - The environment for this term.
- * @param {boolean} labels - Whether to use the predefined labels or generate new ones.
- * @param {Object} env - The environment of this lambda term (used for labelling purposes).
  * @return {Object[]} All of the reductions accessible from one beta reduction (empty if none).
  */
-function getAllOneStepReductions(term, ctx){
+function getAllOneStepReductions(term){
 
     var reductions = [];
     var x = 0;
@@ -343,7 +340,7 @@ function getAllOneStepReductions(term, ctx){
         switch(term.getType()){
             case ABS:
 
-                var scopeReductions = getAllOneStepReductions(term.t, ctx);
+                var scopeReductions = getAllOneStepReductions(term.t);
 
                 for(var i = 0; i < scopeReductions.length; i++){
                     reductions[x] = [new LambdaAbstraction(scopeReductions[i][0], term.label), scopeReductions[i][1]];
@@ -351,14 +348,14 @@ function getAllOneStepReductions(term, ctx){
                 }
                 break;
             case APP:
-                var lhsReductions = getAllOneStepReductions(term.t1, ctx);
+                var lhsReductions = getAllOneStepReductions(term.t1);
 
                 for(var i = 0; i < lhsReductions.length; i++){
                     reductions[x] = [new LambdaApplication(lhsReductions[i][0], term.t2), lhsReductions[i][1]];
                     x++;
                 }
 
-                var rhsReductions = getAllOneStepReductions(term.t2, ctx);
+                var rhsReductions = getAllOneStepReductions(term.t2);
                 
                 for(var i = 0; i < rhsReductions.length; i++){
                     reductions[x] = [new LambdaApplication(term.t1, rhsReductions[i][0]), rhsReductions[i][1]];
@@ -374,7 +371,7 @@ function getAllOneStepReductions(term, ctx){
 }
 
 var reductionSteps = 0;
-const maxReductionSteps = 100;
+const maxReductionSteps = 1000;
 
 /**
  * Generate the reduction tree for a given lambda term.
@@ -385,7 +382,11 @@ const maxReductionSteps = 100;
  */
 function generateReductionTree(term, ctx, x){
 
-    if(x === undefined){
+    var graph = new ReductionGraph(term);
+    console.log(graph.printGraph());
+    return graph;
+
+    /*if(x === undefined){
         reductionSteps = 0;
     }
 
@@ -408,5 +409,5 @@ function generateReductionTree(term, ctx, x){
     }
 
     return new ReductionTree(term, subtrees);
-
+    */
 }

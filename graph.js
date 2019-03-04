@@ -848,48 +848,45 @@ function checkForIdenticalReduction(id, source, target){
 
 /**
  * Generate the elements of the normalisation graph.
- * @param {string} id - The id of where the graph will be drawn.
- * @param {Object} tree - The normalisation tree object.
- * @param {Object} ctx - The context of the lambda term.
- * @param {string} parent - The node ID of the parent.
- * @param {string} parentReduction - The reduction that led to this term.
- * @param {number} level - The current level of the graph.
+ * @param {string} id               - The id of where the graph will be drawn.
+ * @param {Object} tree             - The normalisation tree object.
+ * @param {Object} ctx              - The context of the lambda term.
+ * @param {boolean} maps            - Whether to draw the submaps.
+ * @param {string} parent           - The node ID of the parent.
+ * @param {string} parentReduction  - The reduction that led to this term.
+ * @param {number} level            - The current level of the graph.
  * @return {Object[]} The graph elements.
  */
-function generateNormalisationGraphElements(id, tree, ctx, parent, parentReduction, level){
+function generateNormalisationGraphElements(id, tree, ctx, maps, parent, parentReduction, level){
 
     var array = [];
     
     if(level === undefined){
-        originalTerm = cyMap;
         level = 0;
     }
 
     /* Nodes use de Bruijn notation to ensure only distinct ones are created (i.e. not alpha-equivalent) */
-    var nodeID = tree.term.prettyPrint(ctx);
+    var nodeID = tree.term.prettyPrint();
 
-    if(checkID(nodeID, nodes) === nodeID){
+    tree.term.generatePrettyVariableNames(ctx);
 
-        tree.term.generatePrettyVariableNames(ctx);
-
+    if(maps){
         var map = drawMap(id, tree.term, ctx);
-        smartPush(imgs, [tree.term.prettyPrint(ctx), map.png()]);
+        smartPush(imgs, [tree.term.prettyPrint(), map.png()]);
+    }
 
-        /* Define the node */
-        array = defineNode(array, nodeID, "norm", "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(ctx), level, "");  
+    /* Define the node */
+    array = defineNode(array, nodeID, "norm", "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(ctx), level, "");  
 
-        /* Generate the elements for the various branches from this node */
-        for(var i = 0; i < tree.reductions.length; i++){
-            array = array.concat(generateNormalisationGraphElements(id, tree.reductions[i][0], ctx, nodeID, tree.reductions[i][1].prettyPrint(ctx), level + 1));
-        }
+    /* Generate the elements for the various branches from this node */
+    for(var i = 0; i < tree.reductions.length; i++){
+        array = array.concat(generateNormalisationGraphElements(id, tree.reductions[i][0], ctx, maps, nodeID, tree.reductions[i][1].prettyPrint(), level + 1));
     }
 
     /* Only define edges that represent distinct reductions (i.e. not alpha-equivalent) */
     if(parent !== undefined && !checkForIdenticalReduction(parentReduction, parent, nodeID)){
         array = defineEdge(array, parent + '->' + parentReduction + '->' + tree.term.prettyPrintLabels(ctx), "norm", "", parent, nodeID, parentReduction);
     }
-
-    cyMap = originalTerm;
 
     return array;
 
@@ -922,14 +919,21 @@ function highlightClass(className, colour){
  * @param {string} id - The id of the graph box.
  * @param {Object} term - The term to draw the normalisation graph of.
  * @param {Object[]} ctx - The free variables in the term.
+ * @param {boolean} map - Whether to draw the submaps.
  */
-function drawNormalisationGraph(id, term, ctx){
+function drawNormalisationGraph(id, term, ctx, maps){
 
     reset(false);
     imgs = [];
 
     var tree = generateReductionTree(term, ctx);
-    var elems = generateNormalisationGraphElements(id, tree, ctx);
+    var elems = generateNormalisationGraphElements(id, tree, ctx, maps);
+
+    var size = 1200;
+
+    if(!maps){
+        size = 1;
+    }
 
     cyNorm = cytoscape({
         container: document.getElementById(id),
@@ -941,14 +945,14 @@ function drawNormalisationGraph(id, term, ctx){
                 selector: 'node',
                 style: {
                     'color': 'black',
-                    'width': '1200',
-                    'height': '1200',
+                    'width': size,
+                    'height': size,
                     'font-size': '100',
                     'label': "",
                     'shape': 'rectangle',
                     'background-color': 'white',
                     'border-width': '5',
-                    'label': 'data(label)',
+                    'label': '',//'data(label)',
                     'text-valign': 'bottom',
                     'font-size': '200'
                 }
@@ -976,8 +980,10 @@ function drawNormalisationGraph(id, term, ctx){
     })
 
     
-    for(var i = 0; i < imgs.length; i++){
-        updateStyle(false, "[id='" + imgs[i][0] + "']", 'background-image', imgs[i][1]);
+    if(maps){
+        for(var i = 0; i < imgs.length; i++){
+            updateStyle(false, "[id='" + imgs[i][0] + "']", 'background-image', imgs[i][1]);
+        }
     }
 
     var x = normalisationDistanceX;

@@ -1104,6 +1104,9 @@ class ReductionTree{
      * @return {number} The shortest path to the normal form of this term, or the cutoff.
      */
     shortestPathToNormalForm(){
+
+        console.log(this.printTree());
+
         return this.pathToNormalForm(0, MIN);
     }
 
@@ -1203,10 +1206,96 @@ class ReductionTree{
         string += this.term.prettyPrint();
 
         for(var i = 0; i < this.reductions.length; i++){
-            string += '<br>' + this.reductions[i][0].printTree(x+1);
+            string += '\n' + this.reductions[i][0].printTree(x+1);
         }
 
         return string;
+
+    }
+
+}
+
+/**
+ * Check if a node is not in the frontier or the seen.
+ * @param {Object} term - The term to check for in the frontier or the seen.
+ * @param {Object[]} frontier - The frontier to check in.
+ * @param {Object[]} seen - The seen to check in.
+ * @return {boolean} If the term is not in the frontier or the seen.
+ */
+function nextNodeNotInFrontierOrSeen(term, frontier, seen){
+
+    for(var k = 0; k < frontier.length; k++){
+        if(frontier[k].prettyPrint() === term.prettyPrint()){
+            return false;
+        }
+    }
+
+    for(var k = 0; k < seen.length; k++){
+        if(seen[k].prettyPrint() === term.prettyPrint()){
+            return false;
+        }
+    }
+
+    return true;
+}
+
+class ReductionGraph{
+
+    /**
+     * Create a new reduction graph.
+     * @param {Object} term - The lambda term to create the reduction graph for.
+     */
+    constructor(term){
+        this.terms = [term];
+        this.matrix = [];
+
+        var seen = [];
+        var frontier = [term];
+        var i = 0;
+
+        while(frontier.length !== 0){
+
+            var workingTerm = frontier.shift();
+
+            smartPush(this.matrix, [workingTerm, []]);
+            smartPush(seen, workingTerm);   
+
+            var reductions = getAllOneStepReductions(workingTerm);
+
+            for(var j = 0; j < reductions.length; j++){
+
+                smartPush(this.matrix[i][1], reductions[j]);
+
+                if(nextNodeNotInFrontierOrSeen(term, frontier, seen)){
+                    smartPush(frontier, reductions[j][0]);
+                }
+            }
+
+            i++;
+        }
+
+    }
+
+    /**
+     * Print a textual representation of the graph, showing the adjacency matrix.
+     * @return {string} A textual representation of the graph.
+     */
+    printGraph(){
+
+        var string = "";
+
+        for(var i = 0; i < this.matrix.length; i++){
+            string += this.matrix[i][0].prettyPrint();
+            
+            for(var j = 0; j < this.matrix[i][1].length; j++){
+                string += "\n----" + this.matrix[i][1][j][0].prettyPrint() + " via " + this.matrix[i][1][j][1].prettyPrint();
+            }
+
+            string += "\n";
+        }
+
+        return string;
+
 
     }
 

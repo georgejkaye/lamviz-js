@@ -1,0 +1,32 @@
+Pair
+\x.\y.\v. v x y
+
+fst
+\p. p (\x.\y. x)
+
+snd
+\p. p (\x.\y. y)
+
+swap
+\x.\y. x (\z.\w. y w z)
+
+True
+\x.\y. Pair x y
+
+False
+\x.\y. Pair y x
+
+Not
+\p.\x.\y. p y x
+
+I
+\x. x
+
+id
+\B. B I I I
+
+Or
+\P.\Q. P True Q (\u.\v. (id v) u)
+
+And
+\P.\Q. P Q False (\u.\v. (id v) u) 

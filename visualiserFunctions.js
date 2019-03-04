@@ -35,7 +35,8 @@ function executeButton(){
 
         if(typeof term !== "string"){
             currentTerm = term;
-            text = term.prettyPrint(freeVariables) + " ~  ~  ~ " + term.prettyPrintLabels(freeVariables);
+            text = term.prettyPrint() + " ~  ~  ~ " + term.prettyPrintLabels(freeVariables);
+            changeText('result', "");
         } else {
             text = term;
             error = true;
@@ -79,7 +80,7 @@ function substituteButton(){
         changeText('result', s)
     } else {
         var newterm = substitute(parse(s, new LambdaEnvironment()), j, currentTerm);
-        changeText('result', newterm.prettyPrint(freeVariables));
+        changeText('result', newterm.prettyPrint());
     }
 }
 
@@ -94,7 +95,7 @@ function evaluateButton(){
         changeText('result', "Timed out during evaluation");
     } else {
 
-        var text = res.prettyPrint(freeVariables) + " ~ ~ ~ " + res.prettyPrintLabels(freeVariables);
+        var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels(freeVariables);
 
         changeText('result', text);
     }
@@ -119,7 +120,7 @@ function normaliseButton(){
         }
 
         currentTerm = res;
-        var text = res.prettyPrint(freeVariables) + " ~ ~ ~ " + res.prettyPrintLabels(freeVariables);
+        var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels(freeVariables);
 
         changeText('result', text);
         drawMap("cy", currentTerm, ctx, true, true, document.getElementById('labels-yes').checked);
@@ -143,7 +144,7 @@ function betaButton(){
 
     var res = applicationAbstraction(t1, t2)
 
-    var text = res.prettyPrint(freeVariables) + " ~ ~ ~ " + res.prettyPrintLabels(freeVariables);
+    var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels(freeVariables);
 
     changeText('result', text)
 
@@ -176,7 +177,7 @@ function generateButton(x){
         }
 
         for(i = 0; i < terms.length; i++){
-            string += terms[i].prettyPrint(freeVariables) + "<br />";
+            string += terms[i].prettyPrint() + "<br />";
         }
     }
 
@@ -191,7 +192,7 @@ function generateButton(x){
 function normaliseTreeButton(){
 
     changeText('normalisation-tree', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")));
-    drawNormalisationGraph('normalisation-graph', currentTerm, freeVariables);
+    drawNormalisationGraph('normalisation-graph', currentTerm, freeVariables, document.getElementById('normalisation-maps').checked);
 
 }
 
@@ -225,42 +226,50 @@ function backButton(){
 function defineButton(){
 
     var functionName = getText("function-name");
-
-    var frees = getText('env').split(" ");
-    freeVariables = new LambdaEnvironment();
-
-    for(i = 0; i < frees.length; i++){
-        freeVariables.pushTerm(frees[i]);
-    }
-
-    var functionBody = parse(tokenise(getText("function-body")), freeVariables);
-
-    if(typeof functionBody !== "string"){
-
-        functionBody.generatePrettyVariableNames(freeVariables);
-
-        var functionDefinition = [functionName, functionBody, functionBody.prettyPrintLabels(freeVariables)];
-        var exists = false;
-
-        for(var i = 0; i < functions.length; i++){
-            if(functions[i][0] === functionName){
-                exists = true;
-                functions[i][1] = functionBody;
-            }
-        }
-
-        if(!exists){
-            smartPush(functions, functionDefinition);
-        }
-
-        changeValue("function-name", "");
-        changeValue("function-body", "");
-        changeText("result", "");
+    
+    if(functionName.split(" ").length > 1){
+        changeText('result', "Alias names must not contain spaces")
     } else {
-        changeText("result", functionBody)
-    }
 
-    updateFunctionsList();
+        var frees = getText('env').split(" ");
+        freeVariables = new LambdaEnvironment();
+
+        for(i = 0; i < frees.length; i++){
+            freeVariables.pushTerm(frees[i]);
+        }
+
+        var body = getText("function-body");
+
+        var functionBody = parse(tokenise(getText("function-body")), freeVariables);
+
+        if(typeof functionBody !== "string"){
+
+            functionBody.generatePrettyVariableNames(freeVariables);
+
+            var functionDefinition = [functionName, functionBody, functionBody.prettyPrintLabels(freeVariables)];
+            var exists = false;
+
+            for(var i = 0; i < functions.length; i++){
+                if(functions[i][0] === functionName){
+                    exists = true;
+                    functions[i][1] = functionDefinition[1];
+                    functions[i][2] = functionDefinition[2];
+                }
+            }
+
+            if(!exists){
+                smartPush(functions, functionDefinition);
+            }
+
+            changeValue("function-name", "");
+            changeValue("function-body", "");
+            changeText("result", "");
+        } else {
+            changeText("result", functionBody);
+        }
+
+        updateFunctionsList();
+    }
 }
 
 function removeFunctionsButton(){
