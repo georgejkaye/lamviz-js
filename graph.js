@@ -849,7 +849,7 @@ function checkForIdenticalReduction(id, source, target){
 /**
  * Generate the elements of the normalisation graph.
  * @param {string} id               - The id of where the graph will be drawn.
- * @param {Object} tree             - The normalisation tree object.
+ * @param {Object} graph            - The normalisation graph object.
  * @param {Object} ctx              - The context of the lambda term.
  * @param {boolean} maps            - Whether to draw the submaps.
  * @param {string} parent           - The node ID of the parent.
@@ -857,7 +857,7 @@ function checkForIdenticalReduction(id, source, target){
  * @param {number} level            - The current level of the graph.
  * @return {Object[]} The graph elements.
  */
-function generateNormalisationGraphElements(id, tree, ctx, maps, parent, parentReduction, level){
+function generateNormalisationGraphElements(id, graph, ctx, maps, parent, parentReduction, level){
 
     var array = [];
     
@@ -865,31 +865,32 @@ function generateNormalisationGraphElements(id, tree, ctx, maps, parent, parentR
         level = 0;
     }
 
-    /* Nodes use de Bruijn notation to ensure only distinct ones are created (i.e. not alpha-equivalent) */
-    var nodeID = tree.term.prettyPrint();
+    /* Iterate over all of the nodes in the adjacency matrix. */
+    for(var i = 0; i < graph.matrix.length; i++){
 
-    tree.term.generatePrettyVariableNames(ctx);
+        var term = graph.matrix[i][0];
+        var nodeID = term.prettyPrint();
 
-    if(maps){
-        var map = drawMap(id, tree.term, ctx);
-        smartPush(imgs, [tree.term.prettyPrint(), map.png()]);
-    }
+        term.generatePrettyVariableNames(ctx);
 
-    /* Define the node */
-    array = defineNode(array, nodeID, "norm", "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(ctx), level, "");  
+        /* If maps are enabled, draw the map for this term. */
+        if(maps){
+            var map = drawMap(id, term, ctx);
+            smartPush(imgs, [nodeID, map.png()]);
+        }
 
-    /* Generate the elements for the various branches from this node */
-    for(var i = 0; i < tree.reductions.length; i++){
-        array = array.concat(generateNormalisationGraphElements(id, tree.reductions[i][0], ctx, maps, nodeID, tree.reductions[i][1].prettyPrint(), level + 1));
-    }
+        /* Define the node first. */
+        array = defineNode(array, nodeID, "norm", "", 0, level * normalisationDistanceY, term.prettyPrintLabels(ctx), level, "");  
 
-    /* Only define edges that represent distinct reductions (i.e. not alpha-equivalent) */
-    if(parent !== undefined && !checkForIdenticalReduction(parentReduction, parent, nodeID)){
-        array = defineEdge(array, parent + '->' + parentReduction + '->' + tree.term.prettyPrintLabels(ctx), "norm", "", parent, nodeID, parentReduction);
+        var reductions = graph.matrix[i][1];
+
+        /* Iterate over each reduction edge. */
+        for(var j = 0; j < reductions.length; j++){
+            array = defineEdge(array, nodeID + '-b->' + reductions[j][1].prettyPrint() + '-b->' + reductions[j][0].prettyPrint(), "norm", "", nodeID, reductions[j][0].prettyPrint(), reductions[j][1].prettyPrintLabels(ctx));
+        }
     }
 
     return array;
-
 }
 
 /**
@@ -926,7 +927,7 @@ function drawNormalisationGraph(id, term, ctx, maps){
     reset(false);
     imgs = [];
 
-    var tree = generateReductionTree(term, ctx);
+    var tree = generateReductionTree(term);
     var elems = generateNormalisationGraphElements(id, tree, ctx, maps);
 
     var size = 1200;

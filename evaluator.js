@@ -376,38 +376,12 @@ const maxReductionSteps = 1000;
 /**
  * Generate the reduction tree for a given lambda term.
  * @param {Object} term - The term to generate the reduction tree for.
- * @param {Object} ctx = The context of this term.
- * @param {boolean} x - Whether this is a subcall.
  * @return {Object} The reduction tree for this term.
  */
-function generateReductionTree(term, ctx, x){
+function generateReductionTree(term){
 
     var graph = new ReductionGraph(term);
     console.log(graph.printGraph());
     return graph;
 
-    /*if(x === undefined){
-        reductionSteps = 0;
-    }
-
-    if(reductionSteps === maxReductionSteps){
-        return new ReductionTree(term, []);
-    } 
-    
-    reductionSteps++;
-
-    var subtrees = [];
-
-    if(term.hasBetaRedex()){
-
-        var reductions = getAllOneStepReductions(term, ctx);
-
-        for(var i = 0; i < reductions.length; i++){
-            subtrees[i] = [generateReductionTree(reductions[i][0], ctx, true), reductions[i][1]];
-        }
-
-    }
-
-    return new ReductionTree(term, subtrees);
-    */
 }

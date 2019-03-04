@@ -993,229 +993,6 @@ class LambdaEnvironment{
 }
 
 /**
- * A reduction tree for a lambda term, showing all the different ways it can be reduced.
- */
-class ReductionTree{
-
-    /**
-     * Create a new reduction tree.
-     * @param {Object} - The lamdba term at the root of the tree.
-     * @param {Object} - All of the reduction subtrees.
-     */
-    constructor(term, reductions){
-        this.term = term;
-        this.reductions = reductions;
-    }
-
-    /**
-     * Get the total number of nodes in this tree.
-     * @return {number} The total number of nodes in this tree.
-     */
-    size(){
-        var size = 1;
-
-        for(var i = 0; i < this.reductions.length; i++){
-            size += this.reductions[i].size();
-        }
-
-        return size;
-    }
-
-    /**
-     * Get the height of this tree.
-     * @return {number} The height of this tree.
-     */
-    height(){
-        
-        var maxSubtreeHeight = 0;
-
-        for(var i = 0; i < this.reductions.length; i++){
-
-            var subtreeHeight = this.reductions[i][0].height() + 1;
-
-            if(subtreeHeight > maxSubtreeHeight){
-                maxSubtreeHeight = subtreeHeight;
-            }
-        }
-
-        return maxSubtreeHeight;
-
-    }
-
-    /**
-     * Remove duplicate nodes from this tree.
-     */
-    compressTree(){
-
-
-
-
-    }
-
-    /**
-     * Get the length of a path to a normal form, whether it be the longest or shortest.
-     * @param {number} mode - What type of path to count (longest, shortest, average)
-     * @return {number} The length of the requested path (or the cutoff if it's too long/infinite).
-     */
-    pathToNormalForm(steps, mode){
-        /* First execution of function */
-        if(steps === undefined){
-            steps = 0;
-        }
-
-        /* Cut off infinite execution */
-        if(steps >= cutoff){
-            return cutoff;
-        }
-
-        /* Already in normal form, path = 0 */
-        if(this.reductions.length === 0){
-            return 0;
-        }
-
-        steps++;
-        var lengths = [];
-
-        for(var i = 0; i < this.reductions.length; i++){
-            lengths[i] = this.reductions[i][0].pathToNormalForm(steps, mode);
-        }
-
-        /* Find the appropriate path */
-        var x = 0;
-
-        switch(mode){
-            case MIN:
-                x = Math.min.apply(null, lengths);
-                break;
-            case MAX:
-                x = Math.max.apply(null, lengths);
-                break;
-            case AVERAGE:
-                x = lengths.reduce((a,b) => a + b, 0) / lengths.length;
-                break;
-        }
-
-        /* Add this step in the graph */
-        return 1 + x;
-    }
-
-    /**
-     * Get the shortest path to the normal form of this term (if one exists).
-     * @return {number} The shortest path to the normal form of this term, or the cutoff.
-     */
-    shortestPathToNormalForm(){
-
-        console.log(this.printTree());
-
-        return this.pathToNormalForm(0, MIN);
-    }
-
-    /**
-     * Get the longest path to the normal form of this term (if one exists).
-     * @return {number} The longest path to the normal form of this term, or the cutoff.
-     */
-    longestPathToNormalForm(){
-        return this.pathToNormalForm(0, MAX);
-    }
-
-    /**
-     * Get the average path to the normal form of this term (if one exists).
-     * @return {number} The average path to the normal form of this term, or the cutoff.
-     */
-    averagePathToNormalForm(){
-        return this.pathToNormalForm(0, AVERAGE);
-    }
-
-    /**
-     * Get a list of unique states in this graph.
-     * @param {string[]} seen - All the states seen so far.
-     * @return {string[]} The unique states in this graph.
-     */
-    allStates(seen){
-
-        if(seen === undefined){
-            seen = [];
-        }
-
-        if(seen.includes(this.term.prettyPrint())){
-            return seen;
-        }
-
-        smartPush(seen, this.term.prettyPrint());
-
-        for(var i = 0; i < this.reductions.length; i++){
-            seen = this.reductions[i][0].allStates(seen);
-        }
-
-        return seen;
-    }
-
-    /**
-     * Get a list of all unique reductions in this graph.
-     * @param {string[]} seen - All the reduction states seen so far.
-     * @return {string[]} The unique reductions in this graph.
-     */
-    allReductions(seen){
-
-        if(seen === undefined){
-            seen = [];
-        }
-
-        for(var i = 0; i < seen.length; i++){
-            if(this.term.prettyPrint() === seen[i][0]){
-                return seen;
-            }
-        }
-
-        for(var i = 0; i < this.reductions.length; i++){
-            smartPush(seen, [this.term.prettyPrint(), this.reductions[i][1].prettyPrint(), this.reductions[i][0].term.prettyPrint()]);
-            seen = this.reductions[i][0].allReductions(seen);
-        }
-
-        return seen;
-    }
-
-    /**
-     * Get the number of vertices in this normalisation graph (excluding duplicates).
-     * @return {number} - The number of vertices in the graph. 
-     */
-    vertices(){
-        return this.allStates().length;
-    }
-
-    edges(){
-        return this.allReductions().length;
-    }
-
-    /**
-     * Get a 'pretty' depiction of the tree, with different layers at different indentations
-     * @param {number} x - The current layer of the tree.
-     */
-    printTree(x){
-
-        if(x === undefined){
-            x = 0;
-        }
-
-        var string = "";
-
-        for(var i = 0; i < x; i++){
-            string += "----";
-        }
-
-        string += this.term.prettyPrint();
-
-        for(var i = 0; i < this.reductions.length; i++){
-            string += '\n' + this.reductions[i][0].printTree(x+1);
-        }
-
-        return string;
-
-    }
-
-}
-
-/**
  * Check if a node is not in the frontier or the seen.
  * @param {Object} term - The term to check for in the frontier or the seen.
  * @param {Object[]} frontier - The frontier to check in.
@@ -1239,6 +1016,9 @@ function nextNodeNotInFrontierOrSeen(term, frontier, seen){
     return true;
 }
 
+/**
+ * A reduction graph showing all the reductions that lead to a normal form (if one exists!).
+ */
 class ReductionGraph{
 
     /**
@@ -1266,7 +1046,7 @@ class ReductionGraph{
 
                 smartPush(this.matrix[i][1], reductions[j]);
 
-                if(nextNodeNotInFrontierOrSeen(term, frontier, seen)){
+                if(nextNodeNotInFrontierOrSeen(reductions[j][0], frontier, seen)){
                     smartPush(frontier, reductions[j][0]);
                 }
             }
@@ -1297,6 +1077,26 @@ class ReductionGraph{
         return string;
 
 
+    }
+    
+    shortestPathToNormalForm(){
+        return 0;
+    }
+
+    longestPathToNormalForm(){
+        return 0;
+    }
+
+    averagePathToNormalForm(){
+        return 0;
+    }
+
+    vertices(){
+        return 0;
+    }
+
+    edges(){
+        return 0;
     }
 
 }

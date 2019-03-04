@@ -330,7 +330,7 @@ function clickRedex(i, labels){
  */
 function showNormalisationGraph(){
 
-    var reductions = generateReductionTree(currentTerm, freeVariables);  
+    var reductions = new ReductionGraph(currentTerm);
 
     changeText('normalisation-studio', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")));
     
