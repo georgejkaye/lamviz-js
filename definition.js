@@ -1079,6 +1079,10 @@ class ReductionGraph{
 
     }
     
+    pathToNormalForm(){
+
+    }
+
     shortestPathToNormalForm(){
         return 0;
     }
@@ -1091,12 +1095,27 @@ class ReductionGraph{
         return 0;
     }
 
+    /**
+     * Get the number of vertices in this graph (i.e. unique reductions).
+     * @return {number} The number of vertices in this graph.
+     */
     vertices(){
-        return 0;
+        return this.matrix.length;
     }
 
+    /**
+     * Get the number of edges in this graph (i.e. unique redexes).
+     * @return {number} The number of edges in this graph.
+     */
     edges(){
-        return 0;
+
+        var edges = 0;
+
+        for(var i = 0; i < this.matrix.length; i++){
+            edges += this.matrix[i][1].length;
+        }
+
+        return edges;
     }
 
 }
