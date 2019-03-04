@@ -186,12 +186,13 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
             newNodeID = checkID(lambda + abstractionLabel, nodes);
             
             var nodeLabel = lambda + abstractionLabel + "."
+            ctx.pushTerm(newNodeID.substring(1), abstractionLabel);
 
             array = defineNode(array, newNodeID, absNode, classes, posX, posY, nodeLabel);
     
-            newEdgeID = checkID(newNodeID + " " + term.t.prettyPrintLabels(), edges);
+            newEdgeID = checkID(newNodeID + " " + term.t.prettyPrintLabels(ctx), edges);
             newEdgeType = absEdge;
-            newEdgeLabel = nodeLabel + " " + term.t.prettyPrintLabels();
+            newEdgeLabel = nodeLabel + " " + term.t.prettyPrintLabels(ctx);
 
             /* The abstracted variable goes NE */
             const lambdaAbstractionSupportNodeID = checkID(newNodeID + "._abstraction_node_right", nodes);
@@ -208,7 +209,6 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
             array = defineEdge(array, lambdaAbstractionSupportEdge2ID, varEdge, classes, lambdaAbstractionSupportNodeID, lambdaAbstractionSupportNode2ID);
 
             /* Generate the elements for the scope of the abstraction */
-            ctx.pushTerm(newNodeID.substring(1), abstractionLabel);
             var scopeArray = generateMapElements(term.t, ctx, [], newNodeID, posX, posY, LHS, redexes);
             ctx.popTerm();
             
@@ -236,7 +236,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
                 isRedex = true;
             }
 
-            newNodeID = checkID("[" + term.t1.prettyPrintLabels() + " @ " + term.t2.prettyPrintLabels() + "]", nodes);
+            newNodeID = checkID("[" + term.t1.prettyPrintLabels(ctx) + " @ " + term.t2.prettyPrintLabels(ctx) + "]", nodes);
             array = defineNode(array, newNodeID, appNode, classes, posX, posY);
 
             newEdgeID = checkID("(" + newNodeID + ")", edges);
@@ -866,27 +866,27 @@ function generateNormalisationGraphElements(id, tree, ctx, parent, parentReducti
     }
 
     /* Nodes use de Bruijn notation to ensure only distinct ones are created (i.e. not alpha-equivalent) */
-    var nodeID = tree.term.prettyPrint();
+    var nodeID = tree.term.prettyPrint(ctx);
 
     if(checkID(nodeID, nodes) === nodeID){
 
         tree.term.generatePrettyVariableNames(ctx);
 
         var map = drawMap(id, tree.term, ctx);
-        smartPush(imgs, [tree.term.prettyPrint(), map.png()]);
+        smartPush(imgs, [tree.term.prettyPrint(ctx), map.png()]);
 
         /* Define the node */
-        array = defineNode(array, nodeID, "norm", "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(), level, "");  
+        array = defineNode(array, nodeID, "norm", "", 0, level * normalisationDistanceY, tree.term.prettyPrintLabels(ctx), level, "");  
 
         /* Generate the elements for the various branches from this node */
         for(var i = 0; i < tree.reductions.length; i++){
-            array = array.concat(generateNormalisationGraphElements(id, tree.reductions[i][0], ctx, nodeID, tree.reductions[i][1].prettyPrint(), level + 1));
+            array = array.concat(generateNormalisationGraphElements(id, tree.reductions[i][0], ctx, nodeID, tree.reductions[i][1].prettyPrint(ctx), level + 1));
         }
     }
 
     /* Only define edges that represent distinct reductions (i.e. not alpha-equivalent) */
     if(parent !== undefined && !checkForIdenticalReduction(parentReduction, parent, nodeID)){
-        array = defineEdge(array, parent + '->' + parentReduction + '->' + tree.term.prettyPrintLabels(), "norm", "", parent, nodeID, parentReduction);
+        array = defineEdge(array, parent + '->' + parentReduction + '->' + tree.term.prettyPrintLabels(ctx), "norm", "", parent, nodeID, parentReduction);
     }
 
     cyMap = originalTerm;

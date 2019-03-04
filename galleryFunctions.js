@@ -196,7 +196,7 @@ function generateButton(x, prev){
 
             terms[i].generatePrettyVariableNames(freeVariables);
 
-            var x = terms[i].prettyPrintLabels().length;
+            var x = terms[i].prettyPrintLabels(freeVariables).length;
             var size = 200;
 
             while(x > 20){
@@ -207,7 +207,7 @@ function generateButton(x, prev){
             var termName = "";
 
             if(document.getElementById('de-bruijn').checked){
-                termName = terms[i].prettyPrint();
+                termName = terms[i].prettyPrint(freeVariables);
             } else {
                 termName = printTermHTML(terms[i]);
             }
@@ -293,15 +293,6 @@ function clearButton(){
     changeText('number-of-terms', "");
     changeText('normalisation-studio', "");
     changeValueClass('number-box', "");
-}
-
-/**
- * Get an HTML representation of a term.
- * @param {Object} term - The lambda term.
- * @return {string} The HTML representation.
- */
-function printTermHTML(term){
-    return term.printHTML()[0];
 }
 
 /**

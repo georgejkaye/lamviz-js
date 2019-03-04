@@ -104,28 +104,26 @@ class LambdaVariable{
 
     /**
      * Get a pretty print of this term.
-     * @param {number} x - The layer this term is at - determines whether brackets are required.
+     * @param {number} x    - The layer this term is at - determines whether brackets are required.
      * @return {string} The pretty string.
      */
     prettyPrint(x){
-
         return this.index;
     }
 
     /**
      * Get a pretty print of this term using the actual labels.
-     * @param {boolean} labels - Whether or not to use the predefined labels in the terms or generate new ones.
-     * @param {Object} env - The environment of this lambda term.
-     * @param {number} x - The layer this term is at - determines whether brackets are required.
+     * @param {Object} ctx  - The context of this lambda term.
+     * @param {number} x    - The layer this term is at - determines whether brackets are required.
      * @return {string} The pretty string.
      */
-    prettyPrintLabels(x){
+    prettyPrintLabels(ctx, x){
 
         if(this.name !== ""){
             return this.name;
         }
 
-        return this.label;
+        return ctx.getCorrespondingVariable(this.index, true);
     }
 
     /**
@@ -219,14 +217,16 @@ class LambdaVariable{
 
     /**
      * Print all of the redexes in this term.
+     * @param {Object} ctx - The context of this lambda term.
      * @return {String[]} The array of all redexes in this term.
      */
-    printRedexes(){
+    printRedexes(ctx){
         return [];
     }
 
     /**
      * Get an HTML representation of this term.
+     * @param {Object} ctx - The context of this lambda term.
      * @param {number} x - The layer this term is at - determines whether brackets are required.
      * @param {number} vars - The number of variables encountered so far.
      * @param {number} abs - The number of abstractions encountered so far.
@@ -234,7 +234,7 @@ class LambdaVariable{
      * @param {number} betas - The number of beta redexes encountered so far.
      * @return {string} The HTML string.
      */
-    printHTML(x, vars, abs, apps, betas){
+    printHTML(ctx, x, vars, abs, apps, betas){
 
         if(x === undefined){
             x = 0;
@@ -244,7 +244,7 @@ class LambdaVariable{
             betas = 0;
         }
 
-        var label = this.label;
+        var label = ctx.getCorrespondingVariable(this.index, true);
 
         if(this.name !== ""){
             label = this.name;
@@ -269,7 +269,7 @@ class LambdaVariable{
             ctx.generatePrettyVariableNames();
         }
 
-        this.label = ctx.getCorrespondingVariable(this.index);
+        this.label = ctx.getCorrespondingVariable(this.index, true);
 
     }
 
@@ -314,21 +314,24 @@ class LambdaAbstraction{
             x = 0;
         }
 
+        var string = "";
+
         if(x === 0){
-            return "\u03BB " + this.t.prettyPrint(0);
+            string = "\u03BB " + this.t.prettyPrint(0);
+        } else {
+            string = "(\u03BB " + this.t.prettyPrint(0) + ")";
         }
 
-        return "(\u03BB " + this.t.prettyPrint(0) + ")";
+        return string;
     }
 
     /**
      * Get a pretty print of this term using the actual labels.
-     * @param {boolean} labels - Whether or not to use the predefined labels in the terms or generate new ones.
-     * @param {Object} env  - The environment of this lambda term.
+     * @param {Object} ctx  - The context of this lambda term.
      * @param {number} x    - The layer this term is at - determines whether brackets are required.
      * @return {string} The pretty string.
      */
-    prettyPrintLabels(x){
+    prettyPrintLabels(ctx, x){
 
         if(this.name !== ""){
             return this.name;
@@ -338,12 +341,14 @@ class LambdaAbstraction{
             x = 0;
         }
 
-        var string = "\u03BB" + this.label + ". " + this.t.prettyPrintLabels(0);
+        ctx.pushTerm(this.label);
+        var string = "\u03BB" + this.label + ". " + this.t.prettyPrintLabels(ctx, 0);
         
         if(x !== 0){
             string = "(" + string + ")";
         }
 
+        ctx.popTerm();
         return string;
     }
 
@@ -453,15 +458,20 @@ class LambdaAbstraction{
 
     /**
      * Print all of the redexes in this term.
+     * @param {Object} ctx - The context of this lambda term.
      * @return {String[]} The array of all redexes in this term.
      */
-    printRedexes(){
+    printRedexes(ctx){
 
-        return this.t.printRedexes();
+        ctx.pushTerm(this.label);
+        var redexes = this.t.printRedexes(ctx);
+        ctx.popTerm();
+        return redexes;
     }
 
     /**
      * Get an HTML representation of this term.
+     * @param {Object} ctx - The context of this lambda term.
      * @param {number} x - The layer this term is at - determines whether brackets are required.
      * @param {number} vars - The number of variables encountered so far.
      * @param {number} abs - The number of abstractions encountered so far.
@@ -469,7 +479,7 @@ class LambdaAbstraction{
      * @param {number} betas - The number of beta redexes encountered so far.
      * @return {string} The HTML string.
      */
-    printHTML(x, vars, abs, apps, betas){
+    printHTML(ctx, x, vars, abs, apps, betas){
 
         if(x === undefined){
             x = 0;
@@ -482,7 +492,9 @@ class LambdaAbstraction{
         var string = '<span class = "abs-' + abs + '">';
         abs++;
 
-        var scope = this.t.printHTML(0, vars, abs, apps, betas);
+        ctx.pushTerm(this.label);
+        var scope = this.t.printHTML(ctx, 0, vars, abs, apps, betas);
+        ctx.popTerm();
 
         if(this.name !== ""){
             string += this.name;
@@ -560,25 +572,28 @@ class LambdaApplication{
             x = 0;
         }
 
+        var string = "";
+
         if(x === 0){
             if(this.t1.getType() === ABS){
-                return this.t1.prettyPrint(1) + " " + this.t2.prettyPrint(1);
+                string = this.t1.prettyPrint(1) + " " + this.t2.prettyPrint(1);
+            } else {
+                string = this.t1.prettyPrint(0) + " " + this.t2.prettyPrint(1);
             }
-
-            return this.t1.prettyPrint(0) + " " + this.t2.prettyPrint(1);
+        } else {
+            string = "(" + this.t1.prettyPrint(x) + " " + this.t2.prettyPrint(x+1) + ")";
         }
 
-        return "(" + this.t1.prettyPrint(x) + " " + this.t2.prettyPrint(x+1) + ")";
+        return string;
     }
 
     /**
      * Get a pretty print of this term using the actual labels.
-     * @param {boolean} labels - Whether or not to use the predefined labels in the terms or generate new ones.
-     * @param {Object} env  - The environment of this lambda term.
+     * @param {Object} ctx  - The context of this lambda term.
      * @param {number} x    - The layer this term is at - determines whether brackets are required.
      * @return {string} The pretty string.
      */
-    prettyPrintLabels(x){
+    prettyPrintLabels(ctx, x){
 
         if(this.name !== ""){
             return this.name;
@@ -588,15 +603,19 @@ class LambdaApplication{
             x = 0;
         }
 
-        if(x === 0){
-            if(this.t1.getType() === ABS){
-                return "(" + this.t1.prettyPrintLabels(0) + ") " + this.t2.prettyPrintLabels(1);
-            }
+        var string = "";
 
-            return this.t1.prettyPrintLabels(0) + " " + this.t2.prettyPrintLabels(1);
+        if(x === 0){
+            if(this.t1.getType() === ABS && this.t1.name === ""){
+                string = "(" + this.t1.prettyPrintLabels(ctx, 0) + ") " + this.t2.prettyPrintLabels(ctx, 1);
+            } else {
+                string = this.t1.prettyPrintLabels(ctx, 0) + " " + this.t2.prettyPrintLabels(ctx, 1);
+            } 
+        } else {
+            string = "(" + this.t1.prettyPrintLabels(ctx, x) + " " + this.t2.prettyPrintLabels(ctx, x+1) + ")";
         }
 
-        return "(" + this.t1.prettyPrintLabels(x) + " " + this.t2.prettyPrintLabels(x+1) + ")";
+        return string;
     }
 
     /**
@@ -726,21 +745,23 @@ class LambdaApplication{
 
     /**
      * Print all of the redexes in this term.
+     * @param {Object} ctx - The context of this lambda term.
      * @return {String[]} The array of all redexes in this term.
      */
-    printRedexes(){
+    printRedexes(ctx){
 
         var array = [];
         
         if(this.isBetaRedex()){
-            array[0] = this.prettyPrintLabels(true);
+            array[0] = this.prettyPrintLabels(ctx);
         }
 
-        return array.concat(this.t1.printRedexes().concat(this.t2.printRedexes()));
+        return array.concat(this.t1.printRedexes(ctx).concat(this.t2.printRedexes(ctx)));
     }
 
     /**
      * Get an HTML representation of this term.
+     * @param {Object} ctx - The context of this lambda term.
      * @param {number} x - The layer this term is at - determines whether brackets are required.
      * @param {number} vars - The number of variables encountered so far.
      * @param {number} abs - The number of abstractions encountered so far.
@@ -748,7 +769,7 @@ class LambdaApplication{
      * @param {number} betas - The number of beta redexes encountered so far.
      * @return {string} The HTML string.
      */
-    printHTML(x, vars, abs, apps, betas){
+    printHTML(ctx, x, vars, abs, apps, betas){
 
         if(x === undefined){
             x = 0;
@@ -784,8 +805,8 @@ class LambdaApplication{
             z = x + 1;
         }
 
-        var lhs = this.t1.printHTML(y, vars, abs, apps, betas);
-        var rhs = this.t2.printHTML(z, lhs[1], lhs[2], lhs[3], lhs[4]);
+        var lhs = this.t1.printHTML(ctx, y, vars, abs, apps, betas);
+        var rhs = this.t2.printHTML(ctx, z, lhs[1], lhs[2], lhs[3], lhs[4]);
 
         if(this.name !== ""){
             string += this.name;
@@ -927,7 +948,7 @@ class LambdaEnvironment{
             return this.env[this.env.length - 1 - index];
         }
 
-        return this.labels[this.labels.length - 1 - index]
+        return this.labels[this.labels.length - 1 - index];
     }
 
     /**

@@ -35,7 +35,7 @@ function executeButton(){
 
         if(typeof term !== "string"){
             currentTerm = term;
-            text = term.prettyPrint() + " ~  ~  ~ " + term.prettyPrintLabels(true);
+            text = term.prettyPrint(freeVariables) + " ~  ~  ~ " + term.prettyPrintLabels(freeVariables);
         } else {
             text = term;
             error = true;
@@ -52,6 +52,8 @@ function executeButton(){
     if(!error){
         viewPortrait("church-room", currentTerm, document.getElementById('labels-yes').checked);
     }
+
+    reduced = false;
 }
 
 /**
@@ -77,7 +79,7 @@ function substituteButton(){
         changeText('result', s)
     } else {
         var newterm = substitute(parse(s, new LambdaEnvironment()), j, currentTerm);
-        changeText('result', newterm.prettyPrint());
+        changeText('result', newterm.prettyPrint(freeVariables));
     }
 }
 
@@ -92,7 +94,7 @@ function evaluateButton(){
         changeText('result', "Timed out during evaluation");
     } else {
 
-        var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels();
+        var text = res.prettyPrint(freeVariables) + " ~ ~ ~ " + res.prettyPrintLabels(freeVariables);
 
         changeText('result', text);
     }
@@ -117,7 +119,7 @@ function normaliseButton(){
         }
 
         currentTerm = res;
-        var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels();
+        var text = res.prettyPrint(freeVariables) + " ~ ~ ~ " + res.prettyPrintLabels(freeVariables);
 
         changeText('result', text);
         drawMap("cy", currentTerm, ctx, true, true, document.getElementById('labels-yes').checked);
@@ -141,7 +143,7 @@ function betaButton(){
 
     var res = applicationAbstraction(t1, t2)
 
-    var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels();
+    var text = res.prettyPrint(freeVariables) + " ~ ~ ~ " + res.prettyPrintLabels(freeVariables);
 
     changeText('result', text)
 
@@ -174,7 +176,7 @@ function generateButton(x){
         }
 
         for(i = 0; i < terms.length; i++){
-            string += terms[i].prettyPrint() + "<br />";
+            string += terms[i].prettyPrint(freeVariables) + "<br />";
         }
     }
 
@@ -199,8 +201,10 @@ function normaliseTreeButton(){
 function resetButton(labels){
     changeText('normalisation-studio', "");
     if(reduced && currentTerm !== originalTerm){
+        originalTerm.generatePrettyVariableNames(freeVariables);
         viewPortrait("church-room", originalTerm, document.getElementById("labels-yes").checked);
         reduced = false;
+        currentTerm = originalTerm;
     } else { 
         document.getElementById("reset-btn").disabled = true; 
     }
@@ -235,7 +239,7 @@ function defineButton(){
 
         functionBody.generatePrettyVariableNames(freeVariables);
 
-        var functionDefinition = [functionName, functionBody, functionBody.prettyPrintLabels()];
+        var functionDefinition = [functionName, functionBody, functionBody.prettyPrintLabels(freeVariables)];
         var exists = false;
 
         for(var i = 0; i < functions.length; i++){
@@ -251,6 +255,7 @@ function defineButton(){
 
         changeValue("function-name", "");
         changeValue("function-body", "");
+        changeText("result", "");
     } else {
         changeText("result", functionBody)
     }

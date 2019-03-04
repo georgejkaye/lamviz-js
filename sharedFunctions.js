@@ -209,7 +209,7 @@ function bulletsOfArray(array, id, onclick, onmouseenter, onmouseout){
  * @return {string} The HTML representation.
  */
 function printTermHTML(term){
-    return term.printHTML()[0];
+    return term.printHTML(freeVariables)[0];
 }
 
 /**
@@ -220,14 +220,14 @@ function printTermHTML(term){
  */
 function getStats(currentTerm, labels){
     return getRow(getCell("term-heading", '<b>' + printTermHTML(currentTerm) + '</b>')) +
-                                                getRow(getCell("term-subheading", '<b>' + currentTerm.prettyPrint() + '</b>')) +
+                                                getRow(getCell("term-subheading", '<b>' + currentTerm.prettyPrint(freeVariables) + '</b>')) +
                                                 getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
                                                 getRow(getCell("term-fact", 'Abstractions: ' + currentTerm.abstractions())) +
                                                 getRow(getCell("term-fact", 'Applications: ' + currentTerm.applications())) +
                                                 getRow(getCell("term-fact", 'Variables: ' + currentTerm.variables())) +
                                                 getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
                                                 getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
-                                                getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(), "redex", "clickRedex(i, " + labels + ")", "highlightRedex(i, true)", "unhighlightRedex(i, true)"))) +
+                                                getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(freeVariables), "redex", "clickRedex(i, " + labels + ")", "highlightRedex(i, true)", "unhighlightRedex(i, true)"))) +
                                                 getRow(getCell("", '<button type = "button" disabled id = "reset-btn" onclick = "resetButton();">Reset</button><button type = "button" id = "back-btn" onclick = "backButton();">Back</button>')) +
                                                 getRow(getCell("", '<button type = "button" id = "norm-btn" onclick = "showNormalisationGraph();">View normalisation graph</button>'));
 }
@@ -313,14 +313,15 @@ function unhighlightRedex(i){
 function clickRedex(i, labels){
 
     var normalisedTerm = specificReduction(currentTerm, i)[0];
-    //normalisedTerm.generatePrettyVariableNames(freeVariables);
+    normalisedTerm.generatePrettyVariableNames(freeVariables);
 
     if(!reduced){
         reduced = true;
         originalTerm = currentTerm;
     }
 
-    viewPortrait("church-room", normalisedTerm, labels);
+    currentTerm = normalisedTerm;
+    viewPortrait("church-room", currentTerm, labels);
     document.getElementById("reset-btn").disabled = false;
 }
 
