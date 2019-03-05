@@ -857,7 +857,7 @@ function checkForIdenticalReduction(id, source, target){
  * @param {number} level            - The current level of the graph.
  * @return {Object[]} The graph elements.
  */
-function generateNormalisationGraphElements(id, graph, ctx, maps, parent, parentReduction, level){
+function generateNormalisationGraphElements(id, graph, ctx, maps){
 
     var array = [];
     
@@ -878,6 +878,8 @@ function generateNormalisationGraphElements(id, graph, ctx, maps, parent, parent
             var map = drawMap(id, term, ctx);
             smartPush(imgs, [nodeID, map.png()]);
         }
+
+        var level = graph.matrix[i][2];
 
         /* Define the node first. */
         array = defineNode(array, nodeID, "norm", "", 0, level * normalisationDistanceY, term.prettyPrintLabels(ctx), level, "");  

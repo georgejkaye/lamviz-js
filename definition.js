@@ -1002,7 +1002,7 @@ class LambdaEnvironment{
 function nextNodeNotInFrontierOrSeen(term, frontier, seen){
 
     for(var k = 0; k < frontier.length; k++){
-        if(frontier[k].prettyPrint() === term.prettyPrint()){
+        if(frontier[k][0].prettyPrint() === term.prettyPrint()){
             return false;
         }
     }
@@ -1023,6 +1023,10 @@ class ReductionGraph{
 
     /**
      * Create a new reduction graph.
+     * 
+     * Structure of the adjacency matrix:
+     * [[term, [[reduction1, redex1], [reduction2, redex2], ...], level], ... [normal form, [ ], level]]
+     * 
      * @param {Object} term - The lambda term to create the reduction graph for.
      */
     constructor(term){
@@ -1030,14 +1034,16 @@ class ReductionGraph{
         this.matrix = [];
 
         var seen = [];
-        var frontier = [term];
+        var frontier = [[term, 0]];
         var i = 0;
 
         while(frontier.length !== 0){
 
-            var workingTerm = frontier.shift();
+            var nextTerm = frontier.shift();
+            var workingTerm = nextTerm[0];
+            var level = nextTerm[1];
 
-            smartPush(this.matrix, [workingTerm, []]);
+            smartPush(this.matrix, [workingTerm, [], level]);
             smartPush(seen, workingTerm);   
 
             var reductions = getAllOneStepReductions(workingTerm);
@@ -1047,7 +1053,7 @@ class ReductionGraph{
                 smartPush(this.matrix[i][1], reductions[j]);
 
                 if(nextNodeNotInFrontierOrSeen(reductions[j][0], frontier, seen)){
-                    smartPush(frontier, reductions[j][0]);
+                    smartPush(frontier, [reductions[j][0], level + 1]);
                 }
             }
 
