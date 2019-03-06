@@ -933,9 +933,11 @@ function drawNormalisationGraph(id, term, ctx, maps){
     var elems = generateNormalisationGraphElements(id, tree, ctx, maps);
 
     var size = 1200;
+    var colour = 'white';
 
     if(!maps){
-        size = 1;
+        size = 250;
+        colour = '#666'
     }
 
     cyNorm = cytoscape({
@@ -953,9 +955,9 @@ function drawNormalisationGraph(id, term, ctx, maps){
                     'font-size': '100',
                     'label': "",
                     'shape': 'rectangle',
-                    'background-color': 'white',
+                    'background-color': colour,
                     'border-width': '5',
-                    'label': '',//'data(label)',
+                    'label': 'data(label)',
                     'text-valign': 'bottom',
                     'font-size': '200'
                 }
@@ -993,7 +995,7 @@ function drawNormalisationGraph(id, term, ctx, maps){
     var w = normalisationNodeWidth;
 
     /* Place nodes at the correct height based on their level */
-    for(var i = 0; i < tree.height() + 1; i++){
+    for(var i = 0; i < tree.longestPathToNormalForm() + 1; i++){
         
         var elems = cyNorm.elements('node[level = ' + i + ']');
 

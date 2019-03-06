@@ -15,5 +15,7 @@
 * ~~Generate 'galleries' of terms from various fragments~~
 * ~~Fix map drawing bug involving free variables with the same name as bound variables (e.g. (\x.x) x)~~
 * ~~Highlighting issues when redex exists inside alias~~
-* Work on pair functions
-* Crazy reset bug reset visualiser to random term, maybe not setting current term somewhere?
+* ~~Work on pair functions~~
+* ~~Crazy reset bug reset visualiser to random term, maybe not setting current term somewhere?~~
+* Make sure terms with infinite reduction loops are handled gracefully
+* Free variables aren't being labelled properly for some reason

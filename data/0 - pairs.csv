@@ -1,4 +1,0 @@
-Pair	\x.\y.\v. v x y
-fst	\p. p (\x.\y. x)
-snd	\p. p (\x.\y. y)
-swap	\p. p (\x.\y. y x)
