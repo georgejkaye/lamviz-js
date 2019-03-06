@@ -992,6 +992,7 @@ function drawNormalisationGraph(id, term, ctx, maps){
     var x = normalisationDistanceX;
     var w = normalisationNodeWidth;
 
+    /* Place nodes at the correct height based on their level */
     for(var i = 0; i < tree.height() + 1; i++){
         
         var elems = cyNorm.elements('node[level = ' + i + ']');

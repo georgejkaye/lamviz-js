@@ -17,7 +17,9 @@ const cutoff = 20;
 /** Constants to represent different modes */
 const MAX = 0;
 const MIN = 1;
-const AVERAGE = 2;
+const MEAN = 2;
+const MODE = 3;
+const MEDIAN = 4;
 
 var currentVariableIndex = 0;
 const variableNames = ['x', 'y', 'z', 'w', 'u', 'v']
@@ -1036,22 +1038,34 @@ class ReductionGraph{
         var seen = [];
         var frontier = [[term, 0]];
         var i = 0;
+        var highestLevel = 0;
 
         while(frontier.length !== 0){
 
+            /* Examine the next term in the frontier containing all next reductions. */
             var nextTerm = frontier.shift();
             var workingTerm = nextTerm[0];
             var level = nextTerm[1];
 
+            if(level > highestLevel){
+                highestLevel = level;
+            }
+
+            /* Add the new reduction to the matrix. */
             smartPush(this.matrix, [workingTerm, [], level]);
+
+            /* Indicate that we've seen this term so it won't be added again. */
             smartPush(seen, workingTerm);   
 
+            /* Get all the reductions from this new term. */
             var reductions = getAllOneStepReductions(workingTerm);
 
             for(var j = 0; j < reductions.length; j++){
 
+                /* Add the reduction to the row in the matrix. */
                 smartPush(this.matrix[i][1], reductions[j]);
 
+                /* If the reductions have not been seen before, add them to the frontier to be examined later. */
                 if(nextNodeNotInFrontierOrSeen(reductions[j][0], frontier, seen)){
                     smartPush(frontier, [reductions[j][0], level + 1]);
                 }
@@ -1059,6 +1073,29 @@ class ReductionGraph{
 
             i++;
         }
+
+        /*for(var i = 0; i < this.matrix.length; i++){
+            if(this.matrix[i][1].length = []){
+                this.matrix[i][2] = highestLevel;
+            }
+        }*/
+
+    }
+
+    /**
+     * Get the corresponding index of the entry in the matrix for a term.
+     * @param {Object} term - The lambda term to look for.
+     * @return {number} The index of the entry in the matrix for this term. 
+     */
+    getTermEntry(term){
+
+        for(var i = 0; i < this.matrix.length; i++){
+            if(term.prettyPrint() === this.matrix[i][0].prettyPrint()){
+                return i;
+            }
+        }
+
+        return -1;
 
     }
 
@@ -1085,20 +1122,144 @@ class ReductionGraph{
 
     }
     
-    pathToNormalForm(){
+    /**
+     * Find the lengths of all paths from one of the terms in the matrix to the normal form (if it exists!).
+     * @param {number} i - The index of the element in the matrix.
+     * @return {number} The length of the path from this term to the normal form (if if exists!).
+     */
+    pathLengthsFromTerm(i){
+
+        var workingTerm = this.matrix[i];
+
+        /* If term is already in its normal form */
+        if(workingTerm[1].length === 0){
+            return [0];
+        }
+
+        var pathLengths = [];
+
+        for(var i = 0; i < workingTerm[1].length; i++){
+
+            var index = this.getTermEntry(workingTerm[1][i][0]);
+            smartPush(pathLengths, this.pathLengthsFromTerm(index));
+
+        }
+
+        pathLengths = pathLengths.map(x => parseInt(x) + 1);
+        return pathLengths;
 
     }
 
+    /**
+     * Find the length of a certain type of path in this normalisation graph.
+     * @param {number} mode - The type of path to find. 
+     * @return {number} The path length that satisfies the mode (can be an array in the case of mode).
+     */
+    pathToNormalForm(mode){
+
+        /* The first element of the matrix is the start point */
+        var paths = this.pathLengthsFromTerm(0);
+        var result = 0;
+
+        switch(mode){
+            case MIN:
+                result = Math.min(...paths);
+                break;
+            case MAX:
+                result = Math.max(...paths);
+                break;
+            case MEAN:
+                result = paths.reduce(function(a, b){return a + b;}) / paths.length;
+                break;
+            case MODE:
+
+                var counts = [];
+
+                /* Find the count of every element in the path lengths array. */
+                while(paths.length > 0){
+
+                    var len = paths.length;
+                    var elem = paths[0];
+                    paths = paths.filter(x => x !== elem);
+                    var count = len - paths.length;
+                    smartPush(counts, [elem, count]);
+
+                }
+
+                var highest = 0;
+                var elems = [];
+
+                /* Establish the highest occuring element(s). */
+                for(var i = 0; i < counts.length; i++){
+                    if(counts[i][1] > highest){
+                        highest = counts[i][1];
+                        elems = [counts[i][0]];
+                    } else if (counts[i][1] === highest){
+                        smartPush(elems, counts[i][0]);
+                    }
+                }
+
+                result = elems;
+
+                break;
+            case MEDIAN:
+
+                paths = paths.sort();
+
+                if(paths.length % 2 === 1){
+                    var x = Math.ceil(paths.length / 2);
+                    result = paths[x];
+                } else {
+                    var x = paths.length / 2;
+                    var m1 = paths[x-1];
+                    var m2 = paths[x];
+                    result = (m1 + m2) / 2;
+                }
+                break;
+        }
+
+        return result;
+
+    }
+
+    /**
+     * Get the shortest path to the normal form (if one exists!).
+     * @return {number} The shortest path to the normal form.
+     */
     shortestPathToNormalForm(){
-        return 0;
+        return this.pathToNormalForm(MIN);
     }
 
+    /**
+     * Get the longest path to the normal form (if one exists!).
+     * @return {number} The longest path to the normal form.
+     */
     longestPathToNormalForm(){
-        return 0;
+        return this.pathToNormalForm(MAX);
     }
 
-    averagePathToNormalForm(){
-        return 0;
+    /**
+     * Get the mean length of path to the normal form (if one exists!).
+     * @return {number} The mean path to the normal form.
+     */
+    meanPathToNormalForm(){
+        return this.pathToNormalForm(MEAN);
+    }
+
+    /**
+     * Get the most common lengths of path to the normal form (if one exists!).
+     * @return {number[]} The most common paths to the normal form.
+     */
+    modePathToNormalForm(){
+        return this.pathToNormalForm(MODE);
+    }
+
+    /**
+     * Get the median length of path to the normal form (if one exists!).
+     * @return {number} The median path to the normal form.
+     */
+    medianPathToNormalForm(){
+        return this.pathToNormalForm(MEDIAN);
     }
 
     /**

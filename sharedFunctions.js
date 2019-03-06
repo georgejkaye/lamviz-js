@@ -341,7 +341,9 @@ function showNormalisationGraph(){
                                             '<table>' + 
                                                 getRow(getCell("term-fact", 'Shortest path: ' + reductions.shortestPathToNormalForm())) +
                                                 getRow(getCell("term-fact", 'Longest path: ' + reductions.longestPathToNormalForm())) +
-                                                getRow(getCell("term-fact", 'Average path: ' + reductions.averagePathToNormalForm())) + 
+                                                getRow(getCell("term-fact", 'Mean path: ' + reductions.meanPathToNormalForm())) + 
+                                                getRow(getCell("term-fact", 'Median path: ' + reductions.medianPathToNormalForm())) + 
+                                                getRow(getCell("term-fact", 'Mode path: ' + reductions.modePathToNormalForm())) + 
                                                 getRow(getCell("term-fact", 'Vertices: ' + reductions.vertices())) +
                                                 getRow(getCell("term-fact", 'Edges: ' + reductions.edges())) +
                                             '</table>' +
