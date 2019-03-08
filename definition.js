@@ -1054,6 +1054,7 @@ class ReductionGraph{
 
             /* Add the new reduction to the matrix. */
             smartPush(this.matrix, [workingTerm, [], level]);
+            console.log("Pushed " + workingTerm.prettyPrint() + " to the matrix.");
 
             /* Indicate that we've seen this term so it won't be added again. */
             smartPush(seen, workingTerm);   
@@ -1069,6 +1070,7 @@ class ReductionGraph{
                 /* If the reductions have not been seen before, add them to the frontier to be examined later. */
                 if(nextNodeNotInFrontierOrSeen(reductions[j][0], frontier, seen)){
                     smartPush(frontier, [reductions[j][0], level + 1]);
+                    console.log("   Pushed " + reductions[j][0] + " to the frontier.");
                 }
             }
 

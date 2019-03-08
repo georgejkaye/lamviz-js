@@ -42,9 +42,19 @@ function parseTerm(tokens, initial, env){
             case '\\':
 
                 i++;
+                
+                if(i >= len){
+                    return "Parse error: unexpected end of expression";
+                }
+
                 abstractionVariable = tokens[i]; 
 
                 i++;
+
+                if(i >= len){
+                    return "Parse error: unexpected end of expression";
+                }
+
                 env.pushTerm(abstractionVariable);
                 var scope = findScope(tokens.slice(i));
 
@@ -64,6 +74,11 @@ function parseTerm(tokens, initial, env){
             case '(':
 
                 i++;
+
+                if(i >= len){
+                    return "Parse error: unexpected end of expression";
+                }
+
                 var scope = findScope(tokens.slice(i));
                 t2 = parseTerm(scope, initial + i, env);
 

@@ -223,12 +223,34 @@ function backButton(){
 /**
  * Function to execute when the define button is pressed.
  */
-function defineButton(){
+function defineFunction(functionName, functionBody){
 
     var functionName = getText("function-name");
+    var functionBody = getText("function-body");
+
+    var error = addFunction(functionName, functionBody);
+
+    if(error === ""){
+        changeValue("function-name", "");
+        changeValue("function-body", "");
+        updateFunctionsList();
+    } else {
+        changeText("result", error);
+    }
+}
+
+/**
+ * Add a new alias to the list of functions.
+ * @param {string} functionName - The name of this function.
+ * @param {string} functionBody - The raw string input for the function body.
+ * @return {string} An error message, if appropriate.
+ */
+function addFunction(functionName, functionBody){
     
+    var error = "";
+
     if(functionName.split(" ").length > 1){
-        changeText('result', "Alias names must not contain spaces")
+        error = functionName + ": Alias names must not contain spaces";
     } else {
 
         var frees = getText('env').split(" ");
@@ -236,17 +258,15 @@ function defineButton(){
 
         for(i = 0; i < frees.length; i++){
             freeVariables.pushTerm(frees[i]);
-        }
+        }       
 
-        var body = getText("function-body");
+        var parsedFunctionBody = parse(tokenise(functionBody), freeVariables);
 
-        var functionBody = parse(tokenise(getText("function-body")), freeVariables);
+        if(typeof parsedFunctionBody !== "string"){
 
-        if(typeof functionBody !== "string"){
+            parsedFunctionBody.generatePrettyVariableNames(freeVariables);
 
-            functionBody.generatePrettyVariableNames(freeVariables);
-
-            var functionDefinition = [functionName, functionBody, functionBody.prettyPrintLabels(freeVariables)];
+            var functionDefinition = [functionName, parsedFunctionBody, parsedFunctionBody.prettyPrintLabels(freeVariables)];
             var exists = false;
 
             for(var i = 0; i < functions.length; i++){
@@ -260,23 +280,25 @@ function defineButton(){
             if(!exists){
                 smartPush(functions, functionDefinition);
             }
-
-            changeValue("function-name", "");
-            changeValue("function-body", "");
-            changeText("result", "");
         } else {
-            changeText("result", functionBody);
+            error = functionName + ": " + parsedFunctionBody;
         }
 
-        updateFunctionsList();
+        return error;
     }
 }
 
+/**
+ * Clear the entire aliases list.
+ */
 function removeFunctionsButton(){
     functions = [];
     updateFunctionsList();
 }
 
+/**
+ * Update the list of aliases displayed on the screen.
+ */
 function updateFunctionsList(){
     
     var string = "";
@@ -286,4 +308,60 @@ function updateFunctionsList(){
     }
 
     changeText("function-list", string);
+}
+
+/**
+ * Function to execute when the reveal bulk aliases box is pressed.
+ */
+function revealBulkButton(){
+    changeText('bulk', "<table>" + 
+                            "<tr>" +
+                                '<td>Define multiple aliases as follows: <br><br> <i>Function1</i> <br> <i>\\x.x</i> <br> <br> <i>Function2</i> <br> <i>\\x.\\y.x y <br> <br> <i>Function3</i> <br> <i>\\x.\\y.y x</td>' + 
+                                '<td><textarea id = "bulk-box" style="height:200px; width: 200px;text-align:top"></textarea></td>' +
+                            "</tr>" +
+                        "</table>" +
+                        "<br>" +
+                        '<button type = "button" id = "bulk-btn" onclick = "bulkButton();">Bulk define aliases</button><button type = "button" id = "hide-btn" onclick = "hideButton();">Hide</button>'
+    )
+}
+
+/**
+ * Function to execute when the bulk aliases definition button is pressed (i.e. parse all the aliases given).
+ */
+function bulkButton(){
+   
+    var text = getText("bulk-box");
+    var split1 = text.split("\n\n");
+    var error = "";
+
+    for(var i = 0; i < split1.length; i++){
+        var split2 = split1[i].split("\n");
+
+        if(split2.length !== 2){
+            error = split2[0] + ": missing function body";
+        } else {
+
+            var newError = addFunction(split2[0], split2[1]);
+
+            if(newError !== ""){
+                error += "\n" + newError;
+            }
+        }
+        
+    }
+
+    if(error === ""){
+        hideButton();
+    } else {
+        changeText("result", error);
+    }
+
+    updateFunctionsList();
+}
+
+/**
+ * Function to execute when the hide button is pressed.
+ */
+function hideButton(){
+    changeText("bulk", '<button type = "button" id = "bulk-btn" onclick = "revealBulkButton();">Bulk define aliases</button>');
 }

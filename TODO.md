@@ -18,4 +18,6 @@
 * ~~Work on pair functions~~
 * ~~Crazy reset bug reset visualiser to random term, maybe not setting current term somewhere?~~
 * Make sure terms with infinite reduction loops are handled gracefully
-* Free variables aren't being labelled properly for some reason
+* ~~Free variables aren't being labelled properly for some reason~~
+* Way of automatically parsing in aliases?
+* Identify what makes the long time for graphs
