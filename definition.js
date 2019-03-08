@@ -1062,6 +1062,8 @@ class ReductionGraph{
             /* Get all the reductions from this new term. */
             var reductions = getAllOneStepReductions(workingTerm);
 
+            console.log("           Got all the reductions!");
+
             for(var j = 0; j < reductions.length; j++){
 
                 /* Add the reduction to the row in the matrix. */
@@ -1077,7 +1079,8 @@ class ReductionGraph{
             i++;
         }
 
-        this.graphStats = this.pathsToNormalForm();
+        this.graphStats = [0,0,0,0,0,0,0,0,0,0,0]
+        //this.graphStats = this.pathsToNormalForm();
         console.log("Graph constructed!");
     }
 
