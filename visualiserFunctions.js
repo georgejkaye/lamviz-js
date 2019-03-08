@@ -228,6 +228,8 @@ function defineFunction(functionName, functionBody){
     var functionName = getText("function-name");
     var functionBody = getText("function-body");
 
+    functionName.replace("<", "\<");
+
     var error = addFunction(functionName, functionBody);
 
     if(error === ""){
@@ -283,9 +285,9 @@ function addFunction(functionName, functionBody){
         } else {
             error = functionName + ": " + parsedFunctionBody;
         }
-
-        return error;
     }
+
+    return error;
 }
 
 /**
@@ -331,32 +333,37 @@ function revealBulkButton(){
 function bulkButton(){
    
     var text = getText("bulk-box");
-    var split1 = text.split("\n\n");
-    var error = "";
 
-    for(var i = 0; i < split1.length; i++){
-        var split2 = split1[i].split("\n");
+    if(text !== ""){
 
-        if(split2.length !== 2){
-            error = split2[0] + ": missing function body";
-        } else {
+        var split1 = text.split("\n\n");
+        var error = "";
 
-            var newError = addFunction(split2[0], split2[1]);
+        for(var i = 0; i < split1.length; i++){
+            var split2 = split1[i].split("\n");
+            split2[0].replace("<", "\<");
+            
+            if(split2.length !== 2){
+                error = split2[0] + ": missing function body";
+            } else {
 
-            if(newError !== ""){
-                error += "\n" + newError;
+                var newError = addFunction(split2[0], split2[1]);
+
+                if(newError !== ""){
+                    error += "\n" + newError;
+                }
             }
+            
         }
-        
-    }
 
-    if(error === ""){
-        hideButton();
-    } else {
-        changeText("result", error);
-    }
+        if(error === ""){
+            hideButton();
+        } else {
+            changeText("result", error);
+        }
 
-    updateFunctionsList();
+        updateFunctionsList();
+    }
 }
 
 /**
