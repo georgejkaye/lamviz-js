@@ -972,8 +972,12 @@ function drawNormalisationGraph(id, term, ctx, maps){
                     'line-color': '#ccc',
                     'width': '30',
                     'curve-style': 'bezier',
-                    'control-point-step-size': '200',
+                    'control-point-step-size': '1000 2000 1000',
                     'font-size': '200',
+                    'control-point-weights': '0.25 0.5 0.75',
+                    'edge-distances': 'node-position',
+                    'loop-direction': '90deg',
+                    'loop-sweep': '45deg'
                 }
             },
 

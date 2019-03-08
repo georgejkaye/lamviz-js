@@ -334,6 +334,12 @@ function showNormalisationGraph(){
 
     changeText('normalisation-studio', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")));
     
+    var mean = reductions.meanPathToNormalForm();
+
+    if(typeof mean === "number"){
+        mean = mean.toFixed(2);
+    }
+
     changeText('normalisation-studio', '<table>' +
                                     '<tr>' +
                                         '<td>' + getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")) + '</td>' +
@@ -341,7 +347,7 @@ function showNormalisationGraph(){
                                             '<table>' + 
                                                 getRow(getCell("term-fact", 'Shortest path: ' + reductions.shortestPathToNormalForm())) +
                                                 getRow(getCell("term-fact", 'Longest path: ' + reductions.longestPathToNormalForm())) +
-                                                getRow(getCell("term-fact", 'Mean path: ' + reductions.meanPathToNormalForm().toFixed(2))) + 
+                                                getRow(getCell("term-fact", 'Mean path: ' + mean)) + 
                                                 getRow(getCell("term-fact", 'Median path: ' + reductions.medianPathToNormalForm())) + 
                                                 getRow(getCell("term-fact", 'Mode path: ' + reductions.modePathToNormalForm())) + 
                                                 getRow(getCell("term-fact", 'Vertices: ' + reductions.vertices())) +

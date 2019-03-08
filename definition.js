@@ -12,7 +12,7 @@ const ABS = 1;
 const APP = 2;
 
 /** The number of reduction steps to perform before halting operations. */
-const cutoff = 20;
+const maximumPathLength = 100;
 
 /** Constants to represent different modes */
 const MAX = 0;
@@ -1120,13 +1120,19 @@ class ReductionGraph{
 
 
     }
-    
+
     /**
      * Find the lengths of all paths from one of the terms in the matrix to the normal form (if it exists!).
      * @param {number} i - The index of the element in the matrix.
      * @return {number} The length of the path from this term to the normal form (if if exists!).
      */
-    pathLengthsFromTerm(i){
+    pathLengthsFromTerm(i, x){
+
+        if(x === undefined){
+            x = 0;
+        } else if (x > maximumPathLength){
+            return -1;
+        }
 
         var workingTerm = this.matrix[i];
 
@@ -1141,13 +1147,17 @@ class ReductionGraph{
         for(var i = 0; i < workingTerm[1].length; i++){
 
             var index = this.getTermEntry(workingTerm[1][i][0]);
-            var subpaths = this.pathLengthsFromTerm(index);
+            var subpaths = this.pathLengthsFromTerm(index, x+1);
+
+            if(subpaths === -1){
+                return -1;
+            }
 
             for (var j = 0; j < subpaths.length; j++){
                 smartPush(pathLengths, subpaths[j]);
 
             }
-            //totalPaths += subpaths[1];
+            totalPaths += subpaths[1];
 
         }
 
@@ -1164,6 +1174,11 @@ class ReductionGraph{
 
         /* The first element of the matrix is the start point */
         var paths = this.pathLengthsFromTerm(0);
+
+        if(paths === -1){
+            console.log("timeout!");
+            return ["unknown", "unknown", "unknown", "unknown", "unknown", "unknown"];
+        }
 
         var result = [0];
         //paths = paths[0];
@@ -1224,6 +1239,7 @@ class ReductionGraph{
         }
 
         return result;
+    
 
     }
 
