@@ -1011,6 +1011,7 @@ function drawNormalisationGraph(id, term, ctx, maps, labels, arrows){
     if(maps){
         for(var i = 0; i < imgs.length; i++){
             updateStyle(false, "[id='" + imgs[i][0] + "']", 'background-image', imgs[i][1]);
+            updateStyle(false, "[id='" + imgs[i][0] + "']", 'background-fit', 'contain');
         }
     }
 

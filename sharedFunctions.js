@@ -405,6 +405,7 @@ function fullScreenMapButton(exhibit){
  */
 function exitFullScreenMapButton(exhibit){
     viewPortrait(exhibit, currentTerm, labels, currentFrame);
+    scrollToElement('church-room');
 }
 
 /**
@@ -521,4 +522,12 @@ function fullScreenNormalisationGraphButton(){
  */
 function exitFullScreenNormalisationGraphButton(){
     showNormalisationGraph();
+}
+
+/**
+ * Function to execute when the clear normalisation graph button is pressed.
+ */
+function clearNormalisationGraph(){
+    changeText('normalisation-studio', "");
+    scrollToElement('church-room');
 }
