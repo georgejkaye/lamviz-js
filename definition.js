@@ -1035,11 +1035,12 @@ class ReductionGraph{
     constructor(term){
         this.terms = [term];
         this.matrix = [];
+        this.highestLevel = 0;
 
         var seen = [];
         var frontier = [[term, 0]];
         var i = 0;
-        var highestLevel = 0;
+
 
         while(frontier.length !== 0){
 
@@ -1048,8 +1049,8 @@ class ReductionGraph{
             var workingTerm = nextTerm[0];
             var level = nextTerm[1];
 
-            if(level > highestLevel){
-                highestLevel = level;
+            if(level > this.highestLevel){
+                this.highestLevel = level;
             }
 
             /* Add the new reduction to the matrix. */
@@ -1072,6 +1073,7 @@ class ReductionGraph{
                 /* If the reductions have not been seen before, add them to the frontier to be examined later. */
                 if(nextNodeNotInFrontierOrSeen(reductions[j][0], frontier, seen)){
                     smartPush(frontier, [reductions[j][0], level + 1]);
+                    
                     console.log("   Pushed " + reductions[j][0] + " to the frontier.");
                 }
             }

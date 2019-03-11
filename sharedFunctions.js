@@ -7,7 +7,15 @@
 var currentTerm;
 var freeVariables = new LambdaEnvironment();
 var originalTerm;
+
+/* Details about the currently viewed big frame */
+var currentFrame;
+var labels;
+
+
 var reduced = false;
+var cyNorm;
+var cyMap;
 
 /**
  * Change the text of an element with a given id.
@@ -38,6 +46,22 @@ function changeValueClass(className, value){
     for(var i = 0; i < elems.length; i++){
         elems[i].value = value;
     }
+}
+
+/**
+ * Scroll the page so an element is at the top.
+ * @param {string} id - The id of the element.
+ * @param {number} offset - The amount to offset the element by.
+ */
+function scrollToElement(id, offset){
+    var rec = document.getElementById(id).getBoundingClientRect();
+    var y = rec.top + window.scrollY;
+
+    if(offset === undefined){
+        offset = 0;
+    }
+
+    window.scrollTo(0, y + offset);
 }
 
 /**
@@ -188,12 +212,8 @@ function getCell(className, content){
 function bulletsOfArray(array, id, onclick, onmouseenter, onmouseout){
 
     var string = "<ul>";
-
     
     for(var i = 0; i < array.length; i++){
-
-
-
         string += '<li id="' + id + '-' + i + '" onclick="' + onclick.replace("i,", i + ",") + '" onmouseenter="' + onmouseenter.replace("i,", i + ",") + '" onmouseout="' + onmouseout.replace("i,", i + ",") + '">' + array[i] + "</li>";
     }
 
@@ -216,9 +236,10 @@ function printTermHTML(term){
  * Get the stats for a lambda term in an HTML table format.
  * @param {Object} currentTerm - The lambda term.
  * @param {boolean} labels - If the labels should be displayed on the map.
+ * @param {number} exhibit - The exhibit the stats are being displayed in.
  * @return {string} The HTML table code for the stats.
  */
-function getStats(currentTerm, labels){
+function getStats(currentTerm, labels, exhibit){
     return getRow(getCell("term-heading", '<b>' + printTermHTML(currentTerm) + '</b>')) +
                                                 getRow(getCell("term-subheading", '<b>' + currentTerm.prettyPrint() + '</b>')) +
                                                 getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
@@ -228,7 +249,7 @@ function getStats(currentTerm, labels){
                                                 getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
                                                 getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
                                                 getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(freeVariables), "redex", "clickRedex(i, " + labels + ")", "highlightRedex(i, true)", "unhighlightRedex(i, true)"))) +
-                                                getRow(getCell("", '<button type = "button" disabled id = "reset-btn" onclick = "resetButton();">Reset</button><button type = "button" id = "back-btn" onclick = "backButton();">Back</button>')) +
+                                                getRow(getCell("", '<button type = "button" id = "fullScreen-btn" onclick = "fullScreenButton(\'' + exhibit + '\');">Full screen</button><button type = "button" disabled id = "reset-btn" onclick = "resetButton();">Reset</button><button type = "button" id = "back-btn" onclick = "backButton();">Back</button>')) +
                                                 getRow(getCell("", '<button type = "button" id = "norm-btn" onclick = "showNormalisationGraph();">View normalisation graph</button> Draw maps (very costly) <input type = "checkbox" id = "normalisation-maps" checked>'));
 }
 
@@ -236,9 +257,10 @@ function getStats(currentTerm, labels){
  * Function to execute when a portrait is clicked.
  * @param {string} exhibit - The id of where the portrait is to be drawn.
  * @param {Object} term - The term to draw.
- * @param {boolean} labels - If the labels should be drawn on the map.
+ * @param {boolean} label - If the labels should be drawn on the map.
+ * @param {number} i - The id of the portrait to draw.
  */
-function viewPortrait(exhibit, term, labels){
+function viewPortrait(exhibit, term, label, i){
 
     currentTerm = term;
 
@@ -248,19 +270,27 @@ function viewPortrait(exhibit, term, labels){
         disabled = 'disabled';
     }
 
+    if(i === undefined){
+        i = 0;
+    }
+    
+    currentFrame = i;
+
     changeText(exhibit, '<table>' +
                                     '<tr>' +
-                                        '<td>' + getDiv("w3-container frame big-frame", "frame" + i, "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
+                                        '<td>' + getDiv("w3-container frame big-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
                                         '<td>' +
                                             '<table>' + 
-                                                getStats(currentTerm, labels) +   
+                                                getStats(currentTerm, labels, exhibit) +   
                                             '</table>' +
                                         '</td>' +
                                     '</tr>' +
                                 '</table>'
     )
 
-    drawMap('portrait' + i, currentTerm, freeVariables, true, true, labels);
+    labels = label;
+    cyMap = drawMap('portrait' + currentFrame, currentTerm, freeVariables, true, true, labels);
+    scrollToElement('frame' + currentFrame, -5);
 }
 
 /**
@@ -321,7 +351,7 @@ function clickRedex(i, labels){
     }
 
     currentTerm = normalisedTerm;
-    viewPortrait("church-room", currentTerm, labels);
+    viewPortrait("church-room", currentTerm, labels, i);
     document.getElementById("reset-btn").disabled = false;
 }
 
@@ -345,11 +375,6 @@ function showNormalisationGraph(){
                                         '<td>' + getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")) + '</td>' +
                                         '<td>' +
                                             '<table>' + 
-                                                getRow(getCell("term-fact", 'Shortest path: ' + reductions.shortestPathToNormalForm())) +
-                                                getRow(getCell("term-fact", 'Longest path: ' + reductions.longestPathToNormalForm())) +
-                                                getRow(getCell("term-fact", 'Mean path: ' + mean)) + 
-                                                getRow(getCell("term-fact", 'Median path: ' + reductions.medianPathToNormalForm())) + 
-                                                getRow(getCell("term-fact", 'Mode path: ' + reductions.modePathToNormalForm())) + 
                                                 getRow(getCell("term-fact", 'Vertices: ' + reductions.vertices())) +
                                                 getRow(getCell("term-fact", 'Edges: ' + reductions.edges())) +
                                             '</table>' +
@@ -359,8 +384,51 @@ function showNormalisationGraph(){
     )
 
     
-    drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables, document.getElementById('normalisation-maps').checked);
+    cyNorm = drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables, document.getElementById('normalisation-maps').checked);
 
     document.getElementById("reset-btn").disabled = false;
 
 }
+
+/**
+ * Change the size of the current frame on screen.
+ * @param {string} width - The style for the width.
+ * @param {string} height - The style for the height.
+ */
+function changeFrameSize(width, height){
+    document.getElementById("frame" + currentFrame).style.width = width;
+    document.getElementById("frame" + currentFrame).style.height = height;
+    document.getElementById("portrait" + currentFrame).style.width = "100%";
+    document.getElementById("portrait" + currentFrame).style.height = "100%";
+    cyMap = drawMap('portrait' + currentFrame, currentTerm, freeVariables, true, true, labels);
+}
+
+/**
+ * Function to execute when the full screen button is pressed.
+ * @param {string} exhibit - The exhibit to affect.
+ */
+function fullScreenButton(exhibit){
+
+    changeText(exhibit, getDiv("w3-container frame big-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + currentFrame, "", "", "")) + '<br>' +
+                            getDiv("","","","",'<button type = "button" id = "fullScreen-btn" onclick = "exitFullScreenButton(\'' + exhibit + '\');">Exit full screen</button>')
+    );
+
+    changeFrameSize("98vw", "94vh");
+    scrollToElement("frame" + currentFrame);
+    
+}
+
+/**
+ * Function to execute when the exit full screen button is pressed.
+ * @param {string} exhibit - The exhibit to affect.
+ */
+function exitFullScreenButton(exhibit){
+    viewPortrait(exhibit, currentTerm, labels, currentFrame);
+}
+/*
+getRow(getCell("term-fact", 'Shortest path: ' + reductions.shortestPathToNormalForm())) +
+                                                getRow(getCell("term-fact", 'Longest path: ' + reductions.longestPathToNormalForm())) +
+                                                getRow(getCell("term-fact", 'Mean path: ' + mean)) + 
+                                                getRow(getCell("term-fact", 'Median path: ' + reductions.medianPathToNormalForm())) + 
+                                                getRow(getCell("term-fact", 'Mode path: ' + reductions.modePathToNormalForm())) + 
+                                                */

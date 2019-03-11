@@ -820,7 +820,7 @@ function drawMap(id, term, ctx, zoom, pan, labels){
     updateLabels(labels);
 
     /** Fit the map to the frame. */
-    cyMap.fit(cyMap.filter(function(ele, i, eles){return true;}), 5);
+    cyMap.fit(cyMap.filter(function(ele, i, eles){return true;}), 10);
 
     return cyMap;
 
@@ -945,6 +945,9 @@ function drawNormalisationGraph(id, term, ctx, maps){
 
         elements: elems,
     
+        textureOnViewport: true,
+        pixelRatio: 1,
+
         style: [
             {
                 selector: 'node',
@@ -956,8 +959,7 @@ function drawNormalisationGraph(id, term, ctx, maps){
                     'label': "",
                     'shape': 'rectangle',
                     'background-color': colour,
-                    'border-width': '5',
-                    'label': 'data(label)',
+                    'label': '',
                     'text-valign': 'bottom',
                     'font-size': '200'
                 }
@@ -999,7 +1001,7 @@ function drawNormalisationGraph(id, term, ctx, maps){
     var w = normalisationNodeWidth;
 
     /* Place nodes at the correct height based on their level */
-    for(var i = 0; i < tree.longestPathToNormalForm() + 1; i++){
+    for(var i = 0; i < tree.highestLevel + 1; i++){
         
         var elems = cyNorm.elements('node[level = ' + i + ']');
 
@@ -1015,6 +1017,8 @@ function drawNormalisationGraph(id, term, ctx, maps){
                 posX = (-0.5) * w + ((j-c) * (w+x));
             }
 
+            console.log(posX);
+
             elems[j].position('x', posX);
             elems[j].position('y', i * normalisationDistanceY);
         }
@@ -1022,5 +1026,7 @@ function drawNormalisationGraph(id, term, ctx, maps){
     }
 
     cyNorm.fit(cyNorm.filter(function(ele, i, eles){return true;}), 10);
+    
+    return cyNorm;
 
 }

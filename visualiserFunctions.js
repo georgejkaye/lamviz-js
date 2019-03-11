@@ -52,6 +52,7 @@ function executeButton(){
 
     if(!error){
         viewPortrait("church-room", currentTerm, document.getElementById('labels-yes').checked);
+        
     }
 
     reduced = false;
