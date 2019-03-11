@@ -274,7 +274,8 @@ function getStats(currentTerm, labels, exhibit){
             getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
             getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(freeVariables), "redex", "clickRedex(i, " + labels + ")", "highlightRedex(i, true)", "unhighlightRedex(i, true)"))) +
             getRow(getCell("", getButton("fullScreen-btn", "fullScreenMapButton(\'" + exhibit + "\');", "Full screen", false) +
-                                getButton("reset-btn", "resetButton();", "Reset", true) + 
+                                getButton("reset-btn", "resetViewButton(\'" + exhibit + "\');", "Reset view", true) +
+                                getButton("reset-btn", "resetButton();", "Reset to original term", true) + 
                                 getButton("back-btn", "backButton();", "Back", false)
             )) +
             getRow(getCell("", "<br>")) +
@@ -313,7 +314,7 @@ function viewPortrait(exhibit, term, label, i){
                                         '<td>' + getDiv("w3-container frame big-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
                                         '<td>' +
                                             '<table>' + 
-                                                getStats(currentTerm, labels, exhibit) +   
+                                                getStats(currentTerm, label, exhibit) +   
                                             '</table>' +
                                         '</td>' +
                                     '</tr>' +
@@ -321,8 +322,15 @@ function viewPortrait(exhibit, term, label, i){
     )
 
     labels = label;
-    cyMap = drawMap('portrait' + currentFrame, currentTerm, freeVariables, true, true, labels);
+    cyMap = drawMap('portrait' + currentFrame, currentTerm, freeVariables, true, true, label);
     scrollToElement('frame' + currentFrame, -5);
+}
+
+/**
+ * Function to execute when the reset view button is pressed.
+ */
+function resetViewButton(exhibit){
+    viewPortrait(exhibit, currentTerm, labels, currentFrame);
 }
 
 /**
