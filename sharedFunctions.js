@@ -50,15 +50,20 @@ function changeValueClass(className, value){
 
 /**
  * Scroll the page so an element is at the top.
- * @param {string} id - The id of the element.
+ * @param {string} id - The id of the element (if undefined, the top of the page).
  * @param {number} offset - The amount to offset the element by.
  */
 function scrollToElement(id, offset){
-    var rec = document.getElementById(id).getBoundingClientRect();
-    var y = rec.top + window.scrollY;
+
+    var y = 0;
 
     if(offset === undefined){
         offset = 0;
+    }
+
+    if(id !== undefined){
+        var rec = document.getElementById(id).getBoundingClientRect();
+        var y = rec.top + window.scrollY;  
     }
 
     window.scrollTo(0, y + offset);
@@ -203,6 +208,25 @@ function getCell(className, content){
 }
 
 /**
+ * Get the HTML for a <button type = "button">.
+ * @param {string} id - The id for this <button>.
+ * @param {string} onclick - The onclick for this <button>.
+ * @param {string} text - The text for this <button>.
+ * @param {boolean} disabled - If this button is disabled.
+ * @return {string} The corresponding HTML for this <button>.
+ */
+function getButton(id, onclick, text, disabled){
+
+    var disabled = "";
+
+    if(disabled){
+        disabled = "disabled";
+    }
+
+    return '<button type = "button" ' + disabled + ' id = "' + id + '" onclick = "' + onclick + '">' + text + '</button>';
+}
+
+/**
  * Get the HTML for a bulleted list of elements in an array.
  * @param {Object[]} array - The array.
  * @param {string} id - The id to prefix elements with.
@@ -241,16 +265,24 @@ function printTermHTML(term){
  */
 function getStats(currentTerm, labels, exhibit){
     return getRow(getCell("term-heading", '<b>' + printTermHTML(currentTerm) + '</b>')) +
-                                                getRow(getCell("term-subheading", '<b>' + currentTerm.prettyPrint() + '</b>')) +
-                                                getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
-                                                getRow(getCell("term-fact", 'Abstractions: ' + currentTerm.abstractions())) +
-                                                getRow(getCell("term-fact", 'Applications: ' + currentTerm.applications())) +
-                                                getRow(getCell("term-fact", 'Variables: ' + currentTerm.variables())) +
-                                                getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
-                                                getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
-                                                getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(freeVariables), "redex", "clickRedex(i, " + labels + ")", "highlightRedex(i, true)", "unhighlightRedex(i, true)"))) +
-                                                getRow(getCell("", '<button type = "button" id = "fullScreen-btn" onclick = "fullScreenButton(\'' + exhibit + '\');">Full screen</button><button type = "button" disabled id = "reset-btn" onclick = "resetButton();">Reset</button><button type = "button" id = "back-btn" onclick = "backButton();">Back</button>')) +
-                                                getRow(getCell("", '<button type = "button" id = "norm-btn" onclick = "showNormalisationGraph();">View normalisation graph</button> Draw maps (very costly) <input type = "checkbox" id = "normalisation-maps" checked>'));
+            getRow(getCell("term-subheading", '<b>' + currentTerm.prettyPrint() + '</b>')) +
+            getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
+            getRow(getCell("term-fact", 'Abstractions: ' + currentTerm.abstractions())) +
+            getRow(getCell("term-fact", 'Applications: ' + currentTerm.applications())) +
+            getRow(getCell("term-fact", 'Variables: ' + currentTerm.variables())) +
+            getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
+            getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
+            getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(freeVariables), "redex", "clickRedex(i, " + labels + ")", "highlightRedex(i, true)", "unhighlightRedex(i, true)"))) +
+            getRow(getCell("", getButton("fullScreen-btn", "fullScreenMapButton(\'" + exhibit + "\');", "Full screen", false) +
+                                getButton("reset-btn", "resetButton();", "Reset", true) + 
+                                getButton("back-btn", "backButton();", "Back", false)
+            )) +
+            getRow(getCell("", "<br>")) +
+            getRow(getCell("term-fact", "<b>Normalisation graph options<b>")) +
+            getRow(getCell("", 'Draw maps (very costly for large maps) <input type = "checkbox" id = "normalisation-maps" checked>')) +
+            getRow(getCell("", 'Draw arrows (very costly for large maps) <input type = "checkbox" id = "normalisation-arrows" checked>')) +
+            getRow(getCell("", 'Draw labels (can get cluttered for large maps) <input type = "checkbox" id = "normalisation-labels" checked>')) +
+            getRow(getCell("", getButton("norm-btn", "showNormalisationGraph()", "View normalisation graph", false)));
 }
 
 /**
@@ -273,7 +305,7 @@ function viewPortrait(exhibit, term, label, i){
     if(i === undefined){
         i = 0;
     }
-    
+
     currentFrame = i;
 
     changeText(exhibit, '<table>' +
@@ -329,10 +361,8 @@ function highlightRedex(i){
  * @param {number} i - The redex to unhighlight.
  */
 function unhighlightRedex(i){
-
     setStyleSpan("beta-" + i, "color:black");
     highlightClass("beta-" + i);
-
 }
 
 /**
@@ -356,38 +386,25 @@ function clickRedex(i, labels){
 }
 
 /**
- * Show the normalisation graph for the current term.
+ * Function to execute when the full screen button is pressed.
+ * @param {string} exhibit - The exhibit to affect.
  */
-function showNormalisationGraph(){
+function fullScreenMapButton(exhibit){
 
-    var reductions = new ReductionGraph(currentTerm);
+    changeText(exhibit, getDiv("w3-container frame big-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + currentFrame, "", "", "")) + '<br>' +
+                            getDiv("","","","", getButton("fullScreen-btn", "exitFullScreenMapButton(\'" + exhibit + "\');", "Exit full screen"))
+    );
 
-    changeText('normalisation-studio', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")));
-    
-    var mean = reductions.meanPathToNormalForm();
+    changeFrameSizeMap("98vw", "95vh");
+    scrollToElement("frame" + currentFrame);
+}
 
-    if(typeof mean === "number"){
-        mean = mean.toFixed(2);
-    }
-
-    changeText('normalisation-studio', '<table>' +
-                                    '<tr>' +
-                                        '<td>' + getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")) + '</td>' +
-                                        '<td>' +
-                                            '<table>' + 
-                                                getRow(getCell("term-fact", 'Vertices: ' + reductions.vertices())) +
-                                                getRow(getCell("term-fact", 'Edges: ' + reductions.edges())) +
-                                            '</table>' +
-                                        '</td>' +
-                                    '</tr>' +
-                                '</table>'
-    )
-
-    
-    cyNorm = drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables, document.getElementById('normalisation-maps').checked);
-
-    document.getElementById("reset-btn").disabled = false;
-
+/**
+ * Function to execute when the exit full screen button is pressed.
+ * @param {string} exhibit - The exhibit to affect.
+ */
+function exitFullScreenMapButton(exhibit){
+    viewPortrait(exhibit, currentTerm, labels, currentFrame);
 }
 
 /**
@@ -395,7 +412,7 @@ function showNormalisationGraph(){
  * @param {string} width - The style for the width.
  * @param {string} height - The style for the height.
  */
-function changeFrameSize(width, height){
+function changeFrameSizeMap(width, height){
     document.getElementById("frame" + currentFrame).style.width = width;
     document.getElementById("frame" + currentFrame).style.height = height;
     document.getElementById("portrait" + currentFrame).style.width = "100%";
@@ -404,31 +421,104 @@ function changeFrameSize(width, height){
 }
 
 /**
- * Function to execute when the full screen button is pressed.
- * @param {string} exhibit - The exhibit to affect.
+ * Show the normalisation graph for the current term.
  */
-function fullScreenButton(exhibit){
+function showNormalisationGraph(){
 
-    changeText(exhibit, getDiv("w3-container frame big-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + currentFrame, "", "", "")) + '<br>' +
-                            getDiv("","","","",'<button type = "button" id = "fullScreen-btn" onclick = "exitFullScreenButton(\'' + exhibit + '\');">Exit full screen</button>')
+    currentReductions = new ReductionGraph(currentTerm);
+
+    changeText('normalisation-studio', '<table>' +
+                                            '<tr>' +
+                                                '<td>' + 
+                                                    getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")) + 
+                                                '</td>' +
+                                                '<td id = "norm-graph-stats">' +
+                                                    getNormalisationGraphText(false) + 
+                                                '</td>'
     );
-
-    changeFrameSize("98vw", "94vh");
-    scrollToElement("frame" + currentFrame);
     
+    cyNorm = drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables, document.getElementById('normalisation-maps').checked, document.getElementById('normalisation-labels').checked, document.getElementById('normalisation-arrows').checked);
+
+    document.getElementById("reset-btn").disabled = false;
+    scrollToElement('normalisation-studio');
+
 }
 
 /**
- * Function to execute when the exit full screen button is pressed.
- * @param {string} exhibit - The exhibit to affect.
+ * Get the text to accompany the normalisation graph.
+ * @param {boolean} pathStats - Whether to include the path stats.
+ * @return {string} The text to accompany the normalisation graph.
  */
-function exitFullScreenButton(exhibit){
-    viewPortrait(exhibit, currentTerm, labels, currentFrame);
+function getNormalisationGraphText(pathStats){
+
+    var pathStatsText = "";
+
+    if(pathStats){
+
+        var mean = currentReductions.meanPathToNormalForm();
+
+        if(typeof mean === "number"){
+            mean = mean.toFixed(2);
+        }
+
+        pathStatsText = getRow(getCell("term-fact", 'Shortest path: ' + currentReductions.shortestPathToNormalForm())) +
+                        getRow(getCell("term-fact", 'Longest path: ' + currentReductions.longestPathToNormalForm())) +
+                        getRow(getCell("term-fact", 'Mean path: ' + mean)) + 
+                        getRow(getCell("term-fact", 'Median path: ' + currentReductions.medianPathToNormalForm())) + 
+                        getRow(getCell("term-fact", 'Mode path: ' + currentReductions.modePathToNormalForm()));
+    } else {
+        pathStatsText = getRow(getCell("", getButton('show-stats-btn', 'showPathStatsButton()', "Calculate path statistics", false))) + 
+                            getRow(getCell("", "Generating the path stats can take a very long time for large graphs!"));
+    }
+    
+    return '<table>' + 
+                getRow(getCell("term-fact", 'Vertices: ' + currentReductions.vertices())) +
+                getRow(getCell("term-fact", 'Edges: ' + currentReductions.edges())) +
+                pathStatsText +
+                getRow(getCell("", getButton('fullscreen-norm-btn', 'fullScreenNormalisationGraphButton()', "Full screen", false))) +
+                getRow(getCell("", getButton('clear-norm-btn', 'clearNormalisationGraph()', "Clear", false))) +
+           '</table>';
 }
-/*
-getRow(getCell("term-fact", 'Shortest path: ' + reductions.shortestPathToNormalForm())) +
-                                                getRow(getCell("term-fact", 'Longest path: ' + reductions.longestPathToNormalForm())) +
-                                                getRow(getCell("term-fact", 'Mean path: ' + mean)) + 
-                                                getRow(getCell("term-fact", 'Median path: ' + reductions.medianPathToNormalForm())) + 
-                                                getRow(getCell("term-fact", 'Mode path: ' + reductions.modePathToNormalForm())) + 
-                                                */
+
+/**
+ * Change the size of the current normalisation graph on screen.
+ * @param {string} width - The style for the width.
+ * @param {string} height - The style for the height.
+ */
+function changeFrameSizeGraph(width, height){
+    document.getElementById("normalisation-graph-frame").style.width = width;
+    document.getElementById("normalisation-graph-frame").style.height = height;
+    document.getElementById("normalisation-graph").style.width = "100%";
+    document.getElementById("normalisation-graph").style.height = "100%";
+    cyNorm = drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables, document.getElementById('normalisation-maps').checked, document.getElementById('normalisation-labels').checked, document.getElementById('normalisation-arrows').checked);
+}
+
+/**
+ * Function to execute when the show path stats button is pressed.
+ */
+function showPathStatsButton(){
+
+    currentReductions.calculatePathStats();
+    changeText("norm-graph-stats", getNormalisationGraphText(true));
+
+}
+
+/**
+ * Function to execute when the full screen normalisation graph button is pressed.
+ */
+function fullScreenNormalisationGraphButton(){
+
+    changeText('normalisation-studio', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")) + '<br>' +
+                            getDiv("","","","", getButton("fullScreen-btn", "exitFullScreenNormalisationGraphButton();", "Exit full screen"))
+    );
+
+    changeFrameSizeGraph("98vw", "94vh");
+    scrollToElement('normalisation-studio');
+}
+
+/**
+ * Function to execute when the exit full screen normalisation graph button is pressed.
+ */
+function exitFullScreenNormalisationGraphButton(){
+    showNormalisationGraph();
+}

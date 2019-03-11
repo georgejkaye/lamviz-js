@@ -245,10 +245,10 @@ function generateButton(x, prev){
 
         if(totalNumber != 0){
             percentage = (filteredNumber / totalNumber) * 100;
+            changeText('help', 'Click on a term to learn more about it. ' + getButton("clear-btn", "clearButton()", "Clear all", false));
         }
 
         changeText('number-of-terms', numString + " match the filtering criteria: "  + percentage.toFixed(2) + "%");
-        changeText('help', "Click on a term to learn more about it.")
 
         ctx = new LambdaEnvironment();
 
@@ -257,6 +257,7 @@ function generateButton(x, prev){
         }
 
         drawGallery(false, terms, ctx);
+        scrollToElement('number-of-terms');
 
     }
 
@@ -291,8 +292,10 @@ var a = 0;
 function clearButton(){
     changeText('church-room', "");
     changeText('number-of-terms', "");
+    changeText('help', "");
     changeText('normalisation-studio', "");
     changeValueClass('number-box', "");
+    scrollToElement();
 }
 
 /**
@@ -302,6 +305,7 @@ function backButton(){
     changeText('normalisation-studio', "");
     generateButton(lastAction, true);
     reduced = false;
+    scrollToElement('number-of-terms');
 }
 
 /**

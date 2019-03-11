@@ -52,7 +52,6 @@ function executeButton(){
 
     if(!error){
         viewPortrait("church-room", currentTerm, document.getElementById('labels-yes').checked);
-        
     }
 
     reduced = false;
@@ -207,8 +206,6 @@ function resetButton(labels){
         viewPortrait("church-room", originalTerm, document.getElementById("labels-yes").checked);
         reduced = false;
         currentTerm = originalTerm;
-    } else { 
-        document.getElementById("reset-btn").disabled = true; 
     }
 }
 
@@ -219,6 +216,7 @@ function backButton(){
     changeText('church-room', "");
     changeText('normalisation-studio', "");
     reduced = false;
+    scrollToElement();
 }
 
 /**
@@ -324,7 +322,8 @@ function revealBulkButton(){
                             "</tr>" +
                         "</table>" +
                         "<br>" +
-                        '<button type = "button" id = "bulk-btn" onclick = "bulkButton();">Bulk define aliases</button><button type = "button" id = "hide-btn" onclick = "hideButton();">Hide</button>'
+                        getButton("bulk-btn", "bulkButton();", "Bulk define aliases", false) + 
+                        getButton("hide-btn", "hideButton()", "Hide", false)
     )
 }
 

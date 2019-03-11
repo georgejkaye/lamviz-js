@@ -21,4 +21,5 @@
 * ~~Free variables aren't being labelled properly for some reason~~
 * ~~Way of automatically parsing in aliases?~~
 * Identify what makes the long time for graphs
-* Work on making graphs easier to read for big boys
+* Make normalisation graphs less laggy somehow
+* ~~Work on making maps easier to read for big boys~~

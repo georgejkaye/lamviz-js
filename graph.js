@@ -923,8 +923,11 @@ function highlightClass(className, colour){
  * @param {Object} term - The term to draw the normalisation graph of.
  * @param {Object[]} ctx - The free variables in the term.
  * @param {boolean} map - Whether to draw the submaps.
+ * @param {boolean} labels - Whether to draw the labels.
+ * @param {boolean} arrows - Whether to draw the arrows.
+ * @return {Object} The object for this normalisation graph.
  */
-function drawNormalisationGraph(id, term, ctx, maps){
+function drawNormalisationGraph(id, term, ctx, maps, labels, arrows){
 
     reset(false);
     imgs = [];
@@ -934,10 +937,24 @@ function drawNormalisationGraph(id, term, ctx, maps){
 
     var size = 1200;
     var colour = 'white';
+    var border = '2';
+    var label = 'data(label)';
+    var arrowColour = '#ccc';
+    var arrowShape = 'triangle';
 
     if(!maps){
         size = 250;
-        colour = '#666'
+        colour = '#666';
+        border = '0';
+    }
+
+    if(!labels){
+        label = '';
+    }
+
+    if(!arrows){
+        arrowColour = '';
+        arrowShape = '';
     }
 
     cyNorm = cytoscape({
@@ -953,13 +970,13 @@ function drawNormalisationGraph(id, term, ctx, maps){
                 selector: 'node',
                 style: {
                     'color': 'black',
+                    'border-width': border,
                     'width': size,
                     'height': size,
                     'font-size': '100',
-                    'label': "",
                     'shape': 'rectangle',
                     'background-color': colour,
-                    'label': '',
+                    'label': label,
                     'text-valign': 'bottom',
                     'font-size': '200'
                 }
@@ -968,8 +985,8 @@ function drawNormalisationGraph(id, term, ctx, maps){
             {
                 selector: 'edge',
                 style: {
-                    'target-arrow-color': '#ccc',
-                    'target-arrow-shape': 'triangle',
+                    'target-arrow-color': arrowColour,
+                    'target-arrow-shape': arrowShape,
                     'arrow-scale': '1.5',
                     'line-color': '#ccc',
                     'width': '30',

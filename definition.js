@@ -1082,7 +1082,6 @@ class ReductionGraph{
         }
 
         this.graphStats = [0,0,0,0,0,0,0,0,0,0,0]
-        //this.graphStats = this.pathsToNormalForm();
         console.log("Graph constructed!");
     }
 
@@ -1169,6 +1168,10 @@ class ReductionGraph{
         pathLengths = pathLengths.map(x => parseInt(x) + 1);
         return pathLengths;
 
+    }
+
+    calculatePathStats(){
+        this.graphStats = this.pathsToNormalForm();
     }
 
     /**

@@ -1,0 +1,197 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+
+\usepackage{hyperref}
+\usepackage{wrapfig}
+\usepackage{amsmath}
+\usepackage{minted}
+\usepackage{color}
+\usepackage{svg}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+
+\graphicspath{ {./images/} }
+\setlength{\tabcolsep}{10pt}
+\setlength{\headheight}{15pt}
+
+\providecommand{\shortcite}[1]{\cite{#1}}
+
+\title{A visualiser for $\lambda$-terms as rooted 3-valent maps}
+\author{George Kaye}
+\date{March 2019}
+
+\makeatletter
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\leftmark}
+\fancyfoot[C]{\thepage}
+
+\renewcommand{\footrulewidth}{0.5pt}
+
+\begin{document}
+
+\input{titlepage.tex}
+
+\tableofcontents
+
+\newpage
+
+\section{Abstract}
+\label{sec:abstract}
+
+\newpage
+
+\section{Acknowledgements}
+\label{sec:acks}
+T boys for their support and soup.
+
+
+\newpage
+
+\section{Introduction}
+\label{sec:intro}
+
+This report details the development of a set of tools to aid in the research of the topological properties of $\lambda$-terms when they are represented as rooted maps.
+
+\subsection{\texorpdfstring{$\lambda$}{lambda}-term visualiser}
+Drawing $\lambda$-terms maps by hand can be quite time-consuming, especially for large terms. The first tool can generate maps for $\lambda$-terms from user input, in addition to providing interesting properties such as crossings.
+
+The user can also reduce the term and view a normalisation graph
+
+\subsection{\texorpdfstring{$\lambda$}{lambda}-term gallery}
+When studying properties of $\lambda$-terms, it can be useful to generate terms and look for interesting properties shared between terms and their maps. The $\lambda$-term gallery can generate all terms of a certain size and free variables, with the ability to filter based on properties such as crossings or $\beta$-redexes.
+
+\newpage
+
+\section{Background}
+\label{sec:background}
+
+\subsection{The \texorpdfstring{$\lambda$}{lambda}-calculus}
+The $\lambda$-calculus is a model of computation where programs are represented by variable abstraction and function application. It is the basis of all functional programming languages. This section will cover some concepts and terminology that will be used in the remainder of the report.
+
+\subsubsection{Definitions}
+\label{sec:defs}
+
+The simplest terms in the $\lambda$-calculus ($\lambda$-terms) are just variables ($x, y, z, ...$). More complex terms can be created using the operations of \textbf{abstraction} ($\lambda x. T$) and \textbf{application} $(T_1 T_2)$. For clearer notation, applications are left-associative and abstractions extend as far to the right as possible:
+%
+\begin{align*}
+    x \, y \, z &\equiv (x \, y) \, z \\
+    \lambda x. x \, \lambda y. y &\equiv (\lambda x. x \, (\lambda y. y))
+\end{align*}
+%
+Variables in the $\lambda$-calculus can be \textbf{bound} or \textbf{free}. A variable is bound if it is inside the scope of a corresponding $\lambda$-abstraction (it is a local variable), or free otherwise. In $\lambda x. x \, y$, the $x$ is bound but the $y$ is free. A $\lambda$-term with no free variables is called a \textbf{closed term}. Two $\lambda$-terms are said to be \textbf{$\alpha$-equivalent} if the only difference between them is the names of their bound variables -- for example, $\lambda x. x$ and $\lambda y. y$ are $\alpha$-equivalent. The process of renaming bound variables is known as \textbf{$\alpha$-conversion}:
+%
+$$\lambda x. T \to_\alpha \lambda y. T[x \mapsto y]$$
+%
+To avoid ambiguity between $\alpha$-equivalent terms, we can use \textbf{de Bruijn notation}. Rather than using explicit variable names, each variable is instead represented by how 'far away' the corresponding abstraction is. For example, $\lambda x. \lambda y. \lambda z. x \, y \, z$ can be written as $\lambda\lambda\lambda \, 2 \, 1 \, 0$. This eliminates the need for $\alpha$-conversion and makes it far more efficient to determine equality of $\lambda$-terms.
+
+$\lambda$-terms contain a number of \textbf{subterms}, defined as:
+%
+\begin{align*}
+    subterms(x) &= 1 \\
+    subterms(\lambda x. T) &= 1 + subterms(T) \\
+    subterms(T_1 T_2) &= 1 + subterms(T_1) \, + \, subterms(T_2)
+\end{align*}
+
+\subsubsection{\texorpdfstring{$\beta$}{Beta}-reduction}
+
+Program execution in the $\lambda$-calculus is performed through \textbf{$\beta$-reduction} -- applying functions to their arguments. A term of the form $(\lambda x. T_1) \, T_2$ is called a \textbf{$\beta$-redex} and can be $\beta$-reduced as follows:
+%
+$$(\lambda x. T) \, u \to_\beta T[x \mapsto u]$$
+%
+Repeatedly performing $\beta$-reduction on a term until it contains no $\beta$-redexes is known as \textbf{normalisation}. A term with no $\beta$-redexes is in its \textbf{normal form}. All $\lambda$-terms have a unique normal form but for some terms this normal form is not computable. While there may be multiple redexes to choose from in a given $\lambda$-term, the order of reductions does not matter and the same normal form will be reached if it is computable -- this is known as the \textbf{Church-Rosser theorem}. The process of normalisation can be represented by \textbf{normalisation graphs}, which show the various paths between a $\lambda$-term and its normal form. An example of normalisation graphs can be seen in Figure \ref{fig:normgraphs}.
+
+\begin{figure}
+    \centering
+    \includegraphics{reduction}
+    \caption{An example of two normalisation graphs, showing the steps of reduction taken for the terms $\lambda x. (\lambda y \, x) (\lambda z. z)$ and $\lambda x. (\lambda y. y) ((\lambda z. z) \, x)$ to reach their normal forms. Note that the diverging paths in the right example still lead to the same normal form, as stated by the Church-Rosser theorem.}
+    \label{fig:normgraphs}
+\end{figure}
+
+\subsubsection{Fragments of the \texorpdfstring{$\lambda$}{lambda}-calculus}
+The \textbf{pure $\lambda$-calculus} contains all terms formed from combining variables, abstractions and applications. However we can restrict ourselves to smaller \textbf{fragments} of the $\lambda$-calculus. The \textbf{linear $\lambda$-calculus} is a subset of the pure $\lambda$-calculus containing terms in which variables are used exactly once, and the \textbf{planar $\lambda$-calculus} is a subset of the linear $\lambda$-calculus in which variables are used in the order they are abstracted in. Linear and planar $\lambda$-terms have special properties relating to maps, which will be covered in the next section.
+
+\begin{table}
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        \textbf{Term} & \textbf{Pure} & \textbf{Linear} & \textbf{Planar} \\
+        \hline
+        $\lambda x. x$ & Yes & Yes & Yes \\
+        \hline
+        $\lambda x. (\lambda y. y) \, x$ & Yes & Yes & Yes \\
+        \hline
+        $\lambda x.\lambda y. x \, y$ & Yes & Yes & Yes \\
+        \hline
+        $\lambda x. \lambda y. y \, x$ & Yes & Yes & No \\
+        \hline
+        $\lambda x. x \, x$ & Yes & No & No \\
+        \hline
+    \end{tabular}
+    \caption{Examples of terms in various fragments of the $\lambda$-calculus.}
+    \label{tab:fragments}
+\end{table}
+
+\subsection{Graphs and maps}
+
+\begin{figure}
+    \centering
+    \includesvg{maps}
+    \caption{These two diagrams represent the same graph but two distinct maps (the ordering of edges around the point on the circle is changed). Adapted from Lando, Zvonkin {\cite{graphs}}}
+    \label{fig:maps}
+\end{figure}
+
+In graph theory, a \textbf{graph} is a set of nodes and edges that link pairs of nodes. When these graphs are \textbf{embedded} onto a surface they are called \textbf{maps}. Unlike graphs, the order of edges around a node is important for maps, and the same graph can be represented as many different maps (an example is shown in Figure \ref{fig:maps}). A map has a \textbf{genus} which is how many 'holes' the surface it is embedded into has. \textbf{Planar maps} are maps with no crossings of edges -- they have a genus of 0. 
+
+In this project we are particularly interested with \textbf{rooted 3-valent maps}. The \textbf{valency} of a node is how many edges connect to it - maps where all of the nodes have a valency of 3 are called \textbf{3-valent}. We can make a \textbf{rooted map} by adding a 'special' node (the \textbf{root}) that connects to the map at one point, as shown in Figure \ref{fig:trivalentrooted}.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.3]{torus}
+    \caption{An example of how a graph with crossings can be embedded onto a torus. From Zeilberger \shortcite{zeil4ct}.}
+    \label{fig:torus}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includesvg[scale=0.5]{trivalentrooted}
+    \caption{A 3-valent map, and the same map but rooted (root indicated by the white node)}
+    \label{fig:trivalentrooted}
+\end{figure}
+
+We can represent $\lambda$-terms as maps. Abstractions and applications are represented as nodes, as shown in Figure \ref{fig:absapp}. We can think of the ordering of the edges around nodes in term of their types:
+
+For an abstraction node the edges flow anti-clockwise: the full abstraction $\lambda x. t$ flowing out (\texttt{A -> B}), the abstracted variable $x$ flowing out (\texttt{A}) and the body of the abstraction $t$ flowing in (\texttt{B}). 
+
+For an application node the edges flow clockwise: the function $t$ flowing in (\texttt{A -> B}), the argument $u$ flowing in (\texttt{A}) and the application $t(u)$ flowing out (\texttt{B}).
+
+With the addition of a root to represent the start of the term, these nodes can be combined to create a rooted map, as shown in Figure \ref{fig:trivalentrooted}. For a linear term, this map will always be 3-valent since there is exactly one use of the abstracted variables.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.7]{absapp}
+    \caption{An abstraction and an application, represented as nodes of a map.}
+    \label{fig:absapp}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.8]{lambdatermandgraph}
+    \caption{An abstraction and an application, represented as nodes of a map.}
+    \label{fig:lambdatermandgrapht}
+\end{figure}
+
+\newpage
+
+\section{Implementation}
+\label{sec:implementation}
+
+\newpage
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+\bibliography{refs}
+
+\end{document}
