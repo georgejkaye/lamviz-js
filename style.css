@@ -35,13 +35,13 @@ h1, h2, h3 {
 }
 .big-frame {
     width: 750px;
-    height: 750px;
+    height: 95vh;
     display: block;
     padding: 0px;
 }
 .graph-frame {
     width: 1000px;
-    height: 1000px;
+    height: 95vh;
     display: block;
     padding: 0px;
 }

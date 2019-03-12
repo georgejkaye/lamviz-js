@@ -12,10 +12,12 @@ var originalTerm;
 var currentFrame;
 var labels;
 
-
 var reduced = false;
 var cyNorm;
 var cyMap;
+
+const fullScreenWidth = "94vw";
+const fullScreenHeight = "92vh";
 
 /**
  * Change the text of an element with a given id.
@@ -278,6 +280,7 @@ function getStats(currentTerm, labels, exhibit){
                                 getButton("reset-btn", "resetButton();", "Reset to original term", true) + 
                                 getButton("back-btn", "backButton();", "Back", false)
             )) +
+            getRow(getCell("", getButton("watch-reduction-btn", "playReduction(document.getElementById(OUTERMOST))", "Watch reduction"))) +
             getRow(getCell("", "<br>")) +
             getRow(getCell("term-fact", "<b>Normalisation graph options<b>")) +
             getRow(getCell("", 'Draw maps (very costly for large maps) <input type = "checkbox" id = "normalisation-maps" checked>')) +
@@ -393,6 +396,55 @@ function clickRedex(i, labels){
     document.getElementById("reset-btn").disabled = false;
 }
 
+const OUTERMOST = 0;
+const INNERMOST = 1;
+const RANDOM = 2;
+
+/**
+ * Watch a term get reduced to its normal form (if it has one - it'll probably crash otherwise).
+ * @param {number} strat - The reduction strategy to use.
+ * @param {boolean} subcall - If this is a subcall.
+ */
+function playReduction(strat, subcall){
+
+    var redexes = currentTerm.betaRedexes();
+
+    if(redexes !== 0){
+
+        var chosenRedex = 0;
+
+        switch(strat){
+            case OUTERMOST:
+                chosenRedex = 0;
+                break;
+            case INNERMOST:
+                chosenRedex = redexes - 1;
+                break;
+            case RANDOM:
+                chosenRedex = Math.floor(Math.random() * redexes);
+                break;
+        }
+
+        const delay = 1000;
+
+        if(subcall){
+            setTimeout(function(){
+                setTimeout(function(){
+                            setTimeout(playReduction(strat, true), delay); 
+                            clickRedex(chosenRedex, labels)
+                }, delay); 
+                highlightRedex(chosenRedex)
+            }, delay);
+        } else {
+            setTimeout(function(){
+                setTimeout(playReduction(strat, true), delay / 2); 
+                (chosenRedex, labels)
+            }, delay / 2); 
+            highlightRedex(chosenRedex);
+        }
+    }
+}
+
 /**
  * Function to execute when the full screen button is pressed.
  * @param {string} exhibit - The exhibit to affect.
@@ -403,7 +455,7 @@ function fullScreenMapButton(exhibit){
                             getDiv("","","","", getButton("fullScreen-btn", "exitFullScreenMapButton(\'" + exhibit + "\');", "Exit full screen"))
     );
 
-    changeFrameSizeMap("98vw", "95vh");
+    changeFrameSizeMap(fullScreenWidth, fullScreenHeight);
     scrollToElement("frame" + currentFrame);
 }
 
@@ -521,7 +573,7 @@ function fullScreenNormalisationGraphButton(){
                             getDiv("","","","", getButton("fullScreen-btn", "exitFullScreenNormalisationGraphButton();", "Exit full screen"))
     );
 
-    changeFrameSizeGraph("98vw", "94vh");
+    changeFrameSizeGraph(fullScreenWidth, fullScreenHeight);
     scrollToElement('normalisation-studio');
 }
 
