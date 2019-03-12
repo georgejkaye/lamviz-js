@@ -454,7 +454,6 @@ function clickRedex(i){
 
     currentTerm = normalisedTerm;
     viewPortrait("church-room", currentTerm, labels, bigScreen, i);
-    document.getElementById("reset-btn").disabled = false;
 }
 
 const OUTERMOST = 0;
