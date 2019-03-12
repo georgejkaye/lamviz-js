@@ -76,22 +76,16 @@ class LambdaVariable{
     /**
      * Create a lambda variable.
      * @param {number} index - Which lambda abstraction this term refers to.
-     * @param {string} label - The label this term is associated with.
+     * @param {string} alias - The alias this term is associated with.
      */
-    constructor(index, label, name){
+    constructor(index, alias){
 
-        if(name === undefined){
-            name = "";
+        if(alias === undefined){
+            alias = "";
         }
 
         this.index = index;
-        this.name = name;
-
-        if(label !== ""){
-            this.label = label
-        } else {
-            this.label = index.toString();
-        }
+        this.alias = alias;
 
         this.print = this.prettyPrint();
     }
@@ -121,8 +115,8 @@ class LambdaVariable{
      */
     prettyPrintLabels(ctx, x){
 
-        if(this.name !== ""){
-            return this.name;
+        if(this.alias !== ""){
+            return this.alias;
         }
 
         return ctx.getCorrespondingVariable(this.index, true);
@@ -248,8 +242,8 @@ class LambdaVariable{
 
         var label = ctx.getCorrespondingVariable(this.index, true);
 
-        if(this.name !== ""){
-            label = this.name;
+        if(this.alias !== ""){
+            label = this.alias;
         }
 
         var string = '<span class = "var-' + vars + '">' + label + '</span>';
@@ -285,15 +279,15 @@ class LambdaAbstraction{
      * @param {Object}      t       - The scope of this lambda abstraction.
      * @param {string}      label   - The label this lambda abstraction has.
      */
-    constructor(t, label, name){
-        if(name === undefined){
-            name = "";
+    constructor(t, label, alias){
+        if(alias === undefined){
+            alias = "";
         }
 
         this.t = t; 
         this.label = label; 
         this.closed = []
-        this.name = name;
+        this.alias = alias;
         this.print = this.prettyPrint();
     }
 
@@ -335,8 +329,8 @@ class LambdaAbstraction{
      */
     prettyPrintLabels(ctx, x){
 
-        if(this.name !== ""){
-            return this.name;
+        if(this.alias !== ""){
+            return this.alias;
         }
 
         if(x === undefined){
@@ -498,8 +492,8 @@ class LambdaAbstraction{
         var scope = this.t.printHTML(ctx, 0, vars, abs, apps, betas);
         ctx.popTerm();
 
-        if(this.name !== ""){
-            string += this.name;
+        if(this.alias !== ""){
+            string += this.alias;
         } else {
             if(x !== 0){
                 string += '(';
@@ -547,12 +541,12 @@ class LambdaApplication{
      * @param {Object} t1 - the first term in the lambda application (the function).
      * @param {Object} t2 - the second term in the lambda application (the argument).
      */
-    constructor(t1, t2, name){
-        if(name === undefined){
-            name = "";
+    constructor(t1, t2, alias){
+        if(alias === undefined){
+            alias = "";
         }
 
-        this.t1 = t1; this.t2 = t2, this.closed = [], this.name = name, this.print = this.prettyPrint();
+        this.t1 = t1; this.t2 = t2, this.closed = [], this.alias = alias, this.print = this.prettyPrint();
     }
 
     /**
@@ -597,8 +591,8 @@ class LambdaApplication{
      */
     prettyPrintLabels(ctx, x){
 
-        if(this.name !== ""){
-            return this.name;
+        if(this.alias !== ""){
+            return this.alias;
         }
 
         if(x === undefined){
@@ -608,7 +602,7 @@ class LambdaApplication{
         var string = "";
 
         if(x === 0){
-            if(this.t1.getType() === ABS && this.t1.name === ""){
+            if(this.t1.getType() === ABS && this.t1.alias === ""){
                 string = "(" + this.t1.prettyPrintLabels(ctx, 0) + ") " + this.t2.prettyPrintLabels(ctx, 1);
             } else {
                 string = this.t1.prettyPrintLabels(ctx, 0) + " " + this.t2.prettyPrintLabels(ctx, 1);
@@ -810,8 +804,8 @@ class LambdaApplication{
         var lhs = this.t1.printHTML(ctx, y, vars, abs, apps, betas);
         var rhs = this.t2.printHTML(ctx, z, lhs[1], lhs[2], lhs[3], lhs[4]);
 
-        if(this.name !== ""){
-            string += this.name;
+        if(this.alias !== ""){
+            string += this.alias;
         } else {
 
             if(x !== 0){
