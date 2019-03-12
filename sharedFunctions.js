@@ -13,6 +13,7 @@ var currentFrame;
 var labels;
 
 var reduced = false;
+var reducing = false;
 var cyNorm;
 var cyMap;
 
@@ -274,13 +275,18 @@ function getStats(currentTerm, labels, exhibit){
             getRow(getCell("term-fact", 'Variables: ' + currentTerm.variables())) +
             getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
             getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
-            getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(freeVariables), "redex", "clickRedex(i, " + labels + ")", "highlightRedex(i, true)", "unhighlightRedex(i, true)"))) +
+            getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(freeVariables), "redex", "clickRedexOnclick(i, " + labels + ")", "highlightRedexMouseover(i, true)", "unhighlightRedexMouseover(i, true)"))) +
             getRow(getCell("", getButton("fullScreen-btn", "fullScreenMapButton(\'" + exhibit + "\');", "Full screen", false) +
                                 getButton("reset-btn", "resetViewButton(\'" + exhibit + "\');", "Reset view", true) +
                                 getButton("reset-btn", "resetButton();", "Reset to original term", true) + 
                                 getButton("back-btn", "backButton();", "Back", false)
             )) +
-            getRow(getCell("", getButton("watch-reduction-btn", "playReduction(document.getElementById(OUTERMOST))", "Watch reduction"))) +
+            getRow(getCell("", getButton("watch-reduction-btn", "playReduction()", "Watch normalisation") +
+                                '<select id="strategy">' +
+                                    "<option value=0>Outermost</value>" +
+                                    "<option value=1>Innermost</value>" +
+                                    "<option value=2>Random</value>" +
+                                "<select")) +
             getRow(getCell("", "<br>")) +
             getRow(getCell("term-fact", "<b>Normalisation graph options<b>")) +
             getRow(getCell("", 'Draw maps (very costly for large maps) <input type = "checkbox" id = "normalisation-maps" checked>')) +
@@ -337,6 +343,16 @@ function resetViewButton(exhibit){
 }
 
 /**
+ * Highlight a redex from a mouseover, providing a reduction animation is not playing.
+ * @param {number} i - The redex to highlight.
+ */
+function highlightRedexMouseover(i){
+    if(!reducing){
+        highlightRedex(i);
+    }
+}
+
+/**
  * Highlight a redex.
  * @param {number} i - The redex to highlight.
  */
@@ -368,6 +384,16 @@ function highlightRedex(i){
 }
 
 /**
+ * Unhighlight an already highlighted redex from a mouseover, providing an animation is not taking place.
+ * @param {number} i - The redex to unhighlight.
+ */
+function unhighlightRedexMouseover(i){
+    if(!reducing){
+        unhighlightRedex(i);
+    }
+}
+
+/**
  * Unhighlight an already highlighted redex.
  * @param {number} i - The redex to unhighlight.
  */
@@ -377,7 +403,16 @@ function unhighlightRedex(i){
 }
 
 /**
- * Function to execute when you click a redex.
+ * FUnction to execute when you click a redex, providing an animation is not playing.
+ */
+function clickRedexOnclick(i, labels){
+    if(!reducing){
+        clickRedex(i, labels);
+    }
+}
+
+/**
+ * Reduce one of the redexes.
  * @param {number} i - The redex clicked.
  * @param {boolean} labels - Whether the labels should be displayed on the map.
  */
@@ -402,14 +437,19 @@ const RANDOM = 2;
 
 /**
  * Watch a term get reduced to its normal form (if it has one - it'll probably crash otherwise).
- * @param {number} strat - The reduction strategy to use.
  * @param {boolean} subcall - If this is a subcall.
+ * @param {number} strat - The strat to use, if this is a subcall.
  */
-function playReduction(strat, subcall){
+function playReduction(subcall, strat){
 
     var redexes = currentTerm.betaRedexes();
+    reducing = true;
 
     if(redexes !== 0){
+
+        if(strat === undefined){
+            strat = document.getElementById("strategy").selectedIndex;
+        }
 
         var chosenRedex = 0;
 
@@ -430,18 +470,20 @@ function playReduction(strat, subcall){
         if(subcall){
             setTimeout(function(){
                 setTimeout(function(){
-                            setTimeout(playReduction(strat, true), delay); 
+                            setTimeout(playReduction(true, strat), delay); 
                             clickRedex(chosenRedex, labels)
                 }, delay); 
                 highlightRedex(chosenRedex)
             }, delay);
         } else {
             setTimeout(function(){
-                setTimeout(playReduction(strat, true), delay / 2); 
-                (chosenRedex, labels)
+                setTimeout(playReduction(true, strat), delay / 2); 
+                clickRedex(chosenRedex, labels);
             }, delay / 2); 
             highlightRedex(chosenRedex);
         }
+    } else {
+        reducing = false;
     }
 }
 
