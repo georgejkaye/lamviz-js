@@ -20,6 +20,6 @@
 * ~~Make sure terms with infinite reduction loops are handled gracefully~~
 * ~~Free variables aren't being labelled properly for some reason~~
 * ~~Way of automatically parsing in aliases?~~
-* Identify what makes the long time for graphs
+* ~~Identify what makes the long time for graphs~~
 * Make normalisation graphs less laggy somehow
 * ~~Work on making maps easier to read for big boys~~

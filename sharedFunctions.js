@@ -277,7 +277,7 @@ function getStats(currentTerm){
             getRow(getCell("term-fact", 'Variables: ' + currentTerm.variables())) +
             getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
             getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
-            getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(freeVariables), "redex", "clickRedexOnclick(i)", "highlightRedexMouseover(i, true)", "unhighlightRedexMouseover(i, true)"))) +
+            getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(freeVariables), "redex", "clickRedexOnclick(i,)", "highlightRedexMouseover(i, true)", "unhighlightRedexMouseover(i, true)"))) +
             getRow(getCell("", getButton("fullScreen-btn", "fullScreenMapButton();", "Full screen", false) +
                                 getButton("reset-btn", "resetViewButton();", "Reset view", true) +
                                 getButton("reset-btn", "resetButton();", "Reset to original term", true) + 
@@ -357,7 +357,7 @@ function resetButton(){
 
     if(reduced){
         currentTerm = originalTerm;
-        viewPortrait(exhibit, currentTerm, labels, fullScreen, currentFrame);
+        viewPortrait(exhibit, currentTerm, labels, bigScreen, currentFrame);
     }
 }
 
@@ -365,7 +365,7 @@ function resetButton(){
  * Function to execute when the reset view button is pressed.
  */
 function resetViewButton(){
-    viewPortrait(exhibit, currentTerm, labels, fullScreen, currentFrame);
+    viewPortrait(exhibit, currentTerm, labels, bigScreen, currentFrame);
 }
 
 /**
@@ -453,7 +453,7 @@ function clickRedex(i){
     }
 
     currentTerm = normalisedTerm;
-    viewPortrait("church-room", currentTerm, labels, fullScreen, i);
+    viewPortrait("church-room", currentTerm, labels, bigScreen, i);
     document.getElementById("reset-btn").disabled = false;
 }
 
@@ -480,6 +480,7 @@ function playReduction(subcall, strat){
 
         var chosenRedex = 0;
 
+        /* The chosen redex depends on the reduction strategy */
         switch(strat){
             case OUTERMOST:
                 chosenRedex = 0;
@@ -492,7 +493,7 @@ function playReduction(subcall, strat){
                 break;
         }
 
-        const delay = 500;
+        const delay = 1000;
 
         if(subcall){
             setTimeout(function(){
@@ -527,51 +528,21 @@ function normaliseButton(){
         reduced = true;
     }
 
-    viewPortrait(exhibit, currentTerm, labels, fullScreen, currentFrame);
+    viewPortrait(exhibit, currentTerm, labels, bigScreen, currentFrame);
 }
 
 /**
  * Function to execute when the full screen button is pressed.
  */
 function fullScreenMapButton(){
-
-    /*changeText(exhibit, getDiv("w3-container frame big-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + currentFrame, "", "", "")) + '<br>' +
-                            getDiv("","","","", getButton("fullScreen-btn", "exitFullScreenMapButton(\'" + exhibit + "\');", "Exit full screen") +
-                            getButton("watch-reduction-btn", "playReduction()", "Watch normalisation") +
-                            '<select id="strategy">' +
-                                "<option value=0>Outermost</value>" +
-                                "<option value=1>Innermost</value>" +
-                                "<option value=2>Random</value>" +
-                            "<select")
-    );
-
-    changeFrameSizeMap(fullScreenWidth, fullScreenHeight);
-    scrollToElement("frame" + currentFrame);
-    */
-
     viewPortrait(exhibit, currentTerm, labels, true, currentFrame);
 }
 
 /**
  * Function to execute when the exit full screen button is pressed.
- * @param {string} exhibit - The exhibit to affect.
  */
-function exitFullScreenMapButton(exhibit){
+function exitFullScreenMapButton(){
     viewPortrait(exhibit, currentTerm, labels, false, currentFrame);
-    scrollToElement('church-room');
-}
-
-/**
- * Change the size of the current frame on screen.
- * @param {string} width - The style for the width.
- * @param {string} height - The style for the height.
- */
-function changeFrameSizeMap(width, height){
-    document.getElementById("frame" + currentFrame).style.width = width;
-    document.getElementById("frame" + currentFrame).style.height = height;
-    document.getElementById("portrait" + currentFrame).style.width = "100%";
-    document.getElementById("portrait" + currentFrame).style.height = "100%";
-    cyMap = drawMap('portrait' + currentFrame, currentTerm, freeVariables, true, true, labels);
 }
 
 /**
@@ -630,7 +601,7 @@ function getNormalisationGraphText(pathStats){
                 getRow(getCell("term-fact", 'Edges: ' + currentReductions.edges())) +
                 pathStatsText +
                 getRow(getCell("", getButton('fullscreen-norm-btn', 'fullScreenNormalisationGraphButton()', "Full screen", false))) +
-                getRow(getCell("", getButton('clear-norm-btn', 'clearNormalisationGraph()', "Clear", false))) +
+                getRow(getCell("", getButton('clear-norm-btn', 'clearNormalisationGraph()', "Back", false))) +
            '</table>';
 }
 
