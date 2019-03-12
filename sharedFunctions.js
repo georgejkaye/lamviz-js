@@ -15,7 +15,7 @@ var exhibit;
 
 var reduced = false;
 var reducing = false;
-var fullScreen = false;
+var bigScreen = false;
 var cyNorm;
 var cyMap;
 
@@ -310,7 +310,7 @@ function viewPortrait(exhibitName, term, label, full, i){
 
     exhibit = exhibitName;
     labels = label;
-    fullScreen = full;
+    bigScreen = full;
 
     currentTerm = term;
 
@@ -320,7 +320,7 @@ function viewPortrait(exhibitName, term, label, full, i){
 
     currentFrame = i;
 
-    if(!fullscreen){
+    if(!bigScreen){
         changeText(exhibit, '<table>' +
                                         '<tr>' +
                                             '<td>' + getDiv("w3-container frame big-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
@@ -340,7 +340,9 @@ function viewPortrait(exhibitName, term, label, full, i){
                                 "<option value=0>Outermost</value>" +
                                 "<option value=1>Innermost</value>" +
                                 "<option value=2>Random</value>" +
-                            "<select")
+                            "<select>" +
+                            getButton("reset-button", "resetViewButton()", "Reset to original view") +
+                            getButton("reset-view-button", "resetButton()", "Reset to original term"))
         );
     }
 
@@ -555,7 +557,7 @@ function fullScreenMapButton(){
  * @param {string} exhibit - The exhibit to affect.
  */
 function exitFullScreenMapButton(exhibit){
-    viewPortrait(exhibit, currentTerm, labels, currentFrame);
+    viewPortrait(exhibit, currentTerm, labels, false, currentFrame);
     scrollToElement('church-room');
 }
 
