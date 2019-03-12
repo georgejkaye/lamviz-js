@@ -39,6 +39,12 @@ h1, h2, h3 {
     display: block;
     padding: 0px;
 }
+.full-frame {
+    width: 97vw;
+    height: 93vh;
+    display: block;
+    padding: 0px;
+}
 .graph-frame {
     width: 1000px;
     height: 95vh;

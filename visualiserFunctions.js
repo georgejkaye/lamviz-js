@@ -51,103 +51,10 @@ function executeButton(){
     changeText('normalisation-studio', "");
 
     if(!error){
-        viewPortrait("church-room", currentTerm, document.getElementById('labels-yes').checked);
+        viewPortrait("church-room", currentTerm, document.getElementById('labels-yes').checked, false);
     }
 
     reduced = false;
-}
-
-/**
- * Function to execute when the 'substitute' button is pressed.
- */
-function substituteButton(){
-
-    var s = tokenise(getText('s'));
-    var j = getText('j');
-
-    var frees = getText('ctx').split(" ");
-    freeVariables = new LambdaEnvironment();
-
-    for(i = 0; i < frees.length; i++){
-        freeVariables.pushTerm(frees[i]);
-    }
-
-    j = freeVariables.find(j);
-
-    if(j === -1){
-        changeText('result', "Variable not in environment");
-    } else if(typeof s === "string"){
-        changeText('result', s)
-    } else {
-        var newterm = substitute(parse(s, new LambdaEnvironment()), j, currentTerm);
-        changeText('result', newterm.prettyPrint());
-    }
-}
-
-/**
- * Function to execute when the 'evaluate' button is pressed.
- */
-function evaluateButton(){
-
-    var res = evaluate(currentTerm);
-
-    if(res === "Timeout"){
-        changeText('result', "Timed out during evaluation");
-    } else {
-
-        var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels(freeVariables);
-
-        changeText('result', text);
-    }
-}
-
-/**
- * Function to execute when the 'normalise' button is pressed.
- */
-function normaliseButton(){
-
-    var res = outermostReduction(currentTerm);
-
-    if(res === "Timeout"){
-        changeText('result', "Timed out during normalisation");
-    } else {
-
-        var frees = getText('env').split(" ");
-        freeVariables = new LambdaEnvironment();
-
-        for(i = 0; i < frees.length; i++){
-            freeVariables.pushTerm(frees[i]);
-        }
-
-        currentTerm = res;
-        var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels(freeVariables);
-
-        changeText('result', text);
-        drawMap("cy", currentTerm, ctx, true, true, document.getElementById('labels-yes').checked);
-    }
-}
-
-/**
- * Function to execute when the beta button is pressed.
- */
-function betaButton(){
-
-    var frees = getText('ctx').split(" ");
-    freeVariables = new LambdaEnvironment();
-
-    for(i = 0; i < frees.length; i++){
-        freeVariables.pushTerm(frees[i]);
-    }
-
-    var t1 = parse(tokenise(getText('b1')), freeVariables);
-    var t2 = parse(tokenise(getText('b2')), freeVariables);
-
-    var res = applicationAbstraction(t1, t2)
-
-    var text = res.prettyPrint() + " ~ ~ ~ " + res.prettyPrintLabels(freeVariables);
-
-    changeText('result', text)
-
 }
 
 /**
@@ -194,19 +101,6 @@ function normaliseTreeButton(){
     changeText('normalisation-tree', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")));
     drawNormalisationGraph('normalisation-graph', currentTerm, freeVariables, document.getElementById('normalisation-maps').checked);
 
-}
-
-/**
- * Function to execute when the reset button is pressed.
- */
-function resetButton(labels){
-    changeText('normalisation-studio', "");
-    if(reduced && currentTerm !== originalTerm){
-        originalTerm.generatePrettyVariableNames(freeVariables);
-        viewPortrait("church-room", originalTerm, document.getElementById("labels-yes").checked);
-        reduced = false;
-        currentTerm = originalTerm;
-    }
 }
 
 /**

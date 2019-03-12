@@ -11,13 +11,15 @@ var originalTerm;
 /* Details about the currently viewed big frame */
 var currentFrame;
 var labels;
+var exhibit;
 
 var reduced = false;
 var reducing = false;
+var fullScreen = false;
 var cyNorm;
 var cyMap;
 
-const fullScreenWidth = "94vw";
+const fullScreenWidth = "96vw";
 const fullScreenHeight = "92vh";
 
 /**
@@ -266,7 +268,7 @@ function printTermHTML(term){
  * @param {number} exhibit - The exhibit the stats are being displayed in.
  * @return {string} The HTML table code for the stats.
  */
-function getStats(currentTerm, labels, exhibit){
+function getStats(currentTerm){
     return getRow(getCell("term-heading", '<b>' + printTermHTML(currentTerm) + '</b>')) +
             getRow(getCell("term-subheading", '<b>' + currentTerm.prettyPrint() + '</b>')) +
             getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
@@ -275,12 +277,13 @@ function getStats(currentTerm, labels, exhibit){
             getRow(getCell("term-fact", 'Variables: ' + currentTerm.variables())) +
             getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
             getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
-            getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(freeVariables), "redex", "clickRedexOnclick(i, " + labels + ")", "highlightRedexMouseover(i, true)", "unhighlightRedexMouseover(i, true)"))) +
-            getRow(getCell("", getButton("fullScreen-btn", "fullScreenMapButton(\'" + exhibit + "\');", "Full screen", false) +
-                                getButton("reset-btn", "resetViewButton(\'" + exhibit + "\');", "Reset view", true) +
+            getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(freeVariables), "redex", "clickRedexOnclick(i)", "highlightRedexMouseover(i, true)", "unhighlightRedexMouseover(i, true)"))) +
+            getRow(getCell("", getButton("fullScreen-btn", "fullScreenMapButton();", "Full screen", false) +
+                                getButton("reset-btn", "resetViewButton();", "Reset view", true) +
                                 getButton("reset-btn", "resetButton();", "Reset to original term", true) + 
                                 getButton("back-btn", "backButton();", "Back", false)
             )) +
+            getRow(getCell("", getButton("normalise-btn", "normaliseButton()", "Normalise"))) +
             getRow(getCell("", getButton("watch-reduction-btn", "playReduction()", "Watch normalisation") +
                                 '<select id="strategy">' +
                                     "<option value=0>Outermost</value>" +
@@ -300,17 +303,16 @@ function getStats(currentTerm, labels, exhibit){
  * @param {string} exhibit - The id of where the portrait is to be drawn.
  * @param {Object} term - The term to draw.
  * @param {boolean} label - If the labels should be drawn on the map.
+ * @param {boolean} fullscreen - If the map should be drawn fullscreen.
  * @param {number} i - The id of the portrait to draw.
  */
-function viewPortrait(exhibit, term, label, i){
+function viewPortrait(exhibitName, term, label, full, i){
+
+    exhibit = exhibitName;
+    labels = label;
+    fullScreen = full;
 
     currentTerm = term;
-
-    var disabled = '';
-
-    if(!currentTerm.hasBetaRedex()){
-        disabled = 'disabled';
-    }
 
     if(i === undefined){
         i = 0;
@@ -318,28 +320,50 @@ function viewPortrait(exhibit, term, label, i){
 
     currentFrame = i;
 
-    changeText(exhibit, '<table>' +
-                                    '<tr>' +
-                                        '<td>' + getDiv("w3-container frame big-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
-                                        '<td>' +
-                                            '<table>' + 
-                                                getStats(currentTerm, label, exhibit) +   
-                                            '</table>' +
-                                        '</td>' +
-                                    '</tr>' +
-                                '</table>'
-    )
+    if(!fullscreen){
+        changeText(exhibit, '<table>' +
+                                        '<tr>' +
+                                            '<td>' + getDiv("w3-container frame big-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
+                                            '<td>' +
+                                                '<table>' + 
+                                                    getStats(currentTerm) +   
+                                                '</table>' +
+                                            '</td>' +
+                                        '</tr>' +
+                                    '</table>'
+        )
+    } else {
+        changeText(exhibit, getDiv("w3-container frame full-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + currentFrame, "", "", "")) + '<br>' +
+                            getDiv("","","","", getButton("fullScreen-btn", "exitFullScreenMapButton(\'" + exhibit + "\');", "Exit full screen") +
+                            getButton("watch-reduction-btn", "playReduction()", "Watch normalisation") +
+                            '<select id="strategy">' +
+                                "<option value=0>Outermost</value>" +
+                                "<option value=1>Innermost</value>" +
+                                "<option value=2>Random</value>" +
+                            "<select")
+        );
+    }
 
-    labels = label;
     cyMap = drawMap('portrait' + currentFrame, currentTerm, freeVariables, true, true, label);
-    scrollToElement('frame' + currentFrame, -5);
+    scrollToElement("church-room");
+}
+
+/**
+ * Function to execute when the reset button is pressed.
+ */
+function resetButton(){
+
+    if(reduced){
+        currentTerm = originalTerm;
+        viewPortrait(exhibit, currentTerm, labels, fullScreen, currentFrame);
+    }
 }
 
 /**
  * Function to execute when the reset view button is pressed.
  */
-function resetViewButton(exhibit){
-    viewPortrait(exhibit, currentTerm, labels, currentFrame);
+function resetViewButton(){
+    viewPortrait(exhibit, currentTerm, labels, fullScreen, currentFrame);
 }
 
 /**
@@ -405,9 +429,9 @@ function unhighlightRedex(i){
 /**
  * FUnction to execute when you click a redex, providing an animation is not playing.
  */
-function clickRedexOnclick(i, labels){
+function clickRedexOnclick(i){
     if(!reducing){
-        clickRedex(i, labels);
+        clickRedex(i);
     }
 }
 
@@ -416,7 +440,7 @@ function clickRedexOnclick(i, labels){
  * @param {number} i - The redex clicked.
  * @param {boolean} labels - Whether the labels should be displayed on the map.
  */
-function clickRedex(i, labels){
+function clickRedex(i){
 
     var normalisedTerm = specificReduction(currentTerm, i)[0];
     normalisedTerm.generatePrettyVariableNames(freeVariables);
@@ -427,7 +451,7 @@ function clickRedex(i, labels){
     }
 
     currentTerm = normalisedTerm;
-    viewPortrait("church-room", currentTerm, labels, i);
+    viewPortrait("church-room", currentTerm, labels, fullScreen, i);
     document.getElementById("reset-btn").disabled = false;
 }
 
@@ -442,6 +466,7 @@ const RANDOM = 2;
  */
 function playReduction(subcall, strat){
 
+    scrollToElement("church-room");
     var redexes = currentTerm.betaRedexes();
     reducing = true;
 
@@ -465,7 +490,7 @@ function playReduction(subcall, strat){
                 break;
         }
 
-        const delay = 1000;
+        const delay = 500;
 
         if(subcall){
             setTimeout(function(){
@@ -488,17 +513,41 @@ function playReduction(subcall, strat){
 }
 
 /**
- * Function to execute when the full screen button is pressed.
- * @param {string} exhibit - The exhibit to affect.
+ * Function to execute when the normalise button is pressed.
  */
-function fullScreenMapButton(exhibit){
+function normaliseButton(){
 
-    changeText(exhibit, getDiv("w3-container frame big-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + currentFrame, "", "", "")) + '<br>' +
-                            getDiv("","","","", getButton("fullScreen-btn", "exitFullScreenMapButton(\'" + exhibit + "\');", "Exit full screen"))
+    var normalisedTerm = normalise(currentTerm);
+
+    if(!reduced){
+        originalTerm = currentTerm;
+        currentTerm = normalisedTerm;
+        reduced = true;
+    }
+
+    viewPortrait(exhibit, currentTerm, labels, fullScreen, currentFrame);
+}
+
+/**
+ * Function to execute when the full screen button is pressed.
+ */
+function fullScreenMapButton(){
+
+    /*changeText(exhibit, getDiv("w3-container frame big-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + currentFrame, "", "", "")) + '<br>' +
+                            getDiv("","","","", getButton("fullScreen-btn", "exitFullScreenMapButton(\'" + exhibit + "\');", "Exit full screen") +
+                            getButton("watch-reduction-btn", "playReduction()", "Watch normalisation") +
+                            '<select id="strategy">' +
+                                "<option value=0>Outermost</value>" +
+                                "<option value=1>Innermost</value>" +
+                                "<option value=2>Random</value>" +
+                            "<select")
     );
 
     changeFrameSizeMap(fullScreenWidth, fullScreenHeight);
     scrollToElement("frame" + currentFrame);
+    */
+
+    viewPortrait(exhibit, currentTerm, labels, true, currentFrame);
 }
 
 /**
