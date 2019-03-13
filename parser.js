@@ -109,7 +109,7 @@ function parseTerm(tokens, initial, env){
                             t2 = new LambdaAbstraction(body.t, body.label, tokens[i]);
                             break;
                         case VAR:
-                            t2 = new LambdaVariable(body.index, body.label, tokens[i]);
+                            t2 = new LambdaVariable(body.index, tokens[i]);
                             break;
                     }
                 } else {
@@ -121,7 +121,7 @@ function parseTerm(tokens, initial, env){
                         return "Parse error: Variable " + tokens[i] + " with no associated binding encountered";
                     }
 
-                    t2 = new LambdaVariable(index, label);
+                    t2 = new LambdaVariable(index);
                 }
 
                 pos++;
