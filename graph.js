@@ -1035,14 +1035,38 @@ function drawNormalisationGraph(id, term, ctx, maps, labels, arrows){
                 posX = (-0.5) * w + ((j-c) * (w+x));
             }
 
-            console.log(posX);
-
             elems[j].position('x', posX);
             elems[j].position('y', i * normalisationDistanceY);
         }
         
     }
 
+    if(!labels){
+        cyNorm.nodes().on('mouseover', function(e){
+            var ele = e.target;
+            updateStyle(false, "[id = '" + ele.data('id') + "']", 'label', 'data(label)');
+            console.log("hello");
+        });
+
+        cyNorm.nodes().on('mouseout', function(e){
+            var ele = e.target;
+            updateStyle(false, "[id = '" + ele.data('id') + "']", 'label', '');
+        });
+        
+    }
+
+    cyNorm.edges().on('mouseover', function(e){
+        var ele = e.target;
+        updateStyle(false, "[id = '" + ele.data('id') + "']", 'label', 'data(label)');
+        console.log("hello");
+    });
+
+    cyNorm.edges().on('mouseout', function(e){
+        var ele = e.target;
+        updateStyle(false, "[id = '" + ele.data('id') + "']", 'label', '');
+    });
+
+    /* Fit the map to the frame. */
     cyNorm.fit(cyNorm.filter(function(ele, i, eles){return true;}), 10);
     
     return cyNorm;

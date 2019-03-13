@@ -340,7 +340,9 @@ function getAllOneStepReductions(term){
         switch(term.getType()){
             case ABS:
 
+                ctx.pushTerm(term.label);
                 var scopeReductions = getAllOneStepReductions(term.t);
+                ctx.popTerm();
 
                 for(var i = 0; i < scopeReductions.length; i++){
                     reductions[x] = [new LambdaAbstraction(scopeReductions[i][0], term.label), scopeReductions[i][1]];

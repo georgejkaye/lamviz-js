@@ -98,8 +98,10 @@ function parseTerm(tokens, initial, env){
             /* otherwise */
             default:
 
+                /* Check if this is an alias being parsed. */
                 var body = getFunctionBody(tokens[i]);
 
+                /* If it is an alias: */
                 if(body !== null){
                     switch(body.getType()){
                         case APP:
@@ -129,6 +131,7 @@ function parseTerm(tokens, initial, env){
                 
         } 
 
+        /* Check if this is the second part of an application. */
         if(secondTerm){
                 t1 = new LambdaApplication(t1, t2);
         } else {
