@@ -168,6 +168,19 @@ function getDiv(className, id, style, onclick, content){
 }
 
 /**
+ * Get the HTML for a <span>.
+ * @param {string} className - The class of this <span>.
+ * @param {string} id - The id of this <span>.
+ * @param {string} style - The style of this <span>.
+ * @param {string} onclick - The onclick of this <span>.
+ * @param {string} content - The content of this <span>.
+ * @return {string} The corresponding HTML for this <span>.
+ */
+function getSpan(className, id, style, onclick, content){
+    return getElement("span", className, id, style, onclick, content);
+}
+
+/**
  * Get the HTML for a <p>.
  * @param {string} className - The class of this <p>.
  * @param {string} id - The id of this <p>.
@@ -333,7 +346,8 @@ function viewPortrait(exhibitName, term, label, full, i){
                                     '</table>'
         )
     } else {
-        changeText(exhibit, getDiv("w3-container frame full-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + currentFrame, "", "", "")) + '<br>' +
+        changeText(exhibit, getSpan("term-heading", "", "", "", "<b>" + printTermHTML(currentTerm) + "</b>&ensp;") + getSpan("term-subheading", "", "", "", "<b>" + currentTerm.prettyPrint() + "</b>") +
+                            getDiv("w3-container frame full-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + currentFrame, "", "", "")) + '<br>' +
                             getDiv("","","","", getButton("fullScreen-btn", "exitFullScreenMapButton(\'" + exhibit + "\');", "Exit full screen") +
                             getButton("watch-reduction-btn", "playReduction()", "Watch normalisation") +
                             '<select id="strategy">' +
@@ -341,6 +355,7 @@ function viewPortrait(exhibitName, term, label, full, i){
                                 "<option value=1>Innermost</value>" +
                                 "<option value=2>Random</value>" +
                             "<select>" +
+                            getButton("normalise-button", "normaliseButton()", "Normalise") +
                             getButton("reset-button", "resetViewButton()", "Reset to original view") +
                             getButton("reset-view-button", "resetButton()", "Reset to original term"))
         );
@@ -358,6 +373,7 @@ function resetButton(){
     if(reduced){
         currentTerm = originalTerm;
         viewPortrait(exhibit, currentTerm, labels, bigScreen, currentFrame);
+        reduced = false;
     }
 }
 
@@ -523,10 +539,10 @@ function normaliseButton(){
 
     if(!reduced){
         originalTerm = currentTerm;
-        currentTerm = normalisedTerm;
         reduced = true;
     }
 
+    currentTerm = normalisedTerm;
     viewPortrait(exhibit, currentTerm, labels, bigScreen, currentFrame);
 }
 
