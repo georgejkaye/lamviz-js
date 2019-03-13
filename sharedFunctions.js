@@ -296,8 +296,7 @@ function getStats(currentTerm){
                                 getButton("reset-btn", "resetButton();", "Reset to original term", true) + 
                                 getButton("back-btn", "backButton();", "Back", false)
             )) +
-            getRow(getCell("", getButton("normalise-btn", "normaliseButton()", "Normalise"))) +
-            getRow(getCell("", getButton("watch-reduction-btn", "playReduction()", "Watch normalisation") +
+            getRow(getCell("", getButton("normalise-btn", "normaliseButton()", "Normalise") + getButton("watch-reduction-btn", "playReduction()", "Watch normalisation") +
                                 '<select id="strategy">' +
                                     "<option value=0>Outermost</value>" +
                                     "<option value=1>Innermost</value>" +
