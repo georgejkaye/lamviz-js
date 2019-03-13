@@ -535,6 +535,7 @@ function playReduction(subcall, strat){
 function normaliseButton(){
 
     var normalisedTerm = normalise(currentTerm);
+    normalisedTerm.generatePrettyVariableNames(freeVariables);
 
     if(!reduced){
         originalTerm = currentTerm;

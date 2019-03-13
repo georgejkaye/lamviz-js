@@ -30,3 +30,21 @@ Or
 
 And
 \P.\Q. P Q False (\u.\v. (id v) u) 
+
+Copy
+\P. P (Pair True True) (Pair False False) (\U.\V. U (\u1.\u2. V (\v1.\v2. (Pair ((id v1) u1) ((id v2) u2)))))
+
+cp1
+\fnc. \p. \k. k (fnc p)
+
+cp2
+\fnc. \p. \q. \k. k (fnc p q)
+
+Notgate
+cp1 Not
+
+Orgate
+cp2 Or
+
+Andgate
+cp2 And
