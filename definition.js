@@ -22,7 +22,7 @@ const MODE = 3;
 const MEDIAN = 4;
 
 var currentVariableIndex = 0;
-const variableNames = ['x', 'y', 'z', 'w', 'u', 'v', 't', 'p', 'q', 'r', 's', 'm', 'n'];
+const variableNames = ['x', 'y', 'z', 'w', 'u', 'v', 't', 'p', 'q', 'r', 's', 'm', 'n', 'o', '\u03C8', '\u03C8', '\u03C9'];
 
 var currentFreeVariableIndex = 0;
 const freeVariableNames = ['a', 'b', 'c', 'd', 'e'];
@@ -533,16 +533,18 @@ class LambdaAbstraction{
      */
     generatePrettyVariableNames(ctx, x){
 
-        if(x === undefined){
-            resetVariableIndices();
-            ctx.generatePrettyVariableNames();
+        if(this.alias === ""){
+
+            if(x === undefined){
+                resetVariableIndices();
+                ctx.generatePrettyVariableNames();
+            }
+
+            this.label = getNextVariableName();
+            ctx.pushTerm(this.label);
+            this.t.generatePrettyVariableNames(ctx, true);
+            ctx.popTerm(this.label);
         }
-
-        this.label = getNextVariableName();
-        ctx.pushTerm(this.label);
-        this.t.generatePrettyVariableNames(ctx, true);
-        ctx.popTerm(this.label);
-
     }
 
 }
@@ -848,14 +850,16 @@ class LambdaApplication{
      */
     generatePrettyVariableNames(ctx, x){
         
-        if(x === undefined){
-            resetVariableIndices();
-            ctx.generatePrettyVariableNames();
+        if(this.alias === ""){
+
+            if(x === undefined){
+                resetVariableIndices();
+                ctx.generatePrettyVariableNames();
+            }
+
+            this.t1.generatePrettyVariableNames(ctx, true);
+            this.t2.generatePrettyVariableNames(ctx, true);
         }
-
-        this.t1.generatePrettyVariableNames(ctx, true);
-        this.t2.generatePrettyVariableNames(ctx, true);
-
     }
 
 }
