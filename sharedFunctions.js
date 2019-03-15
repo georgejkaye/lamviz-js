@@ -268,10 +268,11 @@ function bulletsOfArray(array, id, onclick, onmouseenter, onmouseout){
 /**
  * Get an HTML representation of a term.
  * @param {Object} term - The lambda term.
+ * @param {boolean} deBruijn - Whether to use de Bruijn indices.
  * @return {string} The HTML representation.
  */
-function printTermHTML(term){
-    return term.printHTML(freeVariables)[0];
+function printTermHTML(term, deBruijn){
+    return term.printHTML(deBruijn, freeVariables)[0];
 }
 
 /**
@@ -282,8 +283,8 @@ function printTermHTML(term){
  * @return {string} The HTML table code for the stats.
  */
 function getStats(currentTerm){
-    return getRow(getCell("term-heading", '<b>' + printTermHTML(currentTerm) + '</b>')) +
-            getRow(getCell("term-subheading", '<b>' + currentTerm.prettyPrint() + '</b>')) +
+    return getRow(getCell("term-heading", '<b>' + printTermHTML(currentTerm, false) + '</b>')) +
+            getRow(getCell("term-subheading", '<b>' + printTermHTML(currentTerm, true) + '</b>')) +
             getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
             getRow(getCell("term-fact", 'Abstractions: ' + currentTerm.abstractions())) +
             getRow(getCell("term-fact", 'Applications: ' + currentTerm.applications())) +
@@ -346,7 +347,7 @@ function viewPortrait(exhibitName, term, label, full, i){
         )
     } else {
         changeText(exhibit, getDiv("w3-container frame full-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + currentFrame, "", "", "")) + '<br>' +
-                            getSpan("term-heading", "", "", "", "<b>" + printTermHTML(currentTerm) + "</b>&ensp;") + getSpan("term-subheading", "", "", "", "<b>" + currentTerm.prettyPrint() + "</b>") +                    
+                            getSpan("term-heading", "", "", "", "<b>" + printTermHTML(currentTerm, false) + "</b>&ensp;") + getSpan("term-subheading", "", "", "", "<b>" + printTermHTML(currentTerm, true) + "</b>") +                    
                             getDiv("","","","", getButton("fullScreen-btn", "exitFullScreenMapButton(\'" + exhibit + "\');", "Exit full screen") +
                             getButton("watch-reduction-btn", "playReduction()", "Watch normalisation") +
                             '<select id="strategy">' +

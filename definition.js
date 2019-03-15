@@ -222,6 +222,7 @@ class LambdaVariable{
 
     /**
      * Get an HTML representation of this term.
+     * @param {boolean} deBruijn - If to use de Bruijn indices or not.
      * @param {Object} ctx - The context of this lambda term.
      * @param {number} x - The layer this term is at - determines whether brackets are required.
      * @param {number} vars - The number of variables encountered so far.
@@ -230,7 +231,7 @@ class LambdaVariable{
      * @param {number} betas - The number of beta redexes encountered so far.
      * @return {string} The HTML string.
      */
-    printHTML(ctx, x, vars, abs, apps, betas){
+    printHTML(deBruijn, ctx, x, vars, abs, apps, betas){
 
         if(x === undefined){
             x = 0;
@@ -240,13 +241,22 @@ class LambdaVariable{
             betas = 0;
         }
 
-        var label = ctx.getCorrespondingVariable(this.index, true);
+        var string = '<span class = "var-' + vars + '">';
 
-        if(this.alias !== ""){
-            label = this.alias;
+        if(deBruijn){
+            string += this.index;
+        } else {
+
+            var label = ctx.getCorrespondingVariable(this.index, true);
+
+            if(this.alias !== ""){
+                label = this.alias;
+            }
+
+            string += label;
         }
-
-        var string = '<span class = "var-' + vars + '">' + label + '</span>';
+        
+        string += '</span>';
         vars++;
 
         return [string, vars, abs, apps, betas];
@@ -460,6 +470,7 @@ class LambdaAbstraction{
 
     /**
      * Get an HTML representation of this term.
+     * @param {boolean} deBruijn - If to use de Bruijn indices or not.
      * @param {Object} ctx - The context of this lambda term.
      * @param {number} x - The layer this term is at - determines whether brackets are required.
      * @param {number} vars - The number of variables encountered so far.
@@ -468,7 +479,7 @@ class LambdaAbstraction{
      * @param {number} betas - The number of beta redexes encountered so far.
      * @return {string} The HTML string.
      */
-    printHTML(ctx, x, vars, abs, apps, betas){
+    printHTML(deBruijn, ctx, x, vars, abs, apps, betas){
 
         if(x === undefined){
             x = 0;
@@ -482,21 +493,31 @@ class LambdaAbstraction{
         abs++;
 
         ctx.pushTerm(this.label);
-        var scope = this.t.printHTML(ctx, 0, vars, abs, apps, betas);
+        var scope = this.t.printHTML(deBruijn, ctx, 0, vars, abs, apps, betas);
         ctx.popTerm();
 
-        if(this.alias !== ""){
-            string += this.alias;
-        } else {
+        if(this.alias === "" || deBruijn){
+            
             if(x !== 0){
                 string += '(';
             }
-
-            string += '&lambda;' + this.label + '. ' + scope[0];
+            
+            string += '&lambda;'
+            
+            if(!deBruijn){
+                string += this.label + '. ';
+            } else {
+                string += " ";
+            }
+             
+            string += scope[0];
 
             if(x !== 0){
                 string += ')';
             }
+            
+        } else {
+            string += this.alias;
         }
 
         string += '</span>';
@@ -750,6 +771,7 @@ class LambdaApplication{
 
     /**
      * Get an HTML representation of this term.
+     * @param {boolean} deBruijn - Whether to use de Bruijn indices.
      * @param {Object} ctx - The context of this lambda term.
      * @param {number} x - The layer this term is at - determines whether brackets are required.
      * @param {number} vars - The number of variables encountered so far.
@@ -758,7 +780,7 @@ class LambdaApplication{
      * @param {number} betas - The number of beta redexes encountered so far.
      * @return {string} The HTML string.
      */
-    printHTML(ctx, x, vars, abs, apps, betas){
+    printHTML(deBruijn, ctx, x, vars, abs, apps, betas){
 
         if(x === undefined){
             x = 0;
@@ -794,13 +816,11 @@ class LambdaApplication{
             z = x + 1;
         }
 
-        var lhs = this.t1.printHTML(ctx, y, vars, abs, apps, betas);
-        var rhs = this.t2.printHTML(ctx, z, lhs[1], lhs[2], lhs[3], lhs[4]);
+        var lhs = this.t1.printHTML(deBruijn, ctx, y, vars, abs, apps, betas);
+        var rhs = this.t2.printHTML(deBruijn, ctx, z, lhs[1], lhs[2], lhs[3], lhs[4]);
 
-        if(this.alias !== ""){
-            string += this.alias;
-        } else {
-
+        if(this.alias === "" || deBruijn){
+            
             if(x !== 0){
                 string += "(";
             }
@@ -810,6 +830,9 @@ class LambdaApplication{
             if(x !== 0){
                 string += ")";
             }
+
+        } else {
+            string += this.alias;
         }
 
         string += "</span>";
