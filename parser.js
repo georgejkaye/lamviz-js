@@ -248,6 +248,7 @@ function tokenise(text){
                 tokens = pushString(tokens, string);
                 string = "";
                 tokens = pushString(tokens, currentCharacter);
+                awaitingContent = true;
                 break;
 
             /* start of a subterm, need to check there is a matching closing bracket */
@@ -263,12 +264,17 @@ function tokenise(text){
                     brackets++;
                     tokens = pushString(tokens, currentCharacter);
                 }
+                awaitingContent = true;
                 break;
 
             /* any other character is part of a string */
             default:
                 string += currentCharacter;
-                awaitingContent = false;
+
+                if(!abstraction){
+                    awaitingContent = false;
+                }
+                
                 break;
         }
 
