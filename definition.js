@@ -22,7 +22,7 @@ const MODE = 3;
 const MEDIAN = 4;
 
 var currentVariableIndex = 0;
-const variableNames = ['x', 'y', 'z', 'w', 'u', 'v']
+const variableNames = ['x', 'y', 'z', 'w', 'u', 'v', 't', 'p', 'q', 'r', 's', 'm', 'n'];
 
 var currentFreeVariableIndex = 0;
 const freeVariableNames = ['a', 'b', 'c', 'd', 'e'];
@@ -259,14 +259,7 @@ class LambdaVariable{
      * @param {boolean} x - Flag to indicate if this is a subcall.
      */
     generatePrettyVariableNames(ctx, x){
-
-        if(x === undefined){
-            resetVariableIndices();
-            ctx.generatePrettyVariableNames();
-        }
-
-        this.label = ctx.getCorrespondingVariable(this.index);
-
+        return;
     }
 
 }

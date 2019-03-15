@@ -345,8 +345,8 @@ function viewPortrait(exhibitName, term, label, full, i){
                                     '</table>'
         )
     } else {
-        changeText(exhibit, getSpan("term-heading", "", "", "", "<b>" + printTermHTML(currentTerm) + "</b>&ensp;") + getSpan("term-subheading", "", "", "", "<b>" + currentTerm.prettyPrint() + "</b>") +
-                            getDiv("w3-container frame full-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + currentFrame, "", "", "")) + '<br>' +
+        changeText(exhibit, getDiv("w3-container frame full-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + currentFrame, "", "", "")) + '<br>' +
+                            getSpan("term-heading", "", "", "", "<b>" + printTermHTML(currentTerm) + "</b>&ensp;") + getSpan("term-subheading", "", "", "", "<b>" + currentTerm.prettyPrint() + "</b>") +                    
                             getDiv("","","","", getButton("fullScreen-btn", "exitFullScreenMapButton(\'" + exhibit + "\');", "Exit full screen") +
                             getButton("watch-reduction-btn", "playReduction()", "Watch normalisation") +
                             '<select id="strategy">' +

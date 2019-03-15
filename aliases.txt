@@ -48,3 +48,6 @@ cp2 Or
 
 Andgate
 cp2 And
+
+circuit
+\x. Copy x (\x1.\x2. Notgate x1 (\x3. Or x3 x2))

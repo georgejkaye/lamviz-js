@@ -155,28 +155,34 @@ function addFunction(functionName, functionBody){
             freeVariables.pushTerm(frees[i]);
         }       
 
-        var parsedFunctionBody = parse(tokenise(functionBody), freeVariables);
+        var tokened = tokenise(functionBody);
+        
+        if(typeof tokened !== "string"){
+            var parsedFunctionBody = parse(tokened, freeVariables);
 
-        if(typeof parsedFunctionBody !== "string"){
+            if(typeof parsedFunctionBody !== "string"){
 
-            parsedFunctionBody.generatePrettyVariableNames(freeVariables);
+                parsedFunctionBody.generatePrettyVariableNames(freeVariables);
 
-            var functionDefinition = [functionName, parsedFunctionBody, parsedFunctionBody.prettyPrintLabels(freeVariables)];
-            var exists = false;
+                var functionDefinition = [functionName, parsedFunctionBody, parsedFunctionBody.prettyPrintLabels(freeVariables)];
+                var exists = false;
 
-            for(var i = 0; i < functions.length; i++){
-                if(functions[i][0] === functionName){
-                    exists = true;
-                    functions[i][1] = functionDefinition[1];
-                    functions[i][2] = functionDefinition[2];
+                for(var i = 0; i < functions.length; i++){
+                    if(functions[i][0] === functionName){
+                        exists = true;
+                        functions[i][1] = functionDefinition[1];
+                        functions[i][2] = functionDefinition[2];
+                    }
                 }
-            }
 
-            if(!exists){
-                smartPush(functions, functionDefinition);
+                if(!exists){
+                    smartPush(functions, functionDefinition);
+                }
+            } else {
+                error = functionName + ": " + parsedFunctionBody;
             }
         } else {
-            error = functionName + ": " + parsedFunctionBody;
+            error = functionName + ": " + tokened;
         }
     }
 
