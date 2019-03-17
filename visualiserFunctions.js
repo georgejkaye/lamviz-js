@@ -270,5 +270,5 @@ function bulkButton(){
  * Function to execute when the hide button is pressed.
  */
 function hideButton(){
-    changeText("bulk", '<button type = "button" id = "bulk-btn" onclick = "revealBulkButton();">Bulk define aliases</button>');
+    changeText("bulk", '<button type = "button" id = "bulk-btn" onclick = "revealBulkButton();">Bulk define aliases</button><button type = "button" id = "clear-all-btn" onclick = "removeFunctionsButton();">Clear all</button>');
 }

@@ -42,18 +42,10 @@ function parseTerm(tokens, initial, env){
             case '\\':
 
                 i++;
-                
-                if(i >= len){
-                    return "Parse error: unexpected end of expression";
-                }
 
                 abstractionVariable = tokens[i]; 
 
                 i++;
-
-                if(i >= len){
-                    return "Parse error: unexpected end of expression";
-                }
 
                 env.pushTerm(abstractionVariable);
                 var scope = findScope(tokens.slice(i));
@@ -74,10 +66,6 @@ function parseTerm(tokens, initial, env){
             case '(':
 
                 i++;
-
-                if(i >= len){
-                    return "Parse error: unexpected end of expression";
-                }
 
                 var scope = findScope(tokens.slice(i));
                 t2 = parseTerm(scope, initial + i, env);
@@ -117,8 +105,7 @@ function parseTerm(tokens, initial, env){
                 } else {
 
                     var index = env.find(tokens[i]);
-                    var label = env.getCorrespondingVariable(index);
-
+                    
                     if(index === -1){
                         return "Parse error: Variable " + tokens[i] + " with no associated binding encountered";
                     }
@@ -274,7 +261,7 @@ function tokenise(text){
                 if(!abstraction){
                     awaitingContent = false;
                 }
-                
+
                 break;
         }
 
