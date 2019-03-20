@@ -27,6 +27,9 @@ const variableNames = ['x', 'y', 'z', 'w', 'u', 'v', 't', 'p', 'q', 'r', 's', 'm
 var currentFreeVariableIndex = 0;
 const freeVariableNames = ['a', 'b', 'c', 'd', 'e'];
 
+/**
+ * Reset the variable indices to start from x, y, z...
+ */
 function resetVariableIndices(){
     currentVariableIndex = 0;
     currentFreeVariableIndex = 0;

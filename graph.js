@@ -885,10 +885,11 @@ function generateNormalisationGraphElements(id, graph, ctx, maps){
         array = defineNode(array, nodeID, "norm", "", 0, level * normalisationDistanceY, term.prettyPrintLabels(ctx), level, "");  
 
         var reductions = graph.matrix[i][1];
+        var redexLabels = term.printRedexes(ctx);
 
         /* Iterate over each reduction edge. */
         for(var j = 0; j < reductions.length; j++){
-            array = defineEdge(array, nodeID + '-b->' + reductions[j][1].prettyPrint() + '-b->' + reductions[j][0].prettyPrint(), "norm", "", nodeID, reductions[j][0].prettyPrint(), reductions[j][1].prettyPrintLabels(ctx));
+            array = defineEdge(array, nodeID + '-b->' + reductions[j][1].prettyPrint() + '-b->' + reductions[j][0].prettyPrint(), "norm", "", nodeID, reductions[j][0].prettyPrint(), redexLabels[j]);
         }
     }
 
