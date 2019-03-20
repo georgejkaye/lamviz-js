@@ -1072,15 +1072,12 @@ class ReductionGraph{
 
             /* Add the new reduction to the matrix. */
             smartPush(this.matrix, [workingTerm, [], level]);
-            console.log("Pushed " + workingTerm.prettyPrint() + " to the matrix.");
 
             /* Indicate that we've seen this term so it won't be added again. */
             smartPush(seen, workingTerm);   
 
             /* Get all the reductions from this new term. */
             var reductions = getAllOneStepReductions(workingTerm);
-
-            console.log("           Got all the reductions!");
 
             for(var j = 0; j < reductions.length; j++){
 
@@ -1090,8 +1087,6 @@ class ReductionGraph{
                 /* If the reductions have not been seen before, add them to the frontier to be examined later. */
                 if(nextNodeNotInFrontierOrSeen(reductions[j][0], frontier, seen)){
                     smartPush(frontier, [reductions[j][0], level + 1]);
-                    
-                    console.log("   Pushed " + reductions[j][0] + " to the frontier.");
                 }
             }
 
@@ -1116,7 +1111,6 @@ class ReductionGraph{
         }
 
         return -1;
-
     }
 
     /**
@@ -1159,11 +1153,12 @@ class ReductionGraph{
 
         /* If term is already in its normal form */
         if(workingTerm[1].length === 0){
-            return [0];
+            return [[0], 0];
         }
 
         var pathLengths = [];
-        var totalPaths = 0;
+        var totalPaths = workingTerm[1].length;
+        var seen = [];
 
         for(var i = 0; i < workingTerm[1].length; i++){
 
@@ -1174,16 +1169,19 @@ class ReductionGraph{
                 return -1;
             }
 
-            for (var j = 0; j < subpaths.length; j++){
-                smartPush(pathLengths, subpaths[j]);
-
+            for (var j = 0; j < subpaths[0].length; j++){
+                smartPush(pathLengths, subpaths[0][j]);
             }
-            totalPaths += subpaths[1];
+            
+            if(!seen.includes(workingTerm[0].prettyPrint())){
+                smartPush(seen, workingTerm[0].prettyPrint());
+                totalPaths += subpaths[1];
+            }
 
         }
 
         pathLengths = pathLengths.map(x => parseInt(x) + 1);
-        return pathLengths;
+        return [pathLengths, totalPaths];
 
     }
 
@@ -1198,15 +1196,18 @@ class ReductionGraph{
     pathsToNormalForm(){
 
         /* The first element of the matrix is the start point */
-        var paths = this.pathLengthsFromTerm(0);
+        var allPaths = this.pathLengthsFromTerm(0);
+        var paths = allPaths[0];
 
         if(paths === -1){
             console.log("timeout!");
             return ["unknown", "unknown", "unknown", "unknown", "unknown", "unknown"];
         }
 
-        var result = [0];
-        //paths = paths[0];
+        var result = [];
+ 
+        /* Total */
+        result[0] = allPaths[1];
 
         /* Min */
         result[1] = Math.min(...paths);

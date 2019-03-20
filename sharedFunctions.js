@@ -602,7 +602,8 @@ function getNormalisationGraphText(pathStats){
             mean = mean.toFixed(2);
         }
 
-        pathStatsText = getRow(getCell("term-fact", 'Shortest path: ' + currentReductions.shortestPathToNormalForm())) +
+        pathStatsText = getRow(getCell("term-fact", 'Total paths: ' + currentReductions.totalPathsToNormalForm())) +
+                        getRow(getCell("term-fact", 'Shortest path: ' + currentReductions.shortestPathToNormalForm())) +
                         getRow(getCell("term-fact", 'Longest path: ' + currentReductions.longestPathToNormalForm())) +
                         getRow(getCell("term-fact", 'Mean path: ' + mean)) + 
                         getRow(getCell("term-fact", 'Median path: ' + currentReductions.medianPathToNormalForm())) + 
