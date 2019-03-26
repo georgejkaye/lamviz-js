@@ -1,4 +1,4 @@
-\documentclass[12pt]{article}
+\documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 
 \usepackage{hyperref}
@@ -121,13 +121,34 @@ Program execution in the $\lambda$-calculus is performed through \textbf{$\beta$
 %
 $$(\lambda x. T) \, u \to_\beta T[x \mapsto u]$$
 %
-Repeatedly performing $\beta$-reduction on a term until it contains no $\beta$-redexes is known as \textbf{normalisation}. A term with no $\beta$-redexes is in its \textbf{normal form}. All $\lambda$-terms have a unique normal form but for some terms this normal form is not computable. While there may be multiple redexes to choose from in a given $\lambda$-term, the order of reductions does not matter and the same normal form will be reached if it is computable -- this is known as the \textbf{Church-Rosser theorem}. The process of normalisation can be represented by \textbf{normalisation graphs}, which show the various paths between a $\lambda$-term and its normal form. An example of normalisation graphs can be seen in Figure \ref{fig:normgraphs}.
+Repeatedly performing $\beta$-reduction on a term until it contains no $\beta$-redexes is known as \textbf{normalisation}. A term with no $\beta$-redexes is in its \textbf{normal form}. All $\lambda$-terms have a unique normal form. If there are multiple $\beta$-redexes in a term, the order they are reduced in does not matter -- the same normal form will be reached. This is known as the \textbf{Church-Rosser theorem} (\cite{churchrosser}). However, for some pure terms the normal form is not computable, as attempts to reduce them will lead to a loop. One well-known example is the $\Omega$ term:
+%
+$$ \Omega = (\lambda x. x \, x)(\lambda x. x \, x) \rightarrow_\beta (x \, x)[x \mapsto (\lambda x. x \, x)] \equiv (\lambda x. x \, x)(\lambda x. x \, x) \equiv \Omega $$
+%
+When it is possible to get stuck in one of these normalisation loops, the order of reduction can actually matter. as shown by the example below, where reducing redex 1 leads to a new term whereas redex 2 leads to the same term:
+%
+$$ T = \underbrace{(\lambda x. \lambda y. x) \, a}_\text{redex 1} \, \underbrace{((\lambda x. x \, x) (\lambda x. x \, x))}_\text{redex 2} $$
+
+$$ T \rightarrow_{\beta1} (\lambda y. a)((\lambda x. x \, x)(\lambda x. x \, x)) $$
+%
+$$ T \rightarrow_{\beta2} (\lambda x. \lambda y. x) \, a \, ((\lambda x. x \, x)(\lambda x. x \, x))$$
+%
+The choice of which redex to reduce is related to \textbf{evaluation strategies}. Choosing the \textbf{outermost reduction} corresponds to \textbf{normal order} evaluation, in which arguments are substituted into a function before they are evaluated. Conversely, chosing the \textbf{innermost reduction} corresponds to \textbf{applicative order} evaluation, where arguments are fully evaluated before being applied to functions. Always choosing the outermost reduction is guaranteed to find the normal form if it exists. This is not the case for choosing the innermost reduction since an argument that is not used in a function could contain a normalisation loop.
+
+The process of normalisation can be represented by \textbf{normalisation graphs}, which show the various paths between a $\lambda$-term and its normal form. An example of normalisation graphs can be seen in Figure \ref{fig:normgraphs} and \ref{fig:normgraphs2}.
 
 \begin{figure}
     \centering
     \includegraphics{reduction}
     \caption{An example of two normalisation graphs, showing the steps of reduction taken for the terms $\lambda x. (\lambda y \, x) (\lambda z. z)$ and $\lambda x. (\lambda y. y) ((\lambda z. z) \, x)$ to reach their normal forms. Note that the diverging paths in the right example still lead to the same normal form, as stated by the Church-Rosser theorem.}
     \label{fig:normgraphs}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.4]{norm2}
+    \caption{Normalisation graphs, showing the steps of reduction taken for the terms for the terms $(\lambda x. x \, x)(\lambda x. x \, x)$ and $(\lambda x. \lambda y. x) \, a \, ((\lambda x. x \, x)(\lambda x. x \, x)$, showing the normalisation loops that can occur.}
+    \label{fig:normgraphs2}
 \end{figure}
 
 \subsubsection{Fragments of the \texorpdfstring{$\lambda$}{lambda}-calculus}
@@ -243,13 +264,48 @@ To make the process more intuitive, parsing was split into two distinct parts: a
 This means that the 'special characters' the parser needs to check for are \texttt{(} and \texttt{)} for subterms, and \texttt{\textbackslash} for abstractions. Everything else is a variable, and adjacent tokens/subterms represent applications. To extend the parser to handle aliases, all that had to be added was to check tokens against the list of existing aliases, and use the corresponding function body if one existed.
 
 \subsection{Drawing the terms}
-Developing a suitable way of drawing the $\lambda$-term maps was the first major problem in the project. Drawing correct maps by hand is quite intuitive as one can place nodes and their edges 'on the fly' so that they do not cross over. However implementing an algorithm for a computer to generate these maps is significantly more difficult.
 
-\subsection{\texorpdfstring{$\lambda$}{Lambda}-term 'portraits'}
+To create the elements in the maps, the term is traversed recursively and new node objects are created when encountering an abstraction or application, with an edge leading to the previous parent node. When a variable is found, the appropriate edge is created between the parent node and the corresponding abstraction node. The array of map elements is then passed to the Cytoscape API which then generates the map.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.17]{maps}
+    \caption{How the map for the term $\lambda x. \lambda y. \lambda z. x \, (y \, z)$ evolved over time. Maps 1 and 2 are incorrect due to too many crossings, Maps 3 is correct but not aesthetically pleasing, Map 4 is the final (correct) version.}
+    \label{fig:drawn_maps}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.17]{maps2}
+    \caption{How the map for the term $\lambda x. \lambda y. x \, (\lambda a. \lambda b. b \, a) \, y$ evolved over time. Maps 1 is incorrect due to a lack of crossings, Map 2 is incorrect due to too many crossings, Map 3 is not only incorrect due to too many crossings but is also very hard to decipher, Map 4 is the final (correct) version.}
+    \label{fig:drawn_maps2}
+\end{figure}
+
+Developing a suitable way of drawing the $\lambda$-term maps was the first major problem in the project. Drawing correct maps by hand is quite intuitive as one can place nodes and their edges 'on the fly' so that they do not cross over. However implementing an algorithm for a computer to generate these maps is significantly more difficult. Algorithms that work for some maps may not work for others, so a strategy that generates consistent maps is required. Figures \ref{fig:drawn_maps} and \ref{fig:drawn_maps2} show how the drawn map for two different terms evolved over time.
+
+Initially maps were generated using a default layout provided by the graph drawing API (1). This placed nodes in a circle and drew the edges as the shortest path between pairs of nodes. While this representation was tidy and efficient, it did not preserve the cyclical order of edges around nodes, so the generated maps were not correct. This was due to the edges representing the use of abstracted variables 'cutting across' the map rather than exiting nodes at the right position. This caused crossings to occur for planar term maps (such as in Figure \ref{fig:drawn_maps}.1). Since edges were always straight unless there were duplicate edges between two nodes, incorrect crossings would also be generated when an edge should have curved around a node to 'dodge' an edge it but instead cut straight through it. It was clear from this method that node positions would have to be explicitly set to ensure the correctness of these maps.
+
+In the next algorithm (2), nodes were placed progressively further up the page, with the root at the bottom. To preserve the cyclical order of edges, the scope of abstractions would always be positioned to the left of an abstraction node, and the left and right hand sides of application would be placed to the left and right respectively.To ensure that variable edges would also preserve this ordering, an extra 'support' node was added to pull a variable edge in the right direction. The edges from these support nodes and their corresponding abstraction node was changed to a bezier curve, with the intention that these edges would curve around the side of the map and only cross other variable edges when they were supposed to. Unfortunately, the edges still tended to incorrectly cross over other edges due to an insufficiently large curvature. Variables used earlier in the term would not be high up enough on the page to curve around the remainder of the term (seen in Figure \ref{fig:drawn_maps}.2) This most commonly happened with terms containing multiple larger subterms, as variables used earlier in the term would cross over edges leading to the subterms (seen in Figure \ref{fig:drawn_maps2}.2 -- the only incorrect crossing is created with the edge leading to the $\lambda a. \lambda b. b \, a$ subterm).
+
+After looking into how the bezier curves were drawn, the algorithm was modified slightly for the next version (3). The variable support nodes were placed at the top of the page, with variables used earlier in the term having higher placed support nodes. This was so that the curves would, in theory, avoid the edges created by the rest of the term and only create correct crossings when approaching the abstraction nodes. The support nodes were also given a more subtle style so as not to be confused with the actual nodes of the map. The algorithm appeared to be successful in initial testing (in Figure \ref{fig:drawn_maps}.3), even if it produced slightly ugly maps (e.g. the 'spikes' created by the meeting of the curved edges with the straight ones). However testing with more complex terms (such as in Figure \ref{fig:drawn_maps2}.3) revealed huge flaws in the algorithm when dealing with closed subterms. The naive way that earlier variables were placed higher up the page meant that the variables used in the closed subterm were dragged downwards and caused edges to display messily and causing even more incorrect crossings. An oddity in how the curvature of variables edges were rendered can also be seen in Figure \ref{fig:drawn_maps2}.3 -- the edge representing $x$ has an unnecessarily huge curve, suggesting that the method for calculating the curvature of edges was slightly bugged too.
+
+Since these algorithms were not having much success and the code was growing out of control, it was abandoned and started from scratch (4). Rather than diving straight into creating a new algorithm, I spent some time thinking about a strategy for drawing maps that would work for all terms. Nodes would be drawn in a similar way to before, with the scope of an abstraction heading left of an abstraction node, and the left and right hand side of an application heading out of the appropriate side. This time, however, all of the variable support nodes would be placed at the same height on the top of the page. Support nodes were also added for abstraction nodes, at the same height. This meant that any crossings would only occur at the top of the page, rather than the edges intersecting other parts of the map. The curvature radius was calculated dynamically, based on the distance between the abstraction support node and the variable support node -- the further apart they were, the greater the radius. This can be seen in Figure \ref{fig:drawn_maps}.4 -- the $x$ edge has the largest radius since it has the furthest to travel. This ensures that all three variable edges do not cross and results in a correct planar map.
+
+Special care was also taken for positioning of subterms. All nodes inside a subterm would be shifted left or right so that they did not intersect with other parts of the map. This is shown in Figure \ref{fig:drawn_maps2}.4 -- the subterm $\lambda a. \lambda b. b \, a$ has been shifted so it is entirely right of its parent application node, and this application node has also been shifted to the right so that there is enough free space to hold the subterm.
+
+While developing the map-generating algorithm, a recurring problem was labelling edges and nodes correctly. In the API, each element must have a unique \textit{id}, which is used when giving edges a source and target. These ids were added to a $\lambda$-context when an abstraction node was encountered so they could be looked up when variables were used later in the term. This caused problems when variable names were used multiple times in a term (such as in $\Omega = (\lambda x. x \, x)(\lambda x. x \, x)$), since uses of the second $x$ would draw edges to the first $x$. Originally, terms were $\alpha$-converted during the algorithm (e.g. $\Omega \mapsto (\lambda x. x \, x)(\lambda x'. x' \, x')$), to ensure all variable names were unique. However this meant that the labels on the generated map wouldn't match up with the term specified by the user, potentially making it confusing. Instead, a \textit{label} field was created in map elements to store the original variable name in. This meant that the \textit{id} of each element could still be unique while retaining the original label. To ensure that variable edges were drawn to the correct abstraction node, these labels were also added to the $\lambda$-context alongside the ids.
+
+Another problem lay in how to deal with free variables. Normally when encountering a variable, it was easy to determine the appropriate abstraction node by prefixing the variable label with a $\lambda$. For free variables, this did not work at first because this abstraction node didn't exist! This meant it had to be created during the algorithm, resulting in a clumsy if statement checking for the existence of such a variable and creating a node for it if it didn't exist. This caused all sorts of bugs, such as with labelling as discussed in the previous paragraph. It turned out there was a much simpler solution to this problem -- create all the free variable nodes at the very beginning of the algorithm, so they could be treated as ordinary abstraction nodes. Initially these free variables were placed at the top of the page with the rest of the variable edges, but this caused problems when manipulating the maps later as the free and bound abstractions had different named edges. Free variables were changed to use the same basic structure as regular abstractions to ensure consistency for this reason. This provided an important lesson to ensure consistency as much as possible throughout the project so that adding new features later could be done with one block of code rather than have to adjust it for different aspects.
+
+%% The bit above is a bit unwieldy
 
 \subsection{Enumeration and generation functions}
+The next stage of the project was to develop functions to count and generate $\lambda$-terms of various fragments of the $\lambda$-calculus. These could then be combined with the visualiser to create $\lambda$-term galleries.
+
 
 \subsection{The gallery}
+
+\subsection{\texorpdfstring{$\lambda$}{Lambda}-term 'portraits'}
 
 \subsection{Normalisation}
 

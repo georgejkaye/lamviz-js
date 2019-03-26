@@ -27,6 +27,8 @@ const variableNames = ['x', 'y', 'z', 'w', 'u', 'v', 't', 'p', 'q', 'r', 's', 'm
 var currentFreeVariableIndex = 0;
 const freeVariableNames = ['a', 'b', 'c', 'd', 'e'];
 
+var loop = false;
+
 /**
  * Reset the variable indices to start from x, y, z...
  */
@@ -1144,8 +1146,10 @@ class ReductionGraph{
     pathLengthsFromTerm(i, x){
 
         if(x === undefined){
+            loop = false;
             x = 0;
         } else if (x > maximumPathLength){
+            loop = true;
             return -1;
         }
 
@@ -1157,7 +1161,13 @@ class ReductionGraph{
         }
 
         var pathLengths = [];
-        var totalPaths = workingTerm[1].length;
+
+        var totalPaths = "unknown"
+        
+        if(!loop){
+            totalPaths = workingTerm[1].length;
+        }
+        
         var seen = [];
 
         for(var i = 0; i < workingTerm[1].length; i++){
@@ -1165,17 +1175,21 @@ class ReductionGraph{
             var index = this.getTermEntry(workingTerm[1][i][0]);
             var subpaths = this.pathLengthsFromTerm(index, x+1);
 
-            if(subpaths === -1){
-                return -1;
-            }
+            if(subpaths !== -1){
 
-            for (var j = 0; j < subpaths[0].length; j++){
-                smartPush(pathLengths, subpaths[0][j]);
-            }
-            
-            if(!seen.includes(workingTerm[0].prettyPrint())){
-                smartPush(seen, workingTerm[0].prettyPrint());
-                totalPaths += subpaths[1];
+                for (var j = 0; j < subpaths[0].length; j++){
+                    smartPush(pathLengths, subpaths[0][j]);
+                }
+                
+                if(!seen.includes(workingTerm[0].prettyPrint())){
+                    smartPush(seen, workingTerm[0].prettyPrint());
+
+                    if(!loop){
+                        totalPaths += subpaths[1];
+                    }
+                }
+            } else {
+                totalPaths = "unknown";
             }
 
         }
@@ -1197,12 +1211,13 @@ class ReductionGraph{
 
         /* The first element of the matrix is the start point */
         var allPaths = this.pathLengthsFromTerm(0);
-        var paths = allPaths[0];
-
-        if(paths === -1){
+        
+        if(allPaths === -1){
             console.log("timeout!");
             return ["unknown", "unknown", "unknown", "unknown", "unknown", "unknown"];
         }
+
+        var paths = allPaths[0];
 
         var result = [];
  
