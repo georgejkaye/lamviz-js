@@ -248,7 +248,21 @@ This section will cover the implementation of the tools, and issues that rose.
 To implement the tools, I decided to use \texttt{Javascript}. This was so the tools could be distributed as 'web apps' and hosted on a website rather than having to be downloaded and relying on any dependencies.
 
 \subsection{Implementing the \texorpdfstring{$\lambda$}{lambda}-calculus in \texttt{Javascript}}
-The first part of developing the project was to implement the $\lambda$-calculus in \texttt{Javascript}, as a basis for the rest of the project to build on. The implementation partially based on the \texttt{ML} examples developed by \cite{pierce}. Variables are stored as de Bruijn indices -- this means that it is trivial to tell if terms are identical without having to perform $\alpha$-conversion. Abstractions and applications are constructed as combinations of subterms. Functionality was added later in the project so that terms can be associated with an \textbf{alias} to save time when writing out large expressions (for example, the alias \texttt{id} for the identity function $\lambda x. x$).
+The first part of developing the project was to implement the $\lambda$-calculus in \texttt{Javascript}, as a basis for the rest of the project to build on. The implementation partially based on the \texttt{ML} examples developed by \cite{pierce}. Variables are stored as de Bruijn indices -- this means that it is trivial to tell if terms are identical without having to perform $\alpha$-conversion. Abstractions and applications are constructed as combinations of subterms. Functionality was added later in the project so that terms can be associated with an \textbf{alias} to save time when writing out large expressions (for example, the alias \texttt{id} for the identity function $\lambda x. x$). An example of how terms can be represented can be seen in Figure \ref{fig:implementation}.
+
+\begin{figure}
+    \begin{minted}[frame=lines]{js}
+    const y = new LambdaVariable(0);     
+    const x = new LambdaVariable(1);      
+    const app = new LambdaApplication(y, x);  
+    const abs1 = new LambdaAbstraction(app, 'y');    
+    const abs2 = new LambdaAbstraction(abs, 'x', 'swap'); 
+    
+    abs2.prettyPrint(); // prints \ \ 0 1
+    \end{minted}
+    \caption{How the function $swap = \lambda x. \lambda y. y \, x$ can be constructed in the \texttt{Javascript} implementation.}
+    \label{fig:implementation}
+\end{figure}
 
 Since terms often contain free variables, a class to represent the context of a term was also created. This was effectively a wrapper for an array that contained the labels of terms currently in the context, with some extra methods to make manipulating it easier, such as determining a label from a given de Bruijn index. 
 
@@ -285,7 +299,7 @@ Developing a suitable way of drawing the $\lambda$-term maps was the first major
 
 Initially maps were generated using a default layout provided by the graph drawing API (1). This placed nodes in a circle and drew the edges as the shortest path between pairs of nodes. While this representation was tidy and efficient, it did not preserve the cyclical order of edges around nodes, so the generated maps were not correct. This was due to the edges representing the use of abstracted variables 'cutting across' the map rather than exiting nodes at the right position. This caused crossings to occur for planar term maps (such as in Figure \ref{fig:drawn_maps}.1). Since edges were always straight unless there were duplicate edges between two nodes, incorrect crossings would also be generated when an edge should have curved around a node to 'dodge' an edge it but instead cut straight through it. It was clear from this method that node positions would have to be explicitly set to ensure the correctness of these maps.
 
-In the next algorithm (2), nodes were placed progressively further up the page, with the root at the bottom. To preserve the cyclical order of edges, the scope of abstractions would always be positioned to the left of an abstraction node, and the left and right hand sides of application would be placed to the left and right respectively.To ensure that variable edges would also preserve this ordering, an extra 'support' node was added to pull a variable edge in the right direction. The edges from these support nodes and their corresponding abstraction node was changed to a bezier curve, with the intention that these edges would curve around the side of the map and only cross other variable edges when they were supposed to. Unfortunately, the edges still tended to incorrectly cross over other edges due to an insufficiently large curvature. Variables used earlier in the term would not be high up enough on the page to curve around the remainder of the term (seen in Figure \ref{fig:drawn_maps}.2) This most commonly happened with terms containing multiple larger subterms, as variables used earlier in the term would cross over edges leading to the subterms (seen in Figure \ref{fig:drawn_maps2}.2 -- the only incorrect crossing is created with the edge leading to the $\lambda a. \lambda b. b \, a$ subterm).
+In the next algorithm (2), nodes were placed progressively further up the page, with the root at the bottom. To preserve the cyclical order of edges, the scope of abstractions would always be positioned to the left of an abstraction node, and the left and right hand sides of application would be placed to the left and right respectively. To ensure that variable edges would also preserve this ordering, an extra 'support' node was added to pull a variable edge in the right direction. The edges from these support nodes and their corresponding abstraction node was changed to a bezier curve, with the intention that these edges would curve around the side of the map and only cross other variable edges when they were supposed to. Unfortunately, the edges still tended to incorrectly cross over other edges due to an insufficiently large curvature. Variables used earlier in the term would not be high up enough on the page to curve around the remainder of the term (seen in Figure \ref{fig:drawn_maps}.2) This most commonly happened with terms containing multiple larger subterms, as variables used earlier in the term would cross over edges leading to the subterms (seen in Figure \ref{fig:drawn_maps2}.2 -- the only incorrect crossing is created with the edge leading to the $\lambda a. \lambda b. b \, a$ subterm).
 
 After looking into how the bezier curves were drawn, the algorithm was modified slightly for the next version (3). The variable support nodes were placed at the top of the page, with variables used earlier in the term having higher placed support nodes. This was so that the curves would, in theory, avoid the edges created by the rest of the term and only create correct crossings when approaching the abstraction nodes. The support nodes were also given a more subtle style so as not to be confused with the actual nodes of the map. The algorithm appeared to be successful in initial testing (in Figure \ref{fig:drawn_maps}.3), even if it produced slightly ugly maps (e.g. the 'spikes' created by the meeting of the curved edges with the straight ones). However testing with more complex terms (such as in Figure \ref{fig:drawn_maps2}.3) revealed huge flaws in the algorithm when dealing with closed subterms. The naive way that earlier variables were placed higher up the page meant that the variables used in the closed subterm were dragged downwards and caused edges to display messily and causing even more incorrect crossings. An oddity in how the curvature of variables edges were rendered can also be seen in Figure \ref{fig:drawn_maps2}.3 -- the edge representing $x$ has an unnecessarily huge curve, suggesting that the method for calculating the curvature of edges was slightly bugged too.
 
@@ -302,36 +316,50 @@ Another problem lay in how to deal with free variables. Normally when encounteri
 \subsection{Enumeration and generation functions}
 The next stage of the project was to develop functions to count and generate $\lambda$-terms of various fragments of the $\lambda$-calculus. These could then be combined with the visualiser to create $\lambda$-term galleries.
 
+The number of $\lambda$-terms with a given number of subterms $n$ and free variables $k$ can be defined as:
+%
+\begin{equation*}
+\begin{split}
+    count(n, k) = & \, count(n-1,k+1) \\
+                & + \sum_{n_1 = 1}^{n - 2} count(n_1, k) \cdot count(n - 1 - n_1, k) \\
+                & + [n = 1] \, k
+\end{split}
+\end{equation*}
+%
+where $[n = 1] \, k$ is equal to $k$ if $n = 1$, $0$ otherwise. 
+
+The three terms in the sum correspond to abstractions, applications and variables respectively. The number of abstractions can be calculated by counting all terms with one less subterm (the abstraction itself counts for one subterm) and one extra free variable (the abstracted variable). The number of applications is slightly more complicated: we need to account for every possible way of splitting the subterms between the two terms $t_1$ and $t_2$. The number of variables is equal to the number of free variables, but only if the number of subterms is equal to 1 -- variables can only have one subterm, themselves!
+
+It is quite simple to develop this equation into a program to generate $\lambda$-terms. An example in \texttt{Haskell} is shown in Figure \ref{fig:gen}. With some modifications to how we use free variables, we can also create programs to generate planar and linear terms. For planar terms, the context of free variables will be split between the LHS and the RHS of an application, so the algorithm will have to take into account the various points at which it can be split (e.g. for $\Gamma$ = \texttt{[0,1,2]}, the possibilities are \texttt{[0],[1,2]} and \texttt{[0,1],[2]}). Linear terms are slightly more complex, since the order of the context is not necessarily preserved by the two terms of an application. All the different ways the variables can be split between the LHS and RHS must be considered.
+
+\begin{figure}
+\begin{minted}[frame=lines]{haskell}
+data Term = Abs Term | App Term Term | Var Int
+
+gen :: Int -> Int -> [Term]
+gen 0 _ = []
+gen 1 k = [Var x | x <- [1..k]]
+gen n k = [Abs t | t <- gen (n-1) (k+1)]
+                ++ [App t1 t2 | 
+                      n1 <- [1..n-2], t1 <- gen n1 k, 
+                                        t2 <- gen (n-1-n1) k] 
+\end{minted}
+\caption{A program to generate pure $\lambda$-terms of a given number of subterms and free variables}
+\label{fig:gen}
+\end{figure}
+
+Translating these programs from \texttt{Haskell} to \texttt{Javascript} was fairly simple -- pattern matching was replaced by switch statements and list comprehensions by for loops.
 
 \subsection{The gallery}
+With the term generation functions implemented in \texttt{Javascript}, the next step was to display all the terms in a 'gallery'. This was fairly simple as it required users to specify values for $n$ and $k$, which would be passed to the appropriate generation algorithm (pure, linear or planar) to produce an array of $\lambda$-terms. These terms could then be fed to the visualiser to produce maps of each of these terms, which could be displayed on screen using basic CSS to arrange them in a grid.
+
+A minor problem was found when passing the generated terms to the visualiser. The generated terms did not contain any labels so the visualiser treated every variable as a free variable and didn't connect the edges to the correct abstraction nodes. This was solved by giving abstracted variables unique dummy labels so the visualiser could distinguish between different abstractions.
+
 
 \subsection{\texorpdfstring{$\lambda$}{Lambda}-term 'portraits'}
 
 \subsection{Normalisation}
 
-\begin{figure}
-    \begin{minted}[frame=lines]{js}
-    class LambdaVariable { 
-        constructor(index, alias); 
-    }
-    class LambdaAbstraction { 
-        constructor(t, label, alias); 
-    }
-    class LambdaApplication { 
-        constructor(t1, t2, alias); 
-    }
-    
-    /* representing swap = \x.\y.y x */
-    const var1 = new LambdaVariable(0);     
-    const var2 = new LambdaVariable(1);      
-    const app = new LambdaApplication(var1, var2);  
-    const abs1 = new LambdaAbstraction(app, 'y');    
-    const abs2 = new LambdaAbstraction(abs, 'x', 'swap');   
-    
-    \end{minted}
-    \caption{The constructors of the three types of $\lambda$-terms, implemented in \texttt{Javascript}, as well as an example of how the function $swap = \lambda x. \lambda y. y x$ would be implemented.}
-    \label{fig:implementation}
-\end{figure}
 \newpage
 
 \section{Conclusion}
