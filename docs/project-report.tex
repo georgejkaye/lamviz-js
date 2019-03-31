@@ -105,7 +105,7 @@ Variables in the $\lambda$-calculus can be \textbf{bound} or \textbf{free}. A va
 %
 $$\lambda x. T \to_\alpha \lambda y. T[x \mapsto y]$$
 %
-To avoid ambiguity between $\alpha$-equivalent terms, we can use \textbf{de Bruijn notation}. Rather than using explicit variable names, each variable is instead represented by how 'far away' the corresponding abstraction is. For example, $\lambda x. \lambda y. \lambda z. x \, y \, z$ can be written as $\lambda\lambda\lambda \, 2 \, 1 \, 0$. This eliminates the need for $\alpha$-conversion and makes it far more efficient to determine equality of $\lambda$-terms.
+To avoid ambiguity between $\alpha$-equivalent terms, we can use \textbf{de Bruijn notation}. Rather than using explicit variable names, each variable is instead represented by how 'far away' the corresponding abstraction is. For example, $\lambda x. \lambda y. \lambda z. x \, y \, z$ can be written as $\lambda\lambda\lambda \, 2 \, 1 \, 0$. This eliminates the need for $\alpha$-conversion, and makes it much easier to implement checking for equality between $\lambda$-terms.
 
 $\lambda$-terms contain a number of \textbf{subterms}, defined as:
 %
@@ -121,17 +121,17 @@ Program execution in the $\lambda$-calculus is performed through \textbf{$\beta$
 %
 $$(\lambda x. T) \, u \to_\beta T[x \mapsto u]$$
 %
-Repeatedly performing $\beta$-reduction on a term until it contains no $\beta$-redexes is known as \textbf{normalisation}. A term with no $\beta$-redexes is in its \textbf{normal form}. All $\lambda$-terms have a unique normal form. If there are multiple $\beta$-redexes in a term, the order they are reduced in does not matter -- the same normal form will be reached. This is known as the \textbf{Church-Rosser theorem} (\cite{churchrosser}). However, for some pure terms the normal form is not computable, as attempts to reduce them will lead to a loop. One well-known example is the $\Omega$ term:
+Repeatedly performing $\beta$-reduction on a term until it contains no $\beta$-redexes is known as \textbf{normalisation}. A term with no $\beta$-redexes is in its \textbf{normal form}. If there are multiple $\beta$-redexes in a term, the order they are reduced in does not matter -- the same normal form will be reached. This is known as the \textbf{Church-Rosser theorem} (\cite{churchrosser}). The normal form of a $\lambda$-term is necessarily unique if it exists. However, for some pure terms the normal form is not computable, as attempts to reduce them may lead to a loop or just continuous expansion. One well-known example is the $\Omega$ term:
 %
 $$ \Omega = (\lambda x. x \, x)(\lambda x. x \, x) \rightarrow_\beta (x \, x)[x \mapsto (\lambda x. x \, x)] \equiv (\lambda x. x \, x)(\lambda x. x \, x) \equiv \Omega $$
 %
-When it is possible to get stuck in one of these normalisation loops, the order of reduction can actually matter. as shown by the example below, where reducing redex 1 leads to a new term whereas redex 2 leads to the same term:
+When it is possible to get stuck in one of these normalisation loops, the order of reduction can actually matter, as shown by the example below, where reducing redex 1 leads to a new term whereas redex 2 leads to the same term:
 %
 $$ T = \underbrace{(\lambda x. \lambda y. x) \, a}_\text{redex 1} \, \underbrace{((\lambda x. x \, x) (\lambda x. x \, x))}_\text{redex 2} $$
 
-$$ T \rightarrow_{\beta1} (\lambda y. a)((\lambda x. x \, x)(\lambda x. x \, x)) $$
+$$ T \rightarrow_{\beta1} (\lambda y. a)((\lambda x. x \, x)(\lambda x. x \, x)) \rightarrow_\beta a$$
 %
-$$ T \rightarrow_{\beta2} (\lambda x. \lambda y. x) \, a \, ((\lambda x. x \, x)(\lambda x. x \, x))$$
+$$ T \rightarrow_{\beta2} (\lambda x. \lambda y. x) \, a \, ((\lambda x. x \, x)(\lambda x. x \, x)) \equiv T$$
 %
 The choice of which redex to reduce is related to \textbf{evaluation strategies}. Choosing the \textbf{outermost reduction} corresponds to \textbf{normal order} evaluation, in which arguments are substituted into a function before they are evaluated. Conversely, chosing the \textbf{innermost reduction} corresponds to \textbf{applicative order} evaluation, where arguments are fully evaluated before being applied to functions. Always choosing the outermost reduction is guaranteed to find the normal form if it exists. This is not the case for choosing the innermost reduction since an argument that is not used in a function could contain a normalisation loop.
 
@@ -152,7 +152,24 @@ The process of normalisation can be represented by \textbf{normalisation graphs}
 \end{figure}
 
 \subsubsection{Fragments of the \texorpdfstring{$\lambda$}{lambda}-calculus}
-The \textbf{pure $\lambda$-calculus} contains all terms formed from combining variables, abstractions and applications. However we can restrict ourselves to smaller \textbf{fragments} of the $\lambda$-calculus. The \textbf{linear $\lambda$-calculus} is a subset of the pure $\lambda$-calculus containing terms in which variables are used exactly once, and the \textbf{planar $\lambda$-calculus} is a subset of the linear $\lambda$-calculus in which variables are used in the order they are abstracted in. Linear and planar $\lambda$-terms have special properties relating to maps, which will be covered in the next section.
+The \textbf{pure $\lambda$-calculus} contains all terms formed from combining variables, abstractions and applications. However we can restrict ourselves to smaller \textbf{fragments} of the $\lambda$-calculus. The \textbf{linear $\lambda$-calculus} is a subset of the pure $\lambda$-calculus containing terms in which variables are used exactly once, and the \textbf{planar $\lambda$-calculus} is a subset of the linear $\lambda$-calculus in which variables are used in the order they are abstracted in. 
+
+Linear and planar terms have special properties relating to normalisation. Linearity and planarity are preserved by $\beta$-reduction, and all linear and planar $lambda$-terms have a computable normal form. This is because as each variable in a linear term only occurs once, terms can only get smaller with each $\beta$-reduction -- they cannot 'blow up'. Similarly, all paths to the normal form are the same length -- because all abstracted variables \textit{must} be used, there are no 'shortcuts' to the normal form by choosing a specific redex. 
+
+It can be shown that the normal form of a linear $\lambda$-term is computable in polynomial time. To normalise a linear term, a search must be performed through the term to try and find a $\beta$-redex $(\lambda x. t)u$. Inside this $\beta$-redex, there will only need to be one substitution -- replacing the single occurrence of the abstracted variable $x$ in $t$ with the applied subterm $u$. Using the definitions of $subterms(t)$:
+%
+\begin{align}
+    subterms((\lambda x.t)u) &= 1 + (1 + subterms(t)) + subterms(u)) \label{betabefore}\\
+    subterms(t[x \mapsto u]) &= subterms(t) - 1 + subterms(u) \label{betaafter}
+\end{align}
+%
+By subtracting \ref{betaafter} from \ref{betabefore}, we can see that the number of subterms always shrinks by three in a $\beta$-reduction. Therefore, the most reductions that a linear $\lambda$-term can have before reaching a normal form (i.e. if the term reduces to a lone variable with one subterm) is $\frac{n}{3}$. In the 'worst case' scenario, a program attempting to normalise a linear $\lambda$-term would have to normalise $n$ terms, taking $\frac{n}{3}$ operations each time. So the upper bound of complexity of normalising linear $\lambda$-terms in in $\mathcal{O}(n^2)$ -- polynomial time.
+
+It has also been shown by \cite{mairson} that normalising linear $\lambda$-terms is PTIME-complete, by encoding boolean circuits as $\lambda$-terms. By reducing the Circuit Value Problem (known to be PTIME-complete) to normalising linear $\lambda$-terms, this proves that the latter is also PTIME-complete.
+
+Since all planar terms are also linear terms, they share this upper bound of normalisation complexity. However, there may be a lower bound of complexity that is unknown to us. We cannot use Mairson's boolean circuits to prove this since the functions are not planar.
+
+Linear and planar terms also have properties related to maps, which will be detailed in the next section.
 
 \begin{table}
     \centering
@@ -180,7 +197,7 @@ The \textbf{pure $\lambda$-calculus} contains all terms formed from combining va
 \begin{figure}
     \centering
     \includesvg{maps}
-    \caption{These two diagrams represent the same graph but two distinct maps (the ordering of edges around the point on the circle is changed). Adapted from Lando, Zvonkin {\cite{graphs}}}
+    \caption{These two diagrams represent the same graph but two distinct maps (the ordering of edges around the point on the circle is changed). Adapted from {\cite{graphs}}}
     \label{fig:maps}
 \end{figure}
 
@@ -202,40 +219,50 @@ In this project we are particularly interested with \textbf{rooted 3-valent maps
     \label{fig:trivalentrooted}
 \end{figure}
 
-We can represent $\lambda$-terms as maps. Abstractions and applications are represented as nodes, as shown in Figure \ref{fig:absapp}. With the addition of a root to represent the start of the term, these nodes can be combined to create a rooted map, as shown in Figure \ref{fig:trivalentrooted}.
-
-Viewing these $\lambda$-term maps can be interesting for many reasons. We can tell which terms are linear since their corresponding maps are 3-valent -- abstracted variables are only used once. Planar terms correspond to planar graphs with no crossings.
-
 \begin{figure}
     \centering
-    \includegraphics[scale=0.7]{absapp}
+    \includegraphics[scale=0.6]{absapp}
     \caption{An abstraction and an application, represented as nodes of a map.}
     \label{fig:absapp}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics[scale=0.8]{lambdatermandgraph}
+    \includegraphics[scale=0.7]{lambdatermandgraph}
     \caption{A representation of the term $\lambda x. \lambda y. \lambda z. x \, (y \, z)$ as a rooted 3-valent map, without and with node labels. From \protect\cite{zeiljfp}.}
     \label{fig:lambdatermandgrapht}
 \end{figure}
 
+We can represent $\lambda$-terms as maps. Abstractions and applications are represented as nodes, as shown in Figure \ref{fig:absapp}. With the addition of a root to represent the start of the term, these nodes can be combined to create a rooted map, as shown in Figure \ref{fig:trivalentrooted}.
+
+Viewing these $\lambda$-term maps can be interesting for many reasons. We can tell which terms are linear since their corresponding maps are 3-valent -- abstracted variables are only used once. Planar terms correspond to planar graphs with no crossings.
+
 \newpage
 
 \section{Features}
+\label{sec:features}
 
+\subsection{Drawing \texorpdfstring{$\lambda$}{lambda}-terms}
+The core feature of the tools is the ability to represent any $\lambda$-term from user input as a rooted map on the screen. A context of free variables can also be specified, allowing these variables to be used in the visualised term. The user can pan and zoom around the map to inspect it more closely. Nodes can also be dragged around to new positions. The user can also choose to display the visualisation with or without labels (if just the structure is of interest). 'Full screen' mode is available so the visualised terms can fill the screen.
 
-\section{Design}
-\label{sec:design}
+To make it easier to input large expressions, users can associate them with \textbf{aliases} (e.g. $id = \lambda x. x)$. A large amount can be pasted in at once with the 'bulk alias' function, which can be useful when using a large amount of predefined functions (such as Mairson's encodings of boolean circuits).
 
-The two tools 
+A number of properties are shown alongside the visualised term. Of most interest are the number of crossings and number of $\beta$-redexes.
 
-\subsection{\texorpdfstring{$\lambda$}{Lambda}-term visualiser}
+\subsection{Normalisation}
 
+The $\beta$-redexes in the term are listed next to the term when it is visualised. By hovering over them, a user can see them highlighted in the visualisation and within the term itself. Different redexes are highlighted in different colours to distinguish between them clearly. By clicking a redex, it will be performed and the visualisation updated with the newly reduced term. By continuing to click on redexes the normal form (if it exists) can be eventually reached.
 
-\subsection{\texorpdfstring{$\lambda$}{Lambda}-term gallery}
+Rather than clicking on the redexes, the process can be animated. There are three strategies provided: left-to-right outermost, right-to-left innermost, and random. The visualiser will highlight the redex it is about to perform, then perform it. This process repeats until the normal form is reached (or might just continue forever if there is no computable normal form).
 
+A normalisation graph can also be generated. By default, this shows the map for each possible reduction, however this can be disabled and replaced with a blank node for large graphs since it can take a long time to render. Path lengths (shortest, longest, average etc) can also be generated.
 
+\subsection{Generating \texorpdfstring{$\lambda$}{lambda}-term galleries}
+Galleries of $\lambda$-terms with a given number of subterms and free variables can be generated. These galleries display all the maps for these terms in a grid. Captions can be shown in regular or de Bruijn notation. For larger galleries, the maps can be turned off to save time when generating them. 
+
+By clicking on one of the 'portraits' in the gallery, the user will shown what what they would have seen had they typed that term into the visualiser.
+
+The results can be filtered by a number of properties, such as crossings and $\beta$-redexes. The number of these terms and the proportion from the full set of terms is displayed.
 
 \newpage
 
@@ -245,10 +272,17 @@ The two tools
 This section will cover the implementation of the tools, and issues that rose.
 
 \subsection{Language}
-To implement the tools, I decided to use \texttt{Javascript}. This was so the tools could be distributed as 'web apps' and hosted on a website rather than having to be downloaded and relying on any dependencies.
+To implement the tools, I decided to use \textsc{Javascript}. This was so the tools could be distributed as 'web apps' and hosted on a website rather than having to be downloaded and relying on any dependencies.
 
-\subsection{Implementing the \texorpdfstring{$\lambda$}{lambda}-calculus in \texttt{Javascript}}
-The first part of developing the project was to implement the $\lambda$-calculus in \texttt{Javascript}, as a basis for the rest of the project to build on. The implementation partially based on the \texttt{ML} examples developed by \cite{pierce}. Variables are stored as de Bruijn indices -- this means that it is trivial to tell if terms are identical without having to perform $\alpha$-conversion. Abstractions and applications are constructed as combinations of subterms. Functionality was added later in the project so that terms can be associated with an \textbf{alias} to save time when writing out large expressions (for example, the alias \texttt{id} for the identity function $\lambda x. x$). An example of how terms can be represented can be seen in Figure \ref{fig:implementation}.
+\subsection{Implementing the \texorpdfstring{$\lambda$}{lambda}-calculus in \textsc{Javascript}}
+\label{sec:implementation-lambda}
+The first part of developing the project was to implement the $\lambda$-calculus in \textsc{Javascript}, as a basis for the rest of the project to build on. The implementation partially based on the \textsc{ML} examples developed by \cite{pierce}. Variables are stored as de Bruijn indices -- this means that it is trivial to tell if terms are identical without having to perform $\alpha$-conversion. Abstractions and applications are constructed as combinations of subterms. Functionality was added later in the project so that terms can be associated with an \textbf{alias} to save time when writing out large expressions (for example, the alias \texttt{id} for the identity function $\lambda x. x$). An example of how terms can be represented can be seen in Figure \ref{fig:implementation}.
+
+Since terms often contain free variables, a class to represent the context of a term was also created. This was effectively a wrapper for an array that contained the labels of terms currently in the context, with some extra methods to make manipulating it easier, such as determining a label from a given de Bruijn index. 
+
+Printing the $\lambda$-terms proved to be more nuanced than expected. While the de Bruijn representation of a term is constant and easy to print, it is not very readable (especially in large terms) -- traditional labelled terms are much more intuitive. Originally variables stored a 'label' that could be printed instead of the index, but this proved to be quite buggy and often variables and their corresponding abstractions would display different labels (e.g. after $\alpha$-conversion). To fix this, labels were restricted to just abstractions, and when printing these labels would be added to a context. When the variables were to be printed, the index of the term would be looked up in the context and the appropriate label retrieved. This would ensure consistency (and subsequently correctness) throughout the term. 
+
+When implementing the normalisation functionality, it became apparent that some sort of $\alpha$-conversion would still need to be implemented to avoid clashes of variables in the printed labels. A function was implemented to generate a 'canonical' set of labels, to ensure that each variable name was only used once in the term. For example, the term $(\lambda d. (\lambda h. h \, d) \, h) \, g$ with free variables $h$ and $g$ would be $\alpha$-converted to $\lambda x. (\lambda y. y \, x) \, a) \, b$. This would also be used when generating normalisation graphs later on -- redexes that led to $\alpha$-equivalent terms would have a consistent set of labels rather than juggling many different representations.
 
 \begin{figure}
     \begin{minted}[frame=lines]{js}
@@ -260,15 +294,9 @@ The first part of developing the project was to implement the $\lambda$-calculus
     
     abs2.prettyPrint(); // prints \ \ 0 1
     \end{minted}
-    \caption{How the function $swap = \lambda x. \lambda y. y \, x$ can be constructed in the \texttt{Javascript} implementation.}
+    \caption{How the function $swap = \lambda x. \lambda y. y \, x$ can be constructed in the \textsc{Javascript} implementation.}
     \label{fig:implementation}
 \end{figure}
-
-Since terms often contain free variables, a class to represent the context of a term was also created. This was effectively a wrapper for an array that contained the labels of terms currently in the context, with some extra methods to make manipulating it easier, such as determining a label from a given de Bruijn index. 
-
-Printing the $\lambda$-terms proved to be more nuanced than expected. While the de Bruijn representation of a term is constant and easy to print, it is not very readable (especially in large terms) -- traditional labelled terms are much more intuitive. Originally variables stored a 'label' that could be printed instead of the index, but this proved to be quite buggy and often variables and their corresponding abstractions would display different labels (e.g. after $\alpha$-conversion). To fix this, labels were restricted to just abstractions, and when printing these labels would be added to a context. When the variables were to be printed, the index of the term would be looked up in the context and the appropriate label retrieved. This would ensure consistency (and subsequently correctness) throughout the term. 
-
-When implementing the normalisation functionality, it became apparent that some sort of $\alpha$-conversion would still need to be implemented to avoid clashes of variables in the printed labels. A function was implemented to generate a 'canonical' set of labels, to ensure that each variable name was only used once in the term. For example, the term $(\lambda d. (\lambda h. h \, d) \, h) \, g$ with free variables $h$ and $g$ would be $\alpha$-converted to $\lambda x. (\lambda y. y \, x) \, a) \, b$. This would also be used when generating normalisation graphs later on -- redexes that led to $\alpha$-equivalent terms would have a consistent set of labels rather than juggling many different representations.
 
 \subsection{Parsing terms from user input}
 Initially the parser would iterate through the user input one character at a time, making note of 'special' characters (e.g. a backslash to represent a $\lambda$-abstraction, or an opening bracket to indicate the start of a subterm). It would then create the $\lambda$-term objects as it went from left to right. However the original parsing algorithm grew quite confusing, as it had to keep track of many different states (e.g. if an abstraction was in progress), and in practice elements could be more than one character long (such as longer variable names).
@@ -330,7 +358,7 @@ where $[n = 1] \, k$ is equal to $k$ if $n = 1$, $0$ otherwise.
 
 The three terms in the sum correspond to abstractions, applications and variables respectively. The number of abstractions can be calculated by counting all terms with one less subterm (the abstraction itself counts for one subterm) and one extra free variable (the abstracted variable). The number of applications is slightly more complicated: we need to account for every possible way of splitting the subterms between the two terms $t_1$ and $t_2$. The number of variables is equal to the number of free variables, but only if the number of subterms is equal to 1 -- variables can only have one subterm, themselves!
 
-It is quite simple to develop this equation into a program to generate $\lambda$-terms. An example in \texttt{Haskell} is shown in Figure \ref{fig:gen}. With some modifications to how we use free variables, we can also create programs to generate planar and linear terms. For planar terms, the context of free variables will be split between the LHS and the RHS of an application, so the algorithm will have to take into account the various points at which it can be split (e.g. for $\Gamma$ = \texttt{[0,1,2]}, the possibilities are \texttt{[0],[1,2]} and \texttt{[0,1],[2]}). Linear terms are slightly more complex, since the order of the context is not necessarily preserved by the two terms of an application. All the different ways the variables can be split between the LHS and RHS must be considered.
+It is quite simple to develop this equation into a program to generate $\lambda$-terms. An example in \textsc{Haskell} is shown in Figure \ref{fig:gen}. With some modifications to how we use free variables, we can also create programs to generate planar and linear terms. For planar terms, the context of free variables will be split between the LHS and the RHS of an application, so the algorithm will have to take into account the various points at which it can be split (e.g. for $\Gamma$ = \texttt{[0,1,2]}, the possibilities are \texttt{[0],[1,2]} and \texttt{[0,1],[2]}). Linear terms are slightly more complex, since the order of the context is not necessarily preserved by the two terms of an application. All the different ways the variables can be split between the LHS and RHS must be considered.
 
 \begin{figure}
 \begin{minted}[frame=lines]{haskell}
@@ -344,30 +372,83 @@ gen n k = [Abs t | t <- gen (n-1) (k+1)]
                       n1 <- [1..n-2], t1 <- gen n1 k, 
                                         t2 <- gen (n-1-n1) k] 
 \end{minted}
-\caption{A program to generate pure $\lambda$-terms of a given number of subterms and free variables}
+\caption{A program to generate pure $\lambda$-terms of a given number of subterms and free variables.}
 \label{fig:gen}
 \end{figure}
 
-Translating these programs from \texttt{Haskell} to \texttt{Javascript} was fairly simple -- pattern matching was replaced by switch statements and list comprehensions by for loops.
+To test that these algorithms were in fact correct, I compared the outputs on the counting algorithms to known sequences on the \href{https://oeis.org}{Online Encycopedia of Integer Sequences (OEIS)}. For example, the sequence of numbers of closed linear $\lambda$-terms of size $n$ (generated by \texttt{[count n 0 | n <- [1..]]} forms the sequence \texttt{[0,1,0,0,5,0,0,60,0,0,1105,...]} which corresponds to sequence \href{https://oeis.org/A062980}{A062980} on the OEIS (\cite{zeiljfp}).
+
+Translating these programs from \textsc{Haskell} to \textsc{Javascript} so they could be used by the tools was fairly simple -- pattern matching was replaced by switch statements and list comprehensions by for loops.
 
 \subsection{The gallery}
-With the term generation functions implemented in \texttt{Javascript}, the next step was to display all the terms in a 'gallery'. This was fairly simple as it required users to specify values for $n$ and $k$, which would be passed to the appropriate generation algorithm (pure, linear or planar) to produce an array of $\lambda$-terms. These terms could then be fed to the visualiser to produce maps of each of these terms, which could be displayed on screen using basic CSS to arrange them in a grid.
+With the term generation functions implemented in \textsc{Javascript}, the next step was to create 'galleries' to display various sets of terms in. The first thing to consider was the different parameters that could be used to filter terms to create different galleries. The original parameters $n$ and $k$ used in the generating algorithms could be used as a starting point, but there were others too such as number of crossings or number of $\beta$-redexes. There may be ways to modify the generation algorithms to only return these terms, but to start with all terms for a given $n$ and $k$ were generated, then the appropriate terms selected using a \texttt{filter(x -> ...)} call on the array. This has the downside of being quite inefficient when it comes to larger arrays of terms but meant that more time could be spent on implementing the tools rather than attempting to devise more algorithms.
+
+Combining the visualiser with the generation algorithms was fairly easy. After receiving user input for values of $n$ and $k$, the appropriate generation algorithm (pure, linear or planar) would be run to produce an array of $\lambda$-terms. These terms could then be fed to the visualiser to produce maps of each of these terms, which would be displayed on screen using basic CSS to arrange them in a grid. Over time the way the gallery was displayed was tinkered with to ensure the best display for all displays and galleries (e.g. terms not too close together, spaced evenly etc). The ability to select filtering criteria was also added later on. To save time when generating galleries of closed terms, the box for $k$ could be left blank and would be inferred as 0.
 
 A minor problem was found when passing the generated terms to the visualiser. The generated terms did not contain any labels so the visualiser treated every variable as a free variable and didn't connect the edges to the correct abstraction nodes. This was solved by giving abstracted variables unique dummy labels so the visualiser could distinguish between different abstractions.
 
+Originally the captions for the portraits were displayed in de Bruijn notation, to represent the 'structure' of the generated terms rather than associate them with any particular labels. However, this made the captions harder to understand than regular notation. This was fixed by using the labelling function detailed in Section \ref{sec:implementation-lambda} to generate a 'canonical' labelling to display alongside the maps. An option to toggle between de Bruijn and regular notation was added, as shown in Figure \ref{fig:galleries}.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.25]{galleries}
+    \caption{The gallery showing all closed linear terms with 5 subterms, with captions in de Bruijn (top) and their regular 'canonical' (bottom) notation.}
+    \label{fig:galleries}
+\end{figure}
+
+As the galleries were tested more it became apparent that for larger galleries, it simply wasn't feasible to display all the maps in a suitable time. Since the actual map-drawing process was the most computationally expensive, an option was added to turn off the map drawing and just show the captions for each term. This meant that a user would still be able to generate the terms, and inspect them in more detail by viewing their 'portrait', as discussed in the next section. 
 
 \subsection{\texorpdfstring{$\lambda$}{Lambda}-term 'portraits'}
+While the galleries were interesting alone to compare the similarities and differences between terms with the same properties, it was hard to inspect the terms in detail from the small portraits. To remedy this, functionality was added so that users could click on a portrait and be shown a larger version. 
+
+With these 'portraits' 
+
 
 \subsection{Normalisation}
 
 \newpage
 
+\section{Design choices}
+\label{sec:design}
+A little bit about the design choices made for the tool?
+
+\subsection{\texorpdfstring{$\lambda$}{Lambda}-term visualiser}
+
+
+\subsection{\texorpdfstring{$\lambda$}{Lambda}-term gallery}
+
+
+\newpage
+\section{Evaluation}
+\label{sec:evaluation}
+How well does it work?
+
+\newpage
+\section{Examples}
+What could it be used for?
+
+\subsection{Boolean circuits}
+Show off how you could use to represent the boolean circuits!
+
+\newpage
+
+\section{Project management}
+\label{sec:project-management}
+How everything got done
+
+\newpage
 \section{Conclusion}
 \label{sec:conclusion}
-Todo
+Conclude
 
 \newpage
 
 \bibliography{refs}
+
+\newpage
+\appendix
+
+\section{File structure}
+How the zip file is structured
 
 \end{document}
