@@ -1,10 +1,23 @@
 /**
- * Functions related to the html page, such as processing input or changing elements.
+ * Functions related to the visualiser page, such as processing input or changing elements.
  * 
  * @author George Kaye
  */
 
 var functions = [];
+
+/**
+ * Pressing Enter triggers the 'Execute' button.
+ */
+var input = document.getElementById('input');
+
+input.addEventListener("keyup", function(event){
+    event.preventDefault();
+    if(event.keyCode === 13){
+        document.getElementById("execute-btn").click();
+    }
+})
+
 
 /**
  * Function to execute when the 'execute' button is pressed.
