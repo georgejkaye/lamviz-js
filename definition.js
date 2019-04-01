@@ -12,7 +12,7 @@ const ABS = 1;
 const APP = 2;
 
 /** The number of reduction steps to perform before halting operations. */
-const maximumPathLength = 100;
+const maximumPathLength = 99;
 
 /** Constants to represent different modes */
 const MAX = 0;
