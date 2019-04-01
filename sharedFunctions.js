@@ -23,6 +23,18 @@ const fullScreenWidth = "96vw";
 const fullScreenHeight = "92vh";
 
 /**
+ * Pressing Enter triggers the 'Execute' button.
+ */
+var input = document.getElementById('input');
+
+input.addEventListener("keyup", function(event){
+    event.preventDefault();
+    if(event.keyCode === 13){
+        document.getElementById("execute-btn").click();
+    }
+})
+
+/**
  * Change the text of an element with a given id.
  * @param {string} id   - The id of the element.
  * @param {string} text - the text to change to
