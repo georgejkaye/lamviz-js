@@ -22,7 +22,7 @@ const MODE = 3;
 const MEDIAN = 4;
 
 var currentVariableIndex = 0;
-const variableNames = ['x', 'y', 'z', 'w', 'u', 'v', 't', 'p', 'q', 'r', 's', 'm', 'n', 'o', '\u03C8', '\u03C8', '\u03C9'];
+const variableNames = ['x', 'y', 'z', 'w', 'u', 'v', 't', 'p', 'q', 'r', 's', 'm', 'n', 'o', '\u03D5', '\u03C8', '\u03C9'];
 
 var currentFreeVariableIndex = 0;
 const freeVariableNames = ['a', 'b', 'c', 'd', 'e'];

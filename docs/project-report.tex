@@ -45,6 +45,10 @@
 \label{sec:abstract}
 Todo
 
+
+\subsection*{Note on the content of this report}
+Some of this report (most notably the Background section) has been based on the content written in my Scientific Paper (\cite{scientificpaper}) from November.
+
 \newpage
 
 \section{Acknowledgements}
@@ -59,9 +63,14 @@ Todo
 
 This report details the development of a set of tools to aid in the research of the topological properties of $\lambda$-terms when they are represented as rooted maps.
 
+\subsection{Motivation}
+There are many links between the $\lambda$-calculus and areas of mathematics and computer science. One such area is graph theory -- we can draw $\lambda$-terms as rooted maps and observe how the topological properties of these maps link with the computational and logical properties of the original terms.
+
+However, performing experimental mathematics with $\lambda$-terms and their maps can be a time-consuming and boring process. The main motivation of this project was to develop tools to make this process easier and eliminate the less interesting aspects. There were two tools developed a \textbf{$\lambda$-term visualiser} and a \textbf{$\lambda$-term gallery}.
+
 \subsection{\texorpdfstring{$\lambda$}{lambda}-term visualiser}
 
-Drawing $\lambda$-terms maps by hand can be quite time-consuming, especially for large terms. The first tool can generate maps for $\lambda$-terms from user input, in addition to providing interesting properties such as crossings. By visualising the $\lambda$-terms it can become much easier to understand the structure of more complex structures implemented in the $\lambda$-calculus (such as pairs).
+Drawing $\lambda$-terms maps by hand can take a while, especially for large terms. The first tool can generate maps for $\lambda$-terms from user input, in addition to providing interesting properties such as crossings. By visualising the $\lambda$-terms it can become much easier to understand the structure of more complex structures implemented in the $\lambda$-calculus (such as pairs).
 
 The visualiser also has functionality relating to the normalisation of terms. The $\beta$-redexes contained within the term are listed, and by clicking on these the user can reduce the term to its normal form (if one exists). A normalisation graph can also be generated, which can also be interesting to examine.
 
@@ -83,6 +92,9 @@ From the gallery, the user can inspect the generated terms using the visualiser,
     \caption{The $\lambda$-term gallery, displaying all closed linear terms of size 5.}
     \label{fig:gallery}
 \end{figure}
+
+\subsection{Report structure}
+The rest of the report is strictured as follows. Section \ref{sec:background} provides the necessary background information for the project. Section \ref{sec:features} details the features of the tools, and Section \ref{sec:implementation} details the implementation choices that went into developing them. Section \ref{sec:design} covers the design choices made during the project. Section \ref{sec:evaluation} covers the evaluation of the project, and Section \ref{sec:project-management} details how the project was managed. Appendix \ref{sec:file-structure} details the file structure of the submitted ZIP file.
 
 \newpage
 
@@ -122,7 +134,7 @@ Program execution in the $\lambda$-calculus is performed through \textbf{$\beta$
 %
 $$(\lambda x. T) \, u \to_\beta T[x \mapsto u]$$
 %
-Repeatedly performing $\beta$-reduction on a term until it contains no $\beta$-redexes is known as \textbf{normalisation}. A term with no $\beta$-redexes is in its \textbf{normal form}. If there are multiple $\beta$-redexes in a term, the order they are reduced in does not matter -- the same normal form will be reached. This is known as the \textbf{Church-Rosser theorem} (\cite{churchrosser}). The normal form of a $\lambda$-term is necessarily unique if it exists. However, for some pure terms the normal form is not computable, as attempts to reduce them may lead to a loop or just continuous expansion. One well-known example is the $\Omega$ term:
+Repeatedly performing $\beta$-reduction on a term until it contains no $\beta$-redexes is known as \textbf{normalisation}. A term with no $\beta$-redexes is in its \textbf{normal form}. If there are multiple $\beta$-redexes in a term, the order they are reduced in does not matter -- the same normal form will be reached. This is known as the \textbf{Church-Rosser theorem} (\cite{churchrosser}). The normal form of a $\lambda$-term is necessarily unique if it exists. However computing if normalising a pure term will terminate is undecidable \cite{church}. This is because attempts to reduce them may lead to a loop or just continuous expansion. One well-known example is the $\Omega$ term:
 %
 $$ \Omega = (\lambda x. x \, x)(\lambda x. x \, x) \rightarrow_\beta (x \, x)[x \mapsto (\lambda x. x \, x)] \equiv (\lambda x. x \, x)(\lambda x. x \, x) \equiv \Omega $$
 %
@@ -308,7 +320,7 @@ This means that the 'special characters' the parser needs to check for are \text
 
 \subsection{Drawing the terms}
 
-To create the elements in the maps, the term is traversed recursively and new node objects are created when encountering an abstraction or application, with an edge leading to the previous parent node. When a variable is found, the appropriate edge is created between the parent node and the corresponding abstraction node. The array of map elements is then passed to the Cytoscape API which then generates the map.
+To create the elements in the maps, the term is traversed recursively and new node objects are created when encountering an abstraction or application, with an edge leading to the previous parent node. When a variable is found, the appropriate edge is created between the parent node and the corresponding abstraction node. The array of map elements is then passed to the Cytoscape API (\url{http://js.cytoscape.org/}) which then generates the map.
 
 \begin{figure}
     \centering
@@ -460,7 +472,7 @@ This became slightly more complicated when dealing with redexes within other red
 
 A similar approach was used when making the redex highlight on the map. The API used allows elements to have classes, so whenever a redex was encountered a corresponding class would be added to an array, and added to all elements within the redex. Whenever a redex was highlighted, the style function from the API could be called and update all the elements with the appropriate class with the colour.
 
-\subsection{Normalisation}
+\subsection{Normalisation graphs}
 One main idea from the project proposal was the use of the visualised maps in normalisation graphs. The first step in this was to implement these normalisation graphs as a data structure in \textsc{Javascript}, and then using these structures alongside the graph drawing API to generate the graphs.
 
 Originally normalisation graphs were created as a naive tree structure. The root node contained the original term, with children representing all possible reductions of that term (each edge representing an individual redex). While this seemed like a suitable idea in theory, it was flawed in that not all redexes lead to unique reductions (the two redexes in $(\lambda x. (\lambda y. (\lambda z. z) \, y) \, x)$ lead to $\alpha$-equivalent terms, but the tree structure could not represent two edges leading to the same node. This also meant that the normalisation graph would not converge to the normal form at the bottom, but would diverge to many nodes containing the same normal form. This implementation would also fail to detect normalisation loops and would continue to descend the tree infinitely. However it had the benefit of being simple to implement and very efficient for terms (providing they had a computable normal form).
@@ -485,7 +497,23 @@ The first attempt at drawing normalisation graphs had numerous problems. While t
 
 In an attempt to reduce the lag created by the drawn graph, I switched to using images for the normalisation graph nodes. The map of the reduction would be generated first, then converted to an image using the API functions. This image could then be used as the background of the normalisation graph node, as shown in the right of Figure \ref{fig:normnodes}. This made creating tidier nodes much easier as a margin could be specified around the image so everything fit inside. Options were also added to disable map generation for large terms (like with the gallery) to reduce the generation time of the graph. It also turned out that drawing arrows on the edges was a large cause of lag, so an option to not draw these was also added. 
 
-While the tree implementation of normalisation graphs had just about been holding up through all of this tweaking, it 
+While the tree implementation of normalisation graphs had just about been holding up through all of this tweaking, it started to show severe weaknesses when attempting to implement functions to calculate path length. Because of the numerous duplicate nodes, complex method needed to be implemented to ensure that only unique paths were being calculated. This was quite complicated and bloated the functions significantly. I decided that it was time to migrate to a more sophisticated implementation.
+
+Rather than a tree, the new implementation uses an adjacency matrix that keeps track of which nodes connect to each other, and by which redex. The original term is fed to the initialisation algorithm, which then performs all the redexes in the term and adds the resulting reductions to a frontier. The current node is added to the adjacency matrix, with references to the nodes it connects to. This process is continued, with any previously seen reductions not being re-added to the frontier, until the frontier is empty and the graph is complete. This has several benefits over the tree implementation. Most notably, every node is unique, which also means that there are no duplicate edges that need to be removed when creating the map. Additionally, because redexes are implemented as references to already existing objects rather than new child objects, infinitely reducing terms with finite normalisation graphs (such as $(\lambda x. x \, x)(\lambda x. x \, x)$) can have these graphs displayed. The only time the algorithm can get stuck now is if the term reduces infinitely with an infinite normalisation graph, such as for $(\lambda x. x \, x \, x)(\lambda x. x \, x \, x)$. For these terms, a cutoff point was added to halt the algorithm at a suitable number of reductions. In the code, the algorithm becomes much more elegant (both while generating the graph and drawing it), since recursion into the tree is replaced with a loop across the adjacency matrix. The value for 'level' was calculated in a similar way to before, with all reductions from the original term assigned level 1, and each subsequent redex increasing this value by 1.
+
+Path functions were now easier to implement. The total number of paths and list of different path lengths could be calculated by starting at the original term and following the references in the adjacency matrix until the normal form was reached. Properties such as shortest or longest path could then be computed by performing operations on the list of path lengths, such as \texttt{min()} or \texttt{max()}.
+
+A feature added slightly later on was the ability to hover over edges and see the redex that that it represented. The API provided functions for performing actions on mouse events, so this was easy to implement. The only minor problem was that redexes could free variables that were bound in the original term, so when it came to printing them there was no way of knowing which variable they referred to. For example, $\lambda \, (\lambda \, 0) \, 0$ prints as $\lambda x. (\lambda y. y) \, x$ but the redex $(\lambda \, 0) \, 0$ on its own prints as $(\lambda y. y) \, ?$, since the $x$ is never bound. This was solved by storing the correctly printed version of the redex at graph initialisation (by considering the original term) rather than trying to generate the label at run-time.
+
+\subsection{Animating normalisation}
+The last major feature implemented was animating the normalisation of terms. In theory, this was simple: highlight the appropriate redex, then perform it and redraw the new term, then keep going until the normal form was reached. Unfortunately, chaining these operations was slightly harder than anticipated since \textsc{Javascript} is single-threaded and as such doesn't have a conventional \texttt{sleep()} function like in multi-threaded languages. Instead it has a \texttt{setTimeout()} function that is passed a function and executes it after a given time. This meant that what was originally a simple while loop had to become a recursive function with several nested \texttt{setTimeout()} functions for the process of highlighting and performing each redex, then calling the animation function on the new term.
+
+Three strategies were implemented: leftmost outermost, which chooses performs the first redex in the redex list, rightmost innermost, which performs the last redex in the redex list, and random.
+
+\subsection{Finishing touches}
+With all main functionality completed, all that was left to do was to polish up the interface. To make use of the tool easier, the page would automatically scroll down to the appropriate section of the page once buttons were clicked, rather than making users scroll down themselves. 
+
+One thing I noticed was how large maps and graphs were quite hard to view, so I implemented a fullscreen mode to redraw them to fill the screen.
 
 \newpage
 
@@ -530,6 +558,40 @@ Conclude
 \appendix
 
 \section{File structure}
-How the zip file is structured
+\label{sec:file-structure}
+This appendix details the file structure of the submitted ZIP directory. To run either of the tools, simply load up one of the \texttt{.html} files in the root of the directory in your preferred browser.
+
+\subsection{\texttt{root} -- Main files}
+\begin{itemize}
+    \item \texttt{gallery.html}: The $\lambda$-term gallery.
+    \item \texttt{visualiser.html}: The $\lambda$-term visualiser.
+    \item \texttt{README.md}: A readme file.
+\end{itemize}
+
+\subsection{\texttt{docs} directory -- Documentation}
+\begin{itemize}
+    \item \texttt{2018-10-26-project-proposal.pdf}: The original project proposal.
+    \item \texttt{2018-11-23-scientific-paper.pdf}: The scientific paper, detailing some project background and the state of the project towards the end of November 2018.
+    \item \texttt{2019-04-08-final-report.pdf}: The final report (this document).
+\end{itemize}
+
+\subsection{\texttt{src} directory -- Source code}
+\begin{itemize}
+    \item \texttt{aliases.txt}: Some sample aliases for use in the visualiser, including Mairson's boolean circuit functions, adapted from \cite{mairson}.
+    \item \texttt{cytoscape.min.js}: The source code for the graph drawing API used.
+    \item \texttt{definition.js}: The implementation of the $\lambda$-calculus and associated data structures.
+    \item \texttt{evaluator.js}: Functions to evaluate and normalising $\lambda$-terms.
+    \item \texttt{galleryFunctions.js}: Functions used in the gallery.
+    \item \texttt{Generator.hs}: The original Haskell versions of the $\lambda$-term counting and generating functions.
+    \item \texttt{generator.js}: Functions to count and generate $\lambda$-terms.
+    \item \texttt{graph.js}: Functions to generate the $\lambda$-term maps and normalisation graphs
+    \item \texttt{parser.js}: Functions to parse and tokenise user input into $\lambda$-terms.
+    \item \texttt{sharedFunctions.js}: Functions shared between the gallery and visualiser.
+    \item \texttt{style.css}: The style document for the two HTML pages.
+    \item \texttt{visualiserFunctions.js}: Functions used in the visualiser.
+\end{itemize}
+
+\subsection{\texttt{pics} directory -- Images}
+Some images of the tools in action.
 
 \end{document}
