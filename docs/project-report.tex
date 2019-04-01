@@ -10,6 +10,7 @@
 \usepackage{graphicx}
 \usepackage{fancyhdr}
 \usepackage{natbib}
+\usepackage[linesnumbered,lined,boxed,commentsnumbered]{algorithm2e}
 
 \bibliographystyle{humannat}
 
@@ -276,11 +277,11 @@ To implement the tools, I decided to use \textsc{Javascript}. This was so the to
 
 \subsection{Implementing the \texorpdfstring{$\lambda$}{lambda}-calculus in \textsc{Javascript}}
 \label{sec:implementation-lambda}
-The first part of developing the project was to implement the $\lambda$-calculus in \textsc{Javascript}, as a basis for the rest of the project to build on. The implementation partially based on the \textsc{ML} examples developed by \cite{pierce}. Variables are stored as de Bruijn indices -- this means that it is trivial to tell if terms are identical without having to perform $\alpha$-conversion. Abstractions and applications are constructed as combinations of subterms. Functionality was added later in the project so that terms can be associated with an \textbf{alias} to save time when writing out large expressions (for example, the alias \texttt{id} for the identity function $\lambda x. x$). An example of how terms can be represented can be seen in Figure \ref{fig:implementation}.
+The first part of developing the project was to implement the $\lambda$-calculus in \textsc{Javascript}, as a basis for the rest of the project to build on. The implementation partially based on the \textsc{ML} examples developed by \cite{pierce}. Variables are stored as de Bruijn indices -- this means that it is trivial to tell if terms are identical without having to perform $\alpha$-conversion. Abstractions and applications are constructed as combinations of subterms, making these $\lambda$-terms trees, where nodes may have zero (variable), one (abstraction) or two (application) children. Functionality was added later in the project so that terms can be associated with an \textbf{alias} to save time when writing out large expressions (for example, the alias \texttt{id} for the identity function $\lambda x. x$). An example of how terms can be represented can be seen in Figure \ref{fig:implementation}.
 
 Since terms often contain free variables, a class to represent the context of a term was also created. This was effectively a wrapper for an array that contained the labels of terms currently in the context, with some extra methods to make manipulating it easier, such as determining a label from a given de Bruijn index. 
 
-Printing the $\lambda$-terms proved to be more nuanced than expected. While the de Bruijn representation of a term is constant and easy to print, it is not very readable (especially in large terms) -- traditional labelled terms are much more intuitive. Originally variables stored a 'label' that could be printed instead of the index, but this proved to be quite buggy and often variables and their corresponding abstractions would display different labels (e.g. after $\alpha$-conversion). To fix this, labels were restricted to just abstractions, and when printing these labels would be added to a context. When the variables were to be printed, the index of the term would be looked up in the context and the appropriate label retrieved. This would ensure consistency (and subsequently correctness) throughout the term. 
+Printing the $\lambda$-terms proved to be more nuanced than expected. The de Bruijn representation of a term is constant and easy to print by traversing the $\lambda$-term tree recursively. However it is not very readable (especially in large terms) -- traditional labelled terms are much more intuitive. Originally variables stored a 'label' that could be printed instead of the index, but this proved to be quite buggy and often variables and their corresponding abstractions would display different labels (e.g. after $\alpha$-conversion). To fix this, labels were restricted to just abstractions, and when printing these labels would be added to a context. When the variables were to be printed, the index of the term would be looked up in the context and the appropriate label retrieved. This would ensure consistency (and subsequently correctness) throughout the term. 
 
 When implementing the normalisation functionality, it became apparent that some sort of $\alpha$-conversion would still need to be implemented to avoid clashes of variables in the printed labels. A function was implemented to generate a 'canonical' set of labels, to ensure that each variable name was only used once in the term. For example, the term $(\lambda d. (\lambda h. h \, d) \, h) \, g$ with free variables $h$ and $g$ would be $\alpha$-converted to $\lambda x. (\lambda y. y \, x) \, a) \, b$. This would also be used when generating normalisation graphs later on -- redexes that led to $\alpha$-equivalent terms would have a consistent set of labels rather than juggling many different representations.
 
@@ -383,7 +384,7 @@ Translating these programs from \textsc{Haskell} to \textsc{Javascript} so they 
 \subsection{The gallery}
 With the term generation functions implemented in \textsc{Javascript}, the next step was to create 'galleries' to display various sets of terms in. The first thing to consider was the different parameters that could be used to filter terms to create different galleries. The original parameters $n$ and $k$ used in the generating algorithms could be used as a starting point, but there were others too such as number of crossings or number of $\beta$-redexes. There may be ways to modify the generation algorithms to only return these terms, but to start with all terms for a given $n$ and $k$ were generated, then the appropriate terms selected using a \texttt{filter(x -> ...)} call on the array. This has the downside of being quite inefficient when it comes to larger arrays of terms but meant that more time could be spent on implementing the tools rather than attempting to devise more algorithms.
 
-Combining the visualiser with the generation algorithms was fairly easy. After receiving user input for values of $n$ and $k$, the appropriate generation algorithm (pure, linear or planar) would be run to produce an array of $\lambda$-terms. These terms could then be fed to the visualiser to produce maps of each of these terms, which would be displayed on screen using basic CSS to arrange them in a grid. Over time the way the gallery was displayed was tinkered with to ensure the best display for all displays and galleries (e.g. terms not too close together, spaced evenly etc). The ability to select filtering criteria was also added later on. To save time when generating galleries of closed terms, the box for $k$ could be left blank and would be inferred as 0.
+Combining the visualiser with the generation algorithms was fairly easy. After receiving user input for values of $n$ and $k$, the appropriate generation algorithm (pure, linear or planar) would be run to produce an array of $\lambda$-terms. These terms could then be fed to the visualiser to produce maps of each of these terms, which would be displayed on screen using basic CSS to arrange them in a grid. Over time the way the gallery was displayed was tinkered with to ensure the best display for all displays and galleries (e.g. terms not too close together, spaced evenly etc). The ability to select filtering criteria was also added later on. One modification made to save time when generating galleries of closed terms was to infer an empty $k$ box as a 0.
 
 A minor problem was found when passing the generated terms to the visualiser. The generated terms did not contain any labels so the visualiser treated every variable as a free variable and didn't connect the edges to the correct abstraction nodes. This was solved by giving abstracted variables unique dummy labels so the visualiser could distinguish between different abstractions.
 
@@ -399,12 +400,92 @@ Originally the captions for the portraits were displayed in de Bruijn notation, 
 As the galleries were tested more it became apparent that for larger galleries, it simply wasn't feasible to display all the maps in a suitable time. Since the actual map-drawing process was the most computationally expensive, an option was added to turn off the map drawing and just show the captions for each term. This meant that a user would still be able to generate the terms, and inspect them in more detail by viewing their 'portrait', as discussed in the next section. 
 
 \subsection{\texorpdfstring{$\lambda$}{Lambda}-term 'portraits'}
-While the galleries were interesting alone to compare the similarities and differences between terms with the same properties, it was hard to inspect the terms in detail from the small portraits. To remedy this, functionality was added so that users could click on a portrait and be shown a larger version. 
+While the galleries were interesting alone to compare the similarities and differences between terms with the same properties, it was hard to inspect the terms in detail from the small portraits. To remedy this, functionality was added so that users could click on a portrait and be shown a larger version, similar to the first visualiser tool.
 
-With these 'portraits' 
+As in an actual art gallery, I thought it would be interesting to have some facts about the term displayed next to the large portrait. One of the most interesting topological properties of the maps is crossings, so an algorithm to calculate the number of crossings in a given $\lambda$-term had to be implemented. The only edges that cause crossings are those that represent the use of abstracted variables. For a map to have no crossings, its variables must be used in the order they are abstracted, i.e. their de Bruijn indices read from left to right must be in descending order. So to find the crossings created by a particular variable, we can calculate $crossings(x) = |x - (n - 1 - i)|$, where $x$ is the de Bruijn index of the variable, $n$ is the length of the context, and $i$ is the position of the variable in the context. For example, in a list of free variables \texttt{[0,1,2]}, the \texttt{0} creates two crossings as it must pass through the edges for variables \texttt{1} and \texttt{2}. Unfortunately, we cannot just perform this calculation for each variable and add them together to find the total number of crossings since this would contain duplicate crossings. 
 
+To solve this problem, a slightly different approach was used. This approach was based on the idea that a crossing is created when a free variable on the LHS of an application has a lower de Bruijn index than a variable on the RHS. For example, $0 \, (1 \, 2)$ has two crossings because $0$ is less than both variables in the RHS, whereas $2 \, (1 \, 0)$ has no crossings since $2$ is greater than both variables in the RHS. These crossings could then be added to the crossings in the LHS and RHS by recursively applying the algorithm. A pseudocode implementation of the calculation of crossings in an application can be seen in Figure \ref{fig:crossings}. It is trivial to consider the other two cases: variables have no crossings and abstractions have the same number of crossings as their scope.
+
+There was initially some trouble translating this into \textsc{Javascript} as I made a severe lapse of judgement and tried to incorporate calculating the free variables into the crossings function. Since \textsc{Javascript} does not contain tuples, this meant performing various array manipulation options to keep track of the current number of calculated crossings and free variables in the same array -- this made the function very hard to understand! I realised that to keep the code cleaner it would be better to first implement a separate function to return an array of free variables in a $\lambda$-term. This made the crossings function much tidier and the implementation become very close to the algorithm in Figure \ref{fig:crossings}.
+
+\begin{figure}
+\begin{algorithm}[H]
+    \SetKwArray{LHS}{freeLHS}
+    \SetKwArray{RHS}{freeRHS}
+    \SetKwData{TotalCrossings}{totalCrossings}
+    \SetKwFunction{freeVariables}{freeVariables}
+    \SetKwFunction{Crossings}{crossings}
+    \SetKwFunction{length}{length}
+\LHS $\leftarrow$ \freeVariables{LHS} \;
+\RHS $\leftarrow$ \freeVariables{RHS} \;
+\TotalCrossings $\leftarrow$ \Crossings{LHS} $+$ \Crossings{RHS} \;
+\For{$i \leftarrow 0$ \KwTo \length{\LHS}}{
+    \For{$j \leftarrow 0$ \KwTo \length{\RHS}}{
+        \If{\LHS{i} $<$ \RHS{j}}{
+            \TotalCrossings $\leftarrow$ \TotalCrossings + 1 \;
+        }
+    }
+}
+\Return \TotalCrossings \;
+\end{algorithm}
+\caption{Algorithm to calculate crossings in an application.}
+\label{fig:crossings}
+\end{figure}
+
+Other facts about the visualised term were much simpler to implement: calculating the number of applications, abstractions and variables involved traversing the term and incrementing a counter whenever a particular element appeared.
+
+With the $\lambda$-term portraits in good condition, I decided to add them to the visualiser as well, to create more consistency between the two tools. This also enabled code to be shared between the tools and the overall size of the codebase to decrease, making it easier to maintain.
+
+\subsection{Interacting with \texorpdfstring{$\beta$}{beta}-redexes}
+With the core functionality of the visualiser and the gallery complete, it was time to turn to more specific features. Since one of the main motivations of the project had been to investigate normalisation, $\beta$-redexes were a good area to head into next.
+
+I again turned to the \textsc{ML} functions developed by \cite{pierce}. Firstly, a function to 'shift' all de Bruijn indices greater than a given number by a certain number of places had to be implemented, followed by a function to substitute a variable for a different term. These could then be combined to create a $\beta$-reduction function. At this point, I also made a basic normalisation function that continuously performed an outermost reduction until reaching a normal form or performing a certain number reduction steps. Combining this with the visualiser was again simple: the map drawing function could be called after reducing or normalising the original term to draw the new term.
+
+The next feature to implement was to list the $\beta$-redexes alongside the portraits. This was just a case of traversing the term tree and adding each $\beta$-redex to an array when finding one, meaning that the leftmost outermost redex would be in position \texttt{0} and the rightmost innermost redex would be in position \texttt{n}, as shown below:
+%
+$$ \overbrace{(\lambda x. \underbrace{(\lambda y. y) \, x}_\text{redex 1}) \, (\lambda x. \underbrace{(\lambda y. y) \, x}_\text{redex 2})}^\text{redex 0} $$
+%
+These redexes could then be printed next to the portraits. To implement clicking on the redexes to reduce it, a function to perform a specific reduction in a term had to be implemented. This was again a case of traversing the term in the same way with a counter that ticked down until the appropriate redex was encountered.
+
+To allow highlighting of redexes in the original term, a method to print terms with HTML tags had to be implemented. This would print the term with \texttt{<span>} tags surrounding each beta redex, so each redex was associated with a class. For example, the term $(\lambda x. x) \, a$ would be enclosed with \texttt{<span class="app-0 beta-0">...</span>}. The style for this class could then be changed when highlighting its corresponding redex in the list. 
+
+This became slightly more complicated when dealing with redexes within other redexes -- the function to change the style of a class had change the style of all classes within the \texttt{<span>} tags since the inner classes overwrote the outer ones. This is shown in Figure \ref{fig:highlight}.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.5]{highlight}
+    \caption{An example showing how the redex highlighting originally had trouble when dealing with redexes inside redexes, and how it now correctly displays.}
+    \label{fig:highlight}
+\end{figure}
+
+A similar approach was used when making the redex highlight on the map. The API used allows elements to have classes, so whenever a redex was encountered a corresponding class would be added to an array, and added to all elements within the redex. Whenever a redex was highlighted, the style function from the API could be called and update all the elements with the appropriate class with the colour.
 
 \subsection{Normalisation}
+One main idea from the project proposal was the use of the visualised maps in normalisation graphs. The first step in this was to implement these normalisation graphs as a data structure in \textsc{Javascript}, and then using these structures alongside the graph drawing API to generate the graphs.
+
+Originally normalisation graphs were created as a naive tree structure. The root node contained the original term, with children representing all possible reductions of that term (each edge representing an individual redex). While this seemed like a suitable idea in theory, it was flawed in that not all redexes lead to unique reductions (the two redexes in $(\lambda x. (\lambda y. (\lambda z. z) \, y) \, x)$ lead to $\alpha$-equivalent terms, but the tree structure could not represent two edges leading to the same node. This also meant that the normalisation graph would not converge to the normal form at the bottom, but would diverge to many nodes containing the same normal form. This implementation would also fail to detect normalisation loops and would continue to descend the tree infinitely. However it had the benefit of being simple to implement and very efficient for terms (providing they had a computable normal form).
+
+Regardless of its problems, this implementation was used for the first iteration of generating normalisation graphs. Since the graph API had the ability to create 'compound nodes' (nodes with other graph elements inside them), the first strategy was to traverse the normalisation tree, generating maps of the terms at each node and placing them inside the larger node of the normalisation graph. The ids of elements would have to be renamed so that maps from different nodes didn't link up by mistake, but this was just a case of suffixing a unique id after each map's elements. These normalisation graph nodes would then be connected by the edges representing redexes. To place the nodes, each reduction was given a 'level' value which specified how many steps had been taken to reach it from the original term. Nodes with the same level were spread out evenly in a row, with rows starting from the top of the page and moving down. This works fine for linear terms, since steps always take you further down the normalisation graph due to all paths being the same length (it is impossible to get to another reduction on the same level). However for pure terms this can cause some irregularities since consecutive reductions can occupy the same level. Since edges are drawn in straight lines, this means they can cut across other nodes in the graph, as shown in Figure \ref{fig:purenorm}. Fortunately this doesn't happen too frequently, and the nodes can be moved out of the way of the edge if desired.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.5]{purenorm}
+    \caption{An example of when the generated normalisation graph can feature edges than cross behind other nodes for pure terms (the edge from the right node to the left node crosses behind the centre node). However it is a lot harder than expected to find examples like this.}
+    \label{fig:purenorm}
+\end{figure}
+
+The first attempt at drawing normalisation graphs had numerous problems. While the API didn't redraw nodes with duplicate ids (which I thought might remove the problem of the duplicate reductions in the normalisation tree), there was a problem with edges, since each node of the tree would attempt to draw its own set of edges from the node and causing many duplicates. This was fixed by checking for unique reductions in the graph drawing algorithm, but this was unwieldy and made the algorithm quite hard to understand. Compound nodes also caused the performance of the map to drop drastically, especially when moving around nodes, which cause a lot of lag. This was not helped by each duplicate node drawing its own map, which I took a while to realise since the maps were drawn on top of each other. Finally there were no options to give a margin around the maps in the normalisation graph nodes, so some of the edges would intersect with the edge of their parent node, as shown in the left of Figure \ref{fig:normnodes}.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.35]{nodenorm}
+    \caption{A comparison between the compound node (left) and background image (right) versions of normalisation graph nodes.}
+    \label{fig:normnodes}
+\end{figure}
+
+In an attempt to reduce the lag created by the drawn graph, I switched to using images for the normalisation graph nodes. The map of the reduction would be generated first, then converted to an image using the API functions. This image could then be used as the background of the normalisation graph node, as shown in the right of Figure \ref{fig:normnodes}. This made creating tidier nodes much easier as a margin could be specified around the image so everything fit inside. Options were also added to disable map generation for large terms (like with the gallery) to reduce the generation time of the graph. It also turned out that drawing arrows on the edges was a large cause of lag, so an option to not draw these was also added. 
+
+While the tree implementation of normalisation graphs had just about been holding up through all of this tweaking, it 
 
 \newpage
 

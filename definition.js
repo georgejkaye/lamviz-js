@@ -1060,8 +1060,15 @@ class ReductionGraph{
         var frontier = [[term, 0]];
         var i = 0;
 
+        var failed = false;
 
         while(frontier.length !== 0){
+
+            console.log(i);
+
+            if(i > maximumPathLength){
+                break;
+            }
 
             /* Examine the next term in the frontier containing all next reductions. */
             var nextTerm = frontier.shift();
@@ -1212,7 +1219,7 @@ class ReductionGraph{
         /* The first element of the matrix is the start point */
         var allPaths = this.pathLengthsFromTerm(0);
         
-        if(allPaths === -1){
+        if(allPaths === -1 || allPaths[0].length === 0){
             console.log("timeout!");
             return ["unknown", "unknown", "unknown", "unknown", "unknown", "unknown"];
         }

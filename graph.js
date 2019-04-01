@@ -6,6 +6,8 @@
 
 /** Array containing all node ids used in the current graph. */
 var nodes = [];
+/** Array containing all node ids used in the current normalisation graph. */
+var normNodes = [];
 /** Array containing all node objects used in the current graph. */
 var nodeObjs = [];
 /** Array containing all edge objects used in the current graph. */
@@ -83,6 +85,7 @@ function reset(map){
         cyMap = undefined;
     } else {
         cyNorm = undefined;
+        normNodes = [];
     }
 }
 
@@ -827,26 +830,6 @@ function drawMap(id, term, ctx, zoom, pan, labels){
 }
 
 /**
- * Check to make sure that a reduction does not already exist in the graph (e.g. alpha-equivalence)
- * @param {string} id - The id of the reduction (in de Bruijn notation).
- * @param {string} source - The source of the reduction.
- * @param {string} target - The target of the reduction.
- * @return {boolean} Whether the reduction exists.
- */
-function checkForIdenticalReduction(id, source, target){
-
-    for(var i = 0; i < edgeObjs.length; i++){
-
-        if(edgeObjs[i].data.id === id && edgeObjs[i].data.source === source && edgeObjs[i].data.target === target){
-            return true;
-        }
-    }
-
-    return false;
-
-}
-
-/**
  * Generate the elements of the normalisation graph.
  * @param {string} id               - The id of where the graph will be drawn.
  * @param {Object} graph            - The normalisation graph object.
@@ -883,13 +866,14 @@ function generateNormalisationGraphElements(id, graph, ctx, maps){
 
         /* Define the node first. */
         array = defineNode(array, nodeID, "norm", "", 0, level * normalisationDistanceY, term.prettyPrintLabels(ctx), level, "");  
+        smartPush(normNodes, nodeID);
 
         var reductions = graph.matrix[i][1];
         var redexLabels = term.printRedexes(ctx);
 
         /* Iterate over each reduction edge. */
         for(var j = 0; j < reductions.length; j++){
-            array = defineEdge(array, nodeID + '-b->' + reductions[j][1].prettyPrint() + '-b->' + reductions[j][0].prettyPrint(), "norm", "", nodeID, reductions[j][0].prettyPrint(), redexLabels[j]);
+                array = defineEdge(array, nodeID + '-b->' + reductions[j][1].prettyPrint() + '-b->' + reductions[j][0].prettyPrint(), "norm", "", nodeID, reductions[j][0].prettyPrint(), redexLabels[j]);
         }
     }
 
@@ -935,6 +919,17 @@ function drawNormalisationGraph(id, term, ctx, maps, labels, arrows){
 
     var tree = generateReductionTree(term);
     var elems = generateNormalisationGraphElements(id, tree, ctx, maps);
+    var newElems = [];
+
+    console.log(nodes);
+
+    for(var i = 0; i < elems.length; i++){
+        
+        console.log(elems[i].data.target);
+        if(elems[i].group !== 'edges' || normNodes.includes(elems[i].data.target)){
+            smartPush(newElems, elems[i])
+        }
+    }
 
     var size = 1200;
     var colour = 'white';
@@ -961,7 +956,7 @@ function drawNormalisationGraph(id, term, ctx, maps, labels, arrows){
     cyNorm = cytoscape({
         container: document.getElementById(id),
 
-        elements: elems,
+        elements: newElems,
     
         textureOnViewport: true,
         pixelRatio: 1,
