@@ -1,4 +1,4 @@
-## A visualiser for λ-terms as rooted maps
+# A visualiser for λ-terms as rooted maps
 
 My MSci final year project: a set of tools to help investigation of terms from various fragments of the λ-calculus. The core function of the tools is to represent these λ-terms as *maps* - some background on maps and how λ-terms can be represented as them can be found in my [**Scientific Paper**](/docs/2018-11-23-scientific-paper.pdf).
 
