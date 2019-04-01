@@ -23,4 +23,4 @@
 * ~~Identify what makes the long time for graphs~~
 * ~~Make normalisation graphs less laggy somehow~~
 * ~~Work on making maps easier to read for big boys~~
-* Check that normalisation graph terminates!
+* ~~Check that normalisation graph terminates!~~
