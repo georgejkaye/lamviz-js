@@ -9,6 +9,7 @@
 \usepackage{svg}
 \usepackage{graphicx}
 \usepackage{fancyhdr}
+\usepackage{rotating}
 \usepackage{natbib}
 \usepackage[linesnumbered,lined,boxed,commentsnumbered]{algorithm2e}
 
@@ -75,7 +76,7 @@ Drawing $\lambda$-terms maps by hand can take a while, especially for large term
 The visualiser also has functionality relating to the normalisation of terms. The $\beta$-redexes contained within the term are listed, and by clicking on these the user can reduce the term to its normal form (if one exists). A normalisation graph can also be generated, which can also be interesting to examine.
 
 \subsection{\texorpdfstring{$\lambda$}{lambda}-term gallery}
-When studying properties of $\lambda$-terms, it can be useful to generate terms and look for interesting properties shared between terms and their maps. However it can be tricky to come up with terms with certain properties (such as terms containing a certain amount of subterms) on the fly. The $\lambda$-term gallery can generate all terms of a certain size and free variables, with the ability to filter based on properties such as crossings or $\beta$-redexes. This makes testing conjectures a much easier process.
+When studying properties of $\lambda$-terms, it can be useful to generate terms and look for interesting properties shared between terms and their maps. However it can be tricky to come up with terms with certain properties (such as terms containing a certain amount of subterms) on the fly. The $\lambda$-term gallery can generate all terms of a certain size and free variables, with the ability to filter based on properties such as crossings or $\beta$-redexes. This makes disproving conjectures by finding counterexamples a much easier process.
 
 From the gallery, the user can inspect the generated terms using the visualiser, with the same functionality present as detailed above.
 
@@ -475,7 +476,7 @@ A similar approach was used when making the redex highlight on the map. The API 
 \subsection{Normalisation graphs}
 One main idea from the project proposal was the use of the visualised maps in normalisation graphs. The first step in this was to implement these normalisation graphs as a data structure in \textsc{Javascript}, and then using these structures alongside the graph drawing API to generate the graphs.
 
-Originally normalisation graphs were created as a naive tree structure. The root node contained the original term, with children representing all possible reductions of that term (each edge representing an individual redex). While this seemed like a suitable idea in theory, it was flawed in that not all redexes lead to unique reductions (the two redexes in $(\lambda x. (\lambda y. (\lambda z. z) \, y) \, x)$ lead to $\alpha$-equivalent terms, but the tree structure could not represent two edges leading to the same node. This also meant that the normalisation graph would not converge to the normal form at the bottom, but would diverge to many nodes containing the same normal form. This implementation would also fail to detect normalisation loops and would continue to descend the tree infinitely. However it had the benefit of being simple to implement and very efficient for terms (providing they had a computable normal form).
+Originally normalisation graphs were created as a naive tree structure. The root node contained the original term, with children representing all possible reductions of that term (each edge representing an individual redex). While this seemed like a suitable idea in theory, it was flawed in that not all redexes lead to unique reductions (the two redexes in $(\lambda x. (\lambda y. (\lambda z. z) \, y) \, x)$ lead to $\alpha$-equivalent terms, but the tree structure could not represent two edges leading to the same node. This also meant that the normalisation graph would not converge to the normal form at the bottom, but would diverge to many nodes containing the same normal form. This implementation would also fail to detect normalisation loops and would continue to descend the tree infinitely. However it had the benefit of being simple to implement and understand.
 
 Regardless of its problems, this implementation was used for the first iteration of generating normalisation graphs. Since the graph API had the ability to create 'compound nodes' (nodes with other graph elements inside them), the first strategy was to traverse the normalisation tree, generating maps of the terms at each node and placing them inside the larger node of the normalisation graph. The ids of elements would have to be renamed so that maps from different nodes didn't link up by mistake, but this was just a case of suffixing a unique id after each map's elements. These normalisation graph nodes would then be connected by the edges representing redexes. To place the nodes, each reduction was given a 'level' value which specified how many steps had been taken to reach it from the original term. Nodes with the same level were spread out evenly in a row, with rows starting from the top of the page and moving down. This works fine for linear terms, since steps always take you further down the normalisation graph due to all paths being the same length (it is impossible to get to another reduction on the same level). However for pure terms this can cause some irregularities since consecutive reductions can occupy the same level. Since edges are drawn in straight lines, this means they can cut across other nodes in the graph, as shown in Figure \ref{fig:purenorm}. Fortunately this doesn't happen too frequently, and the nodes can be moved out of the way of the edge if desired.
 
@@ -499,7 +500,7 @@ In an attempt to reduce the lag created by the drawn graph, I switched to using 
 
 While the tree implementation of normalisation graphs had just about been holding up through all of this tweaking, it started to show severe weaknesses when attempting to implement functions to calculate path length. Because of the numerous duplicate nodes, complex method needed to be implemented to ensure that only unique paths were being calculated. This was quite complicated and bloated the functions significantly. I decided that it was time to migrate to a more sophisticated implementation.
 
-Rather than a tree, the new implementation uses an adjacency matrix that keeps track of which nodes connect to each other, and by which redex. The original term is fed to the initialisation algorithm, which then performs all the redexes in the term and adds the resulting reductions to a frontier. The current node is added to the adjacency matrix, with references to the nodes it connects to. This process is continued, with any previously seen reductions not being re-added to the frontier, until the frontier is empty and the graph is complete. This has several benefits over the tree implementation. Most notably, every node is unique, which also means that there are no duplicate edges that need to be removed when creating the map. Additionally, because redexes are implemented as references to already existing objects rather than new child objects, infinitely reducing terms with finite normalisation graphs (such as $(\lambda x. x \, x)(\lambda x. x \, x)$) can have these graphs displayed. The only time the algorithm can get stuck now is if the term reduces infinitely with an infinite normalisation graph, such as for $(\lambda x. x \, x \, x)(\lambda x. x \, x \, x)$. For these terms, a cutoff point was added to halt the algorithm at a suitable number of reductions. In the code, the algorithm becomes much more elegant (both while generating the graph and drawing it), since recursion into the tree is replaced with a loop across the adjacency matrix. The value for 'level' was calculated in a similar way to before, with all reductions from the original term assigned level 1, and each subsequent redex increasing this value by 1.
+Rather than a tree, the new implementation uses an adjacency matrix that keeps track of which nodes connect to each other, and by which redex. The original term is fed to the initialisation algorithm, which then performs all the redexes in the term and adds the resulting reductions to a frontier. The current node is added to the adjacency matrix, with references to the nodes it connects to. This process is continued, with any previously seen reductions not being re-added to the frontier, until the frontier is empty and the graph is complete. This has several benefits over the tree implementation. Most notably, every node is unique, which also means that there are no duplicate edges that need to be removed when creating the map. Additionally, because redexes are implemented as references to already existing objects rather than new child objects, infinitely reducing terms with finite normalisation graphs (such as $(\lambda x. x \, x)(\lambda x. x \, x)$) can have these graphs displayed. The only time the algorithm could carry on infinitely would be if the term reduces infinitely with an infinite normalisation graph, such as for $(\lambda x. x \, x \, x)(\lambda x. x \, x \, x)$. For these terms, a cutoff point was added to halt the algorithm at a suitable number of reductions. In the code, the algorithm becomes much more elegant (both while generating the graph and drawing it), since recursion into the tree is replaced with a loop across the adjacency matrix. The value for 'level' was calculated in a similar way to before, with all reductions from the original term assigned level 1, and each subsequent redex increasing this value by 1.
 
 Path functions were now easier to implement. The total number of paths and list of different path lengths could be calculated by starting at the original term and following the references in the adjacency matrix until the normal form was reached. Properties such as shortest or longest path could then be computed by performing operations on the list of path lengths, such as \texttt{min()} or \texttt{max()}.
 
@@ -536,8 +537,62 @@ How well does it work?
 \section{Examples}
 What could it be used for?
 
+\subsection{Visualising terms}
+The main 
+
+\subsection{Terms with infinite reductions but finite graphs}
+Some terms, such as $\Omega$, have no computable normal form, but do have finite normalisation graphs. These can be generated by the visualiser. An example that combines $\Omega$ with a path that does reach a normal form is shown in Figure \ref{fig:omega}.
+
 \subsection{Boolean circuits}
-Show off how you could use to represent the boolean circuits!
+To prove that normalisation of linear $\lambda$-terms is PTIME-complete, \cite{mairson} encoded boolean circuits as functions in \textsc{ML}. By normalising these functions, the output of the boolean circuit can be produced. Since the Circuit Value Problem is known to be PTIME-complete, reducing it to the normalisation of linear $\lambda$-terms shows that the latter is also PTIME-complete.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.4]{normgraph}
+    \caption{An example of a normalisation graph with loops for the term $\lambda x. (\lambda y. \lambda z. y) \, x \, ((\lambda w. w \, w)(\lambda u. u \, u))$.}
+    \label{fig:omega}
+\end{figure}
+
+It can be interesting to use the visualiser to view the structure of the maps associated with these. One example is the circuit shown in Figure \ref{fig:circuit}, which is encoded as $\lambda x.$ \texttt{Copy} $x \, (\lambda x_1. \lambda x_2.$ \texttt{Notgate} $x_1 \, (\lambda x_3.$ \texttt{Orgate} $x_3 \, x_2 \, (\lambda x_4. x_4))$. The \texttt{Copy} function represents a fanout gate, copying one input $x$ to two outputs, $x_1$ and $x_2$. The \texttt{Notgate} function takes the input $x_1$ and negates it to to the output $x_3$. The \texttt{Orgate} function takes in two inputs $x_2$ and $x_3$ and returns the \texttt{Or} of these as $x_4$.
+
+The corresponding map is shown in Figure \ref{fig:circuitmap}, demonstrating how very simple circuits can create quite large maps! If we give the circuit an input, we use the visualiser to step through the redexes and arrive at the normal form, which will be the output of the circuit. The circuit in Figure \ref{fig:circuit} applied to \texttt{True} normalises to the pair representing \texttt{True}, as expected.
+
+In theory, the normalisation graphs for these circuits could also be generated to view all the different paths normalisation could take. Unfortunately, this appears to be infeasible on desktop machines due to the huge number of nodes in the graph. However, the normalisation graphs for smaller terms \textit{can} be generated in a suitable time, such as the one representing \texttt{And True False} in Figure \ref{fig:andnorm}.
+
+
+\begin{figure}
+    \centering
+    \includesvg[scale=0.75]{circuit}
+    \caption{A simple boolean circuit, representing \texttt{x -> Or (Not x) x}.}
+    \label{fig:circuit}
+\end{figure}
+
+\begin{sidewaysfigure}
+    \centering
+    \includegraphics[scale=0.4]{circuitmap}
+    \caption{The corresponding map for the circuit in Figure \ref{fig:circuit}}
+    \label{fig:circuitmap}
+\end{sidewaysfigure}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.25]{andgate}
+    \caption{The structure of the normalisation graph for \texttt{And True False}.}
+    \label{fig:andnorm}
+\end{figure}
+
+\subsection{Testing conjectures}
+When tes
+
+One very simple example of a conjecture could be \textit{All closed linear terms of size 11 with 3 $\beta$-redexes are planar}. There are 1105 linear terms of size 11, of which 14 contain three $\beta$-redexes, so even working out which terms fit the criteria would take a long time by hand, and drawing them even longer. By using the gallery, it is very simple to generate the 14 terms and verify that, indeed, they are all planar. One thing I noticed while testing the gallery is that closed linear terms of size 8 with two $\beta$-redexes and size 5 with one $\beta$-redex are also all planar, as shown in Figure \ref{fig:testingconjecture}. This could lead to the conjecture \textit{All closed linear terms of size $n$ with $\frac{n-2}{3}$ $\beta$-redexes are planar}. This also holds for size 14 with 4 $\beta$-redexes, but cannot be tested much further since my computer cannot generate larger terms in a suitable time. Nevertheless, it is a good starting point
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.23]{testingconjecture}
+    \caption{Testing the conjecture \textit{All closed linear terms of size $n$ with $\frac{n-2}{3}$ $\beta$-redexes are planar}.}
+    \label{fig:testingconjecture}
+\end{figure}
+
 
 \newpage
 
@@ -565,6 +620,7 @@ This appendix details the file structure of the submitted ZIP directory. To run 
 \begin{itemize}
     \item \texttt{gallery.html}: The $\lambda$-term gallery.
     \item \texttt{visualiser.html}: The $\lambda$-term visualiser.
+    \item \texttt{aliases.txt}: Some sample aliases for use in the visualiser, including Mairson's boolean circuit functions, adapted from \cite{mairson}.
     \item \texttt{README.md}: A readme file.
 \end{itemize}
 
@@ -577,7 +633,6 @@ This appendix details the file structure of the submitted ZIP directory. To run 
 
 \subsection{\texttt{src} directory -- Source code}
 \begin{itemize}
-    \item \texttt{aliases.txt}: Some sample aliases for use in the visualiser, including Mairson's boolean circuit functions, adapted from \cite{mairson}.
     \item \texttt{cytoscape.min.js}: The source code for the graph drawing API used.
     \item \texttt{definition.js}: The implementation of the $\lambda$-calculus and associated data structures.
     \item \texttt{evaluator.js}: Functions to evaluate and normalising $\lambda$-terms.

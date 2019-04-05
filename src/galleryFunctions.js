@@ -200,7 +200,7 @@ function generateButton(x, prev){
             var size = 200;
 
             while(x > 20){
-                size -= 2;
+                size -= 3;
                 x--;
             }
 
