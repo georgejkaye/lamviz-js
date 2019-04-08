@@ -157,6 +157,9 @@ function addFunction(functionName, functionBody){
     
     var error = "";
 
+    functionName = functionName.replace(/</g, "&lt;");
+    functionName = functionName.replace(/>/g, "&gt;");
+
     if(functionName.split(" ").length > 1){
         error = functionName + ": Alias names must not contain spaces";
     } else {
@@ -254,8 +257,9 @@ function bulkButton(){
 
         for(var i = 0; i < split1.length; i++){
             var split2 = split1[i].split("\n");
-            split2[0].replace("<", "\<");
-            
+            split2[0] = split2[0].replace(/</g, "&lt;");
+            split2[0] = split2[0].replace(/>/g, "&gt;");
+
             if(split2.length !== 2){
                 error = split2[0] + ": missing function body";
             } else {
