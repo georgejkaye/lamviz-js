@@ -107,8 +107,8 @@ function parseTerm(tokens, initial, env){
                     var index = env.find(tokens[i]);
 
                     if(index === -1){
-                        tokens[i] = tokens[i].replace(/</g, "@lt;");
-                        tokens[i] = tokens[i].replace(/>/g, "@gt;");
+                        tokens[i] = tokens[i].replace(/</g, "&lt;");
+                        tokens[i] = tokens[i].replace(/>/g, "&gt;");
                         return "Parse error: Variable " + tokens[i] + " with no associated binding encountered";
                     }
 
