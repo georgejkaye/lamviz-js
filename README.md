@@ -34,4 +34,4 @@ The [**Project Proposal**](/docs/2018-10-26-project-proposal.pdf) is a brief ove
 
 The [**Scientific Paper**](/docs/2018-11-23-scientific-paper.pdf) gives some background on the topics involved, and how the project was progressing towards the end of November.
 
-The [**Project Report**] (coming soon!) is the actual dissertation.
+The [**Project Report**](/docs/2019-04-08-final-report.pdf) is the report from the end of the project - the dissertation!
