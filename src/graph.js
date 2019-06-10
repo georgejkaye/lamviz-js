@@ -68,6 +68,9 @@ var redexEdgeIDs = [];
 /** Images for the reduction graph */
 var imgs = [];
 
+var leftest = 0;
+var rightest = 0;
+
 /**
  * Reset the nodes and edges arrays.
  */
@@ -83,6 +86,8 @@ function reset(map){
 
     if(map){
         cyMap = undefined;
+        leftest = 0;
+        rightest = 0;
     } else {
         cyNorm = undefined;
         normNodes = [];
@@ -629,8 +634,6 @@ function updateLabels(labels){
  */
 function placeFreeVariables(boundVariables, freeVariables, ctx){
 
-    var rightest = 0;
-
     /** Find the furthest point right the map extends. */
     for(i = 0; i < boundVariables.length; i++){
         
@@ -638,6 +641,10 @@ function placeFreeVariables(boundVariables, freeVariables, ctx){
 
         if(newX > rightest){
             rightest = newX;
+        }
+
+        if(newX < leftest){
+            leftest = newX;
         }
     }
 
@@ -825,7 +832,7 @@ function drawMap(id, term, ctx, zoom, pan, labels){
     /** Fit the map to the frame. */
     cyMap.fit(cyMap.filter(function(ele, i, eles){return true;}), 10);
 
-    return cyMap;
+    return [cyMap, rightest - leftest];
 
 }
 
