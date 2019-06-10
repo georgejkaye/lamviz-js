@@ -381,7 +381,6 @@ const maxReductionSteps = 1000;
 function generateReductionTree(term){
 
     var graph = new ReductionGraph(term);
-    console.log(graph.printGraph());
     return graph;
 
 }

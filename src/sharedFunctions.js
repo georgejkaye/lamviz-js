@@ -19,6 +19,7 @@ var bigScreen = false;
 var cyNorm;
 var cyMap;
 var cyMapWidth;
+var cyNormWidth;
 
 var imageWindow;
 
@@ -298,7 +299,7 @@ function getStats(currentTerm){
             getRow(getCell("", getButton("fullScreen-btn", "fullScreenMapButton();", "Full screen", false) +
                                 getButton("reset-btn", "resetViewButton();", "Reset view", true) +
                                 getButton("reset-btn", "resetButton();", "Reset to original term", true) + 
-                                getButton("export-btn", "exportButton()", "Export map", false)
+                                getButton("export-btn", "exportButton(true)", "Export map", false)
             )) +
             getRow(getCell("", getButton("normalise-btn", "normaliseButton()", "Normalise") + getButton("watch-reduction-btn", "playReduction()", "Watch normalisation") +
                                 '<select id="strategy">' +
@@ -392,17 +393,31 @@ function resetViewButton(){
 }
 
 /**
- * Function to execute when the export button is pressed
+ * Function to execute when the export button is pressed.
+ * @param {boolean} map - Whether to export the map or the normalisation graph
  */
-function exportButton(){
+function exportButton(map){
 
-    var scale = 10000 / cyMapWidth;
+    var scale = 1;
+    var png64;
 
-    var png64 = cyMap.png({
-        bg: '#fff',
-        full: true,
-        scale: scale
-    });
+    if(map){
+        scale = 10000 / cyMapWidth;
+        png64 = cyMap.png({
+            bg: '#fff',
+            full: true,
+            scale: scale
+        });
+    } else {
+        scale = 1000 / (cyNormWidth / 4);
+        png64 = cyNorm.png({
+            bg: '#fff',
+            full: true,
+            scale: scale,
+            maxWidth: 10000,
+            maxHeight: 10000
+        });
+    }
 
     imageWindow = window.open(png64, '_blank');
 }
@@ -601,7 +616,9 @@ function showNormalisationGraph(){
                                                 '</td>'
     );
     
-    cyNorm = drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables, document.getElementById('normalisation-maps').checked, document.getElementById('normalisation-labels').checked, document.getElementById('normalisation-arrows').checked);
+    var norm = drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables, document.getElementById('normalisation-maps').checked, document.getElementById('normalisation-labels').checked, document.getElementById('normalisation-arrows').checked);
+    cyNorm = norm[0];
+    cyNormWidth = norm[1];
 
     document.getElementById("reset-btn").disabled = false;
     scrollToElement('normalisation-studio');
@@ -642,6 +659,7 @@ function getNormalisationGraphText(pathStats){
                 pathStatsText +
                 getRow(getCell("", getButton('fullscreen-norm-btn', 'fullScreenNormalisationGraphButton()', "Full screen", false))) +
                 getRow(getCell("", getButton('clear-norm-btn', 'clearNormalisationGraph()', "Back", false))) +
+                getRow(getCell("", getButton('export-norm-btn', 'exportButton(false)', "Export graph", false))) +
            '</table>';
 }
 

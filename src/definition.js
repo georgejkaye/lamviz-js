@@ -1064,8 +1064,6 @@ class ReductionGraph{
 
         while(frontier.length !== 0){
 
-            console.log(i);
-
             if(i > maximumPathLength){
                 break;
             }
@@ -1103,7 +1101,6 @@ class ReductionGraph{
         }
 
         this.graphStats = [0,0,0,0,0,0,0,0,0,0,0]
-        console.log("Graph constructed!");
     }
 
     /**
@@ -1220,7 +1217,6 @@ class ReductionGraph{
         var allPaths = this.pathLengthsFromTerm(0);
         
         if(allPaths === -1 || allPaths[0].length === 0){
-            console.log("timeout!");
             return ["unknown", "unknown", "unknown", "unknown", "unknown", "unknown"];
         }
 

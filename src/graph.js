@@ -63,13 +63,19 @@ const lambda = "\u03BB";
 var redexIndex = 0;
 /** An array of nodes that need to have redexes propogated to their abstraction. */
 var redexList = [];
-/** IDs of the actual redex edges */
+/** IDs of the actual redex edges. */
 var redexEdgeIDs = [];
-/** Images for the reduction graph */
+/** Images for the reduction graph. */
 var imgs = [];
 
-var leftest = 0;
-var rightest = 0;
+/** The x coordinate of the leftest node on the current map. */
+var mapLeftest = 0;
+/** The x coordinate of the rightest node on the current map. */
+var mapRightest = 0;
+/** The x coordinate of the leftest node on the current normalisation graph. */
+var graphLeftest = 0;
+/** The x coordinate of the rightest node on the current normalisation graph. */
+var graphRightest = 0;
 
 /**
  * Reset the nodes and edges arrays.
@@ -86,11 +92,13 @@ function reset(map){
 
     if(map){
         cyMap = undefined;
-        leftest = 0;
-        rightest = 0;
+        mapLeftest = 0;
+        mapRightest = 0;
     } else {
         cyNorm = undefined;
         normNodes = [];
+        graphLeftest = 0;
+        graphRightest = 0;
     }
 }
 
@@ -639,12 +647,12 @@ function placeFreeVariables(boundVariables, freeVariables, ctx){
         
         var newX = boundVariables[i].position('x');
 
-        if(newX > rightest){
-            rightest = newX;
+        if(newX > mapRightest){
+            mapRightest = newX;
         }
 
-        if(newX < leftest){
-            leftest = newX;
+        if(newX < mapLeftest){
+            mapLeftest = newX;
         }
     }
 
@@ -654,7 +662,7 @@ function placeFreeVariables(boundVariables, freeVariables, ctx){
         var id = freeVariables[j].data('id');
 
         /* Calculate how far right along the page the node should be placed. */
-        var x = rightest + ((freeVariables.length - j) * nodeDistanceX * 2) - nodeDistanceX;
+        var x = mapRightest + ((freeVariables.length - j) * nodeDistanceX * 2) - nodeDistanceX;
 
         /* Place the free variable at the bottom of the map. */
         freeVariables[j].position('x', x);
@@ -832,7 +840,7 @@ function drawMap(id, term, ctx, zoom, pan, labels){
     /** Fit the map to the frame. */
     cyMap.fit(cyMap.filter(function(ele, i, eles){return true;}), 10);
 
-    return [cyMap, rightest - leftest];
+    return [cyMap, mapRightest - mapLeftest];
 
 }
 
@@ -866,7 +874,7 @@ function generateNormalisationGraphElements(id, graph, ctx, maps){
         /* If maps are enabled, draw the map for this term. */
         if(maps){
             var map = drawMap(id, term, ctx);
-            smartPush(imgs, [nodeID, map.png()]);
+            smartPush(imgs, [nodeID, map[0].png()]);
         }
 
         var level = graph.matrix[i][2];
@@ -928,11 +936,8 @@ function drawNormalisationGraph(id, term, ctx, maps, labels, arrows){
     var elems = generateNormalisationGraphElements(id, tree, ctx, maps);
     var newElems = [];
 
-    console.log(nodes);
-
     for(var i = 0; i < elems.length; i++){
         
-        console.log(elems[i].data.target);
         if(elems[i].group !== 'edges' || normNodes.includes(elems[i].data.target)){
             smartPush(newElems, elems[i])
         }
@@ -1038,6 +1043,14 @@ function drawNormalisationGraph(id, term, ctx, maps, labels, arrows){
                 posX = (-0.5) * w + ((j-c) * (w+x));
             }
 
+            if(posX < graphLeftest){
+                graphLeftest = posX;
+            }
+
+            if(posX > graphRightest){
+                graphRightest = posX;
+            }
+
             elems[j].position('x', posX);
             elems[j].position('y', i * normalisationDistanceY);
         }
@@ -1048,7 +1061,6 @@ function drawNormalisationGraph(id, term, ctx, maps, labels, arrows){
         cyNorm.nodes().on('mouseover', function(e){
             var ele = e.target;
             updateStyle(false, "[id = '" + ele.data('id') + "']", 'label', 'data(label)');
-            console.log("hello");
         });
 
         cyNorm.nodes().on('mouseout', function(e){
@@ -1061,7 +1073,6 @@ function drawNormalisationGraph(id, term, ctx, maps, labels, arrows){
     cyNorm.edges().on('mouseover', function(e){
         var ele = e.target;
         updateStyle(false, "[id = '" + ele.data('id') + "']", 'label', 'data(label)');
-        console.log("hello");
     });
 
     cyNorm.edges().on('mouseout', function(e){
@@ -1072,6 +1083,6 @@ function drawNormalisationGraph(id, term, ctx, maps, labels, arrows){
     /* Fit the map to the frame. */
     cyNorm.fit(cyNorm.filter(function(ele, i, eles){return true;}), 10);
     
-    return cyNorm;
+    return [cyNorm, graphRightest - graphLeftest];
 
 }
