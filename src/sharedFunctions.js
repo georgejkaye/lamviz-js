@@ -18,7 +18,7 @@ var bigScreen = false;
 var cyNorm;
 var cyMap;
 var cyMapWidth;
-var cyNormWidth;
+var cyNormHeight;
 
 var imageWindow;
 
@@ -438,7 +438,7 @@ function exportButton(map){
             scale: scale
         });
     } else {
-        scale = 1000 / (cyNormWidth / 4);
+        scale = 5000 / cyNormHeight;
         png64 = cyNorm.png({
             bg: '#fff',
             full: true,
@@ -646,7 +646,7 @@ function showNormalisationGraph(){
     
     var norm = drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables, document.getElementById('normalisation-maps').checked, document.getElementById('normalisation-labels').checked, document.getElementById('normalisation-arrows').checked);
     cyNorm = norm[0];
-    cyNormWidth = norm[1];
+    cyNormHeight = norm[1];
 
     document.getElementById("reset-btn").disabled = false;
     scrollToElement('normalisation-studio');
@@ -701,7 +701,9 @@ function changeFrameSizeGraph(width, height){
     document.getElementById("normalisation-graph-frame").style.height = height;
     document.getElementById("normalisation-graph").style.width = "100%";
     document.getElementById("normalisation-graph").style.height = "100%";
-    cyNorm = drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables, document.getElementById('normalisation-maps').checked, document.getElementById('normalisation-labels').checked, document.getElementById('normalisation-arrows').checked);
+    var norm = drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables, document.getElementById('normalisation-maps').checked, document.getElementById('normalisation-labels').checked, document.getElementById('normalisation-arrows').checked);
+    cyNorm = norm[0];
+    cyNormHeight = norm[1];
 }
 
 /**
