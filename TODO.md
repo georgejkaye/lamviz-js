@@ -24,3 +24,7 @@
 * ~~Make normalisation graphs less laggy somehow~~
 * ~~Work on making maps easier to read for big boys~~
 * ~~Check that normalisation graph terminates!~~
+* Highlighting stops when you return from a normalisation graph
+* Implement some groovier animations when reducing
+* Make everything tidier
+* Make interface more polished
