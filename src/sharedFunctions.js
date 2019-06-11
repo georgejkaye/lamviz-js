@@ -402,7 +402,7 @@ function exportButton(map){
     var png64;
 
     if(map){
-        scale = 10000 / cyMapWidth;
+        scale = 5000 / cyMapWidth;
         png64 = cyMap.png({
             bg: '#fff',
             full: true,
