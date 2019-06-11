@@ -418,7 +418,7 @@ function resetButton(){
  * Function to execute when the reset view button is pressed.
  */
 function resetViewButton(){
-    viewPortrait(exhibit, currentTerm, showLabels().checked, bigScreen, currentFrame);
+    viewPortrait(exhibit, currentTerm, showLabels(), bigScreen, currentFrame);
 }
 
 /**
