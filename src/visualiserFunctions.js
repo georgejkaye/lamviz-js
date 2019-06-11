@@ -71,52 +71,6 @@ function executeButton(){
 }
 
 /**
- * Function to execute when the generate button is pressed.
- */
-function generateButton(x){
-
-    var n = parseInt(getText('n'));
-    var k = parseInt(getText('k'));
-    var string = "";
-
-    if(isNaN(n) || isNaN(k)){
-        string = "Bad input";
-    } else {
-        var terms;
-        
-        switch(x){
-            case 0:
-                terms = generateTerms(n, k);
-                break;
-            case 1:
-                terms = generateLinearTerms(n, k);
-                break;
-            case 2:
-                terms = generatePlanarTerms(n, k);
-                break;
-        }
-
-        for(i = 0; i < terms.length; i++){
-            string += terms[i].prettyPrint() + "<br />";
-        }
-    }
-
-    changeText('generated-terms', string);
-    changeText('enumerated-terms', "There are " + terms.length + " terms");
-
-}
-
-/**
- * Function to execute when the normalisation tree button is pressed.
- */
-function normaliseTreeButton(){
-
-    changeText('normalisation-tree', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")));
-    drawNormalisationGraph('normalisation-graph', currentTerm, freeVariables, document.getElementById('normalisation-maps').checked);
-
-}
-
-/**
  * Function to execute when the back button is pressed.
  */
 function backButton(){

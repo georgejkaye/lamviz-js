@@ -1083,6 +1083,6 @@ function drawNormalisationGraph(id, term, ctx, maps, labels, arrows){
     /* Fit the map to the frame. */
     cyNorm.fit(cyNorm.filter(function(ele, i, eles){return true;}), 10);
     
-    return [cyNorm, tree.highestLevel * (normalisationDistanceY + size)];
+    return [cyNorm, (1 + tree.highestLevel) * (normalisationDistanceY + size)];
 
 }

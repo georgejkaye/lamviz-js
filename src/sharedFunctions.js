@@ -15,10 +15,10 @@ var exhibit;
 var reduced = false;
 var reducing = false;
 var bigScreen = false;
-var cyNorm;
-var cyMap;
-var cyMapWidth;
-var cyNormHeight;
+var cyNormCurrent;
+var cyMapCurrent;
+var cyMapWidthCurrent;
+var cyNormHeightCurrent;
 
 var imageWindow;
 
@@ -388,8 +388,8 @@ function viewPortrait(exhibitName, term, label, full, i){
     }
 
     var map = drawMap('portrait' + currentFrame, currentTerm, freeVariables, true, true, label);
-    cyMap = map[0];
-    cyMapWidth = map[1];
+    cyMapCurrent = map[0];
+    cyMapWidthCurrent = map[1];
     
     scrollToElement("church-room");
 }
@@ -431,15 +431,15 @@ function exportButton(map){
     var png64;
 
     if(map){
-        scale = 5000 / cyMapWidth;
-        png64 = cyMap.png({
+        scale = 5000 / cyMapWidthCurrent;
+        png64 = cyMapCurrent.png({
             bg: '#fff',
             full: true,
             scale: scale
         });
     } else {
-        scale = 5000 / cyNormHeight;
-        png64 = cyNorm.png({
+        scale = 5000 / cyNormHeightCurrent;
+        png64 = cyNormCurrent.png({
             bg: '#fff',
             full: true,
             scale: scale,
@@ -645,8 +645,8 @@ function showNormalisationGraph(){
     );
     
     var norm = drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables, document.getElementById('normalisation-maps').checked, document.getElementById('normalisation-labels').checked, document.getElementById('normalisation-arrows').checked);
-    cyNorm = norm[0];
-    cyNormHeight = norm[1];
+    cyNormCurrent = norm[0];
+    cyNormHeightCurrent = norm[1];
 
     document.getElementById("reset-btn").disabled = false;
     scrollToElement('normalisation-studio');
@@ -702,8 +702,8 @@ function changeFrameSizeGraph(width, height){
     document.getElementById("normalisation-graph").style.width = "100%";
     document.getElementById("normalisation-graph").style.height = "100%";
     var norm = drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables, document.getElementById('normalisation-maps').checked, document.getElementById('normalisation-labels').checked, document.getElementById('normalisation-arrows').checked);
-    cyNorm = norm[0];
-    cyNormHeight = norm[1];
+    cyNormCurrent = norm[0];
+    cyNormHeightCurrent = norm[1];
 }
 
 /**
