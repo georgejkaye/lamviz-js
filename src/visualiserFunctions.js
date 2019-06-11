@@ -64,7 +64,7 @@ function executeButton(){
     changeText('normalisation-studio', "");
 
     if(!error){
-        viewPortrait("church-room", currentTerm, document.getElementById('labels-yes').checked, false);
+        viewPortrait("church-room", currentTerm, true, false);
     }
 
     reduced = false;

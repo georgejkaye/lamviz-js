@@ -10,7 +10,6 @@ var originalTerm;
 
 /* Details about the currently viewed big frame */
 var currentFrame;
-var labels;
 var exhibit;
 
 var reduced = false;
@@ -230,6 +229,28 @@ function getCell(className, content){
 }
 
 /**
+ * Get the HTML for a radio button
+ * @param {string} id       - The id of this radio button.
+ * @param {string} name     - The name of the radio group.
+ * @param {string} value    - The value submitted by this radio button.
+ * @param {string} onclick  - What to do when this button is clicked.
+ * @param {boolean} checked - Whether this button is initially checked.
+ * @param {string} label    - The label for this radio button.
+ * @return {string} The corresponding HTML for this radio button.
+ */
+function getRadioButton(id, name, value, onclick, checked, label){
+
+    var check = "";
+
+    if(checked){
+        check = "checked";
+    }
+
+    return '<input type="radio" id="' + id + '" name="' + name + '" value="' + value + '" onclick = "' + onclick + '" ' + check + '/>' +
+                '<label for="' + id + '">' + label + '</label>';
+}
+
+/**
  * Get the HTML for a <button type = "button">.
  * @param {string} id - The id for this <button>.
  * @param {string} onclick - The onclick for this <button>.
@@ -286,7 +307,7 @@ function printTermHTML(term, deBruijn){
  * @param {number} exhibit - The exhibit the stats are being displayed in.
  * @return {string} The HTML table code for the stats.
  */
-function getStats(currentTerm){
+function getStats(currentTerm, labels){
     return getRow(getCell("term-heading", '<b>' + printTermHTML(currentTerm, false) + '</b>')) +
             getRow(getCell("term-subheading", '<b>' + printTermHTML(currentTerm, true) + '</b>')) +
             getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
@@ -296,6 +317,7 @@ function getStats(currentTerm){
             getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
             getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
             getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(freeVariables), "redex", "clickRedexOnclick(i,)", "highlightRedexMouseover(i, true)", "unhighlightRedexMouseover(i, true)"))) +
+            getRow(getCell("border-top", getP("", "", "", "", getRadioButton("yes-labels", "labels", "yes-labels", "updateLabels(true)", labels, "Show labels") + getRadioButton("no-labels", "labels", "no-labels", "updateLabels(false)", !labels, "No labels")))) +
             getRow(getCell("", getButton("fullScreen-btn", "fullScreenMapButton();", "Full screen", false) +
                                 getButton("reset-btn", "resetViewButton();", "Reset view", true) +
                                 getButton("reset-btn", "resetButton();", "Reset to original term", true) + 
@@ -327,7 +349,6 @@ function getStats(currentTerm){
 function viewPortrait(exhibitName, term, label, full, i){
 
     exhibit = exhibitName;
-    labels = label;
     bigScreen = full;
 
     currentTerm = term;
@@ -344,7 +365,7 @@ function viewPortrait(exhibitName, term, label, full, i){
                                             '<td>' + getDiv("w3-container frame big-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
                                             '<td>' +
                                                 '<table>' + 
-                                                    getStats(currentTerm) +   
+                                                    getStats(currentTerm, label) +   
                                                 '</table>' +
                                             '</td>' +
                                         '</tr>' +
@@ -374,13 +395,21 @@ function viewPortrait(exhibitName, term, label, full, i){
 }
 
 /**
+ * Find out if labels should be shown on the drawn map.
+ * @return {boolean} if labels should be shown on the drawn map.
+ */
+function showLabels(){
+    return document.getElementById('yes-labels').checked;
+}
+
+/**
  * Function to execute when the reset button is pressed.
  */
 function resetButton(){
 
     if(reduced){
         currentTerm = originalTerm;
-        viewPortrait(exhibit, currentTerm, labels, bigScreen, currentFrame);
+        viewPortrait(exhibit, currentTerm, showLabels(), bigScreen, currentFrame);
         reduced = false;
     }
 }
@@ -389,7 +418,7 @@ function resetButton(){
  * Function to execute when the reset view button is pressed.
  */
 function resetViewButton(){
-    viewPortrait(exhibit, currentTerm, labels, bigScreen, currentFrame);
+    viewPortrait(exhibit, currentTerm, showLabels().checked, bigScreen, currentFrame);
 }
 
 /**
@@ -494,7 +523,6 @@ function clickRedexOnclick(i){
 /**
  * Reduce one of the redexes.
  * @param {number} i - The redex clicked.
- * @param {boolean} labels - Whether the labels should be displayed on the map.
  */
 function clickRedex(i){
 
@@ -507,7 +535,7 @@ function clickRedex(i){
     }
 
     currentTerm = normalisedTerm;
-    viewPortrait("church-room", currentTerm, labels, bigScreen, i);
+    viewPortrait("church-room", currentTerm, showLabels(), bigScreen, i);
 }
 
 const OUTERMOST = 0;
@@ -552,14 +580,14 @@ function playReduction(subcall, strat){
             setTimeout(function(){
                 setTimeout(function(){
                             setTimeout(playReduction(true, strat), delay); 
-                            clickRedex(chosenRedex, labels)
+                            clickRedex(chosenRedex)
                 }, delay); 
                 highlightRedex(chosenRedex)
             }, delay);
         } else {
             setTimeout(function(){
                 setTimeout(playReduction(true, strat), delay / 2); 
-                clickRedex(chosenRedex, labels);
+                clickRedex(chosenRedex);
             }, delay / 2); 
             highlightRedex(chosenRedex);
         }
@@ -582,21 +610,21 @@ function normaliseButton(){
     }
 
     currentTerm = normalisedTerm;
-    viewPortrait(exhibit, currentTerm, labels, bigScreen, currentFrame);
+    viewPortrait(exhibit, currentTerm, showLabels(), bigScreen, currentFrame);
 }
 
 /**
  * Function to execute when the full screen button is pressed.
  */
 function fullScreenMapButton(){
-    viewPortrait(exhibit, currentTerm, labels, true, currentFrame);
+    viewPortrait(exhibit, currentTerm, showLabels(), true, currentFrame);
 }
 
 /**
  * Function to execute when the exit full screen button is pressed.
  */
 function exitFullScreenMapButton(){
-    viewPortrait(exhibit, currentTerm, labels, false, currentFrame);
+    viewPortrait(exhibit, currentTerm, showLabels(), false, currentFrame);
 }
 
 /**
