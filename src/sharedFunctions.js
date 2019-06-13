@@ -383,7 +383,9 @@ function viewPortrait(exhibitName, term, label, full, i){
                             "<select>" +
                             getButton("normalise-button", "normaliseButton()", "Normalise") +
                             getButton("reset-button", "resetViewButton()", "Reset to original view") +
-                            getButton("reset-view-button", "resetButton()", "Reset to original term"))
+                            getButton("reset-view-button", "resetButton()", "Reset to original term") + 
+                            getRadioButton("yes-labels", "labels", "yes-labels", "updateLabels(true)", label, "Show labels") + 
+                            getRadioButton("no-labels", "labels", "no-labels", "updateLabels(false)", !label, "No labels"))
         );
     }
 
