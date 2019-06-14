@@ -77,6 +77,13 @@ var graphLeftest = 0;
 /** The x coordinate of the rightest node on the current normalisation graph. */
 var graphRightest = 0;
 
+/** The queue of highlight operations to perform. */
+var highlightOperations = [];
+var performingHighlight = false;
+
+var nextHighlight;
+var nextUnhighlight;
+
 /**
  * Reset the nodes and edges arrays.
  */
@@ -724,7 +731,9 @@ function drawMap(id, term, ctx, zoom, pan, labels){
                     'color': 'white',
                     'width': '15',
                     'height': '15',
-                    'font-size': '10'
+                    'font-size': '10',
+                    'transition-property': 'background-color',
+                    'transition-duration': '0.25s'
                 }
             },
     
@@ -741,12 +750,14 @@ function drawMap(id, term, ctx, zoom, pan, labels){
             {
                 selector: 'edge',
                 style: {
-                'width': 2,
-                'line-color': '#ccc',
-                'mid-target-arrow-color': '#ccc',
-                'mid-target-arrow-shape': 'triangle',
-                'arrow-scale': '1',
-                'font-size': '6',
+                    'width': 2,
+                    'line-color': '#ccc',
+                    'mid-target-arrow-color': '#ccc',
+                    'mid-target-arrow-shape': 'triangle',
+                    'arrow-scale': '1',
+                    'font-size': '6',
+                    'transition-property': 'background-color, line-color, mid-target-arrow-color',
+                    'transition-duration': '0.25s'
                 }
             },
 
@@ -766,17 +777,53 @@ function drawMap(id, term, ctx, zoom, pan, labels){
                     },
                     'control-point-weights': '0.5',
                     'loop-direction': '45deg',
-                    'edge-distances': 'node-position'
+                    'edge-distances': 'node-position',
                     
                 }
             },
 
             {
-                selector: '.redex',
+                selector: '.highlighted-red',
+                style: {
+                    'background-color': 'red',
+                    'line-color': 'red',
+                    'mid-target-arrow-color': 'red',
+                }
+            },
+
+            {
+                selector: '.highlighted-blue',
+                style: {
+                    'background-color': 'blue',
+                    'line-color': 'red',
+                    'mid-target-arrow-color': 'blue',
+                }
+            },
+
+            {
+                selector: '.highlighted-green',
                 style: {
                     'background-color': 'green',
                     'line-color': 'green',
-                    'mid-target-arrow-color': 'green'
+                    'mid-target-arrow-color': 'green',
+                }
+            },
+
+            {
+                selector: '.highlighted-orange',
+                style: {
+                    'background-color': 'orange',
+                    'line-color': 'orange',
+                    'mid-target-arrow-color': 'orange',
+                }
+            },
+
+            {
+                selector: '.highlighted-violet',
+                style: {
+                    'background-color': 'violet',
+                    'line-color': 'violet',
+                    'mid-target-arrow-color': 'violet',
                 }
             },
 
@@ -897,24 +944,70 @@ function generateNormalisationGraphElements(id, graph, ctx, maps){
 
 /**
  * Highlight elements of a certain class a certain colour.
- * @param {string} className = The class name to affect.
- * @param {string} colour - The colour to change to. 
+ * @param {boolean} active      - If the highlight is being activated.
+ * @param {string} className    - The class name to affect.
+ * @param {string} colour       - The colour to change to. 
  */
-function highlightClass(className, colour){
+function toggleHighlight(active, className, colour){
 
     className = '.' + className;
 
-    if(colour === undefined){
-        updateStyle(true, className, 'line-color', '#ccc');
-        updateStyle(true, className, 'mid-target-arrow-color', '#ccc');
-        updateStyle(true, 'node', 'background-color', '#666');
-        updateStyle(true, 'node[type =\"' + varNode + '\"], node[type =\"' + varNodeTop + '\"]', '#ccc');
-        updateStyle(true, '.global', 'background=color', '#f00');
+    if(active){
+        nextHighlight = [className, colour];
     } else {
-        updateStyle(true, className, 'background-color', colour);
-        updateStyle(true, className, 'line-color', colour);
-        updateStyle(true, className, 'mid-target-arrow-color', colour);
+
+        if(nextHighlight !== undefined && className === nextHighlight[0]){
+            nextHighlight = [];
+        } else {
+            nextUnhighlight = [className, colour];
+        }
+        
     }
+
+    if(!performingHighlight){
+        performNextHighlight();
+    }
+
+}
+
+function performNextHighlight(){
+
+    performingHighlight = true;
+
+    if(nextUnhighlight !== undefined){
+
+        var eles = cyMap.elements(nextUnhighlight[0]);
+        var colour = nextUnhighlight[1];
+
+        removeHighlightClass(eles, colour);
+        nextUnhighlight = undefined;
+    }
+
+    if(nextHighlight !== undefined){
+        var eles = cyMap.elements(nextHighlight[0]);
+        var colour = nextHighlight[1];
+
+        addHighlightClass(eles, colour);
+        nextHighlight = undefined;
+    }
+
+    highlightOperations.shift();
+
+    setTimeout(function(){
+        if(nextHighlight !== undefined || nextUnhighlight !== undefined){
+            performNextHighlight();
+        } else {
+            performingHighlight = false;
+        }
+    }, 250);
+}
+
+function addHighlightClass(eles, colour){
+        eles.addClass('highlighted-' + colour);
+}
+
+function removeHighlightClass(eles, colour){
+        eles.removeClass('highlighted-' + colour);
 }
 
 /**

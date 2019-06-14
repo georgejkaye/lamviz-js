@@ -25,6 +25,9 @@ var imageWindow;
 const fullScreenWidth = "96vw";
 const fullScreenHeight = "92vh";
 
+/** The redex currently being highlighted, -1 if no redex */
+var activeRedex = -1;
+
 /**
  * Change the text of an element with a given id.
  * @param {string} id   - The id of the element.
@@ -464,11 +467,12 @@ function highlightRedexMouseover(i){
 }
 
 /**
- * Highlight a redex.
- * @param {number} i - The redex to highlight.
+ * Get an appropriate colour from an index (cycles through the good colours of the rainbow).
+ * @param {number} i - The index to get a colour from.
+ * @return {string} The corresponding colour.
  */
-function highlightRedex(i){
-
+function getColour(i){
+    
     var colour = "";
 
     switch(i % 5){
@@ -489,8 +493,18 @@ function highlightRedex(i){
             break;
     }
 
+    return colour;
+}
+
+/**
+ * Highlight a redex.
+ * @param {number} i - The redex to highlight.
+ */
+function highlightRedex(i){
+
+    var colour = getColour(i);
     setStyleSpan("beta-" + i, "color:" + colour);
-    highlightClass("beta-" + i, colour);
+    toggleHighlight(true, "beta-" + i, colour);
 
 }
 
@@ -509,12 +523,14 @@ function unhighlightRedexMouseover(i){
  * @param {number} i - The redex to unhighlight.
  */
 function unhighlightRedex(i){
+    
+    var colour = getColour(i);
     setStyleSpan("beta-" + i, "color:black");
-    highlightClass("beta-" + i);
+    toggleHighlight(false, "beta-" + i, colour);
 }
 
 /**
- * FUnction to execute when you click a redex, providing an animation is not playing.
+ * Function to execute when you click a redex, providing an animation is not playing.
  */
 function clickRedexOnclick(i){
     if(!reducing){
