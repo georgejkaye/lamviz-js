@@ -1050,7 +1050,7 @@ function removeHighlightClass(eles, colour){
  * Perform the reduction animation for a particular redex.
  * @param {number} i - The number of the redex to reduce.
  */
-function performReductionAnimation(i){
+function performReductionAnimationStepOne(i){
 
     /* Step 1: Perform the graph rewrite */
 
@@ -1090,13 +1090,10 @@ function performReductionAnimation(i){
     body.animate({position: {x: LHSMidpointX, y: LHSMidpointY}}, {duration: 1000});
     term.animate({position: {x: LHSMidpointX, y: LHSMidpointY}, style: {opacity: 0}}, {duration: 1000});
 
-    var edge = term.connectedEdges()[0];
-
     setTimeout(function(){
         cyMap.remove(app);
         cyMap.remove(abs);
         cyMap.remove(mid);
-        cyMap.add(createEdge(edge.data().id, edge.data().type, edge.classes(), edge.source().data().id, body.data().id, ""));
     }, 1000);
 
     /* Step 2: Move the variable arcs over to the where they are now abstracted from. */

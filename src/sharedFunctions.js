@@ -320,8 +320,8 @@ function printTermHTML(term, deBruijn){
  * @return {string} The HTML table code for the stats.
  */
 function getStats(currentTerm, labels){
-    return getRow(getCell("term-heading", '<b>' + printTermHTML(currentTerm, false) + '</b>')) +
-            getRow(getCell("term-subheading", '<b>' + printTermHTML(currentTerm, true) + '</b>')) +
+    return getRow(getCell("term-heading", '<b id = "term-name">' + printTermHTML(currentTerm, false) + '</b>')) +
+            getRow(getCell("term-subheading", '<b id = "term-name-bruijn">' + printTermHTML(currentTerm, true) + '</b>')) +
             getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
             getRow(getCell("term-fact", 'Abstractions: ' + currentTerm.abstractions())) +
             getRow(getCell("term-fact", 'Applications: ' + currentTerm.applications())) +
@@ -553,21 +553,17 @@ function clickRedexOnclick(i){
  */
 function clickRedex(i){
 
-    performReductionAnimation(i);
+    performReductionAnimationStepOne(i);
+    
+    if(!reduced){
+        reduced = true;
+        originalTerm = currentTerm;
+    }
+    
+    currentTerm = specificReduction(currentTerm, i)[0];
 
-    var redexText = getHTML("beta-" + i);
-    console.log(redexText);
-
-    var re = /<.+?>\(λ(.+?)\. .+\)<\/span> (<span.+>(.+)<\/span>)/g
-    var match = re.exec(redexText);
-    var absvar = match[1];
-    var argHTML = match[2];
-    var arg = match[3];
-
-    redexText = redexText.replace(lambda + absvar + ". ", "");
-    redexText = redexText.replace(argHTML, "[" + absvar + "->" + arg + "]")
-
-    changeText("beta-" + i, redexText);
+    changeText("term-name", printTermHTML(currentTerm, false));
+    changeText("term-name-bruijn", printTermHTML(currentTerm, true));
 
     /*var normalisedTerm = specificReduction(currentTerm, i)[0];
     normalisedTerm.generatePrettyVariableNames(freeVariables);

@@ -265,6 +265,7 @@ function innermostReduction(term){
 /**
  * Perform a specific reduction, as if they are numbered from left to right, outwards in.
  * @param {Object} term - The lambda term to perform the reduction on.
+ * @param {number} i    - The specific reduction to perform.
  * @return {Object[]} The reduced lambda term and a number displaying how many reductions need to be encountered.
  */
 function specificReduction(term, i){
