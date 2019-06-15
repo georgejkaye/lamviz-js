@@ -910,8 +910,6 @@ function drawMap(id, term, ctx, zoom, pan, labels){
         userPanningEnabled: pan,
     });
 
-    console.log(elems);
-
     /** Find the highest node so that all variable nodes at the top of page can be aligned */
     const nodes = cyMap.elements("node");
     var highest = 0;
@@ -1056,9 +1054,17 @@ function performReductionAnimation(i){
 
     var app = cyMap.$id(redexNodes[i][0]);
     var appEles = app.connectedEdges();
-    
+    var appMids = appEles.connectedNodes().filter(x => x.data().id.includes("midpoint"));
+
+    var term = cyMap.$id(appMids[2].data().id);
+    var arg = cyMap.$id(appMids[1].data().id);
+
     var abs = cyMap.$id(redexNodes[i][1]);
     var absEles = abs.connectedEdges();
+    var absMids = absEles.connectedNodes().filter(x => x.data().id.includes("midpoint"));
+
+    var absvar = cyMap.$id(absMids[0].data().id);
+    var body = cyMap.$id(absMids[1].data().id);
 
     var mid = cyMap.$id(redexNodes[i][1] + "_midpoint_" + redexNodes[i][0]);
 
@@ -1067,6 +1073,18 @@ function performReductionAnimation(i){
     absEles.animate({style: {opacity: 0}}, {duration: 1000});
     abs.animate({style: {opacity: 0}}, {duration: 1000});
     mid.animate({style: {opacity: 0}}, {duration: 1000});
+
+    var LHSMidpointX = (term.position('x') + body.position('x')) / 2;
+    var LHSMidpointY = (term.position('y') + body.position('y')) / 2;
+
+    var RHSMidpointX = (arg.position('x') + absvar.position('x')) / 2;
+    var RHSMidpointY = (arg.position('y') + absvar.position('y')) / 2;
+
+    absvar.animate({position: {x: RHSMidpointX, y: RHSMidpointY}}, {duration: 1000});
+    arg.animate({position: {x: RHSMidpointX, y: RHSMidpointY}}, {duration: 1000});
+    body.animate({position: {x: LHSMidpointX, y: LHSMidpointY}}, {duration: 1000});
+    term.animate({position: {x: LHSMidpointX, y: LHSMidpointY}}, {duration: 1000});
+
 
     setTimeout(function(){
         cyMap.remove(app);
