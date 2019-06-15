@@ -1059,14 +1059,22 @@ function performReductionAnimationStepOne(i){
     var appMids = appEles.connectedNodes().filter(x => x.data().id.includes("midpoint"));
 
     var term = cyMap.$id(appMids[2].data().id);
-    var arg = cyMap.$id(appMids[1].data().id);
+    
+    var argid = appMids[1].data().id;
+    var arg = cyMap.$id(argid);
+    var argSupportNode = cyMap.edges('[target = "' + argid + '"]')[0].source();
 
     var abs = cyMap.$id(redexNodes[i][1]);
     var absEles = abs.connectedEdges();
     var absMids = absEles.connectedNodes().filter(x => x.data().id.includes("midpoint"));
 
-    var absvar = cyMap.$id(absMids[0].data().id);
-    var body = cyMap.$id(absMids[1].data().id);
+    var absvarid = absMids[0].data().id;
+    var absvar = cyMap.$id(absvarid);
+    var absVarSupportNode = cyMap.edges('[source = "' + absvarid + '"]')[0].target();
+
+    var bodyid = absMids[1].data().id;
+    var body = cyMap.$id(bodyid);
+    var bodySupportNode = cyMap.edges('[target = "' + bodyid + '"]')[0].source();
 
     var mid = cyMap.$id(redexNodes[i][1] + "_midpoint_" + redexNodes[i][0]);
 
@@ -1081,8 +1089,8 @@ function performReductionAnimationStepOne(i){
     var LHSMidpointX = (term.position('x') + body.position('x')) / 2;
     var LHSMidpointY = (term.position('y') + body.position('y')) / 2;
 
-    var RHSMidpointX = (arg.position('x') + absvar.position('x')) / 2;
-    var RHSMidpointY = (arg.position('y') + absvar.position('y')) / 2;
+    var RHSMidpointX = (absVarSupportNode.position('x') + argSupportNode.position('x')) / 2;
+    var RHSMidpointY = (absVarSupportNode.position('y') + argSupportNode.position('y')) / 2;
 
     /* Join together the remaining midpoints */
     absvar.animate({position: {x: RHSMidpointX, y: RHSMidpointY}}, {duration: 1000});
