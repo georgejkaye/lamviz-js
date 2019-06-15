@@ -1068,9 +1068,11 @@ function performReductionAnimation(i){
     abs.animate({style: {opacity: 0}}, {duration: 1000});
     mid.animate({style: {opacity: 0}}, {duration: 1000});
 
-    //cyMap.remove(app);
-    //cyMap.remove(abs);
-    //cyMap.remove(mid);
+    setTimeout(function(){
+        cyMap.remove(app);
+        cyMap.remove(abs);
+        cyMap.remove(mid);
+    }, 1000);
 
 }
 
