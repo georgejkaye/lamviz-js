@@ -55,12 +55,23 @@ const varNodeTop = "var-node-top";
 const varEdge = "var-edge";
 /** An edge carrying a variable (with label). */
 const varEdgeLabel = "var-label-edge";
+/** The midpoint of an application edge. */
+const appMidpoint = "app-midpoint";
+/** The midpoint of an abstraction edge. */
+const absMidpoint = "abs-midpoint";
+/** The midpoint of a variable arriving at an application. */
+const varMidpoint = "var-midpoint";
+/** The midpoint of a variable leaving an abstraction edge. */
+const absVarMidpoint = "abs-midpoint";
+/** The midpoint of the RHS  */
 
 /** A lambda character */
 const lambda = "\u03BB";
 
 /** How many redexes have been encountered so far. */
 var redexIndex = 0;
+/** Array containing the application and abstraction nodes that represent each redex. */
+var redexNodes = [];
 /** An array of nodes that need to have redexes propogated to their abstraction. */
 var redexList = [];
 /** IDs of the actual redex edges. */
@@ -76,6 +87,9 @@ var mapRightest = 0;
 var graphLeftest = 0;
 /** The x coordinate of the rightest node on the current normalisation graph. */
 var graphRightest = 0;
+
+/** Array associating midpoints with nodes. */
+var midpoints = [];
 
 /** The queue of highlight operations to perform. */
 var highlightOperations = [];
@@ -96,6 +110,8 @@ function reset(map){
     redexIndex = 0;
     redexList = [];
     redexEdgeIDs = [];
+    redexNodes = [];
+    midpoints = [];
 
     if(map){
         cyMap = undefined;
@@ -169,8 +185,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
         parentX = 0;
         parentY = 0;
 
-        var rootNode = createNode(">", "root-node", "", parentX, parentY);
-        array = pushNode(array, rootNode);
+        array = defineNode(array, ">", "root-node", "", parentX, parentY);
 
         posX = parentX;
         posY = parentY - nodeDistanceY;
@@ -200,6 +215,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
     var newEdgeID = "";
     var newEdgeType = "";
     var newEdgeLabel = "";
+    var midpointType = "";
 
     switch(term.getType()){
         case ABS:
@@ -208,6 +224,10 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
 
             newNodeID = checkID(lambda + abstractionLabel, nodes);
             
+            if(redexEdge){
+                redexNodes[redexIndex - 1][1] = newNodeID;
+            }
+
             var nodeLabel = lambda + abstractionLabel + "."
             ctx.pushTerm(newNodeID.substring(1), abstractionLabel);
 
@@ -215,14 +235,23 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
     
             newEdgeID = checkID(newNodeID + " " + term.t.prettyPrintLabels(ctx), edges);
             newEdgeType = absEdge;
+            midpointType = absMidpoint;
             newEdgeLabel = nodeLabel + " " + term.t.prettyPrintLabels(ctx);
 
-            /* The abstracted variable goes NE */
+            /* The abstracted variable goes NE, via a midpoint */
             const lambdaAbstractionSupportNodeID = checkID(newNodeID + "._abstraction_node_right", nodes);
             array = defineNode(array, lambdaAbstractionSupportNodeID, varNode, classes, posX + nodeDistanceX, posY - nodeDistanceY);
 
+            const abstractionMidpointID = newNodeID + "_midpoint_" + lambdaAbstractionSupportNodeID;
+            array = defineNode(array, abstractionMidpointID, absVarMidpoint, classes, 0, 0, "");
+
             const lambdaAbstractionSupportEdgeID = checkID(newNodeID + "._node_from_abstraction_to_right", edges);
-            array = defineEdge(array, lambdaAbstractionSupportEdgeID, varEdge, classes, newNodeID, lambdaAbstractionSupportNodeID);
+            array = defineEdge(array, lambdaAbstractionSupportEdgeID, varEdge, classes.concat('no-arrows'), newNodeID, abstractionMidpointID);
+
+            const lambdaAbstractionSupportEdgeMidpointID = checkID(newNodeID + "._node_from_abstraction_to_right_midpoint", edges);
+            array = defineEdge(array, lambdaAbstractionSupportEdgeMidpointID, varEdge, classes, abstractionMidpointID, lambdaAbstractionSupportNodeID);
+
+            smartPush(midpoints, [abstractionMidpointID, newNodeID, lambdaAbstractionSupportNodeID]);
 
             /* The abstracted variable travels to the top of the map */
             const lambdaAbstractionSupportNode2ID = checkID(newNodeID + "._abstraction_node_top", nodes);
@@ -254,7 +283,6 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
 
             if(term.isBetaRedex()){
                 smartPush(redexes, redexIndex);
-                redexIndex++;
                 classes = betaClasses(redexes);
                 isRedex = true;
             }
@@ -262,8 +290,14 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
             newNodeID = checkID("[" + term.t1.prettyPrintLabels(ctx) + " @ " + term.t2.prettyPrintLabels(ctx) + "]", nodes);
             array = defineNode(array, newNodeID, appNode, classes, posX, posY);
 
+            if(isRedex){
+                smartPush(redexNodes, [newNodeID]);
+                redexIndex++;
+            }
+
             newEdgeID = checkID("(" + newNodeID + ")", edges);
             newEdgeType = appEdge;
+            midpointType = appMidpoint;
             
             /* Generate the elements for the LHS of the application */
             var lhsArray = generateMapElements(term.t1, ctx, [], newNodeID, posX, posY, LHS, redexes, isRedex);
@@ -291,7 +325,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
                 array.push(rhsArray[j]);
             }
 
-            if(term.isBetaRedex()){
+            if(isRedex){
                 redexes.pop();               
                 classes = betaClasses(redexes);
             }
@@ -310,6 +344,7 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
             /* Create the edge between the parent and the variable node */
             newEdgeID = checkID(variableID + " in " + parent + "_edge_from_parent_to_variable", edges);
             newEdgeType = varEdge;
+            midpointType = varMidpoint;
 
             /* Create the node at the top of the page for this variable to travel from */
             const lambdaVariableSupportNodeID = checkID(variableID + "_variable_node_top", nodes);
@@ -336,12 +371,16 @@ function generateMapElements(term, ctx, array, parent, parentX, parentY, positio
         smartPush(redexEdgeIDs, newEdgeID);
     }
 
-    if(term.name != ""){
-        newEdgeId = term.name;
-    }
+    var midpointID = newNodeID + "_midpoint_" + parent;
+
+    array = defineNode(array, midpointID, midpointType, classes, 0, 0, newEdgeLabel);
+    array = defineEdge(array, newEdgeID + "_midpoint", newEdgeType, classes.concat('no-arrows'), newNodeID, midpointID);
+    smartPush(midpoints, [midpointID, newNodeID, parent]);
+    newNodeID = midpointID;
 
     /* Create an edge linking the newest node with its parent */
-    array = defineEdge(array, newEdgeID, newEdgeType, classes, newNodeID, parent, newEdgeLabel);
+
+    array = defineEdge(array, newEdgeID, newEdgeType, classes, newNodeID, parent);
 
     return array;
     
@@ -512,7 +551,7 @@ function furthestLeft(array){
 
     for(i = 1; i < array.length; i++){
 
-        if(array[i].position !== undefined){
+        if(array[i].position !== undefined && !array[i].data.type.includes("midpoint")){
             const newLeft = array[i].position.x;
 
             if(newLeft < left){
@@ -535,7 +574,7 @@ function furthestRight(array){
 
     for(i = 1; i < array.length; i++){
 
-        if(array[i].position !== undefined){
+        if(array[i].position !== undefined && !array[i].data.type.includes("midpoint")){
             const newRight = array[i].position.x;
 
             if(newRight > right){
@@ -556,13 +595,28 @@ function furthestRight(array){
 function shiftXs(array, x){
 
     for(i = 0; i < array.length; i++){
-        if(array[i].position !== undefined){
-
+        if(array[i].position !== undefined && !array[i].data.type.includes("midpoint")){
             array[i].position.x += x;
         } 
     }
 
     return array;
+}
+
+function updateMidpoints(){
+
+    for(i = 0; i < midpoints.length; i++){
+
+        var midpoint = cyMap.$id(midpoints[i][0])
+        var node1 = cyMap.$id(midpoints[i][1]);
+        var node2 = cyMap.$id(midpoints[i][2]);
+
+        var x = (node1.position("x") + node2.position("x")) / 2
+        var y = (node1.position("y") + node2.position("y")) / 2
+
+        midpoint.position("x", x);
+        midpoint.position("y", y);
+    }
 }
 
 /**
@@ -608,14 +662,14 @@ function updateLabels(labels){
         updateNodeLabels(absNode, lambda);
         updateNodeLabels(absNodeFree, "*" + lambda);
         updateNodeLabels(appNode, '@');
-        updateEdgeLabels(absEdge, 'data(label)');
         updateEdgeLabels(varEdgeLabel, function(ele){
             return ele.data().label;
         });
 
-        updateEdgeLabels(appEdge, function(ele){
+        updateNodeLabels(absMidpoint, 'data(label)');
+        updateNodeLabels(appMidpoint, function(ele){
         
-            var re = /\[(.+)\]/;
+            var re = /\[(.+)\]\_/;
 
             var id = ele.data().id;
             id = id.match(re)[1];
@@ -748,6 +802,18 @@ function drawMap(id, term, ctx, zoom, pan, labels){
             },
 
             {
+                selector: 'node[type =\"' + absMidpoint + '\"], node[type =\"' + appMidpoint + '\"], node[type =\"' + varMidpoint + '\"]',
+                style: {
+                    'width': 4,
+                    'height': 4,
+                    'background-color': '#ccc',
+                    'label': 'data(label)',    
+                    'color': 'black',
+                    'font-size': '6'            
+                }
+            },
+
+            {
                 selector: 'edge',
                 style: {
                     'width': 2,
@@ -828,11 +894,11 @@ function drawMap(id, term, ctx, zoom, pan, labels){
             },
 
             {
-                selector: '.dashed',
+                selector: '.no-arrows',
                 style: {
-                    'width': 5
+                    'arrow-scale': 0.0001
                 }
-            },
+            }
 
         ],
 
@@ -843,6 +909,8 @@ function drawMap(id, term, ctx, zoom, pan, labels){
         userZoomingEnabled: zoom,
         userPanningEnabled: pan,
     });
+
+    console.log(elems);
 
     /** Find the highest node so that all variable nodes at the top of page can be aligned */
     const nodes = cyMap.elements("node");
@@ -880,6 +948,8 @@ function drawMap(id, term, ctx, zoom, pan, labels){
         }
 
     }   
+
+    updateMidpoints();
 
     /** Update the labels appropriately. */
     updateLabels(labels);
@@ -970,6 +1040,22 @@ function addHighlightClass(eles, colour){
  */
 function removeHighlightClass(eles, colour){
         eles.removeClass('highlighted-' + colour);
+}
+
+/**
+ * Perform the reduction animation for a particular redex.
+ * @param {number} i - The number of the redex to reduce.
+ */
+function performReductionAnimation(i){
+
+    var app = cyMap.$id(redexNodes[i][0]);
+    var abs = cyMap.$id(redexNodes[i][1]);
+    var mid = cyMap.$id(redexNodes[i][1] + "_midpoint_" + redexNodes[i][0]);
+
+    cyMap.remove(app);
+    cyMap.remove(abs);
+    cyMap.remove(mid);
+
 }
 
 /**

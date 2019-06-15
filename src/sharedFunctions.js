@@ -544,7 +544,9 @@ function clickRedexOnclick(i){
  */
 function clickRedex(i){
 
-    var normalisedTerm = specificReduction(currentTerm, i)[0];
+    performReductionAnimation(i);
+
+    /*var normalisedTerm = specificReduction(currentTerm, i)[0];
     normalisedTerm.generatePrettyVariableNames(freeVariables);
 
     if(!reduced){
@@ -553,7 +555,7 @@ function clickRedex(i){
     }
 
     currentTerm = normalisedTerm;
-    viewPortrait("church-room", currentTerm, showLabels(), bigScreen, i);
+    viewPortrait("church-room", currentTerm, showLabels(), bigScreen, i); */
 }
 
 const OUTERMOST = 0;
