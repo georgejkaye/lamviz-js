@@ -108,12 +108,21 @@ function setStyleSpan(className, style){
 }
 
 /**
- * Get the text of an element with a given id.
+ * Get the value of an element with a given id.
  * @param {string} id - The id of the element.
- * @return {string} The text of the element.
+ * @return {string} The value of the element.
  */
-function getText(id){
+function getValue(id){
     return document.getElementById(id).value;
+}
+
+/**
+ * Get the HTML of an element with a given id.
+ * @param {string} id - The id of the element.
+ * @return {string} The HTML of the element.
+ */
+function getHTML(id){
+    return document.getElementById(id).innerHTML;
 }
 
 /**
@@ -376,7 +385,7 @@ function viewPortrait(exhibitName, term, label, full, i){
         )
     } else {
         changeText(exhibit, getDiv("w3-container frame full-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + currentFrame, "", "", "")) + '<br>' +
-                            getSpan("term-heading", "", "", "", "<b>" + printTermHTML(currentTerm, false) + "</b>&ensp;") + getSpan("term-subheading", "", "", "", "<b>" + printTermHTML(currentTerm, true) + "</b>") +                    
+                            getSpan("term-heading", "term-name", "", "", "<b>" + printTermHTML(currentTerm, false) + "</b>&ensp;") + getSpan("term-subheading", "", "", "", "<b>" + printTermHTML(currentTerm, true) + "</b>") +                    
                             getDiv("","","","", getButton("fullScreen-btn", "exitFullScreenMapButton(\'" + exhibit + "\');", "Exit full screen") +
                             getButton("watch-reduction-btn", "playReduction()", "Watch normalisation") +
                             '<select id="strategy">' +
@@ -545,6 +554,20 @@ function clickRedexOnclick(i){
 function clickRedex(i){
 
     performReductionAnimation(i);
+
+    var redexText = getHTML("beta-" + i);
+    console.log(redexText);
+
+    var re = /<.+?>\(λ(.+?)\. .+\)<\/span> (<span.+>(.+)<\/span>)/g
+    var match = re.exec(redexText);
+    var absvar = match[1];
+    var argHTML = match[2];
+    var arg = match[3];
+
+    redexText = redexText.replace(lambda + absvar + ". ", "");
+    redexText = redexText.replace(argHTML, "[" + absvar + "->" + arg + "]")
+
+    changeText("beta-" + i, redexText);
 
     /*var normalisedTerm = specificReduction(currentTerm, i)[0];
     normalisedTerm.generatePrettyVariableNames(freeVariables);

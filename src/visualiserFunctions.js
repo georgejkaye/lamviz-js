@@ -25,7 +25,7 @@ input.addEventListener("keyup", function(event){
 function executeButton(){
 
     var error = false;
-    var text = getText('input');
+    var text = getValue('input');
 
     if(text === ""){
         error = true;
@@ -34,7 +34,7 @@ function executeButton(){
         text = tokenise(text);
     }
     
-    var frees = getText('env').split(" ");
+    var frees = getValue('env').split(" ");
     freeVariables = new LambdaEnvironment();
 
     for(i = 0; i < frees.length; i++){
@@ -85,8 +85,8 @@ function backButton(){
  */
 function defineFunction(functionName, functionBody){
 
-    var functionName = getText("function-name");
-    var functionBody = getText("function-body");
+    var functionName = getValue("function-name");
+    var functionBody = getValue("function-body");
 
     functionName.replace("<", "\<");
 
@@ -118,7 +118,7 @@ function addFunction(functionName, functionBody){
         error = functionName + ": Alias names must not contain spaces";
     } else {
 
-        var frees = getText('env').split(" ");
+        var frees = getValue('env').split(" ");
         freeVariables = new LambdaEnvironment();
 
         for(i = 0; i < frees.length; i++){
@@ -202,7 +202,7 @@ function revealBulkButton(){
  */
 function bulkButton(){
    
-    var text = getText("bulk-box");
+    var text = getValue("bulk-box");
 
     if(text !== ""){
 

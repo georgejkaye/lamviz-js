@@ -797,7 +797,14 @@ class LambdaApplication{
             betas = 0;
         }
 
-        var string = '<span class = "app-' + apps;
+        
+        var string = '<span ';
+        
+        if(this.isBetaRedex()){
+            string += 'id = "beta-' + betas + '" '
+        }
+
+        string += 'class = "app-' + apps;
         apps++;
 
         if(this.isBetaRedex()){

@@ -1052,6 +1052,8 @@ function removeHighlightClass(eles, colour){
  */
 function performReductionAnimation(i){
 
+    /* Step 1: Perform the graph rewrite */
+
     var app = cyMap.$id(redexNodes[i][0]);
     var appEles = app.connectedEdges();
     var appMids = appEles.connectedNodes().filter(x => x.data().id.includes("midpoint"));
@@ -1068,6 +1070,8 @@ function performReductionAnimation(i){
 
     var mid = cyMap.$id(redexNodes[i][1] + "_midpoint_" + redexNodes[i][0]);
 
+
+    /* Remove the beta reduction nodes and edge linking them. */
     appEles.animate({style: {opacity: 0}}, {duration: 1000});
     app.animate({style: {opacity: 0}}, {duration: 1000});
     absEles.animate({style: {opacity: 0}}, {duration: 1000});
@@ -1080,17 +1084,23 @@ function performReductionAnimation(i){
     var RHSMidpointX = (arg.position('x') + absvar.position('x')) / 2;
     var RHSMidpointY = (arg.position('y') + absvar.position('y')) / 2;
 
+    /* Join together the remaining midpoints */
     absvar.animate({position: {x: RHSMidpointX, y: RHSMidpointY}}, {duration: 1000});
     arg.animate({position: {x: RHSMidpointX, y: RHSMidpointY}}, {duration: 1000});
     body.animate({position: {x: LHSMidpointX, y: LHSMidpointY}}, {duration: 1000});
-    term.animate({position: {x: LHSMidpointX, y: LHSMidpointY}}, {duration: 1000});
+    term.animate({position: {x: LHSMidpointX, y: LHSMidpointY}, style: {opacity: 0}}, {duration: 1000});
 
+    var edge = term.connectedEdges()[0];
 
     setTimeout(function(){
         cyMap.remove(app);
         cyMap.remove(abs);
         cyMap.remove(mid);
+        cyMap.add(createEdge(edge.data().id, edge.data().type, edge.classes(), edge.source().data().id, body.data().id, ""));
     }, 1000);
+
+    /* Step 2: Move the variable arcs over to the where they are now abstracted from. */
+
 
 }
 
