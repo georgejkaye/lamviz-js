@@ -753,8 +753,8 @@ function drawMap(id, term, ctx, zoom, pan, labels){
                     'width': 2,
                     'line-color': '#ccc',
                     'mid-target-arrow-color': '#ccc',
-                    'mid-target-arrow-shape': 'triangle',
-                    'arrow-scale': '1',
+                    'mid-target-arrow-shape': 'chevron',
+                    'arrow-scale': '0.75',
                     'font-size': '6',
                     'transition-property': 'background-color, line-color, mid-target-arrow-color',
                     'transition-duration': '0.25s'
@@ -892,6 +892,87 @@ function drawMap(id, term, ctx, zoom, pan, labels){
 }
 
 /**
+ * Highlight elements of a certain class a certain colour.
+ * @param {boolean} active      - If the highlight is being activated.
+ * @param {string} className    - The class name to affect.
+ * @param {string} colour       - The colour to change to. 
+ */
+function toggleHighlight(active, className, colour){
+
+    className = '.' + className;
+
+    if(active){
+        nextHighlight = [className, colour];
+    } else {
+
+        if(nextHighlight !== undefined && className === nextHighlight[0]){
+            nextHighlight = [];
+        } else {
+            nextUnhighlight = [className, colour];
+        }
+        
+    }
+
+    if(!performingHighlight){
+        performNextHighlight();
+    }
+
+}
+
+/**
+ * Perform the next highlight in the queue. Prioritises unhighlighting.
+ */
+function performNextHighlight(){
+
+    performingHighlight = true;
+
+    if(nextUnhighlight !== undefined){
+
+        var eles = cyMap.elements(nextUnhighlight[0]);
+        var colour = nextUnhighlight[1];
+
+        removeHighlightClass(eles, colour);
+        nextUnhighlight = undefined;
+    }
+
+    if(nextHighlight !== undefined){
+        var eles = cyMap.elements(nextHighlight[0]);
+        var colour = nextHighlight[1];
+
+        addHighlightClass(eles, colour);
+        nextHighlight = undefined;
+    }
+
+    highlightOperations.shift();
+
+    setTimeout(function(){
+        if(nextHighlight !== undefined || nextUnhighlight !== undefined){
+            performNextHighlight();
+        } else {
+            performingHighlight = false;
+        }
+    }, 250);
+}
+
+/**
+ * Add a highlight class to a set of elements.
+ * @param {Object[]} - The set of elements to add the class to.
+ * @param {string}   - The colour to add.
+ */
+function addHighlightClass(eles, colour){
+        eles.addClass('highlighted-' + colour);
+}
+
+/**
+ * Remove a highlight class from a set of elements.
+ * @param {Object[]} - The set of elements to remove the class from.
+ * @param {string}   - The colour to remove.
+ */
+function removeHighlightClass(eles, colour){
+        eles.removeClass('highlighted-' + colour);
+}
+
+/**
  * Generate the elements of the normalisation graph.
  * @param {string} id               - The id of where the graph will be drawn.
  * @param {Object} graph            - The normalisation graph object.
@@ -943,74 +1024,6 @@ function generateNormalisationGraphElements(id, graph, ctx, maps){
 }
 
 /**
- * Highlight elements of a certain class a certain colour.
- * @param {boolean} active      - If the highlight is being activated.
- * @param {string} className    - The class name to affect.
- * @param {string} colour       - The colour to change to. 
- */
-function toggleHighlight(active, className, colour){
-
-    className = '.' + className;
-
-    if(active){
-        nextHighlight = [className, colour];
-    } else {
-
-        if(nextHighlight !== undefined && className === nextHighlight[0]){
-            nextHighlight = [];
-        } else {
-            nextUnhighlight = [className, colour];
-        }
-        
-    }
-
-    if(!performingHighlight){
-        performNextHighlight();
-    }
-
-}
-
-function performNextHighlight(){
-
-    performingHighlight = true;
-
-    if(nextUnhighlight !== undefined){
-
-        var eles = cyMap.elements(nextUnhighlight[0]);
-        var colour = nextUnhighlight[1];
-
-        removeHighlightClass(eles, colour);
-        nextUnhighlight = undefined;
-    }
-
-    if(nextHighlight !== undefined){
-        var eles = cyMap.elements(nextHighlight[0]);
-        var colour = nextHighlight[1];
-
-        addHighlightClass(eles, colour);
-        nextHighlight = undefined;
-    }
-
-    highlightOperations.shift();
-
-    setTimeout(function(){
-        if(nextHighlight !== undefined || nextUnhighlight !== undefined){
-            performNextHighlight();
-        } else {
-            performingHighlight = false;
-        }
-    }, 250);
-}
-
-function addHighlightClass(eles, colour){
-        eles.addClass('highlighted-' + colour);
-}
-
-function removeHighlightClass(eles, colour){
-        eles.removeClass('highlighted-' + colour);
-}
-
-/**
  * Draw the normalisation graph for a given term.
  * @param {string} id - The id of the graph box.
  * @param {Object} term - The term to draw the normalisation graph of.
@@ -1041,7 +1054,7 @@ function drawNormalisationGraph(id, term, ctx, maps, labels, arrows){
     var border = '2';
     var label = 'data(label)';
     var arrowColour = '#ccc';
-    var arrowShape = 'triangle';
+    var arrowShape = 'chevron';
 
     if(!maps){
         size = 250;
