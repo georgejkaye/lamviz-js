@@ -275,7 +275,11 @@ function unhighlightRedex(i){
  */
 function clickRedexOnclick(i){
     if(!reducing){
+        reducing = true;
         clickRedex(i);
+        setTimeout(function(){
+            reducing = false;
+        }, 1750);
     }
 }
 
