@@ -787,7 +787,8 @@ function drawMap(id, term, ctx, zoom, pan, labels){
                     'height': '15',
                     'font-size': '10',
                     'transition-property': 'background-color',
-                    'transition-duration': '0.25s'
+                    'transition-duration': '0.25s',
+                    'opacity': 0
                 }
             },
     
@@ -823,7 +824,8 @@ function drawMap(id, term, ctx, zoom, pan, labels){
                     'arrow-scale': '0.75',
                     'font-size': '6',
                     'transition-property': 'background-color, line-color, mid-target-arrow-color',
-                    'transition-duration': '0.25s'
+                    'transition-duration': '0.25s',
+                    'opacity': '0s'
                 }
             },
 
@@ -898,6 +900,13 @@ function drawMap(id, term, ctx, zoom, pan, labels){
                 style: {
                     'arrow-scale': 0.0001
                 }
+            },
+
+            {
+                selector: '.opaque',
+                style: {
+                    'opacity': 1
+                }
             }
 
         ],
@@ -960,6 +969,8 @@ function drawMap(id, term, ctx, zoom, pan, labels){
 
     /** Fit the map to the frame. */
     cyMap.fit(cyMap.filter(function(ele, i, eles){return true;}), 10);
+    cyMap.nodes().animate({style: {opacity: 1}}, {duration: 500});
+    cyMap.edges().animate({style: {opacity: 1}}, {duration: 500});
 
     return [cyMap, mapRightest - mapLeftest];
 
@@ -1050,33 +1061,40 @@ function removeHighlightClass(eles, colour){
  * Perform the reduction animation for a particular redex.
  * @param {number} i - The number of the redex to reduce.
  */
-function performReductionAnimationStepOne(i){
+function performReductionAnimation(i){
 
     /* Step 1: Perform the graph rewrite */
 
+    /* The application node and connected half edges */
     var app = cyMap.$id(redexNodes[i][0]);
     var appEles = app.connectedEdges();
     var appMids = appEles.connectedNodes().filter(x => x.data().id.includes("midpoint"));
 
-    var term = cyMap.$id(appMids[2].data().id);
-    
-    var argid = appMids[1].data().id;
-    var arg = cyMap.$id(argid);
-    var argSupportNode = cyMap.edges('[target = "' + argid + '"]')[0].source();
-
+    /* The abstraction node and connected half edges */
     var abs = cyMap.$id(redexNodes[i][1]);
     var absEles = abs.connectedEdges();
     var absMids = absEles.connectedNodes().filter(x => x.data().id.includes("midpoint"));
 
+    /* The midpoint between the application and abstraction */
+    var mid = cyMap.$id(redexNodes[i][1] + "_midpoint_" + redexNodes[i][0]);
+
+    /* Traversing towards the remainder of the term */
+    var term = cyMap.$id(appMids[2].data().id);
+    
+    /* Traversing towards the argument */
+    var argid = appMids[1].data().id;
+    var arg = cyMap.$id(argid);
+    var argSupportNode = cyMap.edges('[target = "' + argid + '"]')[0].source();
+
+    /* Traversing towards the abstracted variable */
     var absvarid = absMids[0].data().id;
     var absvar = cyMap.$id(absvarid);
     var absVarSupportNode = cyMap.edges('[source = "' + absvarid + '"]')[0].target();
 
+    /* Traversing towards the body of the abstraction */
     var bodyid = absMids[1].data().id;
     var body = cyMap.$id(bodyid);
     var bodySupportNode = cyMap.edges('[target = "' + bodyid + '"]')[0].source();
-
-    var mid = cyMap.$id(redexNodes[i][1] + "_midpoint_" + redexNodes[i][0]);
 
 
     /* Remove the beta reduction nodes and edge linking them. */
@@ -1097,15 +1115,6 @@ function performReductionAnimationStepOne(i){
     arg.animate({position: {x: RHSMidpointX, y: RHSMidpointY}}, {duration: 1000});
     body.animate({position: {x: LHSMidpointX, y: LHSMidpointY}}, {duration: 1000});
     term.animate({position: {x: LHSMidpointX, y: LHSMidpointY}, style: {opacity: 0}}, {duration: 1000});
-
-    setTimeout(function(){
-        cyMap.remove(app);
-        cyMap.remove(abs);
-        cyMap.remove(mid);
-    }, 1000);
-
-    /* Step 2: Move the variable arcs over to the where they are now abstracted from. */
-
 
 }
 
@@ -1139,6 +1148,8 @@ function generateNormalisationGraphElements(id, graph, ctx, maps){
         /* If maps are enabled, draw the map for this term. */
         if(maps){
             var map = drawMap(id, term, ctx);
+            map[0].nodes().addClass('opaque');
+            map[0].edges().addClass('opaque');
             smartPush(imgs, [nodeID, map[0].png()]);
         }
 
