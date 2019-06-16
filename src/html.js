@@ -248,13 +248,13 @@ function getRadioButton(id, name, value, onclick, checked, label){
  */
 function getButton(id, onclick, text, disabled){
 
-    var disabled = "";
+    var disabledText = "";
 
     if(disabled){
-        disabled = "disabled";
+        disabledText = "disabled";
     }
 
-    return '<button type = "button" ' + disabled + ' id = "' + id + '" onclick = "' + onclick + '">' + text + '</button>';
+    return '<button type = "button" ' + disabledText + ' id = "' + id + '" onclick = "' + onclick + '">' + text + '</button>';
 }
 
 /**

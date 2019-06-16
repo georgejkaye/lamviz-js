@@ -36,6 +36,7 @@ var activeRedex = -1;
  * @return {string} The HTML table code for the stats.
  */
 function getStats(currentTerm, labels){
+
     return getRow(getCell("term-heading", '<b id = "term-name">' + printTermHTML(currentTerm, false) + '</b>')) +
             getRow(getCell("term-subheading", '<b id = "term-name-bruijn">' + printTermHTML(currentTerm, true) + '</b>')) +
             getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
@@ -47,8 +48,8 @@ function getStats(currentTerm, labels){
             getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(freeVariables), "redex", "clickRedexOnclick(i,)", "highlightRedexMouseover(i, true)", "unhighlightRedexMouseover(i, true)"))) +
             getRow(getCell("border-top", getP("", "", "", "", getRadioButton("yes-labels", "labels", "yes-labels", "updateLabels(true)", labels, "Show labels") + getRadioButton("no-labels", "labels", "no-labels", "updateLabels(false)", !labels, "No labels")))) +
             getRow(getCell("", getButton("fullScreen-btn", "fullScreenMapButton();", "Full screen", false) +
-                                getButton("reset-btn", "resetViewButton();", "Reset view", true) +
-                                getButton("reset-btn", "resetButton();", "Reset to original term", true) + 
+                                getButton("reset-btn", "resetViewButton();", "Reset view", false) +
+                                getButton("reset-btn", "resetButton();", "Reset to original term", !reduced) + 
                                 getButton("export-btn", "exportButton(true)", "Export map", false)
             )) +
             getRow(getCell("", getButton("normalise-btn", "normaliseButton()", "Normalise") + getButton("watch-reduction-btn", "playReduction()", "Watch normalisation") +
@@ -56,7 +57,8 @@ function getStats(currentTerm, labels){
                                     "<option value=0>Outermost</value>" +
                                     "<option value=1>Innermost</value>" +
                                     "<option value=2>Random</value>" +
-                                "<select>")) +
+                                "<select>" +
+                                getButton("stop-btn", "stopNormalisationPlayback()", "Stop", !reducing))) +
             getRow(getCell("", getButton("back-btn", "backButton();", "Back", false))) +
             getRow(getCell("", "<br>")) +
             getRow(getCell("term-fact", "<b>Normalisation graph options<b>")) +
@@ -139,8 +141,8 @@ function resetButton(){
 
     if(reduced){
         currentTerm = originalTerm;
-        viewPortrait(exhibit, currentTerm, showLabels(), bigScreen, currentFrame);
         reduced = false;
+        viewPortrait(exhibit, currentTerm, showLabels(), bigScreen, currentFrame);
     }
 }
 
@@ -281,6 +283,11 @@ function clickRedex(i){
         }
 
         currentTerm = normalisedTerm;
+        
+        if(currentTerm.betaRedexes() === 0){
+            reducing = false;
+        }
+
         viewPortrait("church-room", currentTerm, showLabels(), bigScreen, i);
     }, 1750);
 
@@ -289,6 +296,7 @@ function clickRedex(i){
 const OUTERMOST = 0;
 const INNERMOST = 1;
 const RANDOM = 2;
+var stop = false;
 
 /**
  * Watch a term get reduced to its normal form (if it has one - it'll probably crash otherwise).
@@ -301,7 +309,13 @@ function playReduction(subcall, strat){
     var redexes = currentTerm.betaRedexes();
     reducing = true;
 
-    if(redexes !== 0){
+    if(!subcall){
+        stop = false;
+    }
+
+    if(redexes !== 0 && !stop){
+
+        document.getElementById("stop-btn").disabled = false;
 
         if(strat === undefined){
             strat = document.getElementById("strategy").selectedIndex;
@@ -345,7 +359,17 @@ function playReduction(subcall, strat){
                 }, longDelay);
             }, shortDelay);
         }
+    } else {
+        document.getElementById("stop-btn").disabled = true;
+        reducing = false;
     }
+}
+
+function stopNormalisationPlayback(){
+
+    stop = true;
+    document.getElementById("stop-btn").disabled = true;
+
 }
 
 /**
