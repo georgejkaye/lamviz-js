@@ -12,9 +12,15 @@ var originalTerm;
 var currentFrame;
 var exhibit;
 
+/** If this is not the originally visualised term */
 var reduced = false;
+/** If a normalisation is being played */
 var reducing = false;
+/** If the term is in normal form */
+var normalForm = false;
+/** If we are in full screen */
 var bigScreen = false;
+
 var cyNormCurrent;
 var cyMapCurrent;
 var cyMapWidthCurrent;
@@ -37,6 +43,12 @@ var activeRedex = -1;
  */
 function getStats(currentTerm, labels){
 
+    var selectDisabled = "";
+
+    if(normalForm){
+        selectDisabled = "disabled";
+    }
+
     return getRow(getCell("term-heading", '<b id = "term-name">' + printTermHTML(currentTerm, false) + '</b>')) +
             getRow(getCell("term-subheading", '<b id = "term-name-bruijn">' + printTermHTML(currentTerm, true) + '</b>')) +
             getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
@@ -52,8 +64,8 @@ function getStats(currentTerm, labels){
                                 getButton("reset-btn", "resetButton();", "Reset to original term", !reduced) + 
                                 getButton("export-btn", "exportButton(true)", "Export map", false)
             )) +
-            getRow(getCell("", getButton("normalise-btn", "normaliseButton()", "Normalise") + getButton("watch-reduction-btn", "playReduction()", "Watch normalisation") +
-                                '<select id="strategy">' +
+            getRow(getCell("", getButton("normalise-btn", "normaliseButton()", "Normalise", normalForm) + getButton("watch-reduction-btn", "playReduction()", "Watch normalisation", normalForm) +
+                                '<select ' + selectDisabled + ' id="strategy">' +
                                     "<option value=0>Outermost</value>" +
                                     "<option value=1>Innermost</value>" +
                                     "<option value=2>Random</value>" +
@@ -86,6 +98,8 @@ function viewPortrait(exhibitName, term, label, full, i){
     if(i === undefined){
         i = 0;
     }
+
+    normalForm = (currentTerm.betaRedexes() === 0);
 
     currentFrame = i;
 
@@ -283,7 +297,7 @@ function clickRedex(i){
         }
 
         currentTerm = normalisedTerm;
-        
+
         if(currentTerm.betaRedexes() === 0){
             reducing = false;
         }
