@@ -669,7 +669,7 @@ function updateLabels(labels){
         updateNodeLabels(absMidpoint, 'data(label)');
         updateNodeLabels(appMidpoint, function(ele){
         
-            var re = /\[(.+)\]\_/;
+            var re = /\[(.+)\]'*\_/;
 
             var id = ele.data().id;
             id = id.match(re)[1];

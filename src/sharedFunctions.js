@@ -322,25 +322,29 @@ function playReduction(subcall, strat){
                 break;
         }
 
-        const delay = 1000;
+        const shortDelay = 500;
+        const longDelay = 2000;
 
         if(subcall){
             setTimeout(function(){
+                highlightRedex(chosenRedex);
                 setTimeout(function(){
-                            setTimeout(playReduction(true, strat), delay); 
-                            clickRedex(chosenRedex)
-                }, delay); 
-                highlightRedex(chosenRedex)
-            }, delay);
-        } else {
+                    clickRedex(chosenRedex);
+                    setTimeout(function(){
+                        playReduction(true, strat);
+                    }, longDelay);
+                }, shortDelay);
+            }, shortDelay);
+
+        } else {   
+            highlightRedex(chosenRedex);  
             setTimeout(function(){
-                setTimeout(playReduction(true, strat), delay / 2); 
                 clickRedex(chosenRedex);
-            }, delay / 2); 
-            highlightRedex(chosenRedex);
+                setTimeout(function(){
+                    playReduction(true, strat);
+                }, longDelay);
+            }, shortDelay);
         }
-    } else {
-        reducing = false;
     }
 }
 
