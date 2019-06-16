@@ -918,6 +918,7 @@ function drawMap(id, term, ctx, zoom, pan, labels){
 
         userZoomingEnabled: zoom,
         userPanningEnabled: pan,
+        wheelSensitivity: 0.25
     });
 
     /** Find the highest node so that all variable nodes at the top of page can be aligned */
@@ -970,8 +971,13 @@ function drawMap(id, term, ctx, zoom, pan, labels){
 
     /** Fit the map to the frame. */
     cyMap.fit(cyMap.filter(function(ele, i, eles){return true;}), 10);
+
+    /** Fade the map in! */
     cyMap.nodes().animate({style: {opacity: 1}}, {duration: 500});
     cyMap.edges().animate({style: {opacity: 1}}, {duration: 500});
+
+    /** Make it so the smallest the map can get is when it fills the screen */
+    cyMap.minZoom(cyMap.zoom() - 0.5);
 
     return [cyMap, mapRightest - mapLeftest];
 
