@@ -107,14 +107,15 @@ function reset(map){
     nodeObjs = [];
     edges = [];
     edgeObjs = [];
-    redexIndex = 0;
-    redexList = [];
-    redexEdgeIDs = [];
-    redexNodes = [];
+
     midpoints = [];
 
     if(map){
         cyMap = undefined;
+        redexNodes = [];
+        redexEdgeIDs = [];
+        redexIndex = 0;
+        redexList = [];
         mapLeftest = 0;
         mapRightest = 0;
     } else {
@@ -1186,8 +1187,19 @@ function drawNormalisationGraph(id, term, ctx, maps, labels, arrows){
     reset(false);
     imgs = [];
 
+
     var tree = generateReductionTree(term);
+    
+    /** Preserve some of the original map information, so it can be used afterwards */
+    var originalTermMap = cyMap;
+    var originalRedexNodes = redexNodes;
+
     var elems = generateNormalisationGraphElements(id, tree, ctx, maps);
+    
+    /** Roll back the variables to the original map */
+    cyMap = originalTermMap;
+    redexNodes = originalRedexNodes;
+
     var newElems = [];
 
     for(var i = 0; i < elems.length; i++){
