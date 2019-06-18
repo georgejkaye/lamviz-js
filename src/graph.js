@@ -864,7 +864,7 @@ function drawMap(id, term, ctx, zoom, pan, labels){
                 selector: '.highlighted-blue',
                 style: {
                     'background-color': 'blue',
-                    'line-color': 'red',
+                    'line-color': 'blue',
                     'mid-target-arrow-color': 'blue',
                 }
             },
