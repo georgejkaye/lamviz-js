@@ -35,6 +35,12 @@
         Applications <input type = "text" class = "number-box" id = "applications">
         Variables <input type = "text" class = "number-box" id = "variables">
         &beta;-redexes<input type = "text" class = "number-box" id = "betas">
+        Sort <select id="sort">
+            <option value=0>Default</value>
+            <option value=1>Beta-redexes: High-Low</value>
+            <option value=2>Beta-redexes: Low-High</value>
+        <select>
+        <button type = "button" id = "sort-btn" onclick = 'sortTerms(document.getElementById("sort")).selectedIndex'>Sort</button>
 
         <b><p id = "number-of-terms"></p></b>
         <b><p id = "help"></p></b>

@@ -307,3 +307,47 @@ function backButton(){
     reduced = false;
     scrollToElement('number-of-terms');
 }
+
+const DEFAULT = 0;
+const BETA_HIGH_LOW = 1;
+const BETA_LOW_HIGH = 2;
+
+function sortTerms(mode){
+
+    switch(mode){
+        case BETA_HIGH_LOW:
+            terms = sortTermsBeta(terms, false);
+            break;
+        case BETA_LOW_HIGH:
+            terms = sortTermsBeta(terms, true);
+            break;
+    }
+
+    drawGallery(false, terms, ctx);
+
+}
+
+/**
+ * Sort terms by the number of beta redexes they have.
+ * @param {Object[]} termList - The list of terms to sort.
+ * @param {boolean} order - If to sort them from high to low (false) or low to high (true).
+ * @return {Object[]} The sorted list of terms.
+ */
+function sortTermsBeta(termList, order){
+
+    if (termList.size <= 1){
+        return termList;
+    }
+
+    var pivot = termList[0];
+
+    var highers = sortTermsBeta(termList.fliter(x => x.betaRedexes() >= pivot.betaRedexes()),order);
+    var lowers = sortTermsBeta(termList.filter(x => x.betaRedexes() < pivot.betaRedexes()), order);
+
+    if (order){
+        return lowers.concat([pivot].concat(highers));
+    }
+
+    return highers.concat([pivot].concat(lowers));
+ 
+}
