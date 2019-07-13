@@ -112,8 +112,7 @@ function prettyString(array){
 /**
  * Action to perform when a generate button is performed.
  * @param {number} x - The identifier for the type of terms to generate.
- * @param {number} n - A previously specified n (optional).
- * @param {number} k - A previously specified k (optional).
+ * @param {boolean} prev - If this is not a new generation of terms (e.g. a sort).
  */
 function generateButton(x, prev){
 
@@ -323,8 +322,7 @@ function sortTerms(mode){
             break;
     }
 
-    drawGallery(false, terms, ctx);
-
+    generateButton(lastAction, true);  
 }
 
 /**
@@ -335,14 +333,20 @@ function sortTerms(mode){
  */
 function sortTermsBeta(termList, order){
 
-    if (termList.size <= 1){
+    if (termList.length <= 1){
         return termList;
     }
 
-    var pivot = termList[0];
+    var pivot = termList.shift();
 
-    var highers = sortTermsBeta(termList.fliter(x => x.betaRedexes() >= pivot.betaRedexes()),order);
+    console.log("length: " + termList.length);
+    console.log(pivot.betaRedexes());
+
+    var highers = sortTermsBeta(termList.filter(x => x.betaRedexes() >= pivot.betaRedexes()), order);
     var lowers = sortTermsBeta(termList.filter(x => x.betaRedexes() < pivot.betaRedexes()), order);
+
+    console.log("higher than " + pivot + ": " + highers);
+    console.log("lower than " + pivot + ": " + lowers);
 
     if (order){
         return lowers.concat([pivot].concat(highers));
