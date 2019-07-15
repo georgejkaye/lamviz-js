@@ -29,7 +29,7 @@
         <p>Draw maps (costly)<input type = "checkbox" id = "draw" checked></p>
         <p>Use de Bruijn notation<input type = "checkbox" id = "de-bruijn"></p>
 
-        <h3>Filtering options</h3>
+        <h3 id = "filtering-options">Filtering options</h3>
         Crossings <input type = "text" class = "number-box" id = "crossings">
         Abstractions <input type = "text" class = "number-box" id = "abstractions">
         Applications <input type = "text" class = "number-box" id = "applications">
@@ -40,7 +40,7 @@
             <option value=1>Beta-redexes: High-Low</value>
             <option value=2>Beta-redexes: Low-High</value>
         <select>
-        <button type = "button" id = "sort-btn" onclick = 'sortTerms(document.getElementById("sort").selectedIndex)'>Sort</button>
+        <button type = "button" id = "sort-btn" onclick = 'filterAndSortButton()'>Filter and sort</button>
 
         <b><p id = "number-of-terms"></p></b>
         <b><p id = "help"></p></b>

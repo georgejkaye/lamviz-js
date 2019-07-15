@@ -5,6 +5,8 @@
  */
 
 var terms;
+var completeTerms;
+
 var cys;
 var ctx;
 var currentTermNo = 0;
@@ -112,7 +114,7 @@ function prettyString(array){
 /**
  * Action to perform when a generate button is performed.
  * @param {number} x - The identifier for the type of terms to generate.
- * @param {boolean} prev - If this is not a new generation of terms (e.g. a sort).
+ * @param {boolean} prev - If this is not a new generation of terms (e.g. a filter or sort).
  */
 function generateButton(x, prev){
 
@@ -121,11 +123,6 @@ function generateButton(x, prev){
     if(!prev){
         n = parseInt(getText('n'));
         k = parseInt(getText('k'));
-        cross = parseInt(getText('crossings'));
-        apps = parseInt(getText('applications'));
-        abs = parseInt(getText('abstractions'));
-        vars = parseInt(getText('variables'));
-        betas = parseInt(getText('betas'));
         lastAction = x;
     }
 
@@ -141,7 +138,7 @@ function generateButton(x, prev){
 
         if(!prev){
             fragment = "";
-            terms = [];
+            completeTerms = [];
             cys = [];
             freeVariables = new LambdaEnvironment();
 
@@ -151,127 +148,104 @@ function generateButton(x, prev){
 
             switch(lastAction){
                 case 0:
-                    terms = generateTerms(n, k);
+                    completeTerms = generateTerms(n, k);
                     fragment = "pure";
                     break;
                 case 1:
-                    terms = generateLinearTerms(n, k);
+                    completeTerms = generateLinearTerms(n, k);
                     fragment = "linear";
                     break;
                 case 2:
-                    terms = generatePlanarTerms(n, k);
+                    completeTerms = generatePlanarTerms(n, k);
                     fragment = "planar";
                     break;
             }
 
-            totalNumber = terms.length;
+            totalNumber = completeTerms.length;
         }
 
-        if(!isNaN(cross)){
-            terms = terms.filter(x => x.crossings() === cross);
-        }
-
-        if(!isNaN(apps)){
-            terms = terms.filter(x => x.applications() === apps);
-        }
-        
-        if(!isNaN(abs)){
-            terms = terms.filter(x => x.abstractions() === abs);
-        }
-        
-        if(!isNaN(vars)){
-            terms = terms.filter(x => x.crossings() === vars);
-        }
-
-        if(!isNaN(betas)){
-            terms = terms.filter(x => x.betaRedexes() === betas);
-        }
-
-        var filteredNumber = terms.length;
-
-        termString = "";
-
-        for(i = 0; i < terms.length; i++){
-
-            terms[i].generatePrettyVariableNames(freeVariables);
-
-            var x = terms[i].prettyPrintLabels(freeVariables).length;
-            var size = 200;
-
-            while(x > 20){
-                size -= 3;
-                x--;
-            }
-
-            var termName = "";
-
-            if(document.getElementById('de-bruijn').checked){
-                termName = terms[i].prettyPrint();
-            } else {
-                termName = printTermHTML(terms[i]);
-            }
-
-            var caption = getP("caption", "portrait-caption-" + i, "font-size:" + size + "%", "", termName + "<br>" + terms[i].crossings() + " crossings");
-
-            if(document.getElementById("draw").checked){
-                termString += getDiv('w3-container frame', 'frame' + i, "", "viewPortrait('church-room', terms[" + i + "], false);", 
-                            getDiv("w3-container inner-frame", "", "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + "<br>" + 
-                                caption);            
- 
-            } else {
-                termString += getDiv('w3-container frame empty', 'frame ' + i, "", "viewPortrait('church-room', terms[" + i + "], false);", caption);
-            }
-        }
-
-        changeText('church-room', termString);
-
-        var numString = "There ";
-        
-        if(totalNumber === 1){
-            numString += "is 1 " + fragment + " term";
-        } else {
-            numString += "are " + totalNumber + " " + fragment + " terms"; 
-        }
-
-        numString += " for n = " + n + " and k = " + k + "<br>" +
-                        filteredNumber + "/" + totalNumber + " term";
-
-        if(terms.length !== 1){
-            numString += "s";
-        }
-
-        var percentage = 0;
-
-        if(totalNumber != 0){
-            percentage = (filteredNumber / totalNumber) * 100;
-            changeText('help', 'Click on a term to learn more about it. ' + getButton("clear-btn", "clearButton()", "Clear all", false));
-        }
-
-        changeText('number-of-terms', numString + " match the filtering criteria: "  + percentage.toFixed(2) + "%");
-
-        ctx = new LambdaEnvironment();
-
-        for(var i = 0; i < k; i++){
-            ctx.pushTerm("f" + i, lambda + "f" + i + ".");
-        }
-
-        drawGallery(false, terms, ctx);
-        scrollToElement('number-of-terms');
-
+        filterAndSortTerms();
+        drawGallery();
     }
 
 }
 
 /**
  * Draw a gallery of generated terms.
- * @param {boolean} cache - If the terms have previously been generated.
- * @param {terms}   terms - The terms in the gallery.
- * @param {ctx}     ctx   - The context of the gallery.
+ * @param {boolean} prev - If the terms have previously been generated.
  */
-function drawGallery(cache, terms, ctx){
+function drawGallery(prev){
     
+    var filteredNumber = terms.length;
+
+    termString = "";
+
+    for(i = 0; i < terms.length; i++){
+
+        terms[i].generatePrettyVariableNames(freeVariables);
+
+        var x = terms[i].prettyPrintLabels(freeVariables).length;
+        var size = 200;
+
+        while(x > 20){
+            size -= 3;
+            x--;
+        }
+
+        var termName = "";
+
+        if(document.getElementById('de-bruijn').checked){
+            termName = terms[i].prettyPrint();
+        } else {
+            termName = printTermHTML(terms[i]);
+        }
+
+        var caption = getP("caption", "portrait-caption-" + i, "font-size:" + size + "%", "", termName + "<br>" + terms[i].crossings() + " crossings");
+
+        if(document.getElementById("draw").checked){
+            termString += getDiv('w3-container frame', 'frame' + i, "", "viewPortrait('church-room', terms[" + i + "], false);", 
+                        getDiv("w3-container inner-frame", "", "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + "<br>" + 
+                            caption);            
+
+        } else {
+            termString += getDiv('w3-container frame empty', 'frame ' + i, "", "viewPortrait('church-room', terms[" + i + "], false);", caption);
+        }
+    }
+
+    changeText('church-room', termString);
+
+    var numString = "There ";
+    
+    if(totalNumber === 1){
+        numString += "is 1 " + fragment + " term";
+    } else {
+        numString += "are " + totalNumber + " " + fragment + " terms"; 
+    }
+
+    numString += " for n = " + n + " and k = " + k + "<br>" +
+                    filteredNumber + "/" + totalNumber + " term";
+
+    if(terms.length !== 1){
+        numString += "s";
+    }
+
+    var percentage = 0;
+
+    if(totalNumber != 0){
+        percentage = (filteredNumber / totalNumber) * 100;
+        changeText('help', 'Click on a term to learn more about it. ' + getButton("clear-btn", "clearButton()", "Clear all", false));
+    }
+
+    changeText('number-of-terms', numString + " match the filtering criteria: "  + percentage.toFixed(2) + "%");
+
+    ctx = new LambdaEnvironment();
+
+    for(var i = 0; i < k; i++){
+        ctx.pushTerm("f" + i, lambda + "f" + i + ".");
+    }
+
     if(document.getElementById("draw").checked){
-        if(cache){
+        if(prev){
             for(var i = 0; i < terms.length; i++){
                 drawMap("portrait" + i, terms[i], ctx, false, false, false);
             }
@@ -281,6 +255,9 @@ function drawGallery(cache, terms, ctx){
             cys[i] = drawMap("portrait" + i, terms[i], ctx, false, false, false);
         }
     }
+    
+    scrollToElement('filtering-options');
+
 }
 
 var a = 0;
@@ -307,11 +284,52 @@ function backButton(){
     scrollToElement('number-of-terms');
 }
 
+/**
+ * Function to execute when the filter and sort button is pressed.
+ */
+function filterAndSortButton(){
+    filterAndSortTerms();
+    drawGallery();
+}
+
 const DEFAULT = 0;
 const BETA_HIGH_LOW = 1;
 const BETA_LOW_HIGH = 2;
 
-function sortTerms(mode){
+/**
+ * Filter and sort the current gallery based on the criteria specified by the user.
+ */
+function filterAndSortTerms(){
+
+    var mode = document.getElementById("sort").selectedIndex;
+
+    terms = completeTerms;
+
+    cross = parseInt(getText('crossings'));
+    apps = parseInt(getText('applications'));
+    abs = parseInt(getText('abstractions'));
+    vars = parseInt(getText('variables'));
+    betas = parseInt(getText('betas'));
+
+    if(!isNaN(cross)){
+        terms = completeTerms.filter(x => x.crossings() === cross);
+    }
+
+    if(!isNaN(apps)){
+        terms = completeTerms.filter(x => x.applications() === apps);
+    }
+    
+    if(!isNaN(abs)){
+        terms = completeTerms.filter(x => x.abstractions() === abs);
+    }
+    
+    if(!isNaN(vars)){
+        terms = completeTerms.filter(x => x.crossings() === vars);
+    }
+
+    if(!isNaN(betas)){
+        terms = completeTerms.filter(x => x.betaRedexes() === betas);
+    }
 
     switch(mode){
         case BETA_HIGH_LOW:
@@ -321,8 +339,6 @@ function sortTerms(mode){
             terms = sortTermsBeta(terms, true);
             break;
     }
-
-    generateButton(lastAction, true);  
 }
 
 /**
