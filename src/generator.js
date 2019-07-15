@@ -35,7 +35,6 @@ function generateTermsHelper(n, k, p){
 
     var terms = [];
 
-
     switch(n){
         case 0:
             break;

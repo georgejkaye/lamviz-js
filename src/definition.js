@@ -83,7 +83,7 @@ class LambdaVariable{
      * @param {number} index - Which lambda abstraction this term refers to.
      * @param {string} alias - The alias this term is associated with.
      */
-    constructor(index, alias){
+    constructor(index, alias, id){
 
         if(alias === undefined){
             alias = "";
@@ -91,6 +91,7 @@ class LambdaVariable{
 
         this.index = index;
         this.alias = alias;
+        this.id = id;
 
         this.print = this.prettyPrint();
     }
@@ -287,7 +288,7 @@ class LambdaAbstraction{
      * @param {Object}      t       - The scope of this lambda abstraction.
      * @param {string}      label   - The label this lambda abstraction has.
      */
-    constructor(t, label, alias){
+    constructor(t, label, alias, id){
         if(alias === undefined){
             alias = "";
         }
@@ -296,6 +297,7 @@ class LambdaAbstraction{
         this.label = label; 
         this.closed = []
         this.alias = alias;
+        this.id = id;
         this.print = this.prettyPrint();
     }
 
@@ -562,12 +564,17 @@ class LambdaApplication{
      * @param {Object} t1 - the first term in the lambda application (the function).
      * @param {Object} t2 - the second term in the lambda application (the argument).
      */
-    constructor(t1, t2, alias){
+    constructor(t1, t2, alias, id){
         if(alias === undefined){
             alias = "";
         }
 
-        this.t1 = t1; this.t2 = t2, this.closed = [], this.alias = alias, this.print = this.prettyPrint();
+        this.t1 = t1; 
+        this.t2 = t2;
+        this.closed = [];
+        this.alias = alias;
+        this.id = id;
+        this.print = this.prettyPrint();
     }
 
     /**

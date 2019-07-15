@@ -30,6 +30,7 @@ const BETA_HIGH_LOW = 1;
 const BETA_LOW_HIGH = 2;
 
 /* Functions for properties */
+const defaultProperty = x => x.id;
 const redexesProperty = x => x.betaRedexes();
 
 /* Text for properties */
@@ -175,12 +176,17 @@ function generateButton(x, prev){
                     break;
             }
 
+            for(var i = 0; i < completeTerms.length; i++){
+               completeTerms[i].id = i;
+            }
+
             terms = completeTerms;
             totalNumber = completeTerms.length;
             sortedCategories = [["", terms]];
         }
 
-        filterAndSortTerms();
+        filterTerms();
+        sortTerms();
         drawGallery();
     }
 
@@ -228,12 +234,12 @@ function drawGallery(prev){
             var caption = getP("caption", "portrait-caption-" + portraitCount, "font-size:" + size + "%", "", termName + "<br>" + workingTerm.crossings() + " crossings");
 
             if(document.getElementById("draw").checked){
-                termString += getDiv('w3-container frame', 'frame' + portraitCount, "", "viewPortrait('church-room', workingTerm, false);", 
+                termString += getDiv('w3-container frame', 'frame' + portraitCount, "", "viewPortrait('church-room', sortedCategories[" + i + "][1][" + j + "], false);", 
                             getDiv("w3-container inner-frame", "", "", "", getDiv("w3-container portrait", "portrait" + portraitCount, "", "", "")) + "<br>" + 
                                 caption);            
 
             } else {
-                termString += getDiv('w3-container frame empty', 'frame ' + portraitCount, "", "viewPortrait('church-room', workingTerm, false);", caption);
+                termString += getDiv('w3-container frame empty', 'frame ' + portraitCount, "", "viewPortrait('church-room', sortedCategories[" + i + "][1][" + j + "], false);", caption);
             }
 
             portraitCount++;
@@ -321,7 +327,8 @@ function backButton(){
  * Function to execute when the filter and sort button is pressed.
  */
 function filterAndSortButton(){
-    var changed = filterAndSortTerms();
+    
+    var changed = filterTerms() || sortTerms();
     
     if(changed){
         drawGallery();
@@ -329,15 +336,12 @@ function filterAndSortButton(){
 }
 
 /**
- * Filter and sort the current gallery based on the criteria specified by the user.
+ * Filter the current gallery based on the criteria specified by the user.
  * @return {boolean} If the list of terms or the order has been changed.
  */
-function filterAndSortTerms(){
+function filterTerms(){
 
     var changed = false;
-
-    var mode = document.getElementById("sort").selectedIndex;
-
     var newCross = parseIntOrEmpty(getText('crossings'));
     var newApps = parseIntOrEmpty(getText('applications'));
     var newAbs = parseIntOrEmpty(getText('abstractions'));
@@ -374,36 +378,55 @@ function filterAndSortTerms(){
         terms = completeTerms.filter(x => x.betaRedexes() === betas);
     }
 
+    return changed;
+}
+
+/**
+ * Filter the current gallery based on the method specified by the user.
+ * @return {boolean} If the list of terms or the order has been changed.
+ */
+function sortTerms(){
+
+    var changed = false;
+
+    var mode = document.getElementById("sort").selectedIndex;
+
     if(mode !== lastSortMode){
         
         changed = true;
         lastSortMode = mode;
-        var property;
 
+        var propertyFunction;
         var propertyNameSingle = "";
         var propertyNamePlural = "";
 
         sortedCategories =  [];
 
         switch(mode){
+            case DEFAULT:
+                order = true;
+                propertyFunction = defaultProperty;
+                break;
             case BETA_HIGH_LOW:
-                terms = sortTermsBeta(terms, false);
-                property = redexesProperty;
+                order = false;
+                propertyFunction = redexesProperty;
                 propertyNameSingle = redexesSingle;
                 propertyNamePlural = redexesPlural;
                 break;
             case BETA_LOW_HIGH:
-                terms = sortTermsBeta(terms, true);
-                property = redexesProperty;
+                order = true;
+                propertyFunction = redexesProperty;
                 propertyNameSingle = redexesSingle;
                 propertyNamePlural = redexesPlural;
                 break;
         }
 
+        terms = quickSortTerms(terms, propertyFunction, order);
+
         if(mode !== DEFAULT){
 
             var c = 0;
-            var currentProperty = property(terms[0]);
+            var currentProperty = propertyFunction(terms[0]);
 
             var propertyName = currentProperty === 1 ? propertyNameSingle : propertyNamePlural;
 
@@ -411,12 +434,12 @@ function filterAndSortTerms(){
 
             for(var i = 1; i < terms.length; i++){
                 
-                var newProperty = property(terms[i]);
+                var newProperty = propertyFunction(terms[i]);
 
                 if(currentProperty !== newProperty){
                     c++;
                     propertyName = newProperty === 1 ? propertyNameSingle : propertyNamePlural;
-                    sortedCategories[c] = [property(terms[i]) + " " + propertyName, [terms[i]]];
+                    sortedCategories[c] = [propertyFunction(terms[i]) + " " + propertyName, [terms[i]]];
                     currentProperty = newProperty;
                 } else {
                     smartPush(sortedCategories[c][1], terms[i]);
@@ -431,12 +454,13 @@ function filterAndSortTerms(){
 }
 
 /**
- * Sort terms by the number of beta redexes they have.
+ * Sort terms by a certain property that they have.
  * @param {Object[]} termList - The list of terms to sort.
+ * @param {function} propertyFunction - The function to get the property to sort by.
  * @param {boolean} order - If to sort them from high to low (false) or low to high (true).
  * @return {Object[]} The sorted list of terms.
  */
-function sortTermsBeta(termList, order){
+function quickSortTerms(termList, propertyFunction, order){
 
     if (termList.length <= 1){
         return termList;
@@ -445,8 +469,8 @@ function sortTermsBeta(termList, order){
     var pivot = termList[0];
     termList = termList.slice(1);
 
-    var highers = sortTermsBeta(termList.filter(x => x.betaRedexes() >= pivot.betaRedexes()), order);
-    var lowers = sortTermsBeta(termList.filter(x => x.betaRedexes() < pivot.betaRedexes()), order);
+    var highers = quickSortTerms(termList.filter(x => propertyFunction(x) >= propertyFunction(pivot)), propertyFunction, order);
+    var lowers = quickSortTerms(termList.filter(x => propertyFunction(x) < propertyFunction(pivot)), propertyFunction, order);
 
     if (order){
         return lowers.concat([pivot].concat(highers));
