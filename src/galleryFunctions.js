@@ -26,16 +26,21 @@ var fragment = "";
 
 /* Sort constants */
 const DEFAULT = 0;
-const BETA_HIGH_LOW = 1;
-const BETA_LOW_HIGH = 2;
+const CROSSINGS_HIGH_LOW = 1;
+const CROSSINGS_LOW_HIGH = 2;
+const BETA_HIGH_LOW = 3;
+const BETA_LOW_HIGH = 4;
 
 /* Functions for properties */
 const defaultProperty = x => x.id;
 const redexesProperty = x => x.betaRedexes();
+const crossingsProperty = x => x.crossings();
 
 /* Text for properties */
-const redexesPlural = "&beta;-redexes"
-const redexesSingle = "&beta;-redex"
+const redexesPlural = "&beta;-redexes";
+const redexesSingle = "&beta;-redex";
+const crossingsPlural = "crossings";
+const crossingsSingle = "crossing";
 
 var lastAction = 0;
 var lastSortMode = DEFAULT;
@@ -185,8 +190,8 @@ function generateButton(x, prev){
 
         }
 
-        var changed = filterTerms();
-        sortTerms(changed);
+        filterTerms();
+        sortTerms(true);
         drawGallery();
     }
 
@@ -408,6 +413,18 @@ function sortTerms(filter){
             case DEFAULT:
                 order = true;
                 propertyFunction = defaultProperty;
+                break;
+            case CROSSINGS_HIGH_LOW:
+                order = false;
+                propertyFunction = crossingsProperty;
+                propertyNameSingle = crossingsSingle;
+                propertyNamePlural = crossingsPlural;
+                break;
+            case CROSSINGS_HIGH_LOW:
+                order = true;
+                propertyFunction = crossingsProperty;
+                propertyNameSingle = crossingsSingle;
+                propertyNamePlural = crossingsPlural;
                 break;
             case BETA_HIGH_LOW:
                 order = false;
