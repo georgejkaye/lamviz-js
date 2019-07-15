@@ -34,6 +34,17 @@ const fullScreenHeight = "92vh";
 /** The redex currently being highlighted, -1 if no redex */
 var activeRedex = -1;
 
+/** Parse an integer from some text, returning -1 if the text is not an integer.
+ *  @param {string} text - The text to parse.
+ *  @return {number} the integer from the text, or -1 if not an integer.
+ */
+function parseIntOrEmpty(text){
+
+    var int = parseInt(text);
+    
+    return (isNaN(int) ? -1 : int);
+}
+
 /**
  * Get the stats for a lambda term in an HTML table format.
  * @param {Object} currentTerm - The lambda term.

@@ -4,25 +4,33 @@
  * @author George Kaye
  */
 
-var terms;
-var completeTerms;
+var terms = [];
+var completeTerms = [];
+
+/* [[cat1, [cat1_0, ... , cat1_n]], ... , [catn, [catn_0, ... , catn_n]]] */
+var sortedCategories = [];
 
 var cys;
 var ctx;
 var currentTermNo = 0;
-var termString = "";
 var totalNumber = 0;
 
 var n = 0;
 var k = 0;
-var cross = 0;
-var abs = 0;
-var apps = 0;
-var vars = 0;
-var betas = 0;
+var cross = -1;
+var abs = -1;
+var apps = -1;
+var vars = -1;
+var betas = -1;
 var fragment = "";
 
+/* Sort constants */
+const DEFAULT = 0;
+const BETA_HIGH_LOW = 1;
+const BETA_LOW_HIGH = 2;
+
 var lastAction = 0;
+var lastSortMode = DEFAULT;
 
 /**
  * Change the text of an element with a given id.
@@ -78,8 +86,7 @@ function setStyleSpan(className, style){
                 elems2[k].setAttribute("style", style);
             }
         }
-    }
-    
+    } 
 }
 
 /**
@@ -126,11 +133,11 @@ function generateButton(x, prev){
         lastAction = x;
     }
 
-    var string = "";
-
     if(isNaN(n)){
-        string = "Bad input";
+        changeText('error', "Parse error: bad value of n");
+        clearButton(false);
     } else {
+        changeText('error', "");
 
         if(isNaN(k)){
             k = 0;
@@ -161,6 +168,7 @@ function generateButton(x, prev){
                     break;
             }
 
+            terms = completeTerms;
             totalNumber = completeTerms.length;
         }
 
@@ -177,8 +185,7 @@ function generateButton(x, prev){
 function drawGallery(prev){
     
     var filteredNumber = terms.length;
-
-    termString = "";
+    var termString = "";
 
     for(i = 0; i < terms.length; i++){
 
@@ -233,7 +240,7 @@ function drawGallery(prev){
 
     if(totalNumber != 0){
         percentage = (filteredNumber / totalNumber) * 100;
-        changeText('help', 'Click on a term to learn more about it. ' + getButton("clear-btn", "clearButton()", "Clear all", false));
+        changeText('help', 'Click on a term to learn more about it. ' + getButton("clear-btn", "clearButton(true)", "Clear all", false));
     }
 
     changeText('number-of-terms', numString + " match the filtering criteria: "  + percentage.toFixed(2) + "%");
@@ -264,13 +271,18 @@ var a = 0;
 
 /**
  * Function to execute when the clear button is pressed.
+ * @param {boolean} nums - Whether to clear the number boxes.
  */
-function clearButton(){
+function clearButton(nums){
     changeText('church-room', "");
     changeText('number-of-terms', "");
     changeText('help', "");
     changeText('normalisation-studio', "");
-    changeValueClass('number-box', "");
+    
+    if(nums){
+        changeValueClass('number-box', "");
+    }
+
     scrollToElement();
 }
 
@@ -288,57 +300,77 @@ function backButton(){
  * Function to execute when the filter and sort button is pressed.
  */
 function filterAndSortButton(){
-    filterAndSortTerms();
-    drawGallery();
+    var changed = filterAndSortTerms();
+    
+    if(changed){
+        drawGallery();
+    }
 }
-
-const DEFAULT = 0;
-const BETA_HIGH_LOW = 1;
-const BETA_LOW_HIGH = 2;
 
 /**
  * Filter and sort the current gallery based on the criteria specified by the user.
+ * @return {boolean} If the list of terms or the order has been changed.
  */
 function filterAndSortTerms(){
 
+    var changed = false;
+
     var mode = document.getElementById("sort").selectedIndex;
 
-    terms = completeTerms;
+    var newCross = parseIntOrEmpty(getText('crossings'));
+    var newApps = parseIntOrEmpty(getText('applications'));
+    var newAbs = parseIntOrEmpty(getText('abstractions'));
+    var newVars = parseIntOrEmpty(getText('variables'));
+    var newBetas = parseIntOrEmpty(getText('betas'));
 
-    cross = parseInt(getText('crossings'));
-    apps = parseInt(getText('applications'));
-    abs = parseInt(getText('abstractions'));
-    vars = parseInt(getText('variables'));
-    betas = parseInt(getText('betas'));
+    if(newCross !== cross || newApps !== apps || newAbs !== abs || newVars !== vars || newBetas !== betas){
+        changed = true;
+        terms = completeTerms;
+        cross = newCross;
+        apps = newApps;
+        abs = newAbs;
+        vars = newVars;
+        betas = newBetas;
+    }
 
-    if(!isNaN(cross)){
+    if(cross !== -1 && newCross !== cross){
         terms = completeTerms.filter(x => x.crossings() === cross);
     }
 
-    if(!isNaN(apps)){
+    if(apps !== -1 && newApps !== apps){
         terms = completeTerms.filter(x => x.applications() === apps);
     }
     
-    if(!isNaN(abs)){
+    if(abs !== -1 && newAbs !== abs){
         terms = completeTerms.filter(x => x.abstractions() === abs);
     }
     
-    if(!isNaN(vars)){
+    if(vars !== -1 && newVars !== vars){
         terms = completeTerms.filter(x => x.crossings() === vars);
     }
 
-    if(!isNaN(betas)){
+    if(betas !== -1 && newBetas !== betas){
         terms = completeTerms.filter(x => x.betaRedexes() === betas);
     }
 
-    switch(mode){
-        case BETA_HIGH_LOW:
-            terms = sortTermsBeta(terms, false);
-            break;
-        case BETA_LOW_HIGH:
-            terms = sortTermsBeta(terms, true);
-            break;
+    if(mode !== lastSortMode){
+        
+        changed = true;
+        lastSortMode = mode;
+
+        sortedCategories =  [];
+
+        switch(mode){
+            case BETA_HIGH_LOW:
+                terms = sortTermsBeta(terms, false);
+                break;
+            case BETA_LOW_HIGH:
+                terms = sortTermsBeta(terms, true);
+                break;
+        }
     }
+
+    return changed;
 }
 
 /**
@@ -353,21 +385,17 @@ function sortTermsBeta(termList, order){
         return termList;
     }
 
-    var pivot = termList.shift();
-
-    console.log("length: " + termList.length);
-    console.log(pivot.betaRedexes());
+    var pivot = termList[0];
+    termList = termList.slice(1);
 
     var highers = sortTermsBeta(termList.filter(x => x.betaRedexes() >= pivot.betaRedexes()), order);
     var lowers = sortTermsBeta(termList.filter(x => x.betaRedexes() < pivot.betaRedexes()), order);
-
-    console.log("higher than " + pivot + ": " + highers);
-    console.log("lower than " + pivot + ": " + lowers);
 
     if (order){
         return lowers.concat([pivot].concat(highers));
     }
 
-    return highers.concat([pivot].concat(lowers));
+    var temp = [pivot].concat(lowers);
+    return highers.concat(temp);
  
 }
