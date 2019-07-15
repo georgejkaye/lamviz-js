@@ -29,6 +29,13 @@ const DEFAULT = 0;
 const BETA_HIGH_LOW = 1;
 const BETA_LOW_HIGH = 2;
 
+/* Functions for properties */
+const redexesProperty = x => x.betaRedexes();
+
+/* Text for properties */
+const redexesPlural = "&beta;-redexes"
+const redexesSingle = "&beta;-redex"
+
 var lastAction = 0;
 var lastSortMode = DEFAULT;
 
@@ -170,6 +177,7 @@ function generateButton(x, prev){
 
             terms = completeTerms;
             totalNumber = completeTerms.length;
+            sortedCategories = [["", terms]];
         }
 
         filterAndSortTerms();
@@ -187,35 +195,48 @@ function drawGallery(prev){
     var filteredNumber = terms.length;
     var termString = "";
 
-    for(i = 0; i < terms.length; i++){
+    var portraitCount = 0;
 
-        terms[i].generatePrettyVariableNames(freeVariables);
+    for(var i = 0; i < sortedCategories.length; i++){
 
-        var x = terms[i].prettyPrintLabels(freeVariables).length;
-        var size = 200;
-
-        while(x > 20){
-            size -= 3;
-            x--;
+        if(sortedCategories[i][0] !== ""){
+            termString += getDiv("", "category-" + i, "", "", getH("","", 3, "", "", sortedCategories[i][0]));
         }
 
-        var termName = "";
+        for(var j = 0; j < sortedCategories[i][1].length; j++){
 
-        if(document.getElementById('de-bruijn').checked){
-            termName = terms[i].prettyPrint();
-        } else {
-            termName = printTermHTML(terms[i]);
-        }
+            var workingTerm = sortedCategories[i][1][j]
 
-        var caption = getP("caption", "portrait-caption-" + i, "font-size:" + size + "%", "", termName + "<br>" + terms[i].crossings() + " crossings");
+            workingTerm.generatePrettyVariableNames(freeVariables);
 
-        if(document.getElementById("draw").checked){
-            termString += getDiv('w3-container frame', 'frame' + i, "", "viewPortrait('church-room', terms[" + i + "], false);", 
-                        getDiv("w3-container inner-frame", "", "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + "<br>" + 
-                            caption);            
+            var x = workingTerm.prettyPrintLabels(freeVariables).length;
+            var size = 200;
 
-        } else {
-            termString += getDiv('w3-container frame empty', 'frame ' + i, "", "viewPortrait('church-room', terms[" + i + "], false);", caption);
+            while(x > 20){
+                size -= 3;
+                x--;
+            }
+
+            var termName = "";
+
+            if(document.getElementById('de-bruijn').checked){
+                termName = workingTerm.prettyPrint();
+            } else {
+                termName = printTermHTML(workingTerm);
+            }
+
+            var caption = getP("caption", "portrait-caption-" + portraitCount, "font-size:" + size + "%", "", termName + "<br>" + workingTerm.crossings() + " crossings");
+
+            if(document.getElementById("draw").checked){
+                termString += getDiv('w3-container frame', 'frame' + portraitCount, "", "viewPortrait('church-room', workingTerm, false);", 
+                            getDiv("w3-container inner-frame", "", "", "", getDiv("w3-container portrait", "portrait" + portraitCount, "", "", "")) + "<br>" + 
+                                caption);            
+
+            } else {
+                termString += getDiv('w3-container frame empty', 'frame ' + portraitCount, "", "viewPortrait('church-room', workingTerm, false);", caption);
+            }
+
+            portraitCount++;
         }
     }
 
@@ -357,16 +378,52 @@ function filterAndSortTerms(){
         
         changed = true;
         lastSortMode = mode;
+        var property;
+
+        var propertyNameSingle = "";
+        var propertyNamePlural = "";
 
         sortedCategories =  [];
 
         switch(mode){
             case BETA_HIGH_LOW:
                 terms = sortTermsBeta(terms, false);
+                property = redexesProperty;
+                propertyNameSingle = redexesSingle;
+                propertyNamePlural = redexesPlural;
                 break;
             case BETA_LOW_HIGH:
                 terms = sortTermsBeta(terms, true);
+                property = redexesProperty;
+                propertyNameSingle = redexesSingle;
+                propertyNamePlural = redexesPlural;
                 break;
+        }
+
+        if(mode !== DEFAULT){
+
+            var c = 0;
+            var currentProperty = property(terms[0]);
+
+            var propertyName = currentProperty === 1 ? propertyNameSingle : propertyNamePlural;
+
+            sortedCategories[0] = [currentProperty + " " + propertyName, [terms[0]]];
+
+            for(var i = 1; i < terms.length; i++){
+                
+                var newProperty = property(terms[i]);
+
+                if(currentProperty !== newProperty){
+                    c++;
+                    propertyName = newProperty === 1 ? propertyNameSingle : propertyNamePlural;
+                    sortedCategories[c] = [property(terms[i]) + " " + propertyName, [terms[i]]];
+                    currentProperty = newProperty;
+                } else {
+                    smartPush(sortedCategories[c][1], terms[i]);
+                }
+            }
+        } else {
+            sortedCategories[0] = ["", terms];
         }
     }
 
