@@ -182,11 +182,11 @@ function generateButton(x, prev){
 
             terms = completeTerms;
             totalNumber = completeTerms.length;
-            sortedCategories = [["", terms]];
+
         }
 
-        filterTerms();
-        sortTerms();
+        var changed = filterTerms();
+        sortTerms(changed);
         drawGallery();
     }
 
@@ -328,9 +328,10 @@ function backButton(){
  */
 function filterAndSortButton(){
     
-    var changed = filterTerms() || sortTerms();
+    var filterChanged = filterTerms()
+    var sortChanged = sortTerms(filterChanged);
     
-    if(changed){
+    if(filterChanged || sortChanged){
         drawGallery();
     }
 }
@@ -358,23 +359,23 @@ function filterTerms(){
         betas = newBetas;
     }
 
-    if(cross !== -1 && newCross !== cross){
+    if(cross !== -1){
         terms = completeTerms.filter(x => x.crossings() === cross);
     }
 
-    if(apps !== -1 && newApps !== apps){
+    if(apps !== -1){
         terms = completeTerms.filter(x => x.applications() === apps);
     }
     
-    if(abs !== -1 && newAbs !== abs){
+    if(abs !== -1){
         terms = completeTerms.filter(x => x.abstractions() === abs);
     }
     
-    if(vars !== -1 && newVars !== vars){
+    if(vars !== -1){
         terms = completeTerms.filter(x => x.crossings() === vars);
     }
 
-    if(betas !== -1 && newBetas !== betas){
+    if(betas !== -1){
         terms = completeTerms.filter(x => x.betaRedexes() === betas);
     }
 
@@ -383,9 +384,10 @@ function filterTerms(){
 
 /**
  * Filter the current gallery based on the method specified by the user.
+ * @param {boolean} filter - If the filter has changed and so the categories need to be recalculated.
  * @return {boolean} If the list of terms or the order has been changed.
  */
-function sortTerms(){
+function sortTerms(filter){
 
     var changed = false;
 
@@ -422,7 +424,9 @@ function sortTerms(){
         }
 
         terms = quickSortTerms(terms, propertyFunction, order);
+    }
 
+    if(filter){
         if(mode !== DEFAULT){
 
             var c = 0;
