@@ -42,6 +42,10 @@ const redexesSingle = "&beta;-redex";
 const crossingsPlural = "crossings";
 const crossingsSingle = "crossing";
 
+var propertyFunction;
+var propertySingle;
+var propertyPlural;
+
 var lastAction = 0;
 var lastSortMode = DEFAULT;
 
@@ -193,6 +197,7 @@ function generateButton(x, prev){
         filterTerms();
         sortTerms(true);
         drawGallery();
+        document.getElementById('sort-btn').disabled = false;
     }
 
 }
@@ -316,6 +321,7 @@ function clearButton(nums){
     }
 
     scrollToElement();
+    document.getElementById('sort-btn').disabled = true;
 }
 
 /**
@@ -402,11 +408,6 @@ function sortTerms(filter){
         
         changed = true;
         lastSortMode = mode;
-
-        var propertyFunction;
-        var propertyNameSingle = "";
-        var propertyNamePlural = "";
-
         sortedCategories =  [];
 
         switch(mode){
@@ -420,7 +421,7 @@ function sortTerms(filter){
                 propertyNameSingle = crossingsSingle;
                 propertyNamePlural = crossingsPlural;
                 break;
-            case CROSSINGS_HIGH_LOW:
+            case CROSSINGS_LOW_HIGH:
                 order = true;
                 propertyFunction = crossingsProperty;
                 propertyNameSingle = crossingsSingle;
@@ -443,32 +444,30 @@ function sortTerms(filter){
         terms = quickSortTerms(terms, propertyFunction, order);
     }
 
-    if(filter){
-        if(mode !== DEFAULT){
+    if(mode !== DEFAULT){
 
-            var c = 0;
-            var currentProperty = propertyFunction(terms[0]);
+        var c = 0;
+        var currentProperty = propertyFunction(terms[0]);
 
-            var propertyName = currentProperty === 1 ? propertyNameSingle : propertyNamePlural;
+        var propertyName = currentProperty === 1 ? propertyNameSingle : propertyNamePlural;
 
-            sortedCategories[0] = [currentProperty + " " + propertyName, [terms[0]]];
+        sortedCategories[0] = [currentProperty + " " + propertyName, [terms[0]]];
 
-            for(var i = 1; i < terms.length; i++){
-                
-                var newProperty = propertyFunction(terms[i]);
+        for(var i = 1; i < terms.length; i++){
+            
+            var newProperty = propertyFunction(terms[i]);
 
-                if(currentProperty !== newProperty){
-                    c++;
-                    propertyName = newProperty === 1 ? propertyNameSingle : propertyNamePlural;
-                    sortedCategories[c] = [propertyFunction(terms[i]) + " " + propertyName, [terms[i]]];
-                    currentProperty = newProperty;
-                } else {
-                    smartPush(sortedCategories[c][1], terms[i]);
-                }
+            if(currentProperty !== newProperty){
+                c++;
+                propertyName = newProperty === 1 ? propertyNameSingle : propertyNamePlural;
+                sortedCategories[c] = [propertyFunction(terms[i]) + " " + propertyName, [terms[i]]];
+                currentProperty = newProperty;
+            } else {
+                smartPush(sortedCategories[c][1], terms[i]);
             }
-        } else {
-            sortedCategories[0] = ["", terms];
         }
+    } else {
+        sortedCategories[0] = ["", terms];
     }
 
     return changed;
