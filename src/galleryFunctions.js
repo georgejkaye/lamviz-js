@@ -241,7 +241,7 @@ function drawGallery(prev){
                 termName = printTermHTML(workingTerm);
             }
 
-            var caption = getP("caption", "portrait-caption-" + portraitCount, "font-size:" + size + "%", "", termName + "<br>" + workingTerm.crossings() + " crossings");
+            var caption = getSpan("caption", "portrait-caption-" + portraitCount, "font-size:" + size + "%", "", termName) + getSpan("subcaption", "portrait-subcaption-" + portraitCount, "", "", "<br>&#x2a09; " + workingTerm.crossings() + "&emsp;&beta; " + workingTerm.betaRedexes());
 
             if(document.getElementById("draw").checked){
                 termString += getDiv('w3-container frame', 'frame' + portraitCount, "", "viewPortrait('church-room', sortedCategories[" + i + "][1][" + j + "], false);", 
