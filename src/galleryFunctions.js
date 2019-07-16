@@ -408,7 +408,6 @@ function sortTerms(filter){
         
         changed = true;
         lastSortMode = mode;
-        sortedCategories =  [];
 
         switch(mode){
             case DEFAULT:
@@ -450,7 +449,8 @@ function sortTerms(filter){
         var currentProperty = propertyFunction(terms[0]);
 
         var propertyName = currentProperty === 1 ? propertyNameSingle : propertyNamePlural;
-
+        
+        sortedCategories =  [];
         sortedCategories[0] = [currentProperty + " " + propertyName, [terms[0]]];
 
         for(var i = 1; i < terms.length; i++){
