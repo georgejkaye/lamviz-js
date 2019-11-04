@@ -5,7 +5,7 @@ My MSci final year project: a set of tools to help investigation of terms from v
 ## Tools
 Two tools were made for the project:
 * [**λ-term visualiser**](https://www.georgejkaye.com/fyp/visualiser)
-* [**λ-term gallery**](https://www.georgejkaye.com/fyp/gallery
+* [**λ-term gallery**](https://www.georgejkaye.com/fyp/gallery)
 
 ### λ-term visualiser
 ![λ-term visualiser](/pics/visualiser.png)
