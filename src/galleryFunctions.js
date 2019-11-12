@@ -441,6 +441,7 @@ function sortTerms(filter){
         }
 
         terms = quickSortTerms(terms, propertyFunction, order);
+        sortedCategories = [];
     }
 
     if(mode !== DEFAULT){
