@@ -30,6 +30,7 @@
 * ~~Implement some groovier animations when reducing~~
 * Make everything tidier
 * Make interface more polished
-* Ability to sort gallery
+* ~~Ability to sort gallery~~
 * Highlight paths on normalisation graph
+* Replace alias'd subterms with blocks to make identifying them easier
   
