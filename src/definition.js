@@ -138,6 +138,14 @@ class LambdaVariable{
     }
 
     /**
+     * How many subterms does this term have?
+     * @return {number} The number of subterms in this term.
+     */
+    subterms(){
+        return 1;
+    }
+
+    /**
      * How many crossings does this term have?
      * @return {number} The number of crossings in this term.
      */
@@ -375,6 +383,14 @@ class LambdaAbstraction{
 
         return this.closed[x];
 
+    }
+
+    /**
+     * How many subterms does this term have?
+     * @return {number} The number of subterms in this term.
+     */
+    subterms(){
+        return 1 + this.t.subterms();
     }
 
     /**
@@ -659,6 +675,14 @@ class LambdaApplication{
 
         return this.closed[x];
 
+    }
+
+    /**
+     * How many subterms does this term have?
+     * @return {number} The number of subterms in this term.
+     */
+    subterms(){
+        return 1 + this.t1.subterms() + this.t2.subterms();
     }
 
     /**

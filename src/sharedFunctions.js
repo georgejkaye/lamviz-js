@@ -62,6 +62,7 @@ function getStats(currentTerm, labels){
 
     return getRow(getCell("term-heading", '<b id = "term-name">' + printTermHTML(currentTerm, false) + '</b>')) +
             getRow(getCell("term-subheading", '<b id = "term-name-bruijn">' + printTermHTML(currentTerm, true) + '</b>')) +
+            getRow(getCell("term-fact", 'Subterms: ' + currentTerm.subterms())) +
             getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
             getRow(getCell("term-fact", 'Abstractions: ' + currentTerm.abstractions())) +
             getRow(getCell("term-fact", 'Applications: ' + currentTerm.applications())) +
