@@ -178,6 +178,29 @@ class LambdaVariable{
     }
 
     /**
+     * Helper function for uniqueVariables()
+     * @param {number[]} seen The variables that have already been seen.
+     * @return {number[]} [The number of unique variables, the seen variables].  
+     */
+    uniqueVariablesHelper(seen){
+
+        if(seen.includes(this.index)){
+            return [0, seen];
+        } 
+
+        return [1, seen.concat(this.index)];
+
+    }
+
+    /**
+     * How many unique variables does this term have?
+     * @return {number} The number of unique variables in this term.
+     */
+    uniqueVariables(){
+        return this.uniqueVariablesHelper([])[0];
+    }
+
+    /**
      * How many free variables does this term have?
      * @return {number} The number of free variables in this term.
      */
@@ -191,6 +214,19 @@ class LambdaVariable{
      */
     freeVariableIndices(){
         return [this.index];
+    }
+
+    /**
+     * How many times is a variable used?
+     * @param {number} index The variable to check for
+     * @return {number} The number of times a variable is used. 
+     */
+    numberOfUses(index){
+        if(index === this.index){
+            return 1;
+        }
+
+        return 0;
     }
 
     /**
@@ -426,6 +462,29 @@ class LambdaAbstraction{
     }
 
     /**
+     * Helper function for uniqueVariables()
+     * @param {number[]} seen The variables that have already been seen.
+     * @return {number[]} [The number of unique variables, the seen variables].  
+     */
+    uniqueVariablesHelper(seen){
+
+        var newSeen = seen.map(x => x + 1);
+
+        var t = this.t.uniqueVariablesHelper(newSeen);
+
+        return [t[0], t[1].map(x => x - 1)];
+
+    }
+
+    /**
+     * How many unique variables does this term have?
+     * @return {number} The number of unique variables in this term.
+     */
+    uniqueVariables(){
+        return this.uniqueVariablesHelper([])[0];
+    }
+
+    /**
      * How many free variables does this term have?
      * @return {number} The number of free variables in this term.
      */
@@ -435,7 +494,7 @@ class LambdaAbstraction{
             return 0;
         }
 
-        return this.t.freeVariables() - 1;
+        return this.t.freeVariables() - this.t.numberOfUses(0);
     }
 
     /**
@@ -446,6 +505,15 @@ class LambdaAbstraction{
         return this.t.freeVariableIndices().filter(x => x !== 0).map(x => x - 1);
     }
     
+    /**
+     * How many times is a variable used?
+     * @param {number} index The variable to check for
+     * @return {number} The number of times a variable is used. 
+     */
+    numberOfUses(index){
+        return this.t.numberOfUses(index+1);
+    }
+
     /**
      * Is this term a beta redex?
      * @return {boolean} Whether this term is a beta redex.
@@ -733,11 +801,42 @@ class LambdaApplication{
     }
 
     /**
+     * Helper function for uniqueVariables()
+     * @param {number[]} seen The variables that have already been seen.
+     * @return {number[]} [The number of unique variables, the seen variables].  
+     */
+    uniqueVariablesHelper(seen){
+
+        var lhs = this.t1.uniqueVariablesHelper(seen);
+        var rhs = this.t2.uniqueVariablesHelper(lhs[1]);
+
+        return [lhs[0] + rhs[0], rhs[1]];
+
+    }
+
+    /**
+     * How many unique variables does this term have?
+     * @return {number} The number of unique variables in this term.
+     */
+    uniqueVariables(){
+        return this.uniqueVariablesHelper([])[0];
+    }
+
+    /**
      * How many free variables does this term have?
      * @return {number} The number of free variables in this term.
      */
     freeVariables(){
         return this.t1.freeVariables() + this.t2.freeVariables();
+    }
+
+    /**
+     * How many times is a variable used?
+     * @param {number} index The variable to check for
+     * @return {number} The number of times a variable is used. 
+     */
+    numberOfUses(index){
+        return this.t1.numberOfUses(index) + this.t2.numberOfUses(index);
     }
 
     /**

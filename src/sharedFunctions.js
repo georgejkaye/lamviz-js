@@ -66,7 +66,8 @@ function getStats(currentTerm, labels){
             getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
             getRow(getCell("term-fact", 'Abstractions: ' + currentTerm.abstractions())) +
             getRow(getCell("term-fact", 'Applications: ' + currentTerm.applications())) +
-            getRow(getCell("term-fact", 'Variables: ' + currentTerm.variables())) +
+            getRow(getCell("term-fact", 'Total variables: ' + currentTerm.variables())) +
+            getRow(getCell("term-fact", 'Unique variables: ' + currentTerm.uniqueVariables())) +
             getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
             getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
             getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(freeVariables), "redex", "clickRedexOnclick(i,)", "highlightRedexMouseover(i, true)", "unhighlightRedexMouseover(i, true)"))) +
