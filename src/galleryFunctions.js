@@ -24,6 +24,8 @@ var vars = -1;
 var betas = -1;
 var fragment = "";
 
+var inGallery = true;
+
 /* Sort constants */
 const DEFAULT = 0;
 const CROSSINGS_HIGH_LOW = 1;
@@ -49,12 +51,34 @@ var propertyPlural;
 var writeTerms = document.getElementById('write').checked;
 var drawTerms = document.getElementById('draw').checked;
 var deBruijnTerms = document.getElementById('de-bruijn').checked;
+var showCrossings = document.getElementById('crossings').checked;
+var showBetaRedexes = document.getElementById('beta').checked;
 
 var lastAction = 0;
 var lastSortMode = DEFAULT;
 
-var writeWhenFiltered = true;
-var drawWhenFiltered = true;
+var writeWhenFiltered = writeTerms;
+var drawWhenFiltered = drawTerms;
+var deBruijnWhenFiltered = deBruijnTerms;
+var crossingsWhenFiltered = showCrossings;
+var betasWhenFiltered = showBetaRedexes;
+
+/**
+ * Pressing Enter triggers the 'Generate terms' button.
+ */
+var input = document.getElementsByClassName('number-box');
+
+for (var i = 0; i < input.length; i++) {
+
+    input[i].addEventListener("keyup", function (event) {
+        event.preventDefault();
+        if (event.keyCode === 13) {
+            document.getElementById("generate-btn").click();
+        }
+    })
+}
+
+
 
 /**
  * Change the text of an element with a given id.
@@ -147,15 +171,20 @@ function prettyString(array) {
  * @param {number} x - The identifier for the type of terms to generate.
  * @param {boolean} prev - If this is not a new generation of terms (e.g. a filter or sort).
  */
-function generateButton(x, prev) {
+function generateButton() {
 
     changeText("normalisation-studio", "");
 
-    if (!prev) {
-        n = parseInt(getText('n'));
-        k = parseInt(getText('k'));
-        lastAction = x;
+    if (document.getElementById('pure').checked) {
+        lastAction = 0;
+    } else if (document.getElementById('linear').checked) {
+        lastAction = 1;
+    } else {
+        lastAction = 2;
     }
+
+    var newn = parseInt(getText('n'));
+    var newk = parseInt(getText('k'));
 
     if (isNaN(n)) {
         changeText('error', "Parse error: bad value of n");
@@ -163,11 +192,15 @@ function generateButton(x, prev) {
     } else {
         changeText('error', "");
 
-        if (isNaN(k)) {
-            k = 0;
+        if (isNaN(newk)) {
+            newk = 0;
         }
 
-        if (!prev) {
+        if (newn != n || newk != k) {
+
+            n = newn;
+            k = newk;
+
             fragment = "";
             completeTerms = [];
             cys = [];
@@ -199,12 +232,10 @@ function generateButton(x, prev) {
             terms = completeTerms;
             totalNumber = completeTerms.length;
 
+            inGallery = false;
         }
 
-        filterTerms();
-        sortTerms(true);
-        drawGallery();
-        document.getElementById('sort-btn').disabled = false;
+        filterSortAndDraw();
     }
 
 }
@@ -236,33 +267,53 @@ function drawGallery(prev) {
                 var x = workingTerm.prettyPrintLabels(freeVariables).length;
                 var size = 200;
 
-                while (x > 20) {
+                while (x > 5) {
                     size -= 3;
                     x--;
                 }
 
                 var termName = "";
 
-                if (document.getElementById('de-bruijn').checked) {
+                if (deBruijnTerms) {
                     termName = workingTerm.prettyPrint();
                 } else {
                     termName = printTermHTML(workingTerm);
                 }
 
-                var caption = getSpan("caption", "portrait-caption-" + portraitCount, "font-size:" + size + "%", "", termName) + getSpan("subcaption", "portrait-subcaption-" + portraitCount, "", "", "<br>&#x2a09; " + workingTerm.crossings() + "&emsp;&beta; " + workingTerm.betaRedexes());
+                /* Portrain subcaption */
+
+                var subcaption = "";
+
+                if (showCrossings) {
+                    subcaption += "&#x2a09;" + workingTerm.crossings();
+                }
+
+                if (showCrossings && showBetaRedexes) {
+                    subcaption += " &emsp;";
+                }
+
+                if (showBetaRedexes) {
+                    subcaption += "&beta; " + workingTerm.betaRedexes()
+                }
+
+                var subcaptionSpan = getSpan("subcaption", "portrait-subcaption-" + portraitCount, "", "", subcaption);
+
+                var caption = getSpan("caption", "portrait-caption-" + portraitCount, "font-size:" + size + "%", "", termName);
 
                 if (drawTerms) {
-                    termString += getDiv('w3-container frame', 'frame' + portraitCount, "", "viewPortrait('church-room', sortedCategories[" + i + "][1][" + j + "], false);",
+                    termString += getDiv('w3-container frame', 'frame' + portraitCount, "", "inGallery = false; viewPortrait('church-room', sortedCategories[" + i + "][1][" + j + "], false);",
                         getDiv("w3-container inner-frame", "", "", "", getDiv("w3-container portrait", "portrait" + portraitCount, "", "", "")) + "<br>" +
-                        caption);
+                        caption + subcaptionSpan);
 
                 } else {
-                    termString += getDiv('w3-container frame empty', 'frame ' + portraitCount, "", "viewPortrait('church-room', sortedCategories[" + i + "][1][" + j + "], false);", caption);
+                    termString += getDiv('w3-container frame empty', 'frame ' + portraitCount, "", "inGallery = false; viewPortrait('church-room', sortedCategories[" + i + "][1][" + j + "], false);", caption + "<br>" + subcaptionSpan);
                 }
 
                 portraitCount++;
             }
         }
+
+        inGallery = true;
     }
 
     changeText('church-room', termString);
@@ -297,7 +348,7 @@ function drawGallery(prev) {
         ctx.pushTerm("f" + i, lambda + "f" + i + ".");
     }
 
-    if (drawTerms) {
+    if (writeTerms && drawTerms) {
         if (prev) {
             for (var i = 0; i < terms.length; i++) {
                 drawMap("portrait" + i, terms[i], ctx, false, false, false);
@@ -308,6 +359,12 @@ function drawGallery(prev) {
             cys[i] = drawMap("portrait" + i, terms[i], ctx, false, false, false);
         }
     }
+
+    writeWhenFiltered = writeTerms;
+    drawWhenFiltered = drawTerms;
+    deBruijnWhenFiltered = deBruijnTerms;
+    crossingsWhenFiltered = showCrossings;
+    betasWhenFiltered = showBetaRedexes;
 
     scrollToElement('filtering-options');
 
@@ -338,7 +395,7 @@ function clearButton(nums) {
  */
 function backButton() {
     changeText('normalisation-studio', "");
-    generateButton(lastAction, true);
+    generateButton(lastAction);
     reduced = false;
     scrollToElement('number-of-terms');
 }
@@ -346,14 +403,24 @@ function backButton() {
 /**
  * Function to execute when the filter and sort button is pressed.
  */
-function filterAndSortButton() {
+function filterSortAndDraw() {
 
     var filterChanged = filterTerms()
     var sortChanged = sortTerms(filterChanged);
 
-    if ((writeWhenFiltered != writeTerms) || (drawWhenFiltered != drawTerms) || filterChanged || sortChanged) {
+    if (!inGallery || (writeWhenFiltered != writeTerms) ||
+        (drawWhenFiltered != drawTerms) ||
+        (deBruijnWhenFiltered != deBruijnTerms) ||
+        (crossingsWhenFiltered != showCrossings) ||
+        (betasWhenFiltered != showBetaRedexes) ||
+        filterChanged || sortChanged) {
+
         writeWhenFiltered = writeTerms;
         drawWhenFiltered = drawTerms;
+        deBruijnWhenFiltered = deBruijnTerms;
+        crossingsWhenFiltered = showCrossings;
+        betasWhenFiltered = showBetaRedexes;
+
         drawGallery();
     }
 }
@@ -365,11 +432,11 @@ function filterAndSortButton() {
 function filterTerms() {
 
     var changed = false;
-    var newCross = parseIntOrEmpty(getText('crossings'));
-    var newApps = parseIntOrEmpty(getText('applications'));
-    var newAbs = parseIntOrEmpty(getText('abstractions'));
-    var newVars = parseIntOrEmpty(getText('variables'));
-    var newBetas = parseIntOrEmpty(getText('betas'));
+    var newCross = parseIntOrEmpty(getText('crossings-box'));
+    var newApps = parseIntOrEmpty(getText('applications-box'));
+    var newAbs = parseIntOrEmpty(getText('abstractions-box'));
+    var newVars = parseIntOrEmpty(getText('variables-box'));
+    var newBetas = parseIntOrEmpty(getText('betas-box'));
 
     if (newCross !== cross || newApps !== apps || newAbs !== abs || newVars !== vars || newBetas !== betas) {
         changed = true;
@@ -515,6 +582,14 @@ function quickSortTerms(termList, propertyFunction, order) {
 
 function toggleWrite() {
     writeTerms = !writeTerms;
+
+    if (!writeTerms) {
+        document.getElementById('draw').checked = false;
+        document.getElementById('draw').disabled = true;
+        drawTerms = false;
+    } else {
+        document.getElementById('draw').disabled = false;
+    }
 }
 
 function toggleDraw() {
@@ -523,4 +598,12 @@ function toggleDraw() {
 
 function toggleDeBruijn() {
     deBruijnTerms = !deBruijnTerms;
+}
+
+function toggleBeta() {
+    showBetaRedexes = !showBetaRedexes;
+}
+
+function toggleCrossings() {
+    showCrossings = !showCrossings;
 }

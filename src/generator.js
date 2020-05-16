@@ -42,10 +42,28 @@ function generateTermsHelper(n, k, p) {
 
         for (var i = 0; i < memo.length; i++) {
             if (arraysEqual(memo[i][0], k)) {
-                console.log("memo!");
                 return [...memo[i][1]];
             }
         }
+
+        var memoVars = memo[0][0];
+        var memoTerms = memo[0][1];
+        var newTerms = [];
+
+        for (var i = 0; i < memoTerms.length; i++) {
+            var workingTerm = memoTerms[i];
+
+            for (var j = 0; j < k.length; j++) {
+                workingTerm = substituteVariable(k[j], memoVars[j], workingTerm);
+            }
+
+            newTerms.push(workingTerm);
+
+        }
+
+        memo[memo.length] = [k, [...newTerms]];
+        return newTerms;
+
     }
 
     var terms = [];
@@ -139,7 +157,6 @@ function generatePlanarTermsHelper(n, k) {
 
         for (var i = 0; i < memo.length; i++) {
             if (arraysEqual(memo[i][0], k)) {
-                console.log("memo!");
                 return [...memo[i][1]];
             }
         }
@@ -162,8 +179,6 @@ function generatePlanarTermsHelper(n, k) {
         memo[memo.length] = [k, [...newTerms]];
         return newTerms;
 
-    } else {
-        console.log("no memo");
     }
 
     var terms = [];
@@ -260,10 +275,28 @@ function generateLinearTermsHelper(n, k) {
 
         for (var i = 0; i < memo.length; i++) {
             if (arraysEqual(memo[i][0], k)) {
-                console.log("memo!");
                 return [...memo[i][1]];
             }
         }
+
+        var memoVars = memo[0][0];
+        var memoTerms = memo[0][1];
+        var newTerms = [];
+
+        for (var i = 0; i < memoTerms.length; i++) {
+            var workingTerm = memoTerms[i];
+
+            for (var j = 0; j < k.length; j++) {
+                workingTerm = substituteVariable(k[j], memoVars[j], workingTerm);
+            }
+
+            newTerms.push(workingTerm);
+
+        }
+
+        memo[memo.length] = [k, [...newTerms]];
+        return newTerms;
+
     }
 
     var terms = [];
