@@ -144,7 +144,7 @@ function generatePlanarTermsHelper(n, k) {
             }
         }
 
-        /*var memoVars = memo[0][0];
+        var memoVars = memo[0][0];
         var memoTerms = memo[0][1];
         var newTerms = [];
 
@@ -152,14 +152,15 @@ function generatePlanarTermsHelper(n, k) {
             var workingTerm = memoTerms[i];
 
             for (var j = 0; j < k.length; j++) {
-                var newTerm = substituteVariable(k[j], memoVars[j], workingTerm);
-                newTerms.push(newTerm);
+                workingTerm = substituteVariable(k[j], memoVars[j], workingTerm);
             }
+
+            newTerms.push(workingTerm);
 
         }
 
         memo[memo.length] = [k, [...newTerms]];
-        return newTerms;*/
+        return newTerms;
 
     } else {
         console.log("no memo");

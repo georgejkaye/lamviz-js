@@ -46,15 +46,22 @@ var propertyFunction;
 var propertySingle;
 var propertyPlural;
 
+var writeTerms = document.getElementById('write').checked;
+var drawTerms = document.getElementById('draw').checked;
+var deBruijnTerms = document.getElementById('de-bruijn').checked;
+
 var lastAction = 0;
 var lastSortMode = DEFAULT;
+
+var writeWhenFiltered = true;
+var drawWhenFiltered = true;
 
 /**
  * Change the text of an element with a given id.
  * @param {string} id   - The id of the element.
  * @param {string} text - the text to change to
  */
-function changeText(id, text){
+function changeText(id, text) {
     document.getElementById(id).innerHTML = text;
 }
 
@@ -63,7 +70,7 @@ function changeText(id, text){
  * @param {string} id   - The id of the element.
  * @param {string} value - the value to change to
  */
-function changeValue(id, value){
+function changeValue(id, value) {
     document.getElementById(id).value = value;
 }
 
@@ -72,10 +79,10 @@ function changeValue(id, value){
  * @param {string} id   - The class of the elements.
  * @param {string} value - the value to change to
  */
-function changeValueClass(className, value){
+function changeValueClass(className, value) {
     var elems = document.getElementsByClassName(className);
 
-    for(var i = 0; i < elems.length; i++){
+    for (var i = 0; i < elems.length; i++) {
         elems[i].value = value;
     }
 }
@@ -85,25 +92,25 @@ function changeValueClass(className, value){
  * @param {string} className - The class of the elements.
  * @param {string} style - The style to set.
  */
-function setStyleSpan(className, style){
+function setStyleSpan(className, style) {
     var elems = document.getElementsByClassName(className);
-    
+
     var re = /class="(.+?)"/g
 
-    for(var i = 0; i < elems.length; i++){
+    for (var i = 0; i < elems.length; i++) {
         elems[i].setAttribute("style", style);
 
         var subs = elems[i].innerHTML;
         var matches = subs.match(re);
-        
-        for(var j = 0; j < matches.length; j++){
+
+        for (var j = 0; j < matches.length; j++) {
             var elems2 = document.getElementsByClassName(matches[j].substring(7, matches[j].length - 1));
 
-            for(var k = 0; k < elems2.length; k++){
+            for (var k = 0; k < elems2.length; k++) {
                 elems2[k].setAttribute("style", style);
             }
         }
-    } 
+    }
 }
 
 /**
@@ -111,7 +118,7 @@ function setStyleSpan(className, style){
  * @param {string} id - The id of the element.
  * @return {string} The text of the element.
  */
-function getText(id){
+function getText(id) {
     return document.getElementById(id).value;
 }
 
@@ -119,13 +126,13 @@ function getText(id){
  * Get a 'pretty' string of an array with spaces in between each element.
  * @param {array} array - The array to get the string from.
  */
-function prettyString(array){
+function prettyString(array) {
 
-    if(array.length !== 0){
+    if (array.length !== 0) {
         var string = array[0];
 
-        if(array.length > 0){
-            for(i = 1; i < array.length; i++){
+        if (array.length > 0) {
+            for (i = 1; i < array.length; i++) {
                 string += " ";
                 string += array[i];
             }
@@ -140,37 +147,37 @@ function prettyString(array){
  * @param {number} x - The identifier for the type of terms to generate.
  * @param {boolean} prev - If this is not a new generation of terms (e.g. a filter or sort).
  */
-function generateButton(x, prev){
+function generateButton(x, prev) {
 
     changeText("normalisation-studio", "");
 
-    if(!prev){
+    if (!prev) {
         n = parseInt(getText('n'));
         k = parseInt(getText('k'));
         lastAction = x;
     }
 
-    if(isNaN(n)){
+    if (isNaN(n)) {
         changeText('error', "Parse error: bad value of n");
         clearButton(false);
     } else {
         changeText('error', "");
 
-        if(isNaN(k)){
+        if (isNaN(k)) {
             k = 0;
         }
 
-        if(!prev){
+        if (!prev) {
             fragment = "";
             completeTerms = [];
             cys = [];
             freeVariables = new LambdaEnvironment();
 
-            for(var i = 0; i < k; i++){
+            for (var i = 0; i < k; i++) {
                 freeVariables.pushTerm(i);
             }
 
-            switch(lastAction){
+            switch (lastAction) {
                 case 0:
                     completeTerms = generateTerms(n, k);
                     fragment = "pure";
@@ -185,8 +192,8 @@ function generateButton(x, prev){
                     break;
             }
 
-            for(var i = 0; i < completeTerms.length; i++){
-               completeTerms[i].id = i;
+            for (var i = 0; i < completeTerms.length; i++) {
+                completeTerms[i].id = i;
             }
 
             terms = completeTerms;
@@ -206,100 +213,102 @@ function generateButton(x, prev){
  * Draw a gallery of generated terms.
  * @param {boolean} prev - If the terms have previously been generated.
  */
-function drawGallery(prev){
-    
+function drawGallery(prev) {
+
     var filteredNumber = terms.length;
     var termString = "";
 
     var portraitCount = 0;
 
-    for(var i = 0; i < sortedCategories.length; i++){
+    if (writeTerms) {
+        for (var i = 0; i < sortedCategories.length; i++) {
 
-        if(sortedCategories[i][0] !== ""){
-            termString += getDiv("", "category-" + i, "", "", getH("","", 3, "", "", sortedCategories[i][0]));
-        }
-
-        for(var j = 0; j < sortedCategories[i][1].length; j++){
-
-            var workingTerm = sortedCategories[i][1][j]
-
-            workingTerm.generatePrettyVariableNames(freeVariables);
-
-            var x = workingTerm.prettyPrintLabels(freeVariables).length;
-            var size = 200;
-
-            while(x > 20){
-                size -= 3;
-                x--;
+            if (sortedCategories[i][0] !== "") {
+                termString += getDiv("", "category-" + i, "", "", getH("", "", 3, "", "", sortedCategories[i][0]));
             }
 
-            var termName = "";
+            for (var j = 0; j < sortedCategories[i][1].length; j++) {
 
-            if(document.getElementById('de-bruijn').checked){
-                termName = workingTerm.prettyPrint();
-            } else {
-                termName = printTermHTML(workingTerm);
+                var workingTerm = sortedCategories[i][1][j]
+
+                workingTerm.generatePrettyVariableNames(freeVariables);
+
+                var x = workingTerm.prettyPrintLabels(freeVariables).length;
+                var size = 200;
+
+                while (x > 20) {
+                    size -= 3;
+                    x--;
+                }
+
+                var termName = "";
+
+                if (document.getElementById('de-bruijn').checked) {
+                    termName = workingTerm.prettyPrint();
+                } else {
+                    termName = printTermHTML(workingTerm);
+                }
+
+                var caption = getSpan("caption", "portrait-caption-" + portraitCount, "font-size:" + size + "%", "", termName) + getSpan("subcaption", "portrait-subcaption-" + portraitCount, "", "", "<br>&#x2a09; " + workingTerm.crossings() + "&emsp;&beta; " + workingTerm.betaRedexes());
+
+                if (drawTerms) {
+                    termString += getDiv('w3-container frame', 'frame' + portraitCount, "", "viewPortrait('church-room', sortedCategories[" + i + "][1][" + j + "], false);",
+                        getDiv("w3-container inner-frame", "", "", "", getDiv("w3-container portrait", "portrait" + portraitCount, "", "", "")) + "<br>" +
+                        caption);
+
+                } else {
+                    termString += getDiv('w3-container frame empty', 'frame ' + portraitCount, "", "viewPortrait('church-room', sortedCategories[" + i + "][1][" + j + "], false);", caption);
+                }
+
+                portraitCount++;
             }
-
-            var caption = getSpan("caption", "portrait-caption-" + portraitCount, "font-size:" + size + "%", "", termName) + getSpan("subcaption", "portrait-subcaption-" + portraitCount, "", "", "<br>&#x2a09; " + workingTerm.crossings() + "&emsp;&beta; " + workingTerm.betaRedexes());
-
-            if(document.getElementById("draw").checked){
-                termString += getDiv('w3-container frame', 'frame' + portraitCount, "", "viewPortrait('church-room', sortedCategories[" + i + "][1][" + j + "], false);", 
-                            getDiv("w3-container inner-frame", "", "", "", getDiv("w3-container portrait", "portrait" + portraitCount, "", "", "")) + "<br>" + 
-                                caption);            
-
-            } else {
-                termString += getDiv('w3-container frame empty', 'frame ' + portraitCount, "", "viewPortrait('church-room', sortedCategories[" + i + "][1][" + j + "], false);", caption);
-            }
-
-            portraitCount++;
         }
     }
 
     changeText('church-room', termString);
 
     var numString = "There ";
-    
-    if(totalNumber === 1){
+
+    if (totalNumber === 1) {
         numString += "is 1 " + fragment + " term";
     } else {
-        numString += "are " + totalNumber + " " + fragment + " terms"; 
+        numString += "are " + totalNumber + " " + fragment + " terms";
     }
 
     numString += " for n = " + n + " and k = " + k + "<br>" +
-                    filteredNumber + "/" + totalNumber + " term";
+        filteredNumber + "/" + totalNumber + " term";
 
-    if(terms.length !== 1){
+    if (terms.length !== 1) {
         numString += "s";
     }
 
     var percentage = 0;
 
-    if(totalNumber != 0){
+    if (totalNumber != 0) {
         percentage = (filteredNumber / totalNumber) * 100;
         changeText('help', 'Click on a term to learn more about it. ' + getButton("clear-btn", "clearButton(true)", "Clear all", false));
     }
 
-    changeText('number-of-terms', numString + " match the filtering criteria: "  + percentage.toFixed(2) + "%");
+    changeText('number-of-terms', numString + " match the filtering criteria: " + percentage.toFixed(2) + "%");
 
     ctx = new LambdaEnvironment();
 
-    for(var i = 0; i < k; i++){
+    for (var i = 0; i < k; i++) {
         ctx.pushTerm("f" + i, lambda + "f" + i + ".");
     }
 
-    if(document.getElementById("draw").checked){
-        if(prev){
-            for(var i = 0; i < terms.length; i++){
+    if (drawTerms) {
+        if (prev) {
+            for (var i = 0; i < terms.length; i++) {
                 drawMap("portrait" + i, terms[i], ctx, false, false, false);
             }
         }
-        
-        for(var i = 0; i < terms.length; i++){
+
+        for (var i = 0; i < terms.length; i++) {
             cys[i] = drawMap("portrait" + i, terms[i], ctx, false, false, false);
         }
     }
-    
+
     scrollToElement('filtering-options');
 
 }
@@ -310,13 +319,13 @@ var a = 0;
  * Function to execute when the clear button is pressed.
  * @param {boolean} nums - Whether to clear the number boxes.
  */
-function clearButton(nums){
+function clearButton(nums) {
     changeText('church-room', "");
     changeText('number-of-terms', "");
     changeText('help', "");
     changeText('normalisation-studio', "");
-    
-    if(nums){
+
+    if (nums) {
         changeValueClass('number-box', "");
     }
 
@@ -327,7 +336,7 @@ function clearButton(nums){
 /**
  * Function to execute when the back button is pressed.
  */
-function backButton(){
+function backButton() {
     changeText('normalisation-studio', "");
     generateButton(lastAction, true);
     reduced = false;
@@ -337,12 +346,14 @@ function backButton(){
 /**
  * Function to execute when the filter and sort button is pressed.
  */
-function filterAndSortButton(){
-    
+function filterAndSortButton() {
+
     var filterChanged = filterTerms()
     var sortChanged = sortTerms(filterChanged);
-    
-    if(filterChanged || sortChanged){
+
+    if ((writeWhenFiltered != writeTerms) || (drawWhenFiltered != drawTerms) || filterChanged || sortChanged) {
+        writeWhenFiltered = writeTerms;
+        drawWhenFiltered = drawTerms;
         drawGallery();
     }
 }
@@ -351,7 +362,7 @@ function filterAndSortButton(){
  * Filter the current gallery based on the criteria specified by the user.
  * @return {boolean} If the list of terms or the order has been changed.
  */
-function filterTerms(){
+function filterTerms() {
 
     var changed = false;
     var newCross = parseIntOrEmpty(getText('crossings'));
@@ -360,7 +371,7 @@ function filterTerms(){
     var newVars = parseIntOrEmpty(getText('variables'));
     var newBetas = parseIntOrEmpty(getText('betas'));
 
-    if(newCross !== cross || newApps !== apps || newAbs !== abs || newVars !== vars || newBetas !== betas){
+    if (newCross !== cross || newApps !== apps || newAbs !== abs || newVars !== vars || newBetas !== betas) {
         changed = true;
         terms = completeTerms;
         cross = newCross;
@@ -370,23 +381,23 @@ function filterTerms(){
         betas = newBetas;
     }
 
-    if(cross !== -1){
+    if (cross !== -1) {
         terms = completeTerms.filter(x => x.crossings() === cross);
     }
 
-    if(apps !== -1){
+    if (apps !== -1) {
         terms = completeTerms.filter(x => x.applications() === apps);
     }
-    
-    if(abs !== -1){
+
+    if (abs !== -1) {
         terms = completeTerms.filter(x => x.abstractions() === abs);
     }
-    
-    if(vars !== -1){
+
+    if (vars !== -1) {
         terms = completeTerms.filter(x => x.crossings() === vars);
     }
 
-    if(betas !== -1){
+    if (betas !== -1) {
         terms = completeTerms.filter(x => x.betaRedexes() === betas);
     }
 
@@ -398,18 +409,18 @@ function filterTerms(){
  * @param {boolean} filter - If the filter has changed and so the categories need to be recalculated.
  * @return {boolean} If the list of terms or the order has been changed.
  */
-function sortTerms(filter){
+function sortTerms(filter) {
 
     var changed = false;
 
     var mode = document.getElementById("sort").selectedIndex;
 
-    if(mode !== lastSortMode){
-        
+    if (mode !== lastSortMode) {
+
         changed = true;
         lastSortMode = mode;
 
-        switch(mode){
+        switch (mode) {
             case DEFAULT:
                 order = true;
                 propertyFunction = defaultProperty;
@@ -444,21 +455,21 @@ function sortTerms(filter){
         sortedCategories = [];
     }
 
-    if(mode !== DEFAULT){
+    if (mode !== DEFAULT) {
 
         var c = 0;
         var currentProperty = propertyFunction(terms[0]);
 
         var propertyName = currentProperty === 1 ? propertyNameSingle : propertyNamePlural;
-        
-        sortedCategories =  [];
+
+        sortedCategories = [];
         sortedCategories[0] = [currentProperty + " " + propertyName, [terms[0]]];
 
-        for(var i = 1; i < terms.length; i++){
-            
+        for (var i = 1; i < terms.length; i++) {
+
             var newProperty = propertyFunction(terms[i]);
 
-            if(currentProperty !== newProperty){
+            if (currentProperty !== newProperty) {
                 c++;
                 propertyName = newProperty === 1 ? propertyNameSingle : propertyNamePlural;
                 sortedCategories[c] = [propertyFunction(terms[i]) + " " + propertyName, [terms[i]]];
@@ -481,9 +492,9 @@ function sortTerms(filter){
  * @param {boolean} order - If to sort them from high to low (false) or low to high (true).
  * @return {Object[]} The sorted list of terms.
  */
-function quickSortTerms(termList, propertyFunction, order){
+function quickSortTerms(termList, propertyFunction, order) {
 
-    if (termList.length <= 1){
+    if (termList.length <= 1) {
         return termList;
     }
 
@@ -493,11 +504,23 @@ function quickSortTerms(termList, propertyFunction, order){
     var highers = quickSortTerms(termList.filter(x => propertyFunction(x) >= propertyFunction(pivot)), propertyFunction, order);
     var lowers = quickSortTerms(termList.filter(x => propertyFunction(x) < propertyFunction(pivot)), propertyFunction, order);
 
-    if (order){
+    if (order) {
         return lowers.concat([pivot].concat(highers));
     }
 
     var temp = [pivot].concat(lowers);
     return highers.concat(temp);
- 
+
+}
+
+function toggleWrite() {
+    writeTerms = !writeTerms;
+}
+
+function toggleDraw() {
+    drawTerms = !drawTerms;
+}
+
+function toggleDeBruijn() {
+    deBruijnTerms = !deBruijnTerms;
 }

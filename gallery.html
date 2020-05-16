@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <meta charset="UTF-8">
 <html>
+
 <head>
-    <link href="https://fonts.googleapis.com/css?family=Lato:400,900" rel="stylesheet"> 
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,900" rel="stylesheet">
     <link rel="stylesheet" href="src/style.css">
 </head>
+
 <body>
 
-    <div class = "column gallery-column">
+    <div class="column gallery-column">
         <h1>&lambda;-term gallery</h1>
 
         <p><b><a href="visualiser.html">&lambda;-term visualiser</a></b></p>
@@ -17,50 +19,58 @@
         The underlying algorithms behind the term generators can be found <a href="Generator.hs">here</a> (in Haskell!).
 
         <h2>&lambda; term generators</h2>
-        n <input type = "text" class = "number-box" id = "n"> k <input type = "text" class = "number-box" id = "k">
-        <button type = "button" id = "generate-btn" onclick = "generateButton(0, false);">Pure</button>
-        <button type = "button" id = "generate-btn" onclick = "generateButton(1, false);">Linear</button>
-        <button type = "button" id = "generate-btn" onclick = "generateButton(2, false);">Planar</button> 
-        <h3 id = "error"></h3>
+        n <input type="text" class="number-box" id="n"> k <input type="text" class="number-box" id="k">
+        <button type="button" id="generate-btn" onclick="generateButton(0, false);">Pure</button>
+        <button type="button" id="generate-btn" onclick="generateButton(1, false);">Linear</button>
+        <button type="button" id="generate-btn" onclick="generateButton(2, false);">Planar</button>
+        <h3 id="error"></h3>
 
-        <p>You might need to be patient for larger values of n and k while the maps are drawn. For n > 10 be prepared to wait a while, or until the universe collapses!</p>
+        <p>You might need to be patient for larger values of n and k while the maps are drawn. For n > 10 be prepared to
+            wait a while, or until the universe collapses!</p>
         <p>For larger terms, you may wish to disable map generation to speed up the process a bit.</p>
 
         <h3>Generation options</h3>
-        <p>Draw maps (costly)<input type = "checkbox" id = "draw" checked></p>
-        <p>Use de Bruijn notation<input type = "checkbox" id = "de-bruijn"></p>
+        <p>Write out terms<input type="checkbox" id="write" checked onclick="toggleWrite()"></p>
+        <p>Draw maps (costly)<input type="checkbox" id="draw" checked onclick="toggleDraw()"></p>
+        <p>Use de Bruijn notation<input type="checkbox" id="de-bruijn" onclick="toggleDeBruijn()"></p>
 
-        <h3 id = "filtering-options">Filtering options</h3>
-        Crossings <input type = "text" class = "number-box" id = "crossings">
-        Abstractions <input type = "text" class = "number-box" id = "abstractions">
-        Applications <input type = "text" class = "number-box" id = "applications">
-        Variables <input type = "text" class = "number-box" id = "variables">
-        &beta;-redexes<input type = "text" class = "number-box" id = "betas">
+        <h3 id="filtering-options">Filtering options</h3>
+        Crossings <input type="text" class="number-box" id="crossings">
+        Abstractions <input type="text" class="number-box" id="abstractions">
+        Applications <input type="text" class="number-box" id="applications">
+        Variables <input type="text" class="number-box" id="variables">
+        &beta;-redexes<input type="text" class="number-box" id="betas">
         Sort <select id="sort">
             <option value=0>Default</value>
             <option value=1>Crossings: High-Low</value>
             <option value=2>Crossings: Low-High</value>
             <option value=3>Beta-redexes: High-Low</value>
             <option value=4>Beta-redexes: Low-High</value>
-        <select>
-        <button type = "button" id = "sort-btn" onclick = 'filterAndSortButton()' disabled>Filter and sort</button>
+                <select>
+                    <button type="button" id="sort-btn" onclick='filterAndSortButton()' disabled>Filter and
+                        sort</button>
 
-        <b><p id = "number-of-terms"></p></b>
-        <b><p id = "help"></p></b>
+                    <b>
+                        <p id="number-of-terms"></p>
+                    </b>
+                    <b>
+                        <p id="help"></p>
+                    </b>
 
-        <p id = "church-room"></p>
-        <p id = "normalisation-studio"></p>
+                    <p id="church-room"></p>
+                    <p id="normalisation-studio"></p>
     </div>
 
-    <script src = "src/definition.js"></script>
-    <script src = "src/parser.js"></script>
-    <script src = "src/cytoscape.min.js"></script>
-    <script src = "src/graph.js"></script>
-    <script src = "src/html.js"></script>
-    <script src = "src/sharedFunctions.js"></script>
-    <script src = "src/galleryFunctions.js"></script>
-    <script src = "src/evaluator.js"></script>
-    <script src = "src/generator.js"></script>
+    <script src="src/definition.js"></script>
+    <script src="src/parser.js"></script>
+    <script src="src/cytoscape.min.js"></script>
+    <script src="src/graph.js"></script>
+    <script src="src/html.js"></script>
+    <script src="src/sharedFunctions.js"></script>
+    <script src="src/galleryFunctions.js"></script>
+    <script src="src/evaluator.js"></script>
+    <script src="src/generator.js"></script>
 
 </body>
-</html> 
+
+</html>
