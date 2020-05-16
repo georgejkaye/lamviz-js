@@ -38,11 +38,26 @@ var activeRedex = -1;
  *  @param {string} text - The text to parse.
  *  @return {number} the integer from the text, or -1 if not an integer.
  */
-function parseIntOrEmpty(text){
+function parseIntOrEmpty(text) {
 
     var int = parseInt(text);
-    
+
     return (isNaN(int) ? -1 : int);
+}
+
+function arraysEqual(a1, a2) {
+
+    if (a1.length !== a2.length) {
+        return false;
+    }
+
+    for (var i = 0; i < a1.length; i++) {
+        if (a1[i] !== a2[i]) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 /**
@@ -52,45 +67,45 @@ function parseIntOrEmpty(text){
  * @param {number} exhibit - The exhibit the stats are being displayed in.
  * @return {string} The HTML table code for the stats.
  */
-function getStats(currentTerm, labels){
+function getStats(currentTerm, labels) {
 
     var selectDisabled = "";
 
-    if(normalForm){
+    if (normalForm) {
         selectDisabled = "disabled";
     }
 
     return getRow(getCell("term-heading", '<b id = "term-name">' + printTermHTML(currentTerm, false) + '</b>')) +
-            getRow(getCell("term-subheading", '<b id = "term-name-bruijn">' + printTermHTML(currentTerm, true) + '</b>')) +
-            getRow(getCell("term-fact", 'Subterms: ' + currentTerm.subterms())) +
-            getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
-            getRow(getCell("term-fact", 'Abstractions: ' + currentTerm.abstractions())) +
-            getRow(getCell("term-fact", 'Applications: ' + currentTerm.applications())) +
-            getRow(getCell("term-fact", 'Total variables: ' + currentTerm.variables())) +
-            getRow(getCell("term-fact", 'Unique variables: ' + currentTerm.uniqueVariables())) +
-            getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
-            getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
-            getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(freeVariables), "redex", "clickRedexOnclick(i,)", "highlightRedexMouseover(i, true)", "unhighlightRedexMouseover(i, true)"))) +
-            getRow(getCell("border-top", getP("", "", "", "", getRadioButton("yes-labels", "labels", "yes-labels", "updateLabels(true)", labels, "Show labels") + getRadioButton("no-labels", "labels", "no-labels", "updateLabels(false)", !labels, "No labels")))) +
-            getRow(getCell("", getButton("fullScreen-btn", "fullScreenMapButton();", "Full screen", false) +
-                                getButton("reset-btn", "resetViewButton();", "Reset view", false) +
-                                getButton("reset-btn", "resetButton();", "Reset to original term", !reduced) + 
-                                getButton("export-btn", "exportButton(true)", "Export map", false)
-            )) +
-            getRow(getCell("", getButton("normalise-btn", "normaliseButton()", "Normalise", normalForm) + getButton("watch-reduction-btn", "playReduction()", "Watch normalisation", normalForm) +
-                                '<select ' + selectDisabled + ' id="strategy">' +
-                                    "<option value=0>Outermost</value>" +
-                                    "<option value=1>Innermost</value>" +
-                                    "<option value=2>Random</value>" +
-                                "<select>" +
-                                getButton("stop-btn", "stopNormalisationPlayback()", "Stop", !reducing))) +
-            getRow(getCell("", getButton("back-btn", "backButton();", "Back", false))) +
-            getRow(getCell("", "<br>")) +
-            getRow(getCell("term-fact", "<b>Normalisation graph options<b>")) +
-            getRow(getCell("", 'Draw maps (very costly for large maps) <input type = "checkbox" id = "normalisation-maps" checked>')) +
-            getRow(getCell("", 'Draw arrows (very costly for large maps) <input type = "checkbox" id = "normalisation-arrows" checked>')) +
-            getRow(getCell("", 'Draw labels (can get cluttered for large maps) <input type = "checkbox" id = "normalisation-labels" checked>')) +
-            getRow(getCell("", getButton("norm-btn", "showNormalisationGraph()", "View normalisation graph", false)));
+        getRow(getCell("term-subheading", '<b id = "term-name-bruijn">' + printTermHTML(currentTerm, true) + '</b>')) +
+        getRow(getCell("term-fact", 'Subterms: ' + currentTerm.subterms())) +
+        getRow(getCell("term-fact", 'Crossings: ' + currentTerm.crossings())) +
+        getRow(getCell("term-fact", 'Abstractions: ' + currentTerm.abstractions())) +
+        getRow(getCell("term-fact", 'Applications: ' + currentTerm.applications())) +
+        getRow(getCell("term-fact", 'Total variables: ' + currentTerm.variables())) +
+        getRow(getCell("term-fact", 'Unique variables: ' + currentTerm.uniqueVariables())) +
+        getRow(getCell("term-fact", 'Free variables: ' + currentTerm.freeVariables())) +
+        getRow(getCell("term-fact", 'Beta redexes: ' + currentTerm.betaRedexes())) +
+        getRow(getCell("term-fact", bulletsOfArray(currentTerm.printRedexes(freeVariables), "redex", "clickRedexOnclick(i,)", "highlightRedexMouseover(i, true)", "unhighlightRedexMouseover(i, true)"))) +
+        getRow(getCell("border-top", getP("", "", "", "", getRadioButton("yes-labels", "labels", "yes-labels", "updateLabels(true)", labels, "Show labels") + getRadioButton("no-labels", "labels", "no-labels", "updateLabels(false)", !labels, "No labels")))) +
+        getRow(getCell("", getButton("fullScreen-btn", "fullScreenMapButton();", "Full screen", false) +
+            getButton("reset-btn", "resetViewButton();", "Reset view", false) +
+            getButton("reset-btn", "resetButton();", "Reset to original term", !reduced) +
+            getButton("export-btn", "exportButton(true)", "Export map", false)
+        )) +
+        getRow(getCell("", getButton("normalise-btn", "normaliseButton()", "Normalise", normalForm) + getButton("watch-reduction-btn", "playReduction()", "Watch normalisation", normalForm) +
+            '<select ' + selectDisabled + ' id="strategy">' +
+            "<option value=0>Outermost</value>" +
+            "<option value=1>Innermost</value>" +
+            "<option value=2>Random</value>" +
+            "<select>" +
+            getButton("stop-btn", "stopNormalisationPlayback()", "Stop", !reducing))) +
+        getRow(getCell("", getButton("back-btn", "backButton();", "Back", false))) +
+        getRow(getCell("", "<br>")) +
+        getRow(getCell("term-fact", "<b>Normalisation graph options<b>")) +
+        getRow(getCell("", 'Draw maps (very costly for large maps) <input type = "checkbox" id = "normalisation-maps" checked>')) +
+        getRow(getCell("", 'Draw arrows (very costly for large maps) <input type = "checkbox" id = "normalisation-arrows" checked>')) +
+        getRow(getCell("", 'Draw labels (can get cluttered for large maps) <input type = "checkbox" id = "normalisation-labels" checked>')) +
+        getRow(getCell("", getButton("norm-btn", "showNormalisationGraph()", "View normalisation graph", false)));
 }
 
 /**
@@ -101,14 +116,14 @@ function getStats(currentTerm, labels){
  * @param {boolean} fullscreen - If the map should be drawn fullscreen.
  * @param {number} i - The id of the portrait to draw.
  */
-function viewPortrait(exhibitName, term, label, full, i){
+function viewPortrait(exhibitName, term, label, full, i) {
 
     exhibit = exhibitName;
     bigScreen = full;
 
     currentTerm = term;
 
-    if(i === undefined){
+    if (i === undefined) {
         i = 0;
     }
 
@@ -116,40 +131,40 @@ function viewPortrait(exhibitName, term, label, full, i){
 
     currentFrame = i;
 
-    if(!bigScreen){
+    if (!bigScreen) {
         changeText(exhibit, '<table>' +
-                                        '<tr>' +
-                                            '<td>' + getDiv("w3-container frame big-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
-                                            '<td>' +
-                                                '<table>' + 
-                                                    getStats(currentTerm, label) +   
-                                                '</table>' +
-                                            '</td>' +
-                                        '</tr>' +
-                                    '</table>'
+            '<tr>' +
+            '<td>' + getDiv("w3-container frame big-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + i, "", "", "")) + '</td>' +
+            '<td>' +
+            '<table>' +
+            getStats(currentTerm, label) +
+            '</table>' +
+            '</td>' +
+            '</tr>' +
+            '</table>'
         )
     } else {
         changeText(exhibit, getDiv("w3-container frame full-frame", "frame" + currentFrame, "", "", getDiv("w3-container portrait", "portrait" + currentFrame, "", "", "")) + '<br>' +
-                            getSpan("term-heading", "term-name", "", "", "<b>" + printTermHTML(currentTerm, false) + "</b>&ensp;") + getSpan("term-subheading", "", "", "", "<b>" + printTermHTML(currentTerm, true) + "</b>") +                    
-                            getDiv("","","","", getButton("fullScreen-btn", "exitFullScreenMapButton(\'" + exhibit + "\');", "Exit full screen") +
-                            getButton("watch-reduction-btn", "playReduction()", "Watch normalisation") +
-                            '<select id="strategy">' +
-                                "<option value=0>Outermost</value>" +
-                                "<option value=1>Innermost</value>" +
-                                "<option value=2>Random</value>" +
-                            "<select>" +
-                            getButton("normalise-button", "normaliseButton()", "Normalise") +
-                            getButton("reset-button", "resetViewButton()", "Reset to original view") +
-                            getButton("reset-view-button", "resetButton()", "Reset to original term") + 
-                            getRadioButton("yes-labels", "labels", "yes-labels", "updateLabels(true)", label, "Show labels") + 
-                            getRadioButton("no-labels", "labels", "no-labels", "updateLabels(false)", !label, "No labels"))
+            getSpan("term-heading", "term-name", "", "", "<b>" + printTermHTML(currentTerm, false) + "</b>&ensp;") + getSpan("term-subheading", "", "", "", "<b>" + printTermHTML(currentTerm, true) + "</b>") +
+            getDiv("", "", "", "", getButton("fullScreen-btn", "exitFullScreenMapButton(\'" + exhibit + "\');", "Exit full screen") +
+                getButton("watch-reduction-btn", "playReduction()", "Watch normalisation") +
+                '<select id="strategy">' +
+                "<option value=0>Outermost</value>" +
+                "<option value=1>Innermost</value>" +
+                "<option value=2>Random</value>" +
+                "<select>" +
+                getButton("normalise-button", "normaliseButton()", "Normalise") +
+                getButton("reset-button", "resetViewButton()", "Reset to original view") +
+                getButton("reset-view-button", "resetButton()", "Reset to original term") +
+                getRadioButton("yes-labels", "labels", "yes-labels", "updateLabels(true)", label, "Show labels") +
+                getRadioButton("no-labels", "labels", "no-labels", "updateLabels(false)", !label, "No labels"))
         );
     }
 
     var map = drawMap('portrait' + currentFrame, currentTerm, freeVariables, true, true, label);
     cyMapCurrent = map[0];
     cyMapWidthCurrent = map[1];
-    
+
     scrollToElement("church-room");
 }
 
@@ -157,16 +172,16 @@ function viewPortrait(exhibitName, term, label, full, i){
  * Find out if labels should be shown on the drawn map.
  * @return {boolean} if labels should be shown on the drawn map.
  */
-function showLabels(){
+function showLabels() {
     return document.getElementById('yes-labels').checked;
 }
 
 /**
  * Function to execute when the reset button is pressed.
  */
-function resetButton(){
+function resetButton() {
 
-    if(reduced){
+    if (reduced) {
         currentTerm = originalTerm;
         reduced = false;
         viewPortrait(exhibit, currentTerm, showLabels(), bigScreen, currentFrame);
@@ -176,7 +191,7 @@ function resetButton(){
 /**
  * Function to execute when the reset view button is pressed.
  */
-function resetViewButton(){
+function resetViewButton() {
     viewPortrait(exhibit, currentTerm, showLabels(), bigScreen, currentFrame);
 }
 
@@ -184,12 +199,12 @@ function resetViewButton(){
  * Function to execute when the export button is pressed.
  * @param {boolean} map - Whether to export the map or the normalisation graph
  */
-function exportButton(map){
+function exportButton(map) {
 
     var scale = 1;
     var png64;
 
-    if(map){
+    if (map) {
         scale = 5000 / cyMapWidthCurrent;
         png64 = cyMapCurrent.png({
             bg: '#fff',
@@ -214,8 +229,8 @@ function exportButton(map){
  * Highlight a redex from a mouseover, providing a reduction animation is not playing.
  * @param {number} i - The redex to highlight.
  */
-function highlightRedexMouseover(i){
-    if(!reducing){
+function highlightRedexMouseover(i) {
+    if (!reducing) {
         highlightRedex(i);
     }
 }
@@ -225,11 +240,11 @@ function highlightRedexMouseover(i){
  * @param {number} i - The index to get a colour from.
  * @return {string} The corresponding colour.
  */
-function getColour(i){
-    
+function getColour(i) {
+
     var colour = "";
 
-    switch(i % 5){
+    switch (i % 5) {
         case 0:
             colour += "red";
             break;
@@ -254,7 +269,7 @@ function getColour(i){
  * Highlight a redex.
  * @param {number} i - The redex to highlight.
  */
-function highlightRedex(i){
+function highlightRedex(i) {
 
     var colour = getColour(i);
     setStyleSpan("beta-" + i, "color:" + colour);
@@ -266,8 +281,8 @@ function highlightRedex(i){
  * Unhighlight an already highlighted redex from a mouseover, providing an animation is not taking place.
  * @param {number} i - The redex to unhighlight.
  */
-function unhighlightRedexMouseover(i){
-    if(!reducing){
+function unhighlightRedexMouseover(i) {
+    if (!reducing) {
         unhighlightRedex(i);
     }
 }
@@ -276,8 +291,8 @@ function unhighlightRedexMouseover(i){
  * Unhighlight an already highlighted redex.
  * @param {number} i - The redex to unhighlight.
  */
-function unhighlightRedex(i){
-    
+function unhighlightRedex(i) {
+
     var colour = getColour(i);
     setStyleSpan("beta-" + i, "color:black");
     toggleHighlight(false, "beta-" + i, colour);
@@ -286,11 +301,11 @@ function unhighlightRedex(i){
 /**
  * Function to execute when you click a redex, providing an animation is not playing.
  */
-function clickRedexOnclick(i){
-    if(!reducing){
+function clickRedexOnclick(i) {
+    if (!reducing) {
         reducing = true;
         clickRedex(i);
-        setTimeout(function(){
+        setTimeout(function () {
             reducing = false;
         }, 1750);
     }
@@ -300,22 +315,22 @@ function clickRedexOnclick(i){
  * Reduce one of the redexes.
  * @param {number} i - The redex clicked.
  */
-function clickRedex(i){
+function clickRedex(i) {
 
     performReductionAnimation(i);
- 
-    setTimeout(function(){
+
+    setTimeout(function () {
         var normalisedTerm = specificReduction(currentTerm, i)[0];
         normalisedTerm.generatePrettyVariableNames(freeVariables);
 
-        if(!reduced){
+        if (!reduced) {
             reduced = true;
             originalTerm = currentTerm;
         }
 
         currentTerm = normalisedTerm;
 
-        if(currentTerm.betaRedexes() === 0){
+        if (currentTerm.betaRedexes() === 0) {
             reducing = false;
         }
 
@@ -334,28 +349,28 @@ var stop = false;
  * @param {boolean} subcall - If this is a subcall.
  * @param {number} strat - The strat to use, if this is a subcall.
  */
-function playReduction(subcall, strat){
+function playReduction(subcall, strat) {
 
     scrollToElement("church-room");
     var redexes = currentTerm.betaRedexes();
     reducing = true;
 
-    if(!subcall){
+    if (!subcall) {
         stop = false;
     }
 
-    if(redexes !== 0 && !stop){
+    if (redexes !== 0 && !stop) {
 
         document.getElementById("stop-btn").disabled = false;
 
-        if(strat === undefined){
+        if (strat === undefined) {
             strat = document.getElementById("strategy").selectedIndex;
         }
 
         var chosenRedex = 0;
 
         /* The chosen redex depends on the reduction strategy */
-        switch(strat){
+        switch (strat) {
             case OUTERMOST:
                 chosenRedex = 0;
                 break;
@@ -370,22 +385,22 @@ function playReduction(subcall, strat){
         const shortDelay = 500;
         const longDelay = 2000;
 
-        if(subcall){
-            setTimeout(function(){
+        if (subcall) {
+            setTimeout(function () {
                 highlightRedex(chosenRedex);
-                setTimeout(function(){
+                setTimeout(function () {
                     clickRedex(chosenRedex);
-                    setTimeout(function(){
+                    setTimeout(function () {
                         playReduction(true, strat);
                     }, longDelay);
                 }, shortDelay);
             }, shortDelay);
 
-        } else {   
-            highlightRedex(chosenRedex);  
-            setTimeout(function(){
+        } else {
+            highlightRedex(chosenRedex);
+            setTimeout(function () {
                 clickRedex(chosenRedex);
-                setTimeout(function(){
+                setTimeout(function () {
                     playReduction(true, strat);
                 }, longDelay);
             }, shortDelay);
@@ -396,7 +411,7 @@ function playReduction(subcall, strat){
     }
 }
 
-function stopNormalisationPlayback(){
+function stopNormalisationPlayback() {
 
     stop = true;
     document.getElementById("stop-btn").disabled = true;
@@ -406,12 +421,12 @@ function stopNormalisationPlayback(){
 /**
  * Function to execute when the normalise button is pressed.
  */
-function normaliseButton(){
+function normaliseButton() {
 
     var normalisedTerm = normalise(currentTerm);
     normalisedTerm.generatePrettyVariableNames(freeVariables);
 
-    if(!reduced){
+    if (!reduced) {
         originalTerm = currentTerm;
         reduced = true;
     }
@@ -423,34 +438,34 @@ function normaliseButton(){
 /**
  * Function to execute when the full screen button is pressed.
  */
-function fullScreenMapButton(){
+function fullScreenMapButton() {
     viewPortrait(exhibit, currentTerm, showLabels(), true, currentFrame);
 }
 
 /**
  * Function to execute when the exit full screen button is pressed.
  */
-function exitFullScreenMapButton(){
+function exitFullScreenMapButton() {
     viewPortrait(exhibit, currentTerm, showLabels(), false, currentFrame);
 }
 
 /**
  * Show the normalisation graph for the current term.
  */
-function showNormalisationGraph(){
+function showNormalisationGraph() {
 
     currentReductions = new ReductionGraph(currentTerm);
 
     changeText('normalisation-studio', '<table>' +
-                                            '<tr>' +
-                                                '<td>' + 
-                                                    getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")) + 
-                                                '</td>' +
-                                                '<td id = "norm-graph-stats">' +
-                                                    getNormalisationGraphText(false) + 
-                                                '</td>'
+        '<tr>' +
+        '<td>' +
+        getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")) +
+        '</td>' +
+        '<td id = "norm-graph-stats">' +
+        getNormalisationGraphText(false) +
+        '</td>'
     );
-    
+
     var norm = drawNormalisationGraph("normalisation-graph", currentTerm, freeVariables, document.getElementById('normalisation-maps').checked, document.getElementById('normalisation-labels').checked, document.getElementById('normalisation-arrows').checked);
     cyNormCurrent = norm[0];
     cyNormHeightCurrent = norm[1];
@@ -465,37 +480,37 @@ function showNormalisationGraph(){
  * @param {boolean} pathStats - Whether to include the path stats.
  * @return {string} The text to accompany the normalisation graph.
  */
-function getNormalisationGraphText(pathStats){
+function getNormalisationGraphText(pathStats) {
 
     var pathStatsText = "";
 
-    if(pathStats){
+    if (pathStats) {
 
         var mean = currentReductions.meanPathToNormalForm();
 
-        if(typeof mean === "number"){
+        if (typeof mean === "number") {
             mean = mean.toFixed(2);
         }
 
         pathStatsText = getRow(getCell("term-fact", 'Total paths: ' + currentReductions.totalPathsToNormalForm())) +
-                        getRow(getCell("term-fact", 'Shortest path: ' + currentReductions.shortestPathToNormalForm())) +
-                        getRow(getCell("term-fact", 'Longest path: ' + currentReductions.longestPathToNormalForm())) +
-                        getRow(getCell("term-fact", 'Mean path: ' + mean)) + 
-                        getRow(getCell("term-fact", 'Median path: ' + currentReductions.medianPathToNormalForm())) + 
-                        getRow(getCell("term-fact", 'Mode path: ' + currentReductions.modePathToNormalForm()));
+            getRow(getCell("term-fact", 'Shortest path: ' + currentReductions.shortestPathToNormalForm())) +
+            getRow(getCell("term-fact", 'Longest path: ' + currentReductions.longestPathToNormalForm())) +
+            getRow(getCell("term-fact", 'Mean path: ' + mean)) +
+            getRow(getCell("term-fact", 'Median path: ' + currentReductions.medianPathToNormalForm())) +
+            getRow(getCell("term-fact", 'Mode path: ' + currentReductions.modePathToNormalForm()));
     } else {
-        pathStatsText = getRow(getCell("", getButton('show-stats-btn', 'showPathStatsButton()', "Calculate path statistics", false))) + 
-                            getRow(getCell("", "Generating the path stats can take a very long time for large graphs!"));
+        pathStatsText = getRow(getCell("", getButton('show-stats-btn', 'showPathStatsButton()', "Calculate path statistics", false))) +
+            getRow(getCell("", "Generating the path stats can take a very long time for large graphs!"));
     }
-    
-    return '<table>' + 
-                getRow(getCell("term-fact", 'Vertices: ' + currentReductions.vertices())) +
-                getRow(getCell("term-fact", 'Edges: ' + currentReductions.edges())) +
-                pathStatsText +
-                getRow(getCell("", getButton('fullscreen-norm-btn', 'fullScreenNormalisationGraphButton()', "Full screen", false))) +
-                getRow(getCell("", getButton('clear-norm-btn', 'clearNormalisationGraph()', "Back", false))) +
-                getRow(getCell("", getButton('export-norm-btn', 'exportButton(false)', "Export graph", false))) +
-           '</table>';
+
+    return '<table>' +
+        getRow(getCell("term-fact", 'Vertices: ' + currentReductions.vertices())) +
+        getRow(getCell("term-fact", 'Edges: ' + currentReductions.edges())) +
+        pathStatsText +
+        getRow(getCell("", getButton('fullscreen-norm-btn', 'fullScreenNormalisationGraphButton()', "Full screen", false))) +
+        getRow(getCell("", getButton('clear-norm-btn', 'clearNormalisationGraph()', "Back", false))) +
+        getRow(getCell("", getButton('export-norm-btn', 'exportButton(false)', "Export graph", false))) +
+        '</table>';
 }
 
 /**
@@ -503,7 +518,7 @@ function getNormalisationGraphText(pathStats){
  * @param {string} width - The style for the width.
  * @param {string} height - The style for the height.
  */
-function changeFrameSizeGraph(width, height){
+function changeFrameSizeGraph(width, height) {
     document.getElementById("normalisation-graph-frame").style.width = width;
     document.getElementById("normalisation-graph-frame").style.height = height;
     document.getElementById("normalisation-graph").style.width = "100%";
@@ -516,7 +531,7 @@ function changeFrameSizeGraph(width, height){
 /**
  * Function to execute when the show path stats button is pressed.
  */
-function showPathStatsButton(){
+function showPathStatsButton() {
 
     currentReductions.calculatePathStats();
     changeText("norm-graph-stats", getNormalisationGraphText(true));
@@ -526,10 +541,10 @@ function showPathStatsButton(){
 /**
  * Function to execute when the full screen normalisation graph button is pressed.
  */
-function fullScreenNormalisationGraphButton(){
+function fullScreenNormalisationGraphButton() {
 
     changeText('normalisation-studio', getDiv("w3-container frame graph-frame", "normalisation-graph-frame", "", "", getDiv("w3-container portrait", "normalisation-graph", "", "", "")) + '<br>' +
-                            getDiv("","","","", getButton("fullScreen-btn", "exitFullScreenNormalisationGraphButton();", "Exit full screen"))
+        getDiv("", "", "", "", getButton("fullScreen-btn", "exitFullScreenNormalisationGraphButton();", "Exit full screen"))
     );
 
     changeFrameSizeGraph(fullScreenWidth, fullScreenHeight);
@@ -539,14 +554,14 @@ function fullScreenNormalisationGraphButton(){
 /**
  * Function to execute when the exit full screen normalisation graph button is pressed.
  */
-function exitFullScreenNormalisationGraphButton(){
+function exitFullScreenNormalisationGraphButton() {
     showNormalisationGraph();
 }
 
 /**
  * Function to execute when the clear normalisation graph button is pressed.
  */
-function clearNormalisationGraph(){
+function clearNormalisationGraph() {
     changeText('normalisation-studio', "");
     scrollToElement('church-room');
 }

@@ -38,7 +38,14 @@ function generateTerms(n, k) {
 function generateTermsHelper(n, k, p) {
 
     if (memoisedTerms[n] != undefined && memoisedTerms[n][k.length] != undefined) {
-        return memoisedTerms[n][k.length];
+        var memo = memoisedTerms[n][k.length];
+
+        for (var i = 0; i < memo.length; i++) {
+            if (arraysEqual(memo[i][0], k)) {
+                console.log("memo!");
+                return [...memo[i][1]];
+            }
+        }
     }
 
     var terms = [];
@@ -85,7 +92,11 @@ function generateTermsHelper(n, k, p) {
         memoisedTerms[n] = [];
     }
 
-    memoisedTerms[n][k.length] = terms;
+    if (memoisedTerms[n][k.length] == undefined) {
+        memoisedTerms[n][k.length] = [];
+    }
+
+    memoisedTerms[n][k.length].push([k, [...terms]]);
 
     return terms;
 
@@ -94,7 +105,7 @@ function generateTermsHelper(n, k, p) {
 
 var memoisedPlanarTerms = [
     []
-]
+];
 
 /**
  * Generate all planar lambda terms with a given number of subterms and free variables.
@@ -124,8 +135,32 @@ function generatePlanarTerms(n, k) {
 function generatePlanarTermsHelper(n, k) {
 
     if (memoisedPlanarTerms[n] != undefined && memoisedPlanarTerms[n][k.length] != undefined) {
-        console.log("memo!");
-        return memoisedPlanarTerms[n][k.length];
+        var memo = memoisedPlanarTerms[n][k.length];
+
+        for (var i = 0; i < memo.length; i++) {
+            if (arraysEqual(memo[i][0], k)) {
+                console.log("memo!");
+                return [...memo[i][1]];
+            }
+        }
+
+        /*var memoVars = memo[0][0];
+        var memoTerms = memo[0][1];
+        var newTerms = [];
+
+        for (var i = 0; i < memoTerms.length; i++) {
+            var workingTerm = memoTerms[i];
+
+            for (var j = 0; j < k.length; j++) {
+                var newTerm = substituteVariable(k[j], memoVars[j], workingTerm);
+                newTerms.push(newTerm);
+            }
+
+        }
+
+        memo[memo.length] = [k, [...newTerms]];
+        return newTerms;*/
+
     } else {
         console.log("no memo");
     }
@@ -179,7 +214,11 @@ function generatePlanarTermsHelper(n, k) {
         memoisedPlanarTerms[n] = [];
     }
 
-    memoisedPlanarTerms[n][k.length] = terms;
+    if (memoisedPlanarTerms[n][k.length] == undefined) {
+        memoisedPlanarTerms[n][k.length] = [];
+    }
+
+    memoisedPlanarTerms[n][k.length].push([k, [...terms]]);
     return terms;
 
 }
@@ -216,7 +255,14 @@ function generateLinearTerms(n, k) {
 function generateLinearTermsHelper(n, k) {
 
     if (memoisedLinearTerms[n] != undefined && memoisedLinearTerms[n][k.length] != undefined) {
-        return memoisedLinearTerms[n][k.length];
+        var memo = memoisedLinearTerms[n][k.length];
+
+        for (var i = 0; i < memo.length; i++) {
+            if (arraysEqual(memo[i][0], k)) {
+                console.log("memo!");
+                return [...memo[i][1]];
+            }
+        }
     }
 
     var terms = [];
@@ -274,7 +320,11 @@ function generateLinearTermsHelper(n, k) {
         memoisedLinearTerms[n] = [];
     }
 
-    memoisedLinearTerms[n][k.length] = terms;
+    if (memoisedLinearTerms[n][k.length] == undefined) {
+        memoisedLinearTerms[n][k.length] = [];
+    }
+
+    memoisedLinearTerms[n][k.length].push([k, [...terms]]);
     return terms;
 
 }
