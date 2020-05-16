@@ -296,6 +296,10 @@ function drawGallery(prev) {
                     subcaption += "&beta; " + workingTerm.betaRedexes()
                 }
 
+                if (subcaption != "") {
+                    subcaption = "<br>" + subcaption;
+                }
+
                 var subcaptionSpan = getSpan("subcaption", "portrait-subcaption-" + portraitCount, "", "", subcaption);
 
                 var caption = getSpan("caption", "portrait-caption-" + portraitCount, "font-size:" + size + "%", "", termName);
