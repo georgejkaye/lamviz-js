@@ -8,8 +8,10 @@ interface StageProps {
 
 export default function Stage(props: StageProps) {
 
+    const term = useSelector((state: RootState) => state.currentState).currentTerm
+
     return (
         <div className="stage">
-            This is the stage
+            This is the stage, drawing {term}
         </div>)
 }

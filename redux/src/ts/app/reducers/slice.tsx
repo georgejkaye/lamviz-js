@@ -19,11 +19,11 @@ export const slice = createSlice({
     reducers: {
         changeMode: (state, action: PayloadAction<Mode>) =>
             state = { ...state, mode: action.payload },
-        drawTerm: (state, action: PayloadAction<string>) =>
+        newTerm: (state, action: PayloadAction<string>) =>
             state = { ...state, currentInput: action.payload },
     }
 })
 
-export const { changeMode, drawTerm } = slice.actions
+export const { changeMode, newTerm } = slice.actions
 
 export default slice.reducer
