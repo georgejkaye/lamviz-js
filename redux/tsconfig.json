@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "allowJs": true,
         "jsx": "react",
         "module": "commonjs",
         "noImplicitAny": true,
@@ -12,5 +13,6 @@
         "esModuleInterop": true,
         "resolveJsonModule": true,
     },
-    "include": ["./src/**/*"]
+    "include": ["./src/**/*"],
+    "typings": "src/tc/types.d.ts"
 }
