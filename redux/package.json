@@ -28,6 +28,7 @@
     "@types/webpack": "^4.41.22",
     "@types/webpack-dev-server": "^3.11.0",
     "awesome-typescript-loader": "^5.2.1",
+    "bs-platform": "^8.3.1",
     "classnames": "^2.2.6",
     "css-loader": "^4.2.2",
     "cytoscape": "3.2.19",

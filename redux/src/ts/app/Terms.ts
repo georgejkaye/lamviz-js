@@ -41,6 +41,7 @@ export interface Term {
 
 }
 
+/*
 class LambdaVariable implements Term {
 
     type = Type.VAR
@@ -145,4 +146,4 @@ class LambdaAbstraction implements Term {
     betaRedexes = () => this.t.betaRedexes()
     isClosed = (ctx: Context) => this.t.isClosed(ctx) || this.t.freeVariableIndices().filter((x) => x !== 0) === []
 
-}
+}*/

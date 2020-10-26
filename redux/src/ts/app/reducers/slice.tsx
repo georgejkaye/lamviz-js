@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { Term, Mode } from "./../Types"
+import { Mode } from "./../Types"
+import { Term } from "./../Terms"
 
 interface State {
     mode: Mode,
