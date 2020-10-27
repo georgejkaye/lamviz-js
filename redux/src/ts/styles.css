@@ -96,7 +96,13 @@ a {
     background-color: #bd93f9
 }
 
-.inactive-tab {}
+.inactive-tab {
+    transition: 0.2s
+}
+
+.inactive-tab:hover {
+    background-color: #bd93f9
+}
 
 .ReactCollapse--collapse {
     transition: height 500ms;
@@ -109,4 +115,17 @@ a {
 
 .credit {
     font-style: italic;
+}
+
+button {
+    border: none;
+    outline: none;
+    padding: 10px;
+    margin: 0px 5px;
+    cursor: pointer;
+    transition-duration: 0.3s;
+}
+
+button:hover {
+    background-color: #bd93f9;
 }

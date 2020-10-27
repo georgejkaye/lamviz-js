@@ -32,10 +32,12 @@ export const slice = createSlice({
         newTerm: (state, action: PayloadAction<[string, string, Term]>) =>
             state = { ...state, currentTermText: action.payload[0], currentContextText: action.payload[1], currentTerm: action.payload[2], error: "" },
         newError: (state, action: PayloadAction<string>) =>
-            state = { ...state, error: action.payload }
+            state = { ...state, error: action.payload },
+        reset: (state) =>
+            state = { ...state, currentTermText: "", currentContextText: "", currentTerm: undefined, error: "" }
     },
 })
 
-export const { changeMode, newTerm, newError } = slice.actions
+export const { changeMode, newTerm, newError, reset } = slice.actions
 
 export default slice.reducer
