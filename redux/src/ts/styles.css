@@ -56,6 +56,10 @@ a {
     margin-top: 15px;
 }
 
+.sidebar-text {
+    padding: 0px 10px;
+}
+
 .example {
     text-align: center;
 }
@@ -101,4 +105,8 @@ a {
 .error {
     padding: 10px 0px;
     background-color: darkred;
+}
+
+.credit {
+    font-style: italic;
 }
