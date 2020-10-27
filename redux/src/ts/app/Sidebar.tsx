@@ -46,11 +46,9 @@ export default function Sidebar() {
 
     const generateButton = () => {
         if (termText != "") {
-            console.log(termText)
-
             try {
-                let term = lex_and_parse(termText, contextText)
-                dispatch(newTerm([termText, contextText, term]))
+                let [term, context] = lex_and_parse(termText, contextText)
+                dispatch(newTerm([termText, contextText, term, context]))
             } catch (e) {
                 dispatch(newError(e._1))
             }
@@ -75,7 +73,7 @@ export default function Sidebar() {
                 <div>This project was first developed as my dissertation from my undergraduate project supervised by <a href="https://noamz.org">Noam Zeilberger</a>, and later improved in my spare time. If you're interested in the maths behind this, you can read <a href="http://noamz.org/papers/trivalinlam-jfp-final.pdf">this paper</a> by Noam.</div>
             </div>
             <div className="sidebar-content sidebar-text">
-                <div className="credit">Graph drawing using <a href="https://js.cytoscape.org">Cytoscape.js</a>.</div>
+                <div className="credit">Graph drawing powered by <a href="https://js.cytoscape.org">Cytoscape.js</a>.</div>
                 <div className="credit">Parsing adapted from <a href="https://github.com/tadeuzagallo/lc-js">lc-js</a>.</div>
             </div>
             <div className="tabs">

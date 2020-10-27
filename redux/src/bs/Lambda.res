@@ -9,16 +9,17 @@
  *    - graph labels
  */
 
-type context = list<(string, string)>
+type context = list<string>
 
 let length = ctx => List.length(ctx)
-let pushTerm = (x, g, ctx) => list{(x, g), ...ctx}
+let pushTerm = (x, ctx) => list{x, ...ctx}
 let popTerm = ctx => {
   switch ctx {
   | list{} => list{}
   | list{_, ...ctx} => ctx
   }
 }
+let lookup = (ctx, i) => List.nth(i, ctx)
 
 /**
  * Lambda term type
@@ -42,18 +43,42 @@ let newApp = (t1, t2, alias) => App(t1, t2, alias)
  * @param x the level of the term we are at (for bracketing)
  * @return a pretty printed term
  */
-let rec prettyPrint' = (t, x) => {
+let rec prettyPrintDeBruijn' = (t, x) => {
   switch t {
   | Var(i, _) => string_of_int(i)
-  | Abs(t, _, _) => x == 0 ? `λ ${prettyPrint'(t, 0)}` : `(λ ${prettyPrint'(t, 0)})`
+  | Abs(t, _, _) =>
+    x == 0 ? `λ ${prettyPrintDeBruijn'(t, 0)}` : `(λ ${prettyPrintDeBruijn'(t, 0)})`
   | App(t1, t2, _) =>
     x == 0
       ? switch t1 {
-        | Abs(_, _, _) => prettyPrint'(t1, 1) ++ " " ++ prettyPrint'(t2, 1)
-        | _ => prettyPrint'(t1, 0) ++ " " ++ prettyPrint'(t2, 1)
+        | Abs(_, _, _) => prettyPrintDeBruijn'(t1, 1) ++ " " ++ prettyPrintDeBruijn'(t2, 1)
+        | _ => prettyPrintDeBruijn'(t1, 0) ++ " " ++ prettyPrintDeBruijn'(t2, 1)
         }
-      : "(" ++ prettyPrint'(t1, x) ++ " " ++ prettyPrint'(t2, x + 1) ++ ")"
+      : "(" ++ prettyPrintDeBruijn'(t1, x) ++ " " ++ prettyPrintDeBruijn'(t2, x + 1) ++ ")"
   }
 }
 
-let prettyPrint = t => prettyPrint'(t, 0)
+let prettyPrintDeBruijn = t => prettyPrintDeBruijn'(t, 0)
+
+let rec prettyPrint' = (t, ctx, x) => {
+  switch t {
+  | Var(i, "") => lookup(i, ctx)
+  | Var(i, a) => a
+  | Abs(t, y, "") => {
+      let ctx' = pushTerm(y, ctx)
+      let string = `λ${y}. ${prettyPrint'(t, ctx', 0)}`
+      x == 0 ? string : "(" ++ string ++ ")"
+    }
+  | Abs(t, x, a) => a
+  | App(t1, t2, "") =>
+    x == 0
+      ? switch t1 {
+        | Abs(_, _, _) => "(" ++ prettyPrint'(t1, ctx, 0) ++ ") " ++ prettyPrint'(t2, ctx, 1)
+        | _ => prettyPrint'(t1, ctx, 0) ++ " " ++ prettyPrint'(t2, ctx, 1)
+        }
+      : "(" ++ prettyPrint'(t1, ctx, x) ++ " " ++ prettyPrint'(t2, ctx, x)
+  | App(t1, t2, a) => a
+  }
+}
+
+let prettyPrint = (t, ctx) => prettyPrint'(t, ctx, 0)

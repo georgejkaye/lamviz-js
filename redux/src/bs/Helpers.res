@@ -1,5 +1,4 @@
 let rec split = (s, c) => {
-  Js.log(s)
   switch String.index(s, c) {
   | exception Not_found => list{s}
   | n =>

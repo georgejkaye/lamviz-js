@@ -2,7 +2,6 @@
 
 import * as Char from "../../node_modules/bs-platform/lib/es6/char.js";
 import * as List from "../../node_modules/bs-platform/lib/es6/list.js";
-import * as Lambda from "./Lambda.bs.js";
 import * as Helpers from "./Helpers.bs.js";
 import * as Caml_obj from "../../node_modules/bs-platform/lib/es6/caml_obj.js";
 import * as Pervasives from "../../node_modules/bs-platform/lib/es6/pervasives.js";
@@ -98,7 +97,6 @@ function lexer$prime(term, _i, _seen) {
       continue ;
     }
     if (seen !== "") {
-      console.log(seen);
       return {
               hd: /* ID */{
                 _0: seen
@@ -312,8 +310,10 @@ function lex_and_parse(term, context) {
   var lexed = lexer$prime(term, 0, "");
   var context$1 = Helpers.split(context, /* " " */32);
   var parsed = parse(context$1, lexed);
-  console.log(Lambda.prettyPrint(parsed));
-  return parsed;
+  return [
+          parsed,
+          context$1
+        ];
 }
 
 export {

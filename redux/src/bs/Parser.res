@@ -41,7 +41,6 @@ let rec lexer' = (term, i, seen) => {
       ? lexer'(term, i + 1, seen ++ Char.escaped(c))
       : seen != ""
       ? {
-        Js.log(seen)
         list{ID(seen), ...lexer'(term, i, "")}
       }
       : {
@@ -148,6 +147,5 @@ let lex_and_parse = (term, context) => {
   let lexed = lexer(term)
   let context = split(context, ' ')
   let parsed = parse(context, lexed)
-  Js.log(prettyPrint(parsed))
-  parsed
+  (parsed, context)
 }

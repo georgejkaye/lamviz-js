@@ -4,12 +4,9 @@ import * as List from "../../node_modules/bs-platform/lib/es6/list.js";
 
 var length = List.length;
 
-function pushTerm(x, g, ctx) {
+function pushTerm(x, ctx) {
   return {
-          hd: [
-            x,
-            g
-          ],
+          hd: x,
           tl: ctx
         };
 }
@@ -20,6 +17,10 @@ function popTerm(ctx) {
   } else {
     return /* [] */0;
   }
+}
+
+function lookup(ctx, i) {
+  return List.nth(i, ctx);
 }
 
 function newVar(i, alias) {
@@ -48,48 +49,104 @@ function newApp(t1, t2, alias) {
         };
 }
 
-function prettyPrint$prime(t, x) {
+function prettyPrintDeBruijn$prime(t, x) {
   switch (t.TAG | 0) {
     case /* Var */0 :
         return String(t._0);
     case /* Abs */1 :
         var t$1 = t._0;
         if (x === 0) {
-          return "λ " + prettyPrint$prime(t$1, 0);
+          return "λ " + prettyPrintDeBruijn$prime(t$1, 0);
         } else {
-          return "(λ " + prettyPrint$prime(t$1, 0) + ")";
+          return "(λ " + prettyPrintDeBruijn$prime(t$1, 0) + ")";
         }
     case /* App */2 :
         var t2 = t._1;
         var t1 = t._0;
         if (x !== 0) {
-          return "(" + prettyPrint$prime(t1, x) + " " + prettyPrint$prime(t2, x + 1 | 0) + ")";
+          return "(" + prettyPrintDeBruijn$prime(t1, x) + " " + prettyPrintDeBruijn$prime(t2, x + 1 | 0) + ")";
         }
         switch (t1.TAG | 0) {
           case /* Abs */1 :
-              return prettyPrint$prime(t1, 1) + " " + prettyPrint$prime(t2, 1);
+              return prettyPrintDeBruijn$prime(t1, 1) + " " + prettyPrintDeBruijn$prime(t2, 1);
           case /* Var */0 :
           case /* App */2 :
               break;
           
         }
-        return prettyPrint$prime(t1, 0) + " " + prettyPrint$prime(t2, 1);
+        return prettyPrintDeBruijn$prime(t1, 0) + " " + prettyPrintDeBruijn$prime(t2, 1);
         break;
     
   }
 }
 
-function prettyPrint(t) {
-  return prettyPrint$prime(t, 0);
+function prettyPrintDeBruijn(t) {
+  return prettyPrintDeBruijn$prime(t, 0);
+}
+
+function prettyPrint$prime(t, ctx, x) {
+  switch (t.TAG | 0) {
+    case /* Var */0 :
+        var a = t._1;
+        if (a === "") {
+          return List.nth(ctx, t._0);
+        } else {
+          return a;
+        }
+    case /* Abs */1 :
+        var a$1 = t._2;
+        var y = t._1;
+        if (a$1 !== "") {
+          return a$1;
+        }
+        var ctx$prime = {
+          hd: y,
+          tl: ctx
+        };
+        var string = "λ" + y + ". " + prettyPrint$prime(t._0, ctx$prime, 0);
+        if (x === 0) {
+          return string;
+        } else {
+          return "(" + string + ")";
+        }
+    case /* App */2 :
+        var a$2 = t._2;
+        var t2 = t._1;
+        var t1 = t._0;
+        if (a$2 !== "") {
+          return a$2;
+        }
+        if (x !== 0) {
+          return "(" + prettyPrint$prime(t1, ctx, x) + " " + prettyPrint$prime(t2, ctx, x);
+        }
+        switch (t1.TAG | 0) {
+          case /* Abs */1 :
+              return "(" + prettyPrint$prime(t1, ctx, 0) + ") " + prettyPrint$prime(t2, ctx, 1);
+          case /* Var */0 :
+          case /* App */2 :
+              break;
+          
+        }
+        return prettyPrint$prime(t1, ctx, 0) + " " + prettyPrint$prime(t2, ctx, 1);
+        break;
+    
+  }
+}
+
+function prettyPrint(t, ctx) {
+  return prettyPrint$prime(t, ctx, 0);
 }
 
 export {
   length ,
   pushTerm ,
   popTerm ,
+  lookup ,
   newVar ,
   newAbs ,
   newApp ,
+  prettyPrintDeBruijn$prime ,
+  prettyPrintDeBruijn ,
   prettyPrint$prime ,
   prettyPrint ,
   

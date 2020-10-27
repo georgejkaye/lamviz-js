@@ -137,11 +137,32 @@ button:hover {
 
 .top-bar {
     background-color: #11152B;
-    font-size: 2em;
-    height: 1.75em;
+    font-size: 40px;
+    height: 50px;
     padding: 10px;
     width: calc(100vw - 420px);
-    overflow-x: scroll;
+    overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
+    padding-bottom: 20px;
+}
+
+.subtop-bar {
+    background-color: #11153B;
+    font-size: 15px;
+    height: 25px;
+    padding: 10px;
+    width: calc(100vw - 420px);
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+}
+
+.bottom-bar {
+    height: 15px;
+}
+
+.graph {
+    flex: 1;
+    background-color: #2444ff;
 }

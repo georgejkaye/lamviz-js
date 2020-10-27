@@ -7,7 +7,6 @@ import * as Caml_js_exceptions from "../../node_modules/bs-platform/lib/es6/caml
 function split(_s, c) {
   while(true) {
     var s = _s;
-    console.log(s);
     var exit = 0;
     var n;
     try {
