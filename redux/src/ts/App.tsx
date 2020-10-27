@@ -2,8 +2,6 @@ import React, { useEffect } from "react"
 import Sidebar from "./app/Sidebar"
 import Stage from "./app/Stage"
 
-import { App } from "../bs/Lambda.bs"
-
 let sidebarWidth: number = 600;
 
 export default function App() {
