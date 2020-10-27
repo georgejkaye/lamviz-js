@@ -1,6 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { Mode } from "./../Types"
-import { Term } from "./../Terms"
+
+import { Term, newVar, newAbs, newApp, prettyPrint } from "./../../../bs/Lambda.bs"
+
+let example = newApp(newAbs(newVar(0, ""), "x", ""), newVar(0, ""), "")
+console.log(prettyPrint(example, 0))
 
 interface State {
     mode: Mode,
