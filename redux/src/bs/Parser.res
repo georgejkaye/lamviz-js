@@ -1,4 +1,5 @@
 open Lambda
+open Helpers
 
 exception ParseError(string)
 
@@ -11,7 +12,7 @@ let token_type = token => {
   | LBRACKET => 2
   | RBRACKET => 3
   | DOT => 4
-  | ID(x) => 5
+  | ID(_) => 5
   | GARBAGE => 6
   }
 }
@@ -137,16 +138,16 @@ and atom = (ctx, tokens) => {
   }
 }
 
-let parse = tokens => {
-  let (result, tokens) = term(list{}, tokens)
+let parse = (context, tokens) => {
+  let (result, tokens) = term(context, tokens)
   let _ = match(EOF, tokens)
   result
 }
 
-let lex_and_parse = string => {
-  let lexed = lexer(string)
-  Js.log(lexed)
-  let parsed = parse(lexed)
-  Js.log(parsed)
-  Js.log(prettyPrint(parsed, 0))
+let lex_and_parse = (term, context) => {
+  let lexed = lexer(term)
+  let context = split(context, ' ')
+  let parsed = parse(context, lexed)
+  Js.log(prettyPrint(parsed))
+  parsed
 }

@@ -42,16 +42,18 @@ let newApp = (t1, t2, alias) => App(t1, t2, alias)
  * @param x the level of the term we are at (for bracketing)
  * @return a pretty printed term
  */
-let rec prettyPrint = (t, x) => {
+let rec prettyPrint' = (t, x) => {
   switch t {
   | Var(i, _) => string_of_int(i)
-  | Abs(t, _, _) => x == 0 ? `λ ${prettyPrint(t, 0)}` : `(λ ${prettyPrint(t, 0)})`
+  | Abs(t, _, _) => x == 0 ? `λ ${prettyPrint'(t, 0)}` : `(λ ${prettyPrint'(t, 0)})`
   | App(t1, t2, _) =>
     x == 0
       ? switch t1 {
-        | Abs(_, _, _) => prettyPrint(t1, 1) ++ " " ++ prettyPrint(t2, 1)
-        | _ => prettyPrint(t1, 0) ++ " " ++ prettyPrint(t2, 1)
+        | Abs(_, _, _) => prettyPrint'(t1, 1) ++ " " ++ prettyPrint'(t2, 1)
+        | _ => prettyPrint'(t1, 0) ++ " " ++ prettyPrint'(t2, 1)
         }
-      : "(" ++ prettyPrint(t1, x) ++ " " ++ prettyPrint(t2, x + 1) ++ ")"
+      : "(" ++ prettyPrint'(t1, x) ++ " " ++ prettyPrint'(t2, x + 1) ++ ")"
   }
 }
+
+let prettyPrint = t => prettyPrint'(t, 0)

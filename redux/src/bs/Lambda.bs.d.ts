@@ -3,7 +3,7 @@ declare module "Lambda.bs"
 export function newVar(i: number, alias: string): Term
 export function newAbs(t: Term, x: string, alias: string): Term
 export function newApp(t1: Term, t2: Term, alias: string): Term
-export function prettyPrint(t: any, x: number): string
+export function prettyPrint(t: any): string
 
 export type Var = {
     TAG: number,

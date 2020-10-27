@@ -16,23 +16,34 @@ export default function Sidebar() {
     const mode = useSelector((state: RootState) => state.currentState).mode
 
     const [exampleOpen, setExampleOpen] = useState(false)
-    const [text, setText] = useState("")
+    const [termText, setTermText] = useState("")
+    const [contextText, setContextText] = useState("")
 
     function setMode(mode: Mode) {
         dispatch(changeMode(mode))
     }
 
-    const handleChange = (event: React.ChangeEvent<any>) => {
-        setText(event.target.value)
+    const handleTermTextChange = (event: React.ChangeEvent<any>) => {
+        setTermText(event.target.value)
+    }
+
+    const handleContextTextChange = (event: React.ChangeEvent<any>) => {
+        setContextText(event.target.value)
     }
 
     const onKeyDown = (event: React.KeyboardEvent<any>) => {
 
         if (event.key === "Enter") {
 
-            console.log(text)
-            lex_and_parse(text)
-            dispatch(newTerm(text))
+            switch (mode) {
+                case Mode.VISUALISER:
+                    if (termText != "") {
+                        console.log(termText)
+                        dispatch(newTerm([termText, contextText]))
+                        break
+                    }
+            }
+
         }
     }
 
@@ -52,11 +63,11 @@ export default function Sidebar() {
             <div className="sidebar-content">
                 <div className="term">
                     <div className="textbox-label">Term</div>
-                    <input className="textbox" type="text" placeholder="\x.\y.\z. x (y z)..." onChange={handleChange} onKeyDown={onKeyDown}></input>
+                    <input className="textbox" type="text" placeholder="\x.\y.\z. x (y z)..." onChange={handleTermTextChange} onKeyDown={onKeyDown}></input>
                 </div>
                 <div className="context">
                     <div className="textbox-label">Context</div>
-                    <input className="textbox" type="text" placeholder="a b c..." onKeyDown={onKeyDown}></input>
+                    <input className="textbox" type="text" placeholder="a b c..." onChange={handleContextTextChange} onKeyDown={onKeyDown}></input>
                 </div>
             </div>
             <div className="sidebar-content"><button type="button">Execute</button><button type="button">Clear</button></div>

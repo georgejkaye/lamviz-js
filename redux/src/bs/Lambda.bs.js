@@ -48,35 +48,39 @@ function newApp(t1, t2, alias) {
         };
 }
 
-function prettyPrint(t, x) {
+function prettyPrint$prime(t, x) {
   switch (t.TAG | 0) {
     case /* Var */0 :
         return String(t._0);
     case /* Abs */1 :
         var t$1 = t._0;
         if (x === 0) {
-          return "λ " + prettyPrint(t$1, 0);
+          return "λ " + prettyPrint$prime(t$1, 0);
         } else {
-          return "(λ " + prettyPrint(t$1, 0) + ")";
+          return "(λ " + prettyPrint$prime(t$1, 0) + ")";
         }
     case /* App */2 :
         var t2 = t._1;
         var t1 = t._0;
         if (x !== 0) {
-          return "(" + prettyPrint(t1, x) + " " + prettyPrint(t2, x + 1 | 0) + ")";
+          return "(" + prettyPrint$prime(t1, x) + " " + prettyPrint$prime(t2, x + 1 | 0) + ")";
         }
         switch (t1.TAG | 0) {
           case /* Abs */1 :
-              return prettyPrint(t1, 1) + " " + prettyPrint(t2, 1);
+              return prettyPrint$prime(t1, 1) + " " + prettyPrint$prime(t2, 1);
           case /* Var */0 :
           case /* App */2 :
               break;
           
         }
-        return prettyPrint(t1, 0) + " " + prettyPrint(t2, 1);
+        return prettyPrint$prime(t1, 0) + " " + prettyPrint$prime(t2, 1);
         break;
     
   }
+}
+
+function prettyPrint(t) {
+  return prettyPrint$prime(t, 0);
 }
 
 export {
@@ -86,6 +90,7 @@ export {
   newVar ,
   newAbs ,
   newApp ,
+  prettyPrint$prime ,
   prettyPrint ,
   
 }

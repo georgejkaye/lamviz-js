@@ -3,6 +3,7 @@
 import * as Char from "../../node_modules/bs-platform/lib/es6/char.js";
 import * as List from "../../node_modules/bs-platform/lib/es6/list.js";
 import * as Lambda from "./Lambda.bs.js";
+import * as Helpers from "./Helpers.bs.js";
 import * as Caml_obj from "../../node_modules/bs-platform/lib/es6/caml_obj.js";
 import * as Pervasives from "../../node_modules/bs-platform/lib/es6/pervasives.js";
 import * as Caml_string from "../../node_modules/bs-platform/lib/es6/caml_string.js";
@@ -301,19 +302,18 @@ function atom(ctx, tokens) {
         ];
 }
 
-function parse(tokens) {
-  var match$1 = term(/* [] */0, tokens);
+function parse(context, tokens) {
+  var match$1 = term(context, tokens);
   match(/* EOF */0, match$1[1]);
   return match$1[0];
 }
 
-function lex_and_parse(string) {
-  var lexed = lexer$prime(string, 0, "");
-  console.log(lexed);
-  var parsed = parse(lexed);
-  console.log(parsed);
-  console.log(Lambda.prettyPrint(parsed, 0));
-  
+function lex_and_parse(term, context) {
+  var lexed = lexer$prime(term, 0, "");
+  var context$1 = Helpers.split(context, /* " " */32);
+  var parsed = parse(context$1, lexed);
+  console.log(Lambda.prettyPrint(parsed));
+  return parsed;
 }
 
 export {
