@@ -46,7 +46,7 @@ function index$prime(a, _xs, _n) {
     }
     throw {
           RE_EXN_ID: ParseError,
-          _1: "Variable not in context",
+          _1: "Variable not in context.",
           Error: new Error()
         };
   };
@@ -183,7 +183,7 @@ function match(token, tokens) {
   }
   throw {
         RE_EXN_ID: ParseError,
-        _1: "Unexpected token encountered",
+        _1: "Unexpected token encountered.",
         Error: new Error()
       };
 }
@@ -237,7 +237,7 @@ function application(ctx, tokens) {
   } else {
     throw {
           RE_EXN_ID: ParseError,
-          _1: "Unexpected character encountered!",
+          _1: "Unexpected character encountered.",
           Error: new Error()
         };
   }

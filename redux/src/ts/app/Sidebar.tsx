@@ -54,6 +54,8 @@ export default function Sidebar() {
             } catch (e) {
                 dispatch(newError(e._1))
             }
+        } else {
+            dispatch(newError("No term specified."))
         }
     }
 

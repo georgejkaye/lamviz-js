@@ -19,7 +19,7 @@ let token_type = token => {
 
 let rec index' = (a, xs, n) => {
   switch xs {
-  | list{} => raise(ParseError("Variable not in context"))
+  | list{} => raise(ParseError("Variable not in context."))
   | list{x, ...xs} => x == a ? n : index'(a, xs, n + 1)
   }
 }
@@ -80,7 +80,7 @@ let token = (token, tokens) => {
 
 /* Assert the next token has a given type, then skip it */
 let match = (token, tokens) => {
-  next(token, tokens) ? List.tl(tokens) : raise(ParseError("Unexpected token encountered"))
+  next(token, tokens) ? List.tl(tokens) : raise(ParseError("Unexpected token encountered."))
 }
 
 /* Skip the next token if it has a given type */
@@ -105,7 +105,7 @@ and application = (ctx, tokens) => {
   let (lhs, tokens) = atom(ctx, tokens)
 
   let lhs = switch lhs {
-  | None => raise(ParseError("Unexpected character encountered!"))
+  | None => raise(ParseError("Unexpected character encountered."))
   | Some(t) => t
   }
 

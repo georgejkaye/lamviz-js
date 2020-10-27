@@ -129,3 +129,19 @@ button {
 button:hover {
     background-color: #bd93f9;
 }
+
+.stage {
+    display: flex;
+    flex-direction: column;
+}
+
+.top-bar {
+    background-color: #11152B;
+    font-size: 2em;
+    height: 1.75em;
+    padding: 10px;
+    width: calc(100vw - 420px);
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+}

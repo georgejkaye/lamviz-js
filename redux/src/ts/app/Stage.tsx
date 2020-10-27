@@ -13,6 +13,9 @@ export default function Stage(props: StageProps) {
 
     return (
         <div className="stage">
-            This is the stage, drawing {term == undefined ? "none" : prettyPrint(term)}
+            <div className="top-bar">
+                {term == undefined ? "" : prettyPrint(term)}
+            </div>
+            <div className="graph"></div>
         </div>)
 }
