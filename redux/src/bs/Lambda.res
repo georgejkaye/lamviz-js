@@ -2,7 +2,26 @@
  * File containing definitions of the lambda terms
  */
 
-/* Lambda term type
+/**
+ * Context type
+ * Stores a list of variables on a stack with their
+ *    - term labels
+ *    - graph labels
+ */
+
+type context = list<(string, string)>
+
+let length = ctx => List.length(ctx)
+let pushTerm = (x, g, ctx) => list{(x, g), ...ctx}
+let popTerm = ctx => {
+  switch ctx {
+  | list{} => list{}
+  | list{x, ...ctx} => ctx
+  }
+}
+
+/**
+ * Lambda term type
  * Can be a
  *  - Variable : index * alias
  *  - Abstraction : subterm * initial label * alias
