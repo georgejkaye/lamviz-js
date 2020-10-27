@@ -1,3 +1,5 @@
+open Lambda
+
 type token = EOF | LAMBDA | LBRACKET | RBRACKET | DOT | ID(string) | GARBAGE
 
 let next_char = (s, i) => i < String.length(s) ? Some(String.get(s, i)) : None
@@ -29,3 +31,28 @@ let rec lexer' = (term, i, seen) => {
 }
 
 let lexer = term => lexer'(term, 0, "")
+
+let next = (token, tokens) => {
+  switch tokens {
+  | list{} => false
+  | list{t, ...ts} => t == token
+  }
+}
+
+let match = (token, tokens) => {
+  next(token, tokens) ? List.tl(tokens) : failwith("error!")
+}
+
+let skip = (token, tokens) => {
+  next(token, tokens) ? (true, List.tl(tokens)) : (false, tokens)
+  }
+}
+
+let rec term = (tokens, ctx) => {
+  switch tokens {
+  | list{LAMBDA, ...ts} => failwith("todo")
+  | ts => application(tokens, ctx)
+  }
+}
+and application = (tokens, ctx) => failwith("todo")
+and atom = (tokens, ctx) => failwith("todo")
