@@ -6,6 +6,7 @@ import { Mode } from "./Types"
 import { changeMode, newTerm } from "./reducers/slice"
 import { Collapse } from "react-collapse"
 import MathJax from "react-mathjax-ts"
+import { lex_and_parse } from "../../bs/Parser.bs";
 
 export default function Sidebar() {
 
@@ -30,6 +31,7 @@ export default function Sidebar() {
         if (event.key === "Enter") {
 
             console.log(text)
+            lex_and_parse(text)
             dispatch(newTerm(text))
         }
     }

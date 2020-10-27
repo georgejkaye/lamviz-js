@@ -16,7 +16,7 @@ let pushTerm = (x, g, ctx) => list{(x, g), ...ctx}
 let popTerm = ctx => {
   switch ctx {
   | list{} => list{}
-  | list{x, ...ctx} => ctx
+  | list{_, ...ctx} => ctx
   }
 }
 
