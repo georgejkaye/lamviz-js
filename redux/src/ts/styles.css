@@ -97,3 +97,8 @@ a {
 .ReactCollapse--collapse {
     transition: height 500ms;
 }
+
+.error {
+    padding: 10px 0px;
+    background-color: darkred;
+}

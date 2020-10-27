@@ -46,7 +46,7 @@ function index$prime(a, _xs, _n) {
     }
     throw {
           RE_EXN_ID: ParseError,
-          _1: "Parse error: Unexpected variable encountered",
+          _1: "Variable not in context",
           Error: new Error()
         };
   };

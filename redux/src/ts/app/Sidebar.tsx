@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { ModifierFlags } from "typescript";
 import { RootState } from "./reducers"
 import { Mode } from "./Types"
-import { changeMode, newTerm } from "./reducers/slice"
+import { changeMode, newTerm, newError } from "./reducers/slice"
 import { Collapse } from "react-collapse"
 import MathJax from "react-mathjax-ts"
 import { lex_and_parse } from "../../bs/Parser.bs";
@@ -14,6 +14,7 @@ export default function Sidebar() {
 
     const dispatch = useDispatch()
     const mode = useSelector((state: RootState) => state.currentState).mode
+    const error = useSelector((state: RootState) => state.currentState).error
 
     const [exampleOpen, setExampleOpen] = useState(false)
     const [termText, setTermText] = useState("")
@@ -39,7 +40,15 @@ export default function Sidebar() {
                 case Mode.VISUALISER:
                     if (termText != "") {
                         console.log(termText)
-                        dispatch(newTerm([termText, contextText]))
+
+                        try {
+                            let term = lex_and_parse(termText, contextText)
+                            dispatch(newTerm([termText, contextText, term]))
+                        } catch (e) {
+                            dispatch(newError(e._1))
+                        }
+
+
                         break
                     }
             }
@@ -61,6 +70,11 @@ export default function Sidebar() {
                 <span className={"tab " + (mode === Mode.GALLERY ? "active-tab" : "inactive-tab")} onClick={(e) => setMode(Mode.GALLERY)}>Gallery</span>
             </div>
             <div className="sidebar-content">
+                <Collapse isOpened={error != ""}>
+                    <div className="error">
+                        {error}
+                    </div>
+                </Collapse>
                 <div className="term">
                     <div className="textbox-label">Term</div>
                     <input className="textbox" type="text" placeholder="\x.\y.\z. x (y z)..." onChange={handleTermTextChange} onKeyDown={onKeyDown}></input>

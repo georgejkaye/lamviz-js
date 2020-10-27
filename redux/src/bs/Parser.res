@@ -19,7 +19,7 @@ let token_type = token => {
 
 let rec index' = (a, xs, n) => {
   switch xs {
-  | list{} => raise(ParseError("Parse error: Unexpected variable encountered"))
+  | list{} => raise(ParseError("Variable not in context"))
   | list{x, ...xs} => x == a ? n : index'(a, xs, n + 1)
   }
 }

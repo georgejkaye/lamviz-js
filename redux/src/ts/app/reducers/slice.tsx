@@ -11,14 +11,16 @@ interface State {
     mode: Mode,
     currentTermText: string,
     currentContextText: string,
-    currentTerm: Term
+    currentTerm: Term,
+    error: string
 }
 
 const initialState: State = {
     mode: Mode.VISUALISER,
     currentTermText: "",
     currentContextText: "",
-    currentTerm: undefined
+    currentTerm: undefined,
+    error: ""
 }
 
 export const slice = createSlice({
@@ -27,19 +29,13 @@ export const slice = createSlice({
     reducers: {
         changeMode: (state, action: PayloadAction<Mode>) =>
             state = { ...state, mode: action.payload },
-        newTerm(state, action: PayloadAction<[string, string]>) {
-            let termText = action.payload[0]
-            let contextText = action.payload[1]
-
-            let term = lex_and_parse(termText, contextText)
-
-            state.currentTermText = termText
-            state.currentContextText = contextText
-            state.currentTerm = term
-        },
-    }
+        newTerm: (state, action: PayloadAction<[string, string, Term]>) =>
+            state = { ...state, currentTermText: action.payload[0], currentContextText: action.payload[1], currentTerm: action.payload[2], error: "" },
+        newError: (state, action: PayloadAction<string>) =>
+            state = { ...state, error: action.payload }
+    },
 })
 
-export const { changeMode, newTerm } = slice.actions
+export const { changeMode, newTerm, newError } = slice.actions
 
 export default slice.reducer
