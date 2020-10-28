@@ -1,7 +1,7 @@
-*/node_modules/
-*/__pycache__
-*/.vscode/
-*/*.lock
-*/.merlin
-*/lib/
-*/*.bs.js
+**/node_modules/
+**/__pycache__
+**/.vscode/
+**/.bsb.lock
+**/.merlin
+**/lib/
+**/**/*.bs.js
