@@ -1,3 +1,8 @@
+let string = string_of_int
+let int = int_of_string
+
+let rec mod = (x, y) => x < y ? x : mod(x - y, y)
+
 let rec split = (s, c) => {
   switch String.index(s, c) {
   | exception Not_found => list{s}
@@ -7,6 +12,21 @@ let rec split = (s, c) => {
     | exception Invalid_argument(_) => list{m1}
     | m2 => m1 == "" ? split(m2, c) : list{m1, ...split(m2, c)}
     }
+  }
+}
+
+let rec index = (a, xs) => index'(a, xs, 0)
+and index' = (a, xs, n) => {
+  switch xs {
+  | list{} => raise(Not_found)
+  | list{x, ...xs} => x == a ? n : index'(a, xs, n + 1)
+  }
+}
+
+let rec contains = (a, xs) => {
+  switch xs {
+  | list{} => false
+  | list{x, ...xs} => x == a ? true : contains(a, xs)
   }
 }
 

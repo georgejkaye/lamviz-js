@@ -17,15 +17,6 @@ let token_type = token => {
   }
 }
 
-let rec index' = (a, xs, n) => {
-  switch xs {
-  | list{} => raise(ParseError("Variable not in context."))
-  | list{x, ...xs} => x == a ? n : index'(a, xs, n + 1)
-  }
-}
-
-let index = (a, xs) => index'(a, xs, 0)
-
 let token_cmp = (token1, token2) => token_type(token1) == token_type(token2)
 
 let next_char = (s, i) => i < String.length(s) ? Some(String.get(s, i)) : None
@@ -131,7 +122,10 @@ and atom = (ctx, tokens) => {
     (Some(term), tokens)
   } else if b2 {
     let (id, tokens) = token(ID(""), tokens)
-    (Some(Var(index(value(id), ctx), "")), tokens)
+    switch index(value(id), ctx) {
+    | x => (Some(Var(x, "")), tokens)
+    | exception Not_found => raise(ParseError("Unexpected variable encountered."))
+    }
   } else {
     (None, tokens)
   }
