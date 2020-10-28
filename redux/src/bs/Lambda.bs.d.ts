@@ -1,10 +1,17 @@
 
 declare module "Lambda.bs"
-export function newVar(i: number, alias: string): Term
-export function newAbs(t: Term, x: string, alias: string): Term
-export function newApp(t1: Term, t2: Term, alias: string): Term
 export function prettyPrint(t: Term, ctx: any): string
 export function prettyPrintDeBruijn(t: Term): string
+export function subterms(t: Term): number
+export function freeVariables(t: Term): number
+export function crossings(t: Term): number
+export function variables(t: Term): number
+export function abstractions(t: Term): number
+export function applications(t: Term): number
+export function betaRedexes(t: Term): number
+export function printRedexesArray(t: Term, ctx: any): string[]
+export function printHTML(t: Term, db: boolean, ctx: any): string
+export function refreshVariableNames(t: Term, ctx: any): [Term, any]
 
 export type Var = {
     TAG: number,

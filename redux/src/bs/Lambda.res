@@ -49,7 +49,7 @@ let rec refreshFreeVariableNames = ctx => refreshFreeVariableNames'(ctx, 0)
 and refreshFreeVariableNames' = (ctx, n) => {
   switch ctx {
   | list{} => list{}
-  | list{x, ...ctx} => list{getFreeVariableName(n), ...refreshFreeVariableNames'(ctx, n + 1)}
+  | list{_, ...ctx} => list{getFreeVariableName(n), ...refreshFreeVariableNames'(ctx, n + 1)}
   }
 }
 
@@ -102,13 +102,13 @@ let rec prettyPrint = (t, ctx) => prettyPrint'(t, ctx, 0)
 and prettyPrint' = (t, ctx, x) => {
   switch t {
   | Var(i, "") => lookup(ctx, i)
-  | Var(i, a) => a
+  | Var(_, a) => a
   | Abs(t, y, "") => {
       let ctx' = pushTerm(ctx, y)
       let string = `λ${y}. ${prettyPrint'(t, ctx', 0)}`
       x == 0 ? string : "(" ++ string ++ ")"
     }
-  | Abs(t, x, a) => a
+  | Abs(_, _, a) => a
   | App(t1, t2, "") =>
     x == 0
       ? switch t1 {
@@ -116,7 +116,7 @@ and prettyPrint' = (t, ctx, x) => {
         | _ => prettyPrint'(t1, ctx, 0) ++ " " ++ prettyPrint'(t2, ctx, 1)
         }
       : "(" ++ prettyPrint'(t1, ctx, x) ++ " " ++ prettyPrint'(t2, ctx, x)
-  | App(t1, t2, a) => a
+  | App(_, _, a) => a
   }
 }
 
@@ -223,8 +223,8 @@ and uniqueVariables' = (t, seen) => {
 let isBetaRedex = t => {
   switch t {
   | Var(_, _) => false
-  | Abs(t, _, _) => false
-  | App(t1, t2, _) =>
+  | Abs(_, _, _) => false
+  | App(t1, _, _) =>
     switch t1 {
     | Abs(_, _, _) => true
     | _ => false
@@ -240,7 +240,7 @@ let rec hasBetaRedex = t => {
   }
 }
 
-let rec hasBetaRedexInside = t => {
+let hasBetaRedexInside = t => {
   switch t {
   | Var(_, _) => false
   | Abs(t, _, _) => hasBetaRedex(t)
@@ -267,6 +267,8 @@ let rec printRedexes = (t, ctx) => {
     isBetaRedex(t) ? list{prettyPrint(t, ctx), ...redexes} : redexes
   }
 }
+
+let printRedexesArray = (t, ctx) => Array.of_list(printRedexes(t, ctx))
 
 let rec printHTML = (t, db, ctx) => printHTML'(t, db, ctx, 0, 0, 0, 0, 0)
 and printHTML' = (t, db, ctx, x, vars, abs, apps, betas) => {
@@ -295,7 +297,7 @@ and printHTML' = (t, db, ctx, x, vars, abs, apps, betas) => {
               let b1 = x == 0 ? "" : "("
               let b2 = x == 0 ? "" : ")"
               let n = db ? " " : l ++ ". "
-              b1 ++ "&lambda;" ++ n ++ b2
+              b1 ++ "&lambda;" ++ n ++ scope ++ b2
             }
 
       let string = "<span class = \"abs-" ++ string(abs) ++ "\">" ++ label ++ "</span>"
@@ -305,9 +307,9 @@ and printHTML' = (t, db, ctx, x, vars, abs, apps, betas) => {
       let bt1 = isBetaRedex(t) ? "id = \"beta-" ++ string(betas) ++ "\" " : ""
       let bt2 = isBetaRedex(t) ? " beta-" ++ string(betas) : ""
 
-      let label =
+      let (label, vars, abs, apps, betas) =
         a != ""
-          ? a
+          ? (a, vars, abs, apps, betas)
           : {
               let (y, z) =
                 x == 0
@@ -328,7 +330,9 @@ and printHTML' = (t, db, ctx, x, vars, abs, apps, betas) => {
                 betas,
               )
               let (rhs, vars, abs, apps, betas) = printHTML'(t2, db, ctx, z, vars, abs, apps, betas)
-              rhs
+              let b1 = x == 0 ? "" : "("
+              let b2 = x == 0 ? "" : ")"
+              (b1 ++ lhs ++ " " ++ rhs ++ b2, vars, abs, apps, betas)
             }
 
       let string =
