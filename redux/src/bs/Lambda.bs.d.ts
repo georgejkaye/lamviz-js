@@ -6,6 +6,7 @@ export function subterms(t: Term): number
 export function freeVariables(t: Term): number
 export function crossings(t: Term): number
 export function variables(t: Term): number
+export function uniqueVariables(t: Term): number
 export function abstractions(t: Term): number
 export function applications(t: Term): number
 export function betaRedexes(t: Term): number

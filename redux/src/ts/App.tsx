@@ -2,7 +2,7 @@ import React, { useEffect } from "react"
 import Sidebar from "./app/Sidebar"
 import Stage from "./app/Stage"
 
-let sidebarWidth: number = 600;
+let sidebarWidth: number = 400;
 
 export default function App() {
 

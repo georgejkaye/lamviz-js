@@ -27,7 +27,7 @@ a {
     margin: 0.5em 0;
     text-align: center;
     font-size: 2.5em;
-    background-color: #383a59;
+    background-color: #003459;
 }
 
 .sidebar {
@@ -36,7 +36,7 @@ a {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background-color: #383a59;
+    background-color: #00171F;
     overflow: hidden;
 }
 
@@ -93,15 +93,16 @@ a {
 }
 
 .active-tab {
-    background-color: #bd93f9
+    background-color: #00A8E8
 }
 
 .inactive-tab {
-    transition: 0.2s
+    transition: 0.2s;
+    background-color: #004D66;
 }
 
 .inactive-tab:hover {
-    background-color: #bd93f9
+    background-color: #00A8E8
 }
 
 .ReactCollapse--collapse {
@@ -136,7 +137,7 @@ button:hover {
 }
 
 .top-bar {
-    background-color: #11152B;
+    background-color: #003459;
     font-size: 40px;
     height: 50px;
     padding: 10px;
@@ -148,7 +149,7 @@ button:hover {
 }
 
 .subtop-bar {
-    background-color: #11153B;
+    background-color: #227DAA;
     font-size: 15px;
     height: 25px;
     padding: 10px;
@@ -164,5 +165,14 @@ button:hover {
 
 .graph {
     flex: 1;
-    background-color: #2444ff;
+    background-color: #9c9c9c
+}
+
+.main-stage {
+    display: flex;
+}
+
+.facts {
+    width: 300px;
+    background-color: #00171F
 }

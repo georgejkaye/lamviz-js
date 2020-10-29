@@ -115,7 +115,7 @@ and prettyPrint' = (t, ctx, x) => {
         | Abs(_, _, _) => "(" ++ prettyPrint'(t1, ctx, 0) ++ ") " ++ prettyPrint'(t2, ctx, 1)
         | _ => prettyPrint'(t1, ctx, 0) ++ " " ++ prettyPrint'(t2, ctx, 1)
         }
-      : "(" ++ prettyPrint'(t1, ctx, x) ++ " " ++ prettyPrint'(t2, ctx, x)
+      : "(" ++ prettyPrint'(t1, ctx, x) ++ " " ++ prettyPrint'(t2, ctx, x) ++ ")"
   | App(_, _, a) => a
   }
 }

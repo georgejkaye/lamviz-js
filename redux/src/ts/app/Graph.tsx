@@ -6,6 +6,7 @@ import CytoscapeComponent from "react-cytoscapejs"
 
 interface GraphProps {
     sidebarWidth: number,
+    barHeight: number
 }
 
 let elements: cytoscape.ElementDefinition[] = []
@@ -24,7 +25,7 @@ export default function Graph(props: GraphProps) {
     const dispatch = useDispatch();
 
     const [dimensions, setDimensions] = useState({
-        height: window.innerHeight,
+        height: window.innerHeight - props.barHeight,
         width: window.innerWidth - props.sidebarWidth,
     });
 
