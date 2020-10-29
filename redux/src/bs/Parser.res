@@ -60,7 +60,7 @@ let next = (token, tokens) => {
 let value = token => {
   switch token {
   | ID(x) => x
-  | _ => failwith("token has no value")
+  | _ => failwith("Missing variable name.")
   }
 }
 

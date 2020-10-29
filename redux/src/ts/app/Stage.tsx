@@ -7,7 +7,8 @@ import Facts from "./Facts";
 import Graph from "./Graph"
 
 interface StageProps {
-    sidebarWidth: number,
+    barWidth: number,
+    barHeight: number
 }
 
 enum VisualiserMode {
@@ -33,8 +34,8 @@ export default function Stage(props: StageProps) {
                         {term == undefined ? "" : prettyPrintDeBruijn(term)}
                     </div>
                 </Collapse >
-                <div className="main-stage" style={{ height: "calc(100vh - 160px)" }}>
-                    <Graph sidebarWidth={700} barHeight={140} />
+                <div className="main-stage" style={{ height: "calc(100vh - " + String(props.barHeight) + "px)" }}>
+                    <Graph barWidth={props.barWidth} barHeight={props.barHeight} />
                     <Facts />
                 </div>
             </Collapse>

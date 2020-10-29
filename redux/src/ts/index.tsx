@@ -9,7 +9,7 @@ import WebFont from 'webfontloader';
 
 WebFont.load({
     google: {
-        families: ['Montserrat:300,400,700', 'sans-serif']
+        families: ['Montserrat:300,400,700', 'Roboto Mono:300,400,700', 'sans-serif']
     }
 });
 

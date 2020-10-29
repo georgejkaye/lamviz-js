@@ -2,7 +2,8 @@ import React, { useEffect } from "react"
 import Sidebar from "./app/Sidebar"
 import Stage from "./app/Stage"
 
-let sidebarWidth: number = 400;
+let barWidth: number = 750
+let barHeight: number = 150
 
 export default function App() {
 
@@ -10,7 +11,7 @@ export default function App() {
         <div className="window">
             <div className="content">
                 <Sidebar />
-                <Stage sidebarWidth={sidebarWidth} />
+                <Stage barWidth={barWidth} barHeight={barHeight} />
             </div>
         </div>)
 }

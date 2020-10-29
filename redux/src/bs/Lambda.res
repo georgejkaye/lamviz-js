@@ -152,7 +152,7 @@ let rec freeVariableIndices = t => {
   }
 }
 
-let isClosed = t => freeVariables(t) == 0
+let closed = t => freeVariables(t) == 0
 
 let rec crossings = t => {
   switch t {
@@ -179,6 +179,19 @@ and crossings'' = (i, rhs) => {
   | list{x, ...xs} => i < x ? 1 + crossings''(i, xs) : crossings''(i, xs)
   }
 }
+
+let rec bridges = t => {
+  switch t {
+  | Var(_, _) => 0
+  | Abs(t, _, _) => closed(t) ? 1 + bridges(t) : bridges(t)
+  | App(t1, t2, _) =>
+    let t1b = closed(t1) ? 1 + bridges(t1) : bridges(t1)
+    let t2b = closed(t2) ? 1 + bridges(t2) : bridges(t2)
+    t1b + t2b
+  }
+}
+
+let bridgeless = t => bridges(t) == 0
 
 let rec variables = t => {
   switch t {
@@ -257,6 +270,9 @@ let rec betaRedexes = t => {
     n + betaRedexes(t1) + betaRedexes(t2)
   }
 }
+
+let linear = t => uniqueVariables(t) == variables(t)
+let planar = t => linear(t) && crossings(t) == 0
 
 let rec printRedexes = (t, ctx) => {
   switch t {

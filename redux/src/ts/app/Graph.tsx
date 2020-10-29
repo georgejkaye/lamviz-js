@@ -5,7 +5,7 @@ import { RootState } from "./reducers"
 import CytoscapeComponent from "react-cytoscapejs"
 
 interface GraphProps {
-    sidebarWidth: number,
+    barWidth: number,
     barHeight: number
 }
 
@@ -26,7 +26,7 @@ export default function Graph(props: GraphProps) {
 
     const [dimensions, setDimensions] = useState({
         height: window.innerHeight - props.barHeight,
-        width: window.innerWidth - props.sidebarWidth,
+        width: window.innerWidth - props.barWidth,
     });
 
     useEffect(() => {
@@ -38,8 +38,8 @@ export default function Graph(props: GraphProps) {
 
         const onResize = () => {
 
-            const height = window.innerHeight
-            const width = window.innerWidth - props.sidebarWidth
+            const height = window.innerHeight - props.barHeight
+            const width = window.innerWidth - props.barWidth
 
             setDimensions({
                 width: width,

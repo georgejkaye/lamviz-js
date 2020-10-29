@@ -173,6 +173,48 @@ button:hover {
 }
 
 .facts {
-    width: 300px;
-    background-color: #00171F
+    width: 350px;
+    background-color: #00171F;
+    font-family: 'Roboto Mono', monospace;
+}
+
+.fact {
+    display: flex;
+    font-size: 1.5em;
+    margin: 10px;
+
+}
+
+.fact-text {
+    flex: 1;
+    text-align: center;
+    margin-right: 25px;
+}
+
+.fact-symbol {
+    text-align: left;
+}
+
+.stats {
+    margin: 0px 10px;
+}
+
+.properties {
+    display: flex;
+}
+
+.property {
+    text-align: center;
+    flex: 1;
+    font-size: 1.5em;
+    margin: 10px 0px;
+}
+
+.yes {
+    color: greenyellow;
+}
+
+.no {
+    color: red;
+    text-decoration: line-through;
 }
