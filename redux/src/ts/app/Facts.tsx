@@ -8,6 +8,8 @@ import { Term } from "../../bs/Lambda.bs"
 
 import Up from "../../svgs/up-chevron.svg"
 import Down from "../../svgs/down-chevron.svg"
+import { normalise } from "../../bs/Evaluator.bs";
+import { newTerm, updateTerm, resetTerm } from "./reducers/slice";
 
 enum StatType {
     VARIABLES,
@@ -104,6 +106,7 @@ function toggleClassOnElement(className: string, on: boolean, newClass: string) 
 }
 
 function highlightRedex(i: number) {
+    console.log("highlighting", i)
     toggleClassOnElement("beta-" + i, true, "highlighted-redex")
 }
 
@@ -117,6 +120,11 @@ export default function Facts() {
     const ctx = useSelector((state: RootState) => state.currentState).currentContext
 
     const [betasOpen, setBetasOpen] = useState(false)
+
+    let dispatch = useDispatch()
+
+    const normaliseButton = (e: React.MouseEvent<any>) => dispatch(updateTerm(normalise(term)))
+    const resetButton = (e: React.MouseEvent<any>) => dispatch(resetTerm())
 
     return (term == undefined ? <div className="facts"></div> :
         <div className="facts">
@@ -139,7 +147,7 @@ export default function Facts() {
                 <StatBox term={term} stat={StatType.BRIDGES} />
             </div>
             <div className="betas-header" onClick={(e) => setBetasOpen(!betasOpen)}>
-                <div className="expand-arrow">{betaRedexes(term) > 0 ? <img src={betasOpen ? Up : Down} className="icon" alt={betasOpen ? "\u2191" : "\u2193"} /> : ""}</div>
+                <div className="expand-arrow"><img src={betasOpen ? Up : Down} className={"icon" + (betaRedexes(term) == 0 ? " hidden" : "")} alt={betasOpen ? "\u2191" : "\u2193"} /></div>
                 <div className="beta-text fact-text">Beta redexes</div>
                 <div className="fact-value">{String(betaRedexes(term))}</div>
             </div>
@@ -149,13 +157,18 @@ export default function Facts() {
                 </div>
             </Collapse>
             <div className="normalisation">
-                <button type="button">Normalise</button>
-                <button type="button">Watch normalisation</button>
-                <select name="strategy" id="strategy">
-                    <option value="outermost">Outermost</option>
-                    <option value="innermost">Innermost</option>"
+                <div className="normalisation-row">
+                    <button type="button" className="normalisation-button" onClick={normaliseButton}>Normalise</button>
+                    <button type="button" className="normalisation-button" onClick={resetButton}>Reset</button>
+                </div>
+                <div className="normalisation-row">
+                    <button type="button" className="normalisation-button">Reduce</button>
+                    <select name="strategy" id="strategy" className="normalisation-button">
+                        <option value="outermost">Outermost</option>
+                        <option value="innermost">Innermost</option>"
                     <option value="random">Random</option>
-                </select>
+                    </select>
+                </div>
             </div>
 
         </div >

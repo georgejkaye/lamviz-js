@@ -251,3 +251,28 @@ button:hover {
 .highlighted-redex {
     font-weight: bold;
 }
+
+.hidden {
+    visibility: hidden;
+}
+
+.normalisation {
+    display: flex;
+    flex-direction: column;
+}
+
+.normalisation-row {
+    display: flex;
+    margin-top: 10px;
+}
+
+.normalisation-button {
+    flex: 1;
+    width: 48%;
+}
+
+select {
+    border: none;
+    outline: none;
+    margin: 0 5px;
+}

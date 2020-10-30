@@ -357,7 +357,7 @@ and printHTML' = (t, db, ctx, x, vars, abs, apps, betas) => {
 
       let string =
         "<span " ++ bt1 ++ "class= \"app-" ++ string(apps) ++ bt2 ++ "\">" ++ label ++ "</span>"
-      (string, vars, abs, apps, betas + (bt1 == "" ? 0 : 1))
+      (string, vars, abs, apps, betas)
     }
   }
 }
