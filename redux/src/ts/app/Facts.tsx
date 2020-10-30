@@ -1,10 +1,13 @@
 
 import React, { useState, KeyboardEvent, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { betaRedexes, prettyPrint, prettyPrintDeBruijn, variables, uniqueVariables, freeVariables, applications, abstractions, subterms, crossings, bridges, linear, planar, closed, bridgeless } from "../../bs/Lambda.bs";
+import { betaRedexes, prettyPrint, prettyPrintDeBruijn, variables, uniqueVariables, freeVariables, applications, abstractions, subterms, crossings, bridges, linear, planar, closed, bridgeless, printRedexesArray } from "../../bs/Lambda.bs";
 import { RootState } from "./reducers"
 import { Collapse } from "react-collapse"
 import { Term } from "../../bs/Lambda.bs"
+
+import Up from "../../svgs/up-chevron.svg"
+import Down from "../../svgs/down-chevron.svg"
 
 enum StatType {
     VARIABLES,
@@ -79,9 +82,41 @@ function StatBox(props: StatProps) {
 
 }
 
+function toggleClassOnElement(className: string, on: boolean, newClass: string) {
+    let elems = document.getElementsByClassName(className)
+    let re = /class="(.+?)"/g
+
+    for (var i = 0; i < elems.length; i++) {
+
+        on ? elems[i].classList.add(newClass) : elems[i].classList.remove(newClass)
+
+        var subs = elems[i].innerHTML;
+        var matches = subs.match(re);
+
+        for (var j = 0; j < matches.length; j++) {
+            var elems2 = document.getElementsByClassName(matches[j].substring(7, matches[j].length - 1));
+
+            for (var k = 0; k < elems2.length; k++) {
+                on ? elems2[k].classList.add(newClass) : elems2[k].classList.remove(newClass)
+            }
+        }
+    }
+}
+
+function highlightRedex(i: number) {
+    toggleClassOnElement("beta-" + i, true, "highlighted-redex")
+}
+
+function unhighlightRedex(i: number) {
+    toggleClassOnElement("beta-" + i, false, "highlighted-redex")
+}
+
 export default function Facts() {
 
     const term = useSelector((state: RootState) => state.currentState).currentTerm
+    const ctx = useSelector((state: RootState) => state.currentState).currentContext
+
+    const [betasOpen, setBetasOpen] = useState(false)
 
     return (term == undefined ? <div className="facts"></div> :
         <div className="facts">
@@ -101,10 +136,20 @@ export default function Facts() {
                 <StatBox term={term} stat={StatType.ABSTRACTIONS} />
                 <StatBox term={term} stat={StatType.APPLICATIONS} />
                 <StatBox term={term} stat={StatType.CROSSINGS} />
-                <StatBox term={term} stat={StatType.BETA_REDEXES} />
                 <StatBox term={term} stat={StatType.BRIDGES} />
             </div>
-        </div>
+            <div className="betas-header" onClick={(e) => setBetasOpen(!betasOpen)}>
+                <div className="expand-arrow"><img src={betasOpen ? Up : Down} className="icon" alt={betasOpen ? "\u2191" : "\u2193"} /></div>
+                <div className="beta-text fact-text">Beta redexes</div>
+                <div className="fact-value">{String(betaRedexes(term))}</div>
+            </div>
+            <Collapse isOpened={betasOpen}>
+                <div className="redexes">
+                    {printRedexesArray(term, ctx).map((r, i) => <div className="redex" onMouseOver={(e) => highlightRedex(i)} onMouseLeave={(e) => unhighlightRedex(i)}>{r}</div>)}
+                </div>
+            </Collapse>
+
+        </div >
 
     )
 }

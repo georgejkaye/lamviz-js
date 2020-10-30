@@ -33,6 +33,7 @@
     "css-loader": "^4.2.2",
     "cytoscape": "3.2.19",
     "file-loader": "^6.1.0",
+    "html-react-parser": "^0.14.0",
     "html-webpack-plugin": "^4.4.1",
     "mini-css-extract-plugin": "^0.11.0",
     "react": "^16.13.1",

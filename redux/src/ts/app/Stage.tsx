@@ -1,10 +1,12 @@
 import React, { useState, KeyboardEvent, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { betaRedexes, prettyPrint, prettyPrintDeBruijn } from "../../bs/Lambda.bs";
+import { betaRedexes, prettyPrint, printHTML, prettyPrintDeBruijn } from "../../bs/Lambda.bs";
 import { RootState } from "./reducers"
 import { Collapse } from "react-collapse"
+import parse from "html-react-parser"
 import Facts from "./Facts";
 import Graph from "./Graph"
+import { Term } from "../../bs/Lambda.bs"
 
 interface StageProps {
     barWidth: number,
@@ -15,6 +17,11 @@ enum VisualiserMode {
     TERM, REDUCTIONS
 }
 
+interface HtmlProps {
+    term: Term
+    ctx: any
+    deBruijn: boolean
+}
 
 export default function Stage(props: StageProps) {
 
@@ -26,12 +33,12 @@ export default function Stage(props: StageProps) {
     return (
         <div className="stage">
             <div className="top-bar">
-                {term == undefined ? "" : prettyPrint(term, context)}
+                {term == undefined ? "" : parse(printHTML(term, false, context))}
             </div>
             <Collapse isOpened={visualiserMode == VisualiserMode.TERM}>
                 < Collapse isOpened={true}>
                     <div className="subtop-bar">
-                        {term == undefined ? "" : prettyPrintDeBruijn(term)}
+                        {term == undefined ? "" : parse(printHTML(term, true, context))}
                     </div>
                 </Collapse >
                 <div className="main-stage" style={{ height: "calc(100vh - " + String(props.barHeight) + "px)" }}>

@@ -176,6 +176,7 @@ button:hover {
     width: 350px;
     background-color: #00171F;
     font-family: 'Roboto Mono', monospace;
+    overflow-y: auto;
 }
 
 .fact {
@@ -189,6 +190,7 @@ button:hover {
     flex: 1;
     text-align: center;
     margin-right: 25px;
+    margin-left: 25px;
 }
 
 .fact-symbol {
@@ -217,4 +219,30 @@ button:hover {
 .no {
     color: red;
     text-decoration: line-through;
+}
+
+.betas-header {
+    display: flex;
+    font-size: 1.5em;
+    margin: 0px 20px;
+}
+
+.icon {
+    height: 15px;
+    width: 15px;
+    margin-right: 10px;
+}
+
+.beta-text {
+    margin-left: 11px;
+}
+
+.redex {
+    padding: 5px 0;
+    text-align: center;
+    font-size: 1.25em;
+}
+
+.highlighted-redex {
+    font-weight: bold;
 }

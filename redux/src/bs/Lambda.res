@@ -286,7 +286,10 @@ let rec printRedexes = (t, ctx) => {
 
 let printRedexesArray = (t, ctx) => Array.of_list(printRedexes(t, ctx))
 
-let rec printHTML = (t, db, ctx) => printHTML'(t, db, ctx, 0, 0, 0, 0, 0)
+let rec printHTML = (t, db, ctx) => {
+  let (string, _, _, _, _) = printHTML'(t, db, ctx, 0, 0, 0, 0, 0)
+  string
+}
 and printHTML' = (t, db, ctx, x, vars, abs, apps, betas) => {
   switch t {
   | Var(n, a) => {
@@ -322,6 +325,7 @@ and printHTML' = (t, db, ctx, x, vars, abs, apps, betas) => {
   | App(t1, t2, a) => {
       let bt1 = isBetaRedex(t) ? "id = \"beta-" ++ string(betas) ++ "\" " : ""
       let bt2 = isBetaRedex(t) ? " beta-" ++ string(betas) : ""
+      let btn = bt1 == "" ? 0 : 1
 
       let (label, vars, abs, apps, betas) =
         a != ""
@@ -343,7 +347,7 @@ and printHTML' = (t, db, ctx, x, vars, abs, apps, betas) => {
                 vars,
                 abs,
                 apps + 1,
-                betas,
+                betas + btn,
               )
               let (rhs, vars, abs, apps, betas) = printHTML'(t2, db, ctx, z, vars, abs, apps, betas)
               let b1 = x == 0 ? "" : "("
