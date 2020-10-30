@@ -237,6 +237,11 @@ button:hover {
     margin-left: 11px;
 }
 
+.redexes {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
 .redex {
     padding: 5px 0;
     text-align: center;

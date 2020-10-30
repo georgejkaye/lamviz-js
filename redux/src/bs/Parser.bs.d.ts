@@ -1,9 +1,4 @@
-import { Term } from "./Lambda.bs"
-
-type Context = {
-    hd: string,
-    tl: Context
-}
+import { Term, Context } from "./Lambda.bs"
 
 declare module "Parser.bs"
-export function lex_and_parse(term: string, context: string): [Term, Context]
+export function lexAndParse(term: string, context: string): [Term, Context]

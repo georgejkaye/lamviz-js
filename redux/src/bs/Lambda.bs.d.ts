@@ -1,6 +1,6 @@
 
 declare module "Lambda.bs"
-export function prettyPrint(t: Term, ctx: any): string
+export function prettyPrint(t: Term, ctx: Context): string
 export function prettyPrintDeBruijn(t: Term): string
 export function subterms(t: Term): number
 export function freeVariables(t: Term): number
@@ -15,9 +15,14 @@ export function applications(t: Term): number
 export function betaRedexes(t: Term): number
 export function linear(t: Term): boolean
 export function planar(t: Term): boolean
-export function printRedexesArray(t: Term, ctx: any): string[]
-export function printHTML(t: Term, db: boolean, ctx: any): string
-export function refreshVariableNames(t: Term, ctx: any): [Term, any]
+export function printRedexesArray(t: Term, ctx: Context): string[]
+export function printHTML(t: Term, db: boolean, ctx: Context): string
+export function refreshVariableNames(t: Term, ctx: Context): [Term, any]
+
+export type Context = {
+    hd: string,
+    tl: Context
+}
 
 export type Var = {
     TAG: number,

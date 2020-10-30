@@ -1,16 +1,17 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import { Mode } from "./../Types"
 
-import { Term } from "./../../../bs/Lambda.bs"
-import { Context } from "./../../../bs/Parser.bs"
-import { lex_and_parse } from "../../../bs/Parser.bs"
+import { Term, Context } from "./../../../bs/Lambda.bs"
+
+export enum Mode {
+    VISUALISER, GALLERY
+}
 
 interface State {
     mode: Mode,
     currentTermText: string,
     currentContextText: string,
     currentTerm: Term,
-    currentContext: any,
+    currentContext: Context,
     error: string
 }
 

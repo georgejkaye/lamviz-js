@@ -1,12 +1,10 @@
-import React, { useState, KeyboardEvent, useEffect } from "react";
+import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { ModifierFlags } from "typescript";
 import { RootState } from "./reducers"
-import { Mode } from "./Types"
-import { changeMode, newTerm, newError, reset } from "./reducers/slice"
+import { Mode, changeMode, newTerm, newError, reset } from "./reducers/slice"
 import { Collapse } from "react-collapse"
 import MathJax from "react-mathjax-ts"
-import { lex_and_parse } from "../../bs/Parser.bs";
+import { lexAndParse } from "../../bs/Parser.bs";
 
 export default function Sidebar() {
 
@@ -47,7 +45,7 @@ export default function Sidebar() {
     const generateButton = () => {
         if (termText != "") {
             try {
-                let [term, context] = lex_and_parse(termText, contextText)
+                let [term, context] = lexAndParse(termText, contextText)
                 dispatch(newTerm([termText, contextText, term, context]))
             } catch (e) {
                 dispatch(newError(e._1))

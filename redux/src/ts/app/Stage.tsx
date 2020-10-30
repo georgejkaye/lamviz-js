@@ -6,7 +6,7 @@ import { Collapse } from "react-collapse"
 import parse from "html-react-parser"
 import Facts from "./Facts";
 import Graph from "./Graph"
-import { Term } from "../../bs/Lambda.bs"
+import { Term, Context } from "../../bs/Lambda.bs"
 
 interface StageProps {
     barWidth: number,
@@ -19,7 +19,7 @@ enum VisualiserMode {
 
 interface HtmlProps {
     term: Term
-    ctx: any
+    ctx: Context
     deBruijn: boolean
 }
 

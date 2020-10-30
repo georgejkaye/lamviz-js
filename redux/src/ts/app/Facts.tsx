@@ -139,7 +139,7 @@ export default function Facts() {
                 <StatBox term={term} stat={StatType.BRIDGES} />
             </div>
             <div className="betas-header" onClick={(e) => setBetasOpen(!betasOpen)}>
-                <div className="expand-arrow"><img src={betasOpen ? Up : Down} className="icon" alt={betasOpen ? "\u2191" : "\u2193"} /></div>
+                <div className="expand-arrow">{betaRedexes(term) > 0 ? <img src={betasOpen ? Up : Down} className="icon" alt={betasOpen ? "\u2191" : "\u2193"} /> : ""}</div>
                 <div className="beta-text fact-text">Beta redexes</div>
                 <div className="fact-value">{String(betaRedexes(term))}</div>
             </div>
@@ -148,6 +148,15 @@ export default function Facts() {
                     {printRedexesArray(term, ctx).map((r, i) => <div className="redex" onMouseOver={(e) => highlightRedex(i)} onMouseLeave={(e) => unhighlightRedex(i)}>{r}</div>)}
                 </div>
             </Collapse>
+            <div className="normalisation">
+                <button type="button">Normalise</button>
+                <button type="button">Watch normalisation</button>
+                <select name="strategy" id="strategy">
+                    <option value="outermost">Outermost</option>
+                    <option value="innermost">Innermost</option>"
+                    <option value="random">Random</option>
+                </select>
+            </div>
 
         </div >
 
