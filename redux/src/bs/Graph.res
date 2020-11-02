@@ -18,7 +18,9 @@ let nid = (ntype, n) => {
   let prefix = switch ntype {
   | ABS => "abs"
   | APP => "app"
+  | APP_MP => "app_mp"
   | ABS_SP => "abs_sp"
+  | ABS_MP => "abs_mp"
   | ABS_SP_MP => "abs_sp_mp"
   | ABS_TOP => "abs_top"
   | VAR => "var"
@@ -77,10 +79,10 @@ and generateFreeVariableElements' = (ctx, dict, nodes, n) => {
 let nodeDistanceX = 30
 let nodeDistanceY = 30
 
-let rec generateMapElements = (term, ctx) => {
+let rec generateGraphElements = (term, ctx) => {
   let (nodes, dict, n) = generateFreeVariableElements(ctx, list{})
 
-  let (nodes, edges, _) = generateMapElements'(
+  let (nodes, edges, _) = generateGraphElements'(
     term,
     ctx,
     dict,
@@ -96,7 +98,7 @@ let rec generateMapElements = (term, ctx) => {
 
   (nodes, edges)
 }
-and generateMapElements' = (
+and generateGraphElements' = (
   term,
   ctx,
   dict,
@@ -109,6 +111,8 @@ and generateMapElements' = (
   redexEdge,
   n,
 ) => {
+  Js.log("Processing " ++ prettyPrint(term, ctx))
+
   let posY = parent["pos"]["y"] - nodeDistanceY
   let mpPosY = parent["pos"]["y"] - nodeDistanceY / 2
 
@@ -120,7 +124,7 @@ and generateMapElements' = (
 
   switch term {
   | Var(x, a) => {
-      let nodeID = List.nth(dict, x)
+      let x = fst(List.nth(dict, x))
 
       let node1 = createNode(nodes, nid(VAR_MP, x), ["midpoint"], mpPosX, mpPosY, "")
       let node2 = createNode(nodes, nid(VAR, x), ["support"], posX, posY, "")
@@ -154,8 +158,6 @@ and generateMapElements' = (
       (list{node1, node2, node3, ...nodes}, list{edge1, edge2, edge3, ...edges}, n)
     }
   | Abs(t, x, a) => {
-      let nodeID = nid(ABS, n)
-
       let node1 = createNode(nodes, nid(ABS_MP, n), ["midpoint"], mpPosX, mpPosY, "")
       let node2 = createNode(nodes, nid(ABS, n), ["abstraction"], posX, posY, lambda)
       let node3 = createNode(
@@ -226,7 +228,7 @@ and generateMapElements' = (
 
       let nodes = list{node1, node2, node3, node4, node5, ...nodes}
       let edges = list{edge1, edge2, edge3, edge4, edge5, ...edges}
-      let (nodes, edges, n) = generateMapElements'(
+      let (nodes, edges, n) = generateGraphElements'(
         t,
         list{x, ...ctx},
         list{(n, false), ...dict},
@@ -242,5 +244,61 @@ and generateMapElements' = (
 
       (nodes, edges, n)
     }
+  | App(t1, t2, a) => {
+      let baseId = prettyPrint(t1, ctx) ++ " @ " ++ prettyPrint(t2, ctx)
+
+      let node1 = createNode(nodes, "app_mid_" ++ baseId, ["midpoint"], mpPosX, mpPosY, "")
+      let node2 = createNode(nodes, "app_" ++ baseId, ["application"], posX, posY, "@")
+
+      let edge1 = createEdge(
+        edges,
+        parent["data"]["id"] ++ "->app_mid_" ++ baseId,
+        ["appedge"],
+        parent["data"]["id"],
+        node1["data"]["id"],
+        "",
+      )
+      let edge2 = createEdge(
+        edges,
+        "app_mid_" ++ baseId ++ "->app_" ++ baseId,
+        ["appedge"],
+        node1["data"]["id"],
+        node2["data"]["id"],
+        "",
+      )
+
+      let (nodes, edges, n) = generateGraphElements'(
+        t1,
+        ctx,
+        dict,
+        list{node1, node2, ...nodes},
+        edges,
+        node2,
+        APP,
+        L,
+        redexes,
+        redexEdge,
+        n,
+      )
+      let (nodes, edges, n) = generateGraphElements'(
+        t2,
+        ctx,
+        dict,
+        nodes,
+        edges,
+        node2,
+        APP,
+        R,
+        redexes,
+        redexEdge,
+        n,
+      )
+      (nodes, edges, n)
+    }
   }
+}
+
+let generateGraphElementsArray = (term, ctx) => {
+  let (nodes, edges) = generateGraphElements(term, ctx)
+  (Array.of_list(nodes), Array.of_list(edges))
 }

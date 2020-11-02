@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+import CytoscapeComponent from "react-cytoscapejs"
 
 import { Term, Context } from "./../../../bs/Lambda.bs"
+import { generateGraphElementsArray } from "./../../../bs/Graph.bs"
 
 export enum Mode {
     VISUALISER, GALLERY
@@ -13,6 +15,7 @@ interface State {
     currentTerm: Term,
     originalTerm: Term,
     currentContext: Context,
+    currentElements: cytoscape.ElementDefinition[],
     error: string
 }
 
@@ -23,7 +26,16 @@ const initialState: State = {
     currentTerm: undefined,
     originalTerm: undefined,
     currentContext: undefined,
+    currentElements: undefined,
     error: ""
+}
+
+function generateElements(term: Term): any {
+    let [nodes, edges] = generateGraphElementsArray(term)
+    console.log("Hello")
+    console.log(nodes)
+    console.log(edges)
+    return nodes.concat(edges)
 }
 
 export const slice = createSlice({
@@ -33,7 +45,7 @@ export const slice = createSlice({
         changeMode: (state, action: PayloadAction<Mode>) =>
             state = { ...state, mode: action.payload },
         newTerm: (state, action: PayloadAction<[string, string, Term, Context]>) =>
-            state = { ...state, currentTermText: action.payload[0], currentContextText: action.payload[1], currentTerm: action.payload[2], originalTerm: action.payload[2], currentContext: action.payload[3], error: "" },
+            state = { ...state, currentTermText: action.payload[0], currentContextText: action.payload[1], currentTerm: action.payload[2], originalTerm: action.payload[2], currentContext: action.payload[3], currentElements: generateElements(action.payload[2]), error: "" },
         newError: (state, action: PayloadAction<string>) =>
             state = { ...state, error: action.payload },
         updateTerm: (state, action: PayloadAction<Term>) =>
