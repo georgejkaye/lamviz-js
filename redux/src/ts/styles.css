@@ -246,6 +246,12 @@ button:hover {
     padding: 5px 0;
     text-align: center;
     font-size: 1.25em;
+    cursor: pointer;
+    transition-duration: 0.3s;
+}
+
+.redex:hover {
+    background-color: #227DAA;
 }
 
 .highlighted-redex {

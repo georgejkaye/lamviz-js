@@ -78,7 +78,7 @@ let newApp = (t1, t2, alias) => App(t1, t2, alias)
 let rec prettyPrintDeBruijn = t => prettyPrintDeBruijn'(t, 0)
 and prettyPrintDeBruijn' = (t, x) => {
   switch t {
-  | Var(i, _) => string(i)
+  | Var(i, _) => str(i)
   | Abs(t, _, _) =>
     x == 0 ? `λ ${prettyPrintDeBruijn'(t, 0)}` : `(λ ${prettyPrintDeBruijn'(t, 0)})`
   | App(t1, t2, _) =>
@@ -293,8 +293,8 @@ let rec printHTML = (t, db, ctx) => {
 and printHTML' = (t, db, ctx, x, vars, abs, apps, betas) => {
   switch t {
   | Var(n, a) => {
-      let label = db ? string(n) : a != "" ? a : lookup(ctx, n)
-      let string = "<span class = \"var-" ++ string(vars) ++ "\">" ++ label ++ "</span>"
+      let label = db ? str(n) : a != "" ? a : lookup(ctx, n)
+      let string = "<span class = \"var-" ++ str(vars) ++ "\">" ++ label ++ "</span>"
       (string, vars + 1, abs, apps, betas)
     }
   | Abs(t, l, a) => {
@@ -319,12 +319,12 @@ and printHTML' = (t, db, ctx, x, vars, abs, apps, betas) => {
               b1 ++ "&lambda;" ++ n ++ scope ++ b2
             }
 
-      let string = "<span class = \"abs-" ++ string(abs) ++ "\">" ++ label ++ "</span>"
+      let string = "<span class = \"abs-" ++ str(abs) ++ "\">" ++ label ++ "</span>"
       (string, vars, abs + 1, apps, betas)
     }
   | App(t1, t2, a) => {
-      let bt1 = isBetaRedex(t) ? "id = \"beta-" ++ string(betas) ++ "\" " : ""
-      let bt2 = isBetaRedex(t) ? " beta-" ++ string(betas) : ""
+      let bt1 = isBetaRedex(t) ? "id = \"beta-" ++ str(betas) ++ "\" " : ""
+      let bt2 = isBetaRedex(t) ? " beta-" ++ str(betas) : ""
       let btn = bt1 == "" ? 0 : 1
 
       let (label, vars, abs, apps, betas) =
@@ -356,7 +356,7 @@ and printHTML' = (t, db, ctx, x, vars, abs, apps, betas) => {
             }
 
       let string =
-        "<span " ++ bt1 ++ "class= \"app-" ++ string(apps) ++ bt2 ++ "\">" ++ label ++ "</span>"
+        "<span " ++ bt1 ++ "class= \"app-" ++ str(apps) ++ bt2 ++ "\">" ++ label ++ "</span>"
       (string, vars, abs, apps, betas)
     }
   }
