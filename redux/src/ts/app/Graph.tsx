@@ -28,8 +28,6 @@ export default function Graph(props: GraphProps) {
     const dispatch = useDispatch();
 
     const elements = useSelector((state: RootState) => state.currentState).currentElements
-    var [currentNodes, setCurrentNodes] = useState([])
-    var [currentEdges, setCurrentEdges] = useState([])
     var [currentElements, setCurrentElements] = useState([])
 
     const [dimensions, setDimensions] = useState({
@@ -43,14 +41,22 @@ export default function Graph(props: GraphProps) {
 
     useEffect(() => {
 
-        if (elements != undefined && currentElements != elements) {
-            cy.add(elements)
+        if (currentElements != [] && (elements != undefined || currentElements != elements)) {
 
-            for (var i = 0; i < elements.length; i++) {
-                cy.$("[id=\"" + elements[i].data["id"] + "\"]").position(elements[i].data["position"])
+            setCurrentElements(elements)
+
+            if (elements != undefined) {
+
+                cy.elements().remove()
+                cy.add(elements)
+
+                for (var i = 0; i < elements.length; i++) {
+                    cy.$("[id=\"" + elements[i].data["id"] + "\"]").position(elements[i].data["position"])
+                }
+
+                cy.fit()
+
             }
-
-            cy.fit()
         }
 
 
