@@ -32,9 +32,9 @@ let nid = (ntype, n) => {
   prefix ++ "_" ++ str(n)
 }
 
-let eid = (n1type, n2type, n) => {
-  let (n1, n2) = (nid(n1type, n), nid(n2type, n))
-  n1 ++ "_to_" ++ n2 ++ "_" ++ str(n)
+let eid = (n1type, n1, n2type, n2) => {
+  let (n1, n2) = (nid(n1type, n1), nid(n2type, n2))
+  n1 ++ "_to_" ++ n2
 }
 
 type direction = U | L | R
@@ -103,12 +103,12 @@ and generateFreeVariableElements' = (ctx, dict, nodes, n) => {
   switch ctx {
   | list{} => (list{}, dict, n)
   | list{x, ...xs} => {
-      let nodeID = "free_" ++ str(n)
+      let nodeID = "free" ++ str(n)
       let nodeLabel = lambda ++ x
       let node = createNode(nodes, nodeID, ["free"], 0, 0, nodeLabel)
 
-      let dict = list{(n, true), ...dict}
-      generateFreeVariableElements'(ctx, dict, list{node, ...nodes}, n + 1)
+      let dict = list{(n, false), ...dict}
+      generateFreeVariableElements'(xs, dict, list{node, ...nodes}, n + 1)
     }
   }
 }
@@ -121,21 +121,25 @@ let rec generateGraphElements = (term, ctx) => {
 
   let root = createNode(nodes, ">", ["root"], 0, 0, "")
 
-  let (nodes, edges, _) = generateGraphElements'(
+  let (nodes', edges, _, _, _) = generateGraphElements'(
     term,
     ctx,
     dict,
     list{root, ...nodes},
     list{},
     root,
+    0,
     ROOT,
     U,
     list{},
     false,
+    0,
     n,
+    0,
   )
 
-  (list{root, ...nodes}, edges)
+  Js.log("Done!")
+  (list{root, ...List.concat(list{nodes', nodes})}, edges)
 }
 and generateGraphElements' = (
   term,
@@ -144,11 +148,14 @@ and generateGraphElements' = (
   nodes,
   edges,
   parent,
+  pn,
   ptype,
   dir,
   redexes,
   redexEdge,
-  n,
+  vars,
+  abs,
+  apps,
 ) => {
   Js.log("Processing " ++ prettyPrint(term, ctx))
 
@@ -171,21 +178,22 @@ and generateGraphElements' = (
   | Var(x, a) => {
       let x = fst(List.nth(dict, x))
 
-      let node1 = createNode(nodes, nid(VAR_MP, x), ["midpoint"], mpPosX, mpPosY, "")
-      let node2 = createNode(nodes, nid(VAR, x), ["support"], posX, posY, "")
-      let node3 = createNode(nodes, nid(VAR_TOP, x), ["top"], posX, posY - nodeDistanceY, "")
+      let node1 = createNode(nodes, nid(VAR_MP, vars), ["midpoint"], mpPosX, mpPosY, "")
+      let node2 = createNode(nodes, nid(VAR, vars), ["support"], posX, posY, "")
+      let node3 = createNode(nodes, nid(VAR_TOP, vars), ["top"], posX, posY - nodeDistanceY, "")
 
       let edge1 = createEdge(
         edges,
-        eid(ptype, VAR_MP, x),
+        eid(ptype, pn, VAR_MP, vars),
         ["varedge"],
         parent["data"]["id"],
         node1["data"]["id"],
         "",
       )
+
       let edge2 = createEdge(
         edges,
-        eid(VAR_MP, VAR, x),
+        eid(VAR_MP, vars, VAR, vars),
         ["varedge"],
         node1["data"]["id"],
         node2["data"]["id"],
@@ -193,21 +201,29 @@ and generateGraphElements' = (
       )
       let edge3 = createEdge(
         edges,
-        eid(VAR, VAR_TOP, x),
+        eid(VAR, vars, VAR_TOP, vars),
         ["varedge"],
         node2["data"]["id"],
         node3["data"]["id"],
         "",
       )
+      let edge4 = createEdge(
+        edges,
+        eid(VAR_TOP, vars, ABS_TOP, x),
+        ["arc"],
+        node3["data"]["id"],
+        nid(ABS_TOP, x),
+        "",
+      )
 
-      (list{node1, node2, node3}, list{edge1, edge2, edge3}, n)
+      (list{node1, node2, node3}, list{edge1, edge2, edge3, edge4}, vars + 1, abs, apps)
     }
   | Abs(t, x, a) => {
-      let node1 = createNode(nodes, nid(ABS_MP, n), ["midpoint"], mpPosX, mpPosY, "")
-      let node2 = createNode(nodes, nid(ABS, n), ["abstraction"], posX, posY, lambda)
+      let node1 = createNode(nodes, nid(ABS_MP, abs), ["midpoint"], mpPosX, mpPosY, "")
+      let node2 = createNode(nodes, nid(ABS, abs), ["abstraction"], posX, posY, lambda)
       let node3 = createNode(
         nodes,
-        nid(ABS_SP_MP, n),
+        nid(ABS_SP_MP, abs),
         ["midpoint"],
         posX + nodeDistanceX / 2,
         posY - nodeDistanceY / 2,
@@ -215,7 +231,7 @@ and generateGraphElements' = (
       )
       let node4 = createNode(
         nodes,
-        nid(ABS_SP, n),
+        nid(ABS_SP, abs),
         ["support"],
         posX + nodeDistanceX,
         posY - nodeDistanceY,
@@ -223,7 +239,7 @@ and generateGraphElements' = (
       )
       let node5 = createNode(
         nodes,
-        nid(ABS_TOP, n),
+        nid(ABS_TOP, abs),
         ["top"],
         posX + nodeDistanceX,
         posY - 2 * nodeDistanceY,
@@ -232,7 +248,7 @@ and generateGraphElements' = (
 
       let edge1 = createEdge(
         edges,
-        eid(ptype, ABS_MP, n),
+        eid(ptype, pn, ABS_MP, abs),
         ["absedge"],
         parent["data"]["id"],
         node1["data"]["id"],
@@ -240,7 +256,7 @@ and generateGraphElements' = (
       )
       let edge2 = createEdge(
         edges,
-        eid(ABS_MP, ABS, n),
+        eid(ABS_MP, abs, ABS, abs),
         ["absedge"],
         node1["data"]["id"],
         node2["data"]["id"],
@@ -248,7 +264,7 @@ and generateGraphElements' = (
       )
       let edge3 = createEdge(
         edges,
-        eid(ABS, ABS_SP_MP, n),
+        eid(ABS, abs, ABS_SP_MP, abs),
         ["varedge"],
         node2["data"]["id"],
         node3["data"]["id"],
@@ -256,7 +272,7 @@ and generateGraphElements' = (
       )
       let edge4 = createEdge(
         edges,
-        eid(ABS_SP_MP, ABS_SP, n),
+        eid(ABS_SP_MP, abs, ABS_SP, abs),
         ["varedge"],
         node3["data"]["id"],
         node4["data"]["id"],
@@ -264,7 +280,7 @@ and generateGraphElements' = (
       )
       let edge5 = createEdge(
         edges,
-        eid(ABS_SP, ABS_TOP, n),
+        eid(ABS_SP, abs, ABS_TOP, abs),
         ["varedge"],
         node4["data"]["id"],
         node5["data"]["id"],
@@ -276,35 +292,36 @@ and generateGraphElements' = (
 
       let nodes = List.concat(list{nnodes, nodes})
       let edges = List.concat(list{nedges, edges})
-      let (snodes, sedges, n) = generateGraphElements'(
+      let (snodes, sedges, vars', abs', apps') = generateGraphElements'(
         t,
         list{x, ...ctx},
-        list{(n, false), ...dict},
+        list{(abs, false), ...dict},
         nodes,
         edges,
         node2,
+        abs,
         ABS,
         L,
         redexes,
         redexEdge,
-        n + 1,
+        vars,
+        abs + 1,
+        apps,
       )
 
       let srightmost = furthestRight(snodes)
       let snodes =
         srightmost >= posX ? shiftNodeX(snodes, -(srightmost - posX) - nodeDistanceX) : snodes
 
-      (List.concat(list{snodes, nnodes}), List.concat(list{sedges, nedges}), n)
+      (List.concat(list{snodes, nnodes}), List.concat(list{sedges, nedges}), vars', abs', apps')
     }
   | App(t1, t2, a) => {
-      let baseId = prettyPrint(t1, ctx) ++ "_@_" ++ prettyPrint(t2, ctx)
-
-      let node1 = createNode(nodes, "app_mid_" ++ baseId, ["midpoint"], mpPosX, mpPosY, "")
-      let node2 = createNode(nodes, "app_" ++ baseId, ["application"], posX, posY, "@")
+      let node1 = createNode(nodes, nid(APP_MP, apps), ["midpoint"], mpPosX, mpPosY, "")
+      let node2 = createNode(nodes, nid(APP, apps), ["application"], posX, posY, "@")
 
       let edge1 = createEdge(
         edges,
-        parent["data"]["id"] ++ "->app_mid_" ++ baseId,
+        eid(ptype, pn, APP_MP, apps),
         ["appedge"],
         parent["data"]["id"],
         node1["data"]["id"],
@@ -312,38 +329,44 @@ and generateGraphElements' = (
       )
       let edge2 = createEdge(
         edges,
-        "app_mid_" ++ baseId ++ "->app_" ++ baseId,
+        eid(APP_MP, apps, APP, apps),
         ["appedge"],
         node1["data"]["id"],
         node2["data"]["id"],
         "",
       )
 
-      let (lnodes, ledges, n) = generateGraphElements'(
+      let (lnodes, ledges, vars', abs', apps') = generateGraphElements'(
         t1,
         ctx,
         dict,
         list{node1, node2, ...nodes},
         list{edge1, edge2, ...edges},
         node2,
+        apps,
         APP,
         L,
         redexes,
         redexEdge,
-        n,
+        vars,
+        abs,
+        apps + 1,
       )
-      let (rnodes, redges, n) = generateGraphElements'(
+      let (rnodes, redges, vars'', abs'', apps'') = generateGraphElements'(
         t2,
         ctx,
         dict,
         nodes,
         edges,
         node2,
+        apps,
         APP,
         R,
         redexes,
         redexEdge,
-        n,
+        vars',
+        abs',
+        apps',
       )
 
       let lrightmost = furthestRight(lnodes)
@@ -356,7 +379,9 @@ and generateGraphElements' = (
       (
         List.concat(list{lnodes, rnodes, list{node1, node2}}),
         List.concat(list{ledges, redges, list{edge1, edge2}}),
-        n,
+        vars'',
+        abs'',
+        apps'',
       )
     }
   }

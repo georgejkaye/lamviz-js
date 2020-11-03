@@ -1,4 +1,4 @@
-import { Term } from "./Lambda.bs"
+import { Context, Term } from "./Lambda.bs"
 
 export interface Position {
     x: number,
@@ -28,4 +28,4 @@ export interface GraphEdge {
 }
 
 declare module "Graph.bs"
-export function generateGraphElementsArray(t: Term): any
+export function generateGraphElementsArray(t: Term, ctx: Context): [cytoscape.ElementDefinition[], cytoscape.ElementDefinition[]]

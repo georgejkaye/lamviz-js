@@ -30,8 +30,8 @@ const initialState: State = {
     error: ""
 }
 
-function generateElements(term: Term): any {
-    let [nodes, edges] = generateGraphElementsArray(term)
+function generateElements(term: Term, ctx: Context): cytoscape.ElementDefinition[] {
+    let [nodes, edges] = generateGraphElementsArray(term, ctx)
     console.log("Hello")
     console.log(nodes)
     console.log(edges)
@@ -45,11 +45,11 @@ export const slice = createSlice({
         changeMode: (state, action: PayloadAction<Mode>) =>
             state = { ...state, mode: action.payload },
         newTerm: (state, action: PayloadAction<[string, string, Term, Context]>) =>
-            state = { ...state, currentTermText: action.payload[0], currentContextText: action.payload[1], currentTerm: action.payload[2], originalTerm: action.payload[2], currentContext: action.payload[3], currentElements: generateElements(action.payload[2]), error: "" },
+            state = { ...state, currentTermText: action.payload[0], currentContextText: action.payload[1], currentTerm: action.payload[2], originalTerm: action.payload[2], currentContext: action.payload[3], currentElements: generateElements(action.payload[2], action.payload[3]), error: "" },
         newError: (state, action: PayloadAction<string>) =>
             state = { ...state, error: action.payload },
         updateTerm: (state, action: PayloadAction<Term>) =>
-            state = { ...state, currentTerm: action.payload, currentElements: generateElements(action.payload) },
+            state = { ...state, currentTerm: action.payload, currentElements: generateElements(action.payload, state.currentContext) },
         resetTerm: (state) =>
             state = { ...state, currentTerm: state.originalTerm },
         clear: (state) =>

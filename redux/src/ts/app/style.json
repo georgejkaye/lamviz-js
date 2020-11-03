@@ -4,7 +4,9 @@
       "style": {
         "background-color": "black",
         "height": "1",
-        "width": "1"
+        "width": "1",
+        "label": "data(id)",
+        "font-size": 2
       }
     },
     {
