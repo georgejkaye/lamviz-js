@@ -98,17 +98,39 @@ let shiftNodeX = (nodes, x) =>
   )
 
 let rec generateFreeVariableElements = (ctx, dict) =>
-  generateFreeVariableElements'(ctx, dict, list{}, 0)
-and generateFreeVariableElements' = (ctx, dict, nodes, n) => {
+  generateFreeVariableElements'(ctx, dict, list{}, list{}, 0)
+and generateFreeVariableElements' = (ctx, dict, nodes, edges, n) => {
   switch ctx {
-  | list{} => (list{}, dict, n)
+  | list{} => (nodes, edges, dict, n)
   | list{x, ...xs} => {
-      let nodeID = "free" ++ str(n)
-      let nodeLabel = lambda ++ x
-      let node = createNode(nodes, nodeID, ["free"], 0, 0, nodeLabel)
+      let node1 = createNode(nodes, nid(ABS, n), ["abstraction", "free"], 0, 0, "")
+      let node2 = createNode(nodes, nid(ABS_SP, n), ["support", "free"], 0, 0, "")
+      let node3 = createNode(nodes, nid(ABS_TOP, n), ["top", "free"], 0, 0, "")
+      let edge1 = createEdge(
+        edges,
+        eid(ABS, n, ABS_SP, n),
+        ["absedge", "free"],
+        node1["data"]["id"],
+        node2["data"]["id"],
+        "",
+      )
+      let edge2 = createEdge(
+        edges,
+        eid(ABS_SP, n, ABS_TOP, n),
+        ["absedge", "free"],
+        node2["data"]["id"],
+        node3["data"]["id"],
+        "",
+      )
 
       let dict = list{(n, false), ...dict}
-      generateFreeVariableElements'(xs, dict, list{node, ...nodes}, n + 1)
+      generateFreeVariableElements'(
+        xs,
+        dict,
+        list{node1, node2, node3, ...nodes},
+        list{edge1, edge2, ...edges},
+        n + 1,
+      )
     }
   }
 }
@@ -117,16 +139,16 @@ let nodeDistanceX = 5
 let nodeDistanceY = 5
 
 let rec generateGraphElements = (term, ctx) => {
-  let (nodes, dict, n) = generateFreeVariableElements(ctx, list{})
+  let (nodes, edges, dict, n) = generateFreeVariableElements(ctx, list{})
 
   let root = createNode(nodes, ">", ["root"], 0, 0, "")
 
-  let (nodes', edges, _, _, _) = generateGraphElements'(
+  let (nodes', edges', _, _, _) = generateGraphElements'(
     term,
     ctx,
     dict,
     list{root, ...nodes},
-    list{},
+    edges,
     root,
     0,
     ROOT,
@@ -139,7 +161,7 @@ let rec generateGraphElements = (term, ctx) => {
   )
 
   Js.log("Done!")
-  (list{root, ...List.concat(list{nodes', nodes})}, edges)
+  (list{root, ...List.concat(list{nodes', nodes})}, List.concat(list{edges', edges}))
 }
 and generateGraphElements' = (
   term,
@@ -176,7 +198,7 @@ and generateGraphElements' = (
 
   switch term {
   | Var(x, a) => {
-      let x = fst(List.nth(dict, x))
+      let (x, b) = List.nth(dict, x)
 
       let node1 = createNode(nodes, nid(VAR_MP, vars), ["midpoint"], mpPosX, mpPosY, "")
       let node2 = createNode(nodes, nid(VAR, vars), ["support"], posX, posY, "")
@@ -215,7 +237,6 @@ and generateGraphElements' = (
         nid(ABS_TOP, x),
         "",
       )
-
       (list{node1, node2, node3}, list{edge1, edge2, edge3, edge4}, vars + 1, abs, apps)
     }
   | Abs(t, x, a) => {
@@ -295,7 +316,7 @@ and generateGraphElements' = (
       let (snodes, sedges, vars', abs', apps') = generateGraphElements'(
         t,
         list{x, ...ctx},
-        list{(abs, false), ...dict},
+        list{(abs, true), ...dict},
         nodes,
         edges,
         node2,
