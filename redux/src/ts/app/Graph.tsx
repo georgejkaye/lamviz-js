@@ -5,7 +5,7 @@ import { RootState } from "./reducers"
 import CytoscapeComponent from "react-cytoscapejs"
 import { cloneDeep, isObject } from "lodash"
 
-import stylesheet from "./style.json"
+import { stylesheet } from "./style.js"
 import { GraphEdge, GraphNode } from "../../bs/Graph.bs"
 
 interface GraphProps {
@@ -22,7 +22,6 @@ function onWheel(e: any) {
 type GraphElement = GraphNode | GraphEdge
 
 export default function Graph(props: GraphProps) {
-
     var cy: cytoscape.Core;
 
     const dispatch = useDispatch();
