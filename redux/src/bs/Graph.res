@@ -59,6 +59,44 @@ let createEdge = (edges, id, classes, source, target, label) =>
     "classes": classes,
   }
 
+let furthestLeft = nodes => {
+  switch nodes {
+  | list{} => failwith("empty")
+  | list{n, ...ns} =>
+    List.fold_left(
+      (n, x) => x["data"]["position"]["x"] < n ? x["data"]["position"]["x"] : n,
+      n["data"]["position"]["x"],
+      ns,
+    )
+  }
+}
+
+let furthestRight = nodes => {
+  switch nodes {
+  | list{} => failwith("empty")
+  | list{n, ...ns} =>
+    List.fold_left(
+      (n, x) => x["data"]["position"]["x"] > n ? x["data"]["position"]["x"] : n,
+      n["data"]["position"]["x"],
+      ns,
+    )
+  }
+}
+
+let shiftNodeX = (nodes, x) =>
+  List.map(
+    n =>
+      createNode(
+        list{},
+        n["data"]["id"],
+        n["classes"],
+        n["data"]["position"]["x"] + x,
+        n["data"]["position"]["y"],
+        n["data"]["label"],
+      ),
+    nodes,
+  )
+
 let rec generateFreeVariableElements = (ctx, dict) =>
   generateFreeVariableElements'(ctx, dict, list{}, 0)
 and generateFreeVariableElements' = (ctx, dict, nodes, n) => {
@@ -97,7 +135,7 @@ let rec generateGraphElements = (term, ctx) => {
     n,
   )
 
-  (nodes, edges)
+  (list{root, ...nodes}, edges)
 }
 and generateGraphElements' = (
   term,
@@ -162,7 +200,7 @@ and generateGraphElements' = (
         "",
       )
 
-      (list{node1, node2, node3, ...nodes}, list{edge1, edge2, edge3, ...edges}, n)
+      (list{node1, node2, node3}, list{edge1, edge2, edge3}, n)
     }
   | Abs(t, x, a) => {
       let node1 = createNode(nodes, nid(ABS_MP, n), ["midpoint"], mpPosX, mpPosY, "")
@@ -233,9 +271,12 @@ and generateGraphElements' = (
         "",
       )
 
-      let nodes = list{node1, node2, node3, node4, node5, ...nodes}
-      let edges = list{edge1, edge2, edge3, edge4, edge5, ...edges}
-      let (nodes, edges, n) = generateGraphElements'(
+      let nnodes = list{node1, node2, node3, node4, node5}
+      let nedges = list{edge1, edge2, edge3, edge4, edge5}
+
+      let nodes = List.concat(list{nnodes, nodes})
+      let edges = List.concat(list{nedges, edges})
+      let (snodes, sedges, n) = generateGraphElements'(
         t,
         list{x, ...ctx},
         list{(n, false), ...dict},
@@ -249,7 +290,11 @@ and generateGraphElements' = (
         n + 1,
       )
 
-      (nodes, edges, n)
+      let srightmost = furthestRight(snodes)
+      let snodes =
+        srightmost >= posX ? shiftNodeX(snodes, -(srightmost - posX) - nodeDistanceX) : snodes
+
+      (List.concat(list{snodes, nnodes}), List.concat(list{sedges, nedges}), n)
     }
   | App(t1, t2, a) => {
       let baseId = prettyPrint(t1, ctx) ++ "_@_" ++ prettyPrint(t2, ctx)
@@ -274,7 +319,7 @@ and generateGraphElements' = (
         "",
       )
 
-      let (nodes, edges, n) = generateGraphElements'(
+      let (lnodes, ledges, n) = generateGraphElements'(
         t1,
         ctx,
         dict,
@@ -287,7 +332,7 @@ and generateGraphElements' = (
         redexEdge,
         n,
       )
-      let (nodes, edges, n) = generateGraphElements'(
+      let (rnodes, redges, n) = generateGraphElements'(
         t2,
         ctx,
         dict,
@@ -300,7 +345,19 @@ and generateGraphElements' = (
         redexEdge,
         n,
       )
-      (nodes, edges, n)
+
+      let lrightmost = furthestRight(lnodes)
+      let lnodes =
+        lrightmost >= posX ? shiftNodeX(lnodes, -(lrightmost - posX) - nodeDistanceX) : lnodes
+
+      let rleftmost = furthestLeft(rnodes)
+      let rnodes = rleftmost <= posX ? shiftNodeX(rnodes, posX - rleftmost + nodeDistanceX) : rnodes
+
+      (
+        List.concat(list{lnodes, rnodes, list{node1, node2}}),
+        List.concat(list{ledges, redges, list{edge1, edge2}}),
+        n,
+      )
     }
   }
 }

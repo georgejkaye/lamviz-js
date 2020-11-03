@@ -70,7 +70,6 @@ export default function Graph(props: GraphProps) {
                 height: height
             })
 
-            cy.fit()
             console.log("resized to: ", width, "x", height)
         }
 
