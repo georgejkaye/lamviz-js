@@ -37,8 +37,8 @@ export default function Graph(props: GraphProps) {
     function postGenerate() {
 
         if (elements.length > 0) {
-            let highest = cy.nodes().reduce((h, e) => (h < e.position("x") ? h : e.position("x")), elements[0]["data"]["position"]["x"])
-            cy.elements(".top").position("y", highest)
+            let highest = cy.nodes().reduce((h, e) => (h < e.position("y") ? h : e.position("y")), elements[0]["data"]["position"]["y"])
+            cy.elements(".top").position("y", highest - (nodeDistanceY / 2))
         }
 
         cy.fit()
