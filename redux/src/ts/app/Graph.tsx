@@ -3,26 +3,34 @@ import { useSelector, useDispatch } from "react-redux"
 import { RootState } from "./reducers"
 
 import CytoscapeComponent from "react-cytoscapejs"
+import { cloneDeep, isObject } from "lodash"
+
+import stylesheet from "./style.json"
+import { GraphEdge, GraphNode } from "../../bs/Graph.bs"
 
 interface GraphProps {
     barWidth: number,
     barHeight: number
 }
 
-let elements: cytoscape.ElementDefinition[] = []
-let stylesheet: cytoscape.StylesheetStyle[] = []
-
-let cy: cytoscape.Core;
 let focused: boolean = false;
 
 function onWheel(e: any) {
     console.log("Scrolling");
 }
 
+type GraphElement = GraphNode | GraphEdge
 
 export default function Graph(props: GraphProps) {
 
+    var cy: cytoscape.Core;
+
     const dispatch = useDispatch();
+
+    const elements = useSelector((state: RootState) => state.currentState).currentElements
+    var [currentNodes, setCurrentNodes] = useState([])
+    var [currentEdges, setCurrentEdges] = useState([])
+    var [currentElements, setCurrentElements] = useState([])
 
     const [dimensions, setDimensions] = useState({
         height: window.innerHeight - props.barHeight,
@@ -30,11 +38,21 @@ export default function Graph(props: GraphProps) {
     });
 
     useEffect(() => {
-        cy.fit();
-        cy.minZoom(cy.zoom());
-    }, []);
+        cy.fit()
+    }, [])
 
     useEffect(() => {
+
+        if (elements != undefined && currentElements != elements) {
+            cy.add(elements)
+
+            for (var i = 0; i < elements.length; i++) {
+                cy.$("[id=\"" + elements[i].data["id"] + "\"]").position(elements[i].data["position"])
+            }
+
+            cy.fit()
+        }
+
 
         const onResize = () => {
 
@@ -46,6 +64,7 @@ export default function Graph(props: GraphProps) {
                 height: height
             })
 
+            cy.fit()
             console.log("resized to: ", width, "x", height)
         }
 
@@ -60,10 +79,9 @@ export default function Graph(props: GraphProps) {
     return (
         <div className="graph" onWheel={onWheel}>
             <CytoscapeComponent
-                elements={elements}
+                elements={[]}
                 style={dimensions}
                 stylesheet={stylesheet}
-                maxZoom={3}
                 cy={(cyObj) => { cy = cyObj }}
             />
         </div>

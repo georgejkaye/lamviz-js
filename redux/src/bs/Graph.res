@@ -3,11 +3,11 @@ open Helpers
 
 let lambda = `λ`
 
-type nodedata = {"id": string, "label": string}
-
 type pos = {"x": int, "y": int}
 
-type node = {"data": nodedata, "classes": array<string>, "pos": pos}
+type nodedata = {"id": string, "label": string, "position": pos}
+
+type node = {"data": nodedata, "classes": array<string>}
 
 type edgedata = {"id": string, "source": string, "target": string, "label": string}
 
@@ -46,9 +46,8 @@ let rec checkNodeId = (nodes, id) =>
 
 let createNode = (nodes, id, classes, x, y, label) =>
   {
-    "data": {"id": checkNodeId(nodes, id), "label": label},
+    "data": {"id": checkNodeId(nodes, id), "label": label, "position": {"x": x, "y": y}},
     "classes": classes,
-    "pos": {"x": x, "y": y},
   }
 
 let rec checkEdgeId = (edges, id) =>
@@ -76,19 +75,21 @@ and generateFreeVariableElements' = (ctx, dict, nodes, n) => {
   }
 }
 
-let nodeDistanceX = 30
-let nodeDistanceY = 30
+let nodeDistanceX = 5
+let nodeDistanceY = 5
 
 let rec generateGraphElements = (term, ctx) => {
   let (nodes, dict, n) = generateFreeVariableElements(ctx, list{})
+
+  let root = createNode(nodes, ">", ["root"], 0, 0, "")
 
   let (nodes, edges, _) = generateGraphElements'(
     term,
     ctx,
     dict,
-    nodes,
+    list{root, ...nodes},
     list{},
-    {"data": {"id": ">", "label": ""}, "classes": ["root"], "pos": {x: 0, y: 0}},
+    root,
     ROOT,
     U,
     list{},
@@ -113,13 +114,19 @@ and generateGraphElements' = (
 ) => {
   Js.log("Processing " ++ prettyPrint(term, ctx))
 
-  let posY = parent["pos"]["y"] - nodeDistanceY
-  let mpPosY = parent["pos"]["y"] - nodeDistanceY / 2
+  let posY = parent["data"]["position"]["y"] - nodeDistanceY
+  let mpPosY = parent["data"]["position"]["y"] - nodeDistanceY / 2
 
   let (posX, mpPosX) = switch dir {
-  | U => (parent["pos"]["x"], parent["pos"]["x"])
-  | L => (parent["pos"]["x"] - nodeDistanceX, parent["pos"]["x"] - nodeDistanceX / 2)
-  | R => (parent["pos"]["x"] + nodeDistanceX, parent["pos"]["x"] + nodeDistanceX / 2)
+  | U => (parent["data"]["position"]["x"], parent["data"]["position"]["x"])
+  | L => (
+      parent["data"]["position"]["x"] - nodeDistanceX,
+      parent["data"]["position"]["x"] - nodeDistanceX / 2,
+    )
+  | R => (
+      parent["data"]["position"]["x"] + nodeDistanceX,
+      parent["data"]["position"]["x"] + nodeDistanceX / 2,
+    )
   }
 
   switch term {
@@ -245,7 +252,7 @@ and generateGraphElements' = (
       (nodes, edges, n)
     }
   | App(t1, t2, a) => {
-      let baseId = prettyPrint(t1, ctx) ++ " @ " ++ prettyPrint(t2, ctx)
+      let baseId = prettyPrint(t1, ctx) ++ "_@_" ++ prettyPrint(t2, ctx)
 
       let node1 = createNode(nodes, "app_mid_" ++ baseId, ["midpoint"], mpPosX, mpPosY, "")
       let node2 = createNode(nodes, "app_" ++ baseId, ["application"], posX, posY, "@")
@@ -272,7 +279,7 @@ and generateGraphElements' = (
         ctx,
         dict,
         list{node1, node2, ...nodes},
-        edges,
+        list{edge1, edge2, ...edges},
         node2,
         APP,
         L,

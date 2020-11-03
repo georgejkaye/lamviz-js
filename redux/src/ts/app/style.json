@@ -1,0 +1,63 @@
+[
+    {
+      "selector": "node",
+      "style": {
+        "background-color": "black",
+        "height": "1",
+        "width": "1"
+      }
+    },
+    {
+        "selector": ".abstraction",
+        "style": {
+            "background-color": "blue",
+            "height": "2",
+            "width": "2"
+        }
+    },
+
+    {
+        "selector": ".application",
+        "style": {
+            "background-color": "red",
+            "width": "2",
+            "height": "2"
+        }
+    },
+
+    {
+        "selector": ".midpoint",
+        "style": {
+            "background-color": "gray",
+            "width": "1",
+            "height": "1"
+        }
+    },
+
+    {
+        "selector": ".support",
+        "style": {
+            "background-color": "gray",
+            "width": "1",
+            "height": "1"
+        }
+    },
+    {
+        "selector": ".top",
+        "style": {
+            "background-color": "gray",
+            "width": "1",
+            "height": "1"
+        }
+    },
+
+
+    {
+        "selector": "edge",
+        "style": {
+          "line-color": "black",
+          "label": "data(label)",
+          "width": "0.5"
+        }
+      }
+]

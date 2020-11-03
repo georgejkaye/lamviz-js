@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import CytoscapeComponent from "react-cytoscapejs"
 
 import { Term, Context } from "./../../../bs/Lambda.bs"
-import { generateGraphElementsArray } from "./../../../bs/Graph.bs"
+import { GraphNode, GraphEdge, generateGraphElementsArray } from "./../../../bs/Graph.bs"
 
 export enum Mode {
     VISUALISER, GALLERY
