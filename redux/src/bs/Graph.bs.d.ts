@@ -29,3 +29,5 @@ export interface GraphEdge {
 
 declare module "Graph.bs"
 export function generateGraphElementsArray(t: Term, ctx: Context): [cytoscape.ElementDefinition[], cytoscape.ElementDefinition[]]
+export const nodeDistanceX: number
+export const nodeDistanceY: number

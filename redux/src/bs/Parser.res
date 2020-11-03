@@ -139,7 +139,7 @@ let parse = (context, tokens) => {
 
 let lexAndParse = (term, context) => {
   let lexed = lexer(term)
-  let context = split(context, ' ')
+  let context = context == "" ? list{} : split(context, ' ')
   let parsed = parse(context, lexed)
   (parsed, context)
 }

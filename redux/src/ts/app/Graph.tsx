@@ -6,7 +6,7 @@ import CytoscapeComponent from "react-cytoscapejs"
 import { cloneDeep, isObject } from "lodash"
 
 import { stylesheet } from "./style.js"
-import { GraphEdge, GraphNode } from "../../bs/Graph.bs"
+import { GraphEdge, GraphNode, nodeDistanceX, nodeDistanceY } from "../../bs/Graph.bs"
 
 interface GraphProps {
     barWidth: number,
@@ -34,6 +34,17 @@ export default function Graph(props: GraphProps) {
         width: window.innerWidth - props.barWidth,
     });
 
+    function postGenerate() {
+
+        if (elements.length > 0) {
+            let highest = cy.nodes().reduce((h, e) => (h < e.position("x") ? h : e.position("x")), elements[0]["data"]["position"]["x"])
+            cy.elements(".top").position("y", highest)
+        }
+
+        cy.fit()
+        cy.minZoom(cy.zoom() - 0.5);
+    }
+
     useEffect(() => {
         cy.fit()
     }, [])
@@ -53,7 +64,7 @@ export default function Graph(props: GraphProps) {
                     cy.$("[id=\"" + elements[i].data["id"] + "\"]").position(elements[i].data["position"])
                 }
 
-                cy.fit()
+                postGenerate()
 
             }
         }

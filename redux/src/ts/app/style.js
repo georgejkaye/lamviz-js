@@ -6,24 +6,28 @@ export const stylesheet = [
             "height": "1",
             "width": "1",
             "label": "data(id)",
-            "font-size": 2
+            "font-size": 2,
         }
     },
     {
         "selector": ".abstraction",
         "style": {
-            "background-color": "blue",
+            "background-color": "#00D9FF",
             "height": "2",
-            "width": "2"
+            "width": "2",
+            "border-color": "black",
+            "border-width": 0.25
         }
     },
 
     {
         "selector": ".application",
         "style": {
-            "background-color": "red",
+            "background-color": "#cd5c5c",
             "width": "2",
-            "height": "2"
+            "height": "2",
+            "border-color": "black",
+            "border-width": 0.25
         }
     },
 
