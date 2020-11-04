@@ -6,44 +6,27 @@ import CytoscapeComponent from "react-cytoscapejs"
 import { cloneDeep, isObject } from "lodash"
 
 import { stylesheet } from "./style.js"
-import { GraphEdge, GraphNode, nodeDistanceX, nodeDistanceY } from "../../bs/Graph.bs"
+import { generateGraphElementsArray, GraphEdge, GraphNode, nodeDistanceX, nodeDistanceY } from "../../bs/Graph.bs"
+import { Term, Context, prettyPrint } from "../../bs/Lambda.bs"
 
 interface GraphProps {
-    barWidth: number,
-    barHeight: number
+    dimensions: { width: number, height: number }
+    graph: { term: Term, context: Context }
 }
-
-let focused: boolean = false;
-
-function onWheel(e: any) {
-    console.log("Scrolling");
-}
-
-type GraphElement = GraphNode | GraphEdge
 
 export default function Graph(props: GraphProps) {
-    var cy: cytoscape.Core;
 
-    const dispatch = useDispatch();
+    let cy: cytoscape.Core
 
-    const elements = useSelector((state: RootState) => state.currentState).currentElements
-    var [currentElements, setCurrentElements] = useState([])
-
-    const [dimensions, setDimensions] = useState({
-        height: window.innerHeight - props.barHeight,
-        width: window.innerWidth - props.barWidth,
-    });
-
-    function postGenerate() {
-
-        if (elements.length > 0) {
-            let highest = cy.nodes().reduce((h, e) => (h < e.position("y") ? h : e.position("y")), elements[0]["data"]["position"]["y"])
-            cy.elements(".top").position("y", highest - (nodeDistanceY / 2))
-        }
-
-        cy.fit()
-        cy.minZoom(cy.zoom() - 0.5);
+    function generateElements(term: Term, ctx: Context): cytoscape.ElementDefinition[] {
+        let [nodes, edges] = generateGraphElementsArray(term, ctx)
+        return nodes.concat(edges)
     }
+
+    let elems = props.graph.term != undefined ? generateElements(props.graph.term, props.graph.context) : []
+
+    const [elements, setElements] = useState([])
+    const [dimensions, setDimensions] = useState(props.dimensions)
 
     useEffect(() => {
         cy.fit()
@@ -51,48 +34,33 @@ export default function Graph(props: GraphProps) {
 
     useEffect(() => {
 
-        if (currentElements != [] && (elements != undefined || currentElements != elements)) {
+        cy.elements().remove()
 
-            setCurrentElements(elements)
+        if (props.graph.term != undefined) {
 
-            if (elements != undefined) {
+            console.log(prettyPrint(props.graph.term, props.graph.context))
+            let elements = generateElements(props.graph.term, props.graph.context)
 
-                cy.elements().remove()
-                cy.add(elements)
+            cy.add(elements)
 
-                for (var i = 0; i < elements.length; i++) {
-                    cy.$("[id=\"" + elements[i].data["id"] + "\"]").position(elements[i].data["position"])
-                }
+            /*for (var i = 0; i < elements.length; i++) {
+                cy.$("[id=\"" + elements[i].data["id"] + "\"]").position(elements[i].data["position"])
+            }*/
 
-                postGenerate()
-
+            if (elements.length > 0) {
+                let highest = cy.nodes().reduce((h, e) => (h < e.position("y") ? h : e.position("y")), elements[0]["data"]["position"]["y"])
+                cy.elements(".top").position("y", highest - (nodeDistanceY / 2))
             }
+
+            console.log("here")
+
+            cy.fit(cy.elements(), 25)
+            cy.minZoom(cy.zoom());
         }
-
-
-        const onResize = () => {
-
-            const height = window.innerHeight - props.barHeight
-            const width = window.innerWidth - props.barWidth
-
-            setDimensions({
-                width: width,
-                height: height
-            })
-
-            console.log("resized to: ", width, "x", height)
-        }
-
-        window.addEventListener("resize", onResize)
-
-        return () => {
-            window.removeEventListener("resize", onResize)
-        }
-
-    })
+    }, [props.graph])
 
     return (
-        <div className="graph" onWheel={onWheel}>
+        <div className="graph">
             <CytoscapeComponent
                 elements={[]}
                 style={dimensions}

@@ -7,7 +7,7 @@ type pos = {"x": int, "y": int}
 
 type nodedata = {"id": string, "label": string, "position": pos}
 
-type node = {"data": nodedata, "classes": array<string>}
+type node = {"data": nodedata, "position": pos, "classes": array<string>}
 
 type edgedata = {"id": string, "source": string, "target": string, "label": string}
 
@@ -47,6 +47,7 @@ let rec checkNodeId = (nodes, id) =>
 let createNode = (nodes, id, classes, x, y, label) =>
   {
     "data": {"id": checkNodeId(nodes, id), "label": label, "position": {"x": x, "y": y}},
+    "position": {"x": x, "y": y},
     "classes": classes,
   }
 
@@ -160,7 +161,6 @@ let rec generateGraphElements = (term, ctx) => {
     0,
   )
 
-  Js.log("Done!")
   (list{root, ...List.concat(list{nodes', nodes})}, List.concat(list{edges', edges}))
 }
 and generateGraphElements' = (
@@ -179,8 +179,6 @@ and generateGraphElements' = (
   abs,
   apps,
 ) => {
-  Js.log("Processing " ++ prettyPrint(term, ctx))
-
   let posY = parent["data"]["position"]["y"] - nodeDistanceY
   let mpPosY = parent["data"]["position"]["y"] - nodeDistanceY / 2
 

@@ -5,7 +5,7 @@ import { RootState } from "./reducers"
 import { Collapse } from "react-collapse"
 import parse from "html-react-parser"
 import Facts from "./Facts";
-import Graph from "./Graph"
+import BigGraph from "./BigGraph"
 import { Term, Context } from "../../bs/Lambda.bs"
 
 interface StageProps {
@@ -17,13 +17,7 @@ enum VisualiserMode {
     TERM, REDUCTIONS
 }
 
-interface HtmlProps {
-    term: Term
-    ctx: Context
-    deBruijn: boolean
-}
-
-export default function Stage(props: StageProps) {
+export default function Visualiser(props: StageProps) {
 
     const term = useSelector((state: RootState) => state.currentState).currentTerm
     const context = useSelector((state: RootState) => state.currentState).currentContext
@@ -42,7 +36,7 @@ export default function Stage(props: StageProps) {
                     </div>
                 </Collapse >
                 <div className="main-stage" style={{ height: "calc(100vh - " + String(props.barHeight) + "px)" }}>
-                    <Graph barWidth={props.barWidth} barHeight={props.barHeight} />
+                    <BigGraph barWidth={props.barWidth} barHeight={props.barHeight} />
                     <Facts />
                 </div>
             </Collapse>
