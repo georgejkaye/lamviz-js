@@ -97,7 +97,7 @@ a {
 }
 
 .inactive-tab {
-    transition: 0.2s;
+    transition: 0.5s;
     background-color: #004D66;
 }
 
