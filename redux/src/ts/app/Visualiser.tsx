@@ -5,27 +5,24 @@ import { RootState } from "./reducers"
 import { Collapse } from "react-collapse"
 import parse from "html-react-parser"
 import Facts from "./Facts";
-import BigGraph from "./BigGraph"
 import { Term, Context } from "../../bs/Lambda.bs"
-
-interface StageProps {
-    barWidth: number,
-    barHeight: number
-}
+import Graph from "./Graph"
 
 enum VisualiserMode {
     TERM, REDUCTIONS
 }
 
-export default function Visualiser(props: StageProps) {
+export default function Visualiser() {
 
     const term = useSelector((state: RootState) => state.currentState).currentTerm
     const context = useSelector((state: RootState) => state.currentState).currentContext
+    const screenDimensions = useSelector((state: RootState) => state.currentState).screenDimensions
+    const graphDimensions = useSelector((state: RootState) => state.currentState).graphDimensions
 
     const [visualiserMode, setVisualiserMode] = useState(VisualiserMode.TERM)
 
     return (
-        <div className="stage">
+        <div className="stage" >
             <div className="top-bar">
                 {term == undefined ? "" : parse(printHTML(term, false, context))}
             </div>
@@ -35,8 +32,10 @@ export default function Visualiser(props: StageProps) {
                         {term == undefined ? "" : parse(printHTML(term, true, context))}
                     </div>
                 </Collapse >
-                <div className="main-stage" style={{ height: "calc(100vh - " + String(props.barHeight) + "px)" }}>
-                    <BigGraph barWidth={props.barWidth} barHeight={props.barHeight} />
+                <div className="main-stage" style={{ height: String(graphDimensions.height) + "px" }}>
+                    <div className="main-graph">
+                        <Graph dimensions={graphDimensions} graph={{ term: term, context: context }} zoom />
+                    </div>
                     <Facts />
                 </div>
             </Collapse>

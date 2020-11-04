@@ -8,8 +8,10 @@ import { Term } from "../../bs/Lambda.bs"
 
 import Up from "../../svgs/up-chevron.svg"
 import Down from "../../svgs/down-chevron.svg"
+import Left from "../../svgs/left-chevron.svg"
+import Right from "../../svgs/right-chevron.svg"
 import { normalise } from "../../bs/Evaluator.bs";
-import { newTerm, updateTerm, resetTerm } from "./reducers/slice";
+import { newTerm, updateTerm, toggleFactsBar, resetTerm } from "./reducers/slice";
 
 enum StatType {
     VARIABLES,
@@ -118,6 +120,7 @@ export default function Facts() {
 
     const term = useSelector((state: RootState) => state.currentState).currentTerm
     const ctx = useSelector((state: RootState) => state.currentState).currentContext
+    const factsOpen = useSelector((state: RootState) => state.currentState).factsOpen
 
     const [betasOpen, setBetasOpen] = useState(false)
 
@@ -126,52 +129,61 @@ export default function Facts() {
     const normaliseButton = (e: React.MouseEvent<any>) => dispatch(updateTerm(normalise(term)))
     const resetButton = (e: React.MouseEvent<any>) => dispatch(resetTerm())
 
-    return (term == undefined ? <div className="facts"></div> :
-        <div className="facts">
-            <div className="properties">
-                <div className={"property " + (linear(term) ? "yes" : "no")}>Linear </div>
-                <div className={"property " + (planar(term) ? "yes" : "no")}>Planar </div>
+    const toggleBar = () => {
+        dispatch(toggleFactsBar(!factsOpen))
+    }
+
+    return (
+        <div className="facts-panel">
+            <div className="toggle-bar" onClick={(e) => toggleBar()}>
+                <div><img src={factsOpen ? Right : Left} className={"lr-icon"} alt={factsOpen ? "\u2b9e" : "\u2b9c"} /></div>
             </div>
-            <div className="properties">
-                <div className={"property " + (closed(term) ? "yes" : "no")}>Closed </div>
-                <div className={"property " + (bridgeless(term) ? "yes" : "no")}>Bridgeless </div>
-            </div>
-            <div className="stats">
-                <StatBox term={term} stat={StatType.SUBTERMS} />
-                <StatBox term={term} stat={StatType.VARIABLES} />
-                <StatBox term={term} stat={StatType.UNIQUE_VARIABLES} />
-                <StatBox term={term} stat={StatType.FREE_VARIABLES} />
-                <StatBox term={term} stat={StatType.ABSTRACTIONS} />
-                <StatBox term={term} stat={StatType.APPLICATIONS} />
-                <StatBox term={term} stat={StatType.CROSSINGS} />
-                <StatBox term={term} stat={StatType.BRIDGES} />
-            </div>
-            <div className="betas-header" onClick={(e) => setBetasOpen(!betasOpen)}>
-                <div className="expand-arrow"><img src={betasOpen ? Up : Down} className={"icon" + (betaRedexes(term) == 0 ? " hidden" : "")} alt={betasOpen ? "\u2191" : "\u2193"} /></div>
-                <div className="beta-text fact-text">Beta redexes</div>
-                <div className="fact-value">{String(betaRedexes(term))}</div>
-            </div>
-            <Collapse isOpened={betasOpen}>
-                <div className="redexes">
-                    {printRedexesArray(term, ctx).map((r, i) => <div className="redex" onMouseOver={(e) => highlightRedex(i)} onMouseLeave={(e) => unhighlightRedex(i)}>{r}</div>)}
-                </div>
-            </Collapse>
-            <div className="normalisation">
-                <div className="normalisation-row">
-                    <button type="button" className="normalisation-button" onClick={normaliseButton}>Normalise</button>
-                    <button type="button" className="normalisation-button" onClick={resetButton}>Reset</button>
-                </div>
-                <div className="normalisation-row">
-                    <button type="button" className="normalisation-button">Reduce</button>
-                    <select name="strategy" id="strategy" className="normalisation-button">
-                        <option value="outermost">Outermost</option>
-                        <option value="innermost">Innermost</option>"
+            {(term == undefined
+                ? <div className={factsOpen ? "facts" : "facts closed"}></div>
+                : <div className={factsOpen ? "facts" : "facts closed"}>
+                    <div className="properties">
+                        <div className={"property " + (linear(term) ? "yes" : "no")}>Linear </div>
+                        <div className={"property " + (planar(term) ? "yes" : "no")}>Planar </div>
+                    </div>
+                    <div className="properties">
+                        <div className={"property " + (closed(term) ? "yes" : "no")}>Closed </div>
+                        <div className={"property " + (bridgeless(term) ? "yes" : "no")}>Bridgeless </div>
+                    </div>
+                    <div className="stats">
+                        <StatBox term={term} stat={StatType.SUBTERMS} />
+                        <StatBox term={term} stat={StatType.VARIABLES} />
+                        <StatBox term={term} stat={StatType.UNIQUE_VARIABLES} />
+                        <StatBox term={term} stat={StatType.FREE_VARIABLES} />
+                        <StatBox term={term} stat={StatType.ABSTRACTIONS} />
+                        <StatBox term={term} stat={StatType.APPLICATIONS} />
+                        <StatBox term={term} stat={StatType.CROSSINGS} />
+                        <StatBox term={term} stat={StatType.BRIDGES} />
+                    </div>
+                    <div className="betas-header" onClick={(e) => setBetasOpen(!betasOpen)}>
+                        <div className="expand-arrow"><img src={betasOpen ? Up : Down} className={"icon" + (betaRedexes(term) == 0 ? " hidden" : "")} alt={betasOpen ? "\u2191" : "\u2193"} /></div>
+                        <div className="beta-text fact-text">Beta redexes</div>
+                        <div className="fact-value">{String(betaRedexes(term))}</div>
+                    </div>
+                    <Collapse isOpened={betasOpen}>
+                        <div className="redexes">
+                            {printRedexesArray(term, ctx).map((r, i) => <div className="redex" onMouseOver={(e) => highlightRedex(i)} onMouseLeave={(e) => unhighlightRedex(i)}>{r}</div>)}
+                        </div>
+                    </Collapse>
+                    <div className="normalisation">
+                        <div className="normalisation-row">
+                            <button type="button" className="normalisation-button" onClick={normaliseButton}>Normalise</button>
+                            <button type="button" className="normalisation-button" onClick={resetButton}>Reset</button>
+                        </div>
+                        <div className="normalisation-row">
+                            <button type="button" className="normalisation-button">Reduce</button>
+                            <select name="strategy" id="strategy" className="normalisation-button">
+                                <option value="outermost">Outermost</option>
+                                <option value="innermost">Innermost</option>"
                     <option value="random">Random</option>
-                    </select>
-                </div>
-            </div>
-
+                            </select>
+                        </div>
+                    </div>
+                </div>)}
         </div >
-
     )
 }

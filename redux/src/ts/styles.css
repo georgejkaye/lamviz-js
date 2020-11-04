@@ -164,26 +164,49 @@ button:hover {
 }
 
 .graph {
-    flex: 1;
-    background-color: #9c9c9c
+    background-color: #9c9c9c;
 }
 
 .main-stage {
     display: flex;
 }
 
+.main-graph {
+    flex: 1;
+}
+
+.facts-panel {
+    display: flex;
+}
+
+.toggle-bar {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    cursor: pointer;
+    width: 20px;
+}
+
+.toggle-bar:hover {
+    background-color: #227DAA;
+}
+
 .facts {
-    width: 350px;
+    flex: 1;
     background-color: #00171F;
     font-family: 'Roboto Mono', monospace;
     overflow-y: auto;
+    width: 330px;
+}
+
+.closed {
+    width: 0;
 }
 
 .fact {
     display: flex;
-    font-size: 1.5em;
+    font-size: 1.4em;
     margin: 10px;
-
 }
 
 .fact-text {
@@ -231,6 +254,12 @@ button:hover {
     height: 15px;
     width: 15px;
     margin-right: 10px;
+}
+
+.lr-icon {
+    height: 15px;
+    width: 15px;
+    margin-left: 3px;
 }
 
 .beta-text {

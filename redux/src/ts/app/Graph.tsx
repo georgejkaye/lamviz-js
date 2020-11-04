@@ -12,6 +12,7 @@ import { Term, Context, prettyPrint } from "../../bs/Lambda.bs"
 interface GraphProps {
     dimensions: { width: number, height: number }
     graph: { term: Term, context: Context }
+    zoom: boolean
 }
 
 export default function Graph(props: GraphProps) {
@@ -23,10 +24,7 @@ export default function Graph(props: GraphProps) {
         return nodes.concat(edges)
     }
 
-    let elems = props.graph.term != undefined ? generateElements(props.graph.term, props.graph.context) : []
-
-    const [elements, setElements] = useState([])
-    const [dimensions, setDimensions] = useState(props.dimensions)
+    const graphDimensions = useSelector((state: RootState) => state.currentState).graphDimensions
 
     useEffect(() => {
         cy.fit()
@@ -43,10 +41,6 @@ export default function Graph(props: GraphProps) {
 
             cy.add(elements)
 
-            /*for (var i = 0; i < elements.length; i++) {
-                cy.$("[id=\"" + elements[i].data["id"] + "\"]").position(elements[i].data["position"])
-            }*/
-
             if (elements.length > 0) {
                 let highest = cy.nodes().reduce((h, e) => (h < e.position("y") ? h : e.position("y")), elements[0]["data"]["position"]["y"])
                 cy.elements(".top").position("y", highest - (nodeDistanceY / 2))
@@ -54,16 +48,17 @@ export default function Graph(props: GraphProps) {
 
             console.log("here")
 
-            cy.fit(cy.elements(), 25)
-            cy.minZoom(cy.zoom());
+            cy.fit()
+            cy.minZoom(cy.zoom() - 10);
         }
     }, [props.graph])
 
+
     return (
-        <div className="graph">
+        <div key={props.dimensions.width} className="graph">
             <CytoscapeComponent
                 elements={[]}
-                style={dimensions}
+                style={graphDimensions}
                 stylesheet={stylesheet}
                 cy={(cyObj) => { cy = cyObj }}
             />
