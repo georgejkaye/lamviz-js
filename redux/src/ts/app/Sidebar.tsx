@@ -8,8 +8,6 @@ import { lexAndParse } from "../../bs/Parser.bs";
 
 export default function Sidebar() {
 
-    const tex = "\\lambda x.\\lambda y \\lambda z. x (y z)"
-
     const dispatch = useDispatch()
     const mode = useSelector((state: RootState) => state.currentState).mode
     const error = useSelector((state: RootState) => state.currentState).error
@@ -45,8 +43,9 @@ export default function Sidebar() {
     const generateButton = () => {
         if (termText != "") {
             try {
-                let [term, context] = lexAndParse(termText, contextText)
-                dispatch(newTerm([termText, contextText, term, context]))
+                let contextTextTrimmed = contextText.trim()
+                let [term, context] = lexAndParse(termText, contextTextTrimmed)
+                dispatch(newTerm([termText, contextTextTrimmed, term, context]))
             } catch (e) {
                 dispatch(newError(e._1))
             }

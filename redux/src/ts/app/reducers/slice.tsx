@@ -40,6 +40,8 @@ const getGraphWidth = (dimensions: Dimensions, facts: boolean) => dimensions.wid
 const getGraphHeight = (dimensions: Dimensions) => dimensions.height - (topHeight + subtopHeight + toggleHeight)
 const getGraphDimensions = (dimensions: Dimensions, facts: boolean) => ({ width: getGraphWidth(dimensions, facts), height: getGraphHeight(dimensions) })
 
+const factsOpenCheck = () => window.innerWidth > 1500
+
 const initialState: State = {
     mode: Mode.VISUALISER,
     currentTermText: "",
@@ -48,8 +50,8 @@ const initialState: State = {
     originalTerm: undefined,
     currentContext: undefined,
     screenDimensions: { width: window.innerWidth, height: window.innerHeight },
-    graphDimensions: getGraphDimensions({ width: window.innerWidth, height: window.innerHeight }, true),
-    factsOpen: true,
+    graphDimensions: getGraphDimensions({ width: window.innerWidth, height: window.innerHeight }, factsOpenCheck()),
+    factsOpen: factsOpenCheck(),
     error: ""
 }
 
@@ -60,7 +62,7 @@ export const slice = createSlice({
         changeMode: (state, action: PayloadAction<Mode>) =>
             state = { ...state, mode: action.payload },
         resize: (state, action: PayloadAction<Dimensions>) =>
-            state = { ...state, screenDimensions: action.payload, graphDimensions: getGraphDimensions(action.payload, state.factsOpen) },
+            state = { ...state, screenDimensions: action.payload, factsOpen: factsOpenCheck(), graphDimensions: getGraphDimensions(action.payload, factsOpenCheck()) },
         newTerm: (state, action: PayloadAction<[string, string, Term, Context]>) =>
             state = { ...state, currentTermText: action.payload[0], currentContextText: action.payload[1], currentTerm: action.payload[2], originalTerm: action.payload[2], currentContext: action.payload[3], error: "" },
         newError: (state, action: PayloadAction<string>) =>

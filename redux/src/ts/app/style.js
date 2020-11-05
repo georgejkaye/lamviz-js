@@ -5,7 +5,7 @@ export const stylesheet = [
             "background-color": "black",
             "height": "1",
             "width": "1",
-            "label": "data(id)",
+            "label": "",
             "font-size": 2,
         }
     },
@@ -34,16 +34,17 @@ export const stylesheet = [
     {
         "selector": ".midpoint",
         "style": {
-            "background-color": "gray",
-            "width": "1",
-            "height": "1"
+            "background-color": "black",
+            "width": "0.75",
+            "height": "0.75"
         }
     },
 
     {
         "selector": ".support",
         "style": {
-            "background-color": "gray",
+            "background-color": "black",
+            "shape": "round-rectangle",
             "width": "1",
             "height": "1"
         }
@@ -51,7 +52,8 @@ export const stylesheet = [
     {
         "selector": ".top",
         "style": {
-            "background-color": "gray",
+            "background-color": "black",
+            "shape": "round-rectangle",
             "width": "1",
             "height": "1"
         }
@@ -61,7 +63,7 @@ export const stylesheet = [
         "style": {
             "line-color": "black",
             "label": "data(label)",
-            "width": "0.5"
+            "width": "0.5",
         }
     },
     {
@@ -80,8 +82,16 @@ export const stylesheet = [
             },
             "control-point-weights": "0.5",
             "loop-direction": "45deg",
-            "edge-distances": "node-position",
+            "source-endpoint": "0 0",
+            "target-endpoint": "0 0"
 
         }
     },
+    {
+        selector: ".alert",
+        style: {
+            "background-color": "red",
+            "line-color": "red"
+        }
+    }
 ]

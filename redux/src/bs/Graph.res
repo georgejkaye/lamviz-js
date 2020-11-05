@@ -27,7 +27,7 @@ let nid = (ntype, n) => {
   | VAR_MP => "var_mp"
   | VAR_TOP => "var_top"
   | FREE => "free"
-  | ROOT => ">"
+  | ROOT => "root"
   }
   prefix ++ "_" ++ str(n)
 }
@@ -99,10 +99,10 @@ let shiftNodeX = (nodes, x) =>
   )
 
 let rec generateFreeVariableElements = (ctx, dict) =>
-  generateFreeVariableElements'(ctx, dict, list{}, list{}, 0)
-and generateFreeVariableElements' = (ctx, dict, nodes, edges, n) => {
+  generateFreeVariableElements'(ctx, dict, list{}, list{}, list{}, 0)
+and generateFreeVariableElements' = (ctx, dict, nodes, edges, frees, n) => {
   switch ctx {
-  | list{} => (nodes, edges, dict, n)
+  | list{} => (nodes, edges, dict, frees, n)
   | list{x, ...xs} => {
       let node1 = createNode(nodes, nid(ABS, n), ["abstraction", "free"], 0, 0, "")
       let node2 = createNode(nodes, nid(ABS_SP, n), ["support", "free"], 0, 0, "")
@@ -130,6 +130,7 @@ and generateFreeVariableElements' = (ctx, dict, nodes, edges, n) => {
         dict,
         list{node1, node2, node3, ...nodes},
         list{edge1, edge2, ...edges},
+        list{(node1["data"]["id"], node2["data"]["id"], node3["data"]["id"]), ...frees},
         n + 1,
       )
     }
@@ -140,9 +141,9 @@ let nodeDistanceX = 5
 let nodeDistanceY = 5
 
 let rec generateGraphElements = (term, ctx) => {
-  let (nodes, edges, dict, n) = generateFreeVariableElements(ctx, list{})
+  let (nodes, edges, dict, frees, n) = generateFreeVariableElements(ctx, list{})
 
-  let root = createNode(nodes, ">", ["root"], 0, 0, "")
+  let root = createNode(nodes, "root", ["root"], 0, 0, "")
 
   let (nodes', edges', midpoints, _, _, _) = generateGraphElements'(
     term,
@@ -161,7 +162,12 @@ let rec generateGraphElements = (term, ctx) => {
     0,
   )
 
-  (list{root, ...List.concat(list{nodes', nodes})}, List.concat(list{edges', edges}), midpoints)
+  (
+    list{root, ...List.concat(list{nodes', nodes})},
+    List.concat(list{edges', edges}),
+    frees,
+    midpoints,
+  )
 }
 and generateGraphElements' = (
   term,
@@ -430,6 +436,6 @@ and generateGraphElements' = (
 }
 
 let generateGraphElementsArray = (term, ctx) => {
-  let (nodes, edges, midpoints) = generateGraphElements(term, ctx)
-  (Array.of_list(nodes), Array.of_list(edges), Array.of_list(midpoints))
+  let (nodes, edges, frees, midpoints) = generateGraphElements(term, ctx)
+  (Array.of_list(nodes), Array.of_list(edges), Array.of_list(frees), Array.of_list(midpoints))
 }

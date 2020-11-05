@@ -1,8 +1,6 @@
 let str = string_of_int
 let int = int_of_string
 
-//let rec mod = (x, y) => x < y ? x : mod(x - y, y)
-
 let rec split = (s, c) => {
   switch String.index(s, c) {
   | exception Not_found => list{s}
