@@ -144,7 +144,7 @@ let rec generateGraphElements = (term, ctx) => {
 
   let root = createNode(nodes, ">", ["root"], 0, 0, "")
 
-  let (nodes', edges', _, _, _) = generateGraphElements'(
+  let (nodes', edges', midpoints, _, _, _) = generateGraphElements'(
     term,
     ctx,
     dict,
@@ -161,7 +161,7 @@ let rec generateGraphElements = (term, ctx) => {
     0,
   )
 
-  (list{root, ...List.concat(list{nodes', nodes})}, List.concat(list{edges', edges}))
+  (list{root, ...List.concat(list{nodes', nodes})}, List.concat(list{edges', edges}), midpoints)
 }
 and generateGraphElements' = (
   term,
@@ -235,7 +235,17 @@ and generateGraphElements' = (
         nid(ABS_TOP, x),
         "",
       )
-      (list{node1, node2, node3}, list{edge1, edge2, edge3, edge4}, vars + 1, abs, apps)
+
+      let midpoint = (node1["data"]["id"], parent["data"]["id"], node2["data"]["id"])
+
+      (
+        list{node1, node2, node3},
+        list{edge1, edge2, edge3, edge4},
+        list{midpoint},
+        vars + 1,
+        abs,
+        apps,
+      )
     }
   | Abs(t, x, a) => {
       let node1 = createNode(nodes, nid(ABS_MP, abs), ["midpoint"], mpPosX, mpPosY, "")
@@ -306,12 +316,15 @@ and generateGraphElements' = (
         "",
       )
 
+      let midpoint1 = (node1["data"]["id"], parent["data"]["id"], node2["data"]["id"])
+      let midpoint2 = (node3["data"]["id"], node2["data"]["id"], node4["data"]["id"])
+
       let nnodes = list{node1, node2, node3, node4, node5}
       let nedges = list{edge1, edge2, edge3, edge4, edge5}
 
       let nodes = List.concat(list{nnodes, nodes})
       let edges = List.concat(list{nedges, edges})
-      let (snodes, sedges, vars', abs', apps') = generateGraphElements'(
+      let (snodes, sedges, smps, vars', abs', apps') = generateGraphElements'(
         t,
         list{x, ...ctx},
         list{(abs, true), ...dict},
@@ -332,7 +345,14 @@ and generateGraphElements' = (
       let snodes =
         srightmost >= posX ? shiftNodeX(snodes, -(srightmost - posX) - nodeDistanceX) : snodes
 
-      (List.concat(list{snodes, nnodes}), List.concat(list{sedges, nedges}), vars', abs', apps')
+      (
+        List.concat(list{snodes, nnodes}),
+        List.concat(list{sedges, nedges}),
+        list{midpoint1, midpoint2, ...smps},
+        vars',
+        abs',
+        apps',
+      )
     }
   | App(t1, t2, a) => {
       let node1 = createNode(nodes, nid(APP_MP, apps), ["midpoint"], mpPosX, mpPosY, "")
@@ -355,7 +375,9 @@ and generateGraphElements' = (
         "",
       )
 
-      let (lnodes, ledges, vars', abs', apps') = generateGraphElements'(
+      let midpoint = (node1["data"]["id"], parent["data"]["id"], node2["data"]["id"])
+
+      let (lnodes, ledges, lmps, vars', abs', apps') = generateGraphElements'(
         t1,
         ctx,
         dict,
@@ -371,7 +393,7 @@ and generateGraphElements' = (
         abs,
         apps + 1,
       )
-      let (rnodes, redges, vars'', abs'', apps'') = generateGraphElements'(
+      let (rnodes, redges, rmps, vars'', abs'', apps'') = generateGraphElements'(
         t2,
         ctx,
         dict,
@@ -398,6 +420,7 @@ and generateGraphElements' = (
       (
         List.concat(list{lnodes, rnodes, list{node1, node2}}),
         List.concat(list{ledges, redges, list{edge1, edge2}}),
+        list{midpoint, ...List.concat(list{lmps, rmps})},
         vars'',
         abs'',
         apps'',
@@ -407,6 +430,6 @@ and generateGraphElements' = (
 }
 
 let generateGraphElementsArray = (term, ctx) => {
-  let (nodes, edges) = generateGraphElements(term, ctx)
-  (Array.of_list(nodes), Array.of_list(edges))
+  let (nodes, edges, midpoints) = generateGraphElements(term, ctx)
+  (Array.of_list(nodes), Array.of_list(edges), Array.of_list(midpoints))
 }

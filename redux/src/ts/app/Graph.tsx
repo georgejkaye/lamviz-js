@@ -19,9 +19,9 @@ export default function Graph(props: GraphProps) {
 
     let cy: cytoscape.Core
 
-    function generateElements(term: Term, ctx: Context): cytoscape.ElementDefinition[] {
-        let [nodes, edges] = generateGraphElementsArray(term, ctx)
-        return nodes.concat(edges)
+    function generateElements(term: Term, ctx: Context): [cytoscape.ElementDefinition[], [string, string, string]] {
+        let [nodes, edges, mps] = generateGraphElementsArray(term, ctx)
+        return [nodes.concat(edges), mps]
     }
 
     const graphDimensions = useSelector((state: RootState) => state.currentState).graphDimensions
@@ -37,7 +37,7 @@ export default function Graph(props: GraphProps) {
         if (props.graph.term != undefined) {
 
             console.log(prettyPrint(props.graph.term, props.graph.context))
-            let elements = generateElements(props.graph.term, props.graph.context)
+            let [elements, mps] = generateElements(props.graph.term, props.graph.context)
 
             cy.add(elements)
 
@@ -45,6 +45,14 @@ export default function Graph(props: GraphProps) {
                 let highest = cy.nodes().reduce((h, e) => (h < e.position("y") ? h : e.position("y")), elements[0]["data"]["position"]["y"])
                 cy.elements(".top").position("y", highest - (nodeDistanceY / 2))
             }
+
+            for (var i = 0; i < mps.length; i++) {
+
+                var pos1 = cy.$("#" + mps[i][1]).position()
+                var pos2 = cy.$("#" + mps[i][2]).position()
+                cy.$("#" + mps[i][0]).position({ x: (pos1.x + pos2.x) / 2, y: (pos1.y + pos2.y) / 2 })
+            }
+
 
             console.log("here")
 
