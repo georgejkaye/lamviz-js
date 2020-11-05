@@ -1,39 +1,39 @@
 Arguments: 
-  /usr/bin/node /usr/share/yarn/bin/yarn.js add @types/react-mathjax2
+  /usr/bin/node /usr/share/yarn/bin/yarn.js add @types/canvas2svg
 
 PATH: 
-  /home/george/apps/Isabelle2020/bin:/home/george/apps/lean-3.4.2-linux/bin:/usr/local/texlive/2020/bin/x86_64-linux:/home/george/.yarn/bin:/home/george/.cabal/bin:/home/george/.local/bin:/home/george/gems/bin:/home/george/.opam/4.10.0/bin:/home/george/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+  /home/george/.cabal/bin:/home/george/.ghcup/bin:/home/george/apps/Lava2000/Bin:/home/george/apps/Isabelle2020/bin:/home/george/apps/lean-3.4.2-linux/bin:/usr/local/texlive/2020/bin/x86_64-linux:/home/george/.yarn/bin:/home/george/.cabal/bin:/home/george/.local/bin:/home/george/gems/bin:/home/george/.cabal/bin:/home/george/.ghcup/bin:/home/george/apps/Lava2000/Bin:/home/george/apps/Isabelle2020/bin:/home/george/apps/lean-3.4.2-linux/bin:/usr/local/texlive/2020/bin/x86_64-linux:/home/george/.yarn/bin:/home/george/.cabal/bin:/home/george/.local/bin:/home/george/gems/bin:/home/george/.opam/4.06.0/bin:/home/george/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
 
 Yarn version: 
   1.22.4
 
 Node version: 
-  10.19.0
+  15.0.1
 
 Platform: 
   linux x64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/@types%2freact-mathjax2: Not found
+  Error: https://registry.yarnpkg.com/@types%2fcanvas2svg: Not found
       at Request.params.callback [as _callback] (/usr/share/yarn/lib/cli.js:66987:18)
       at Request.self.callback (/usr/share/yarn/lib/cli.js:140748:22)
-      at Request.emit (events.js:198:13)
+      at Request.emit (node:events:327:20)
       at Request.<anonymous> (/usr/share/yarn/lib/cli.js:141720:10)
-      at Request.emit (events.js:198:13)
+      at Request.emit (node:events:327:20)
       at IncomingMessage.<anonymous> (/usr/share/yarn/lib/cli.js:141642:12)
-      at Object.onceWrapper (events.js:286:20)
-      at IncomingMessage.emit (events.js:203:15)
-      at endReadableNT (_stream_readable.js:1145:12)
-      at process._tickCallback (internal/process/next_tick.js:63:19)
+      at Object.onceWrapper (node:events:433:28)
+      at IncomingMessage.emit (node:events:339:22)
+      at endReadableNT (node:internal/streams/readable:1289:12)
+      at processTicksAndRejections (node:internal/process/task_queues:80:21)
 
 npm manifest: 
   {
-    "name": "uk-station-network",
-    "version": "0.0.1",
-    "description": "A graph of all UK stations and connections between them",
+    "name": "lambda-visualiser",
+    "version": "2.0.0",
+    "description": "A visualiser for linear lambda terms as rooted trivalent maps",
     "scripts": {
-      "build": "webpack",
-      "start": "webpack-dev-server --open"
+      "build": "webpack & bsb",
+      "start": "webpack-dev-server --open & bsb -w"
     },
     "private": true,
     "main": "main.js",
@@ -44,6 +44,7 @@ npm manifest:
       "@reduxjs/toolkit": "^1.4.0",
       "@types/classnames": "^2.2.10",
       "@types/jest": "^26.0.13",
+      "@types/lodash": "^4.14.164",
       "@types/node": "^14.6.3",
       "@types/react": "^16.9.49",
       "@types/react-autosuggest": "^10.0.0",
@@ -57,18 +58,25 @@ npm manifest:
       "@types/webpack": "^4.41.22",
       "@types/webpack-dev-server": "^3.11.0",
       "awesome-typescript-loader": "^5.2.1",
+      "bs-platform": "^8.3.1",
+      "canvas2svg": "^1.0.16",
       "classnames": "^2.2.6",
       "css-loader": "^4.2.2",
       "cytoscape": "3.2.19",
+      "cytoscape-cxtmenu": "^3.2.0",
+      "cytoscape-svg": "^0.3.1",
+      "cytoscape-undo-redo": "^1.3.3",
       "file-loader": "^6.1.0",
+      "html-react-parser": "^0.14.0",
       "html-webpack-plugin": "^4.4.1",
+      "lodash": "^4.17.20",
       "mini-css-extract-plugin": "^0.11.0",
       "react": "^16.13.1",
       "react-autosuggest": "^10.0.2",
       "react-collapse": "^5.0.1",
       "react-cytoscapejs": "^1.2.1",
       "react-dom": "^16.13.1",
-      "react-mathjax2": "^0.0.2",
+      "react-mathjax-ts": "^0.1.2",
       "react-redux": "^7.2.1",
       "react-transition-group": "^4.4.1",
       "source-map-loader": "^1.1.0",
@@ -157,6 +165,18 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/@types/cytoscape/-/cytoscape-3.14.8.tgz#edad330ed25464750bb77241ab163b840e0f3545"
     integrity sha512-Om2mlbmtUrl4Cmm7YvbzhJCcHu6sRlTb+w75mcEOi8rXAebyL/AoFWrQiUl839zBrd85eOERx9gdAkJsVBzirQ==
   
+  "@types/domhandler@*", "@types/domhandler@2.4.1":
+    version "2.4.1"
+    resolved "https://registry.yarnpkg.com/@types/domhandler/-/domhandler-2.4.1.tgz#7b3b347f7762180fbcb1ece1ce3dd0ebbb8c64cf"
+    integrity sha512-cfBw6q6tT5sa1gSPFSRKzF/xxYrrmeiut7E0TxNBObiLSBTuFEHibcfEe3waQPEDbqBsq+ql/TOniw65EyDFMA==
+  
+  "@types/domutils@*":
+    version "1.7.3"
+    resolved "https://registry.yarnpkg.com/@types/domutils/-/domutils-1.7.3.tgz#890de5a79d86896e9e6a7445a43c9512e62d6f04"
+    integrity sha512-EucnS75OnnEdypNt+UpARisSF8eJBq4no+aVOis3Bs5kyABDXm1hEDv6jJxcMJPjR+a2YCrEANaW+BMT2QVG2Q==
+    dependencies:
+      domhandler "^2.4.0"
+  
   "@types/express-serve-static-core@*":
     version "4.17.13"
     resolved "https://registry.yarnpkg.com/@types/express-serve-static-core/-/express-serve-static-core-4.17.13.tgz#d9af025e925fc8b089be37423b8d1eac781be084"
@@ -196,6 +216,15 @@ Lockfile:
     version "5.1.1"
     resolved "https://registry.yarnpkg.com/@types/html-minifier-terser/-/html-minifier-terser-5.1.1.tgz#3c9ee980f1a10d6021ae6632ca3e79ca2ec4fb50"
     integrity sha512-giAlZwstKbmvMk1OO7WXSj4OZ0keXAcl2TQq4LWHiiPH2ByaH7WeUzng+Qej8UPxxv+8lRTuouo0iaNDBuzIBA==
+  
+  "@types/htmlparser2@3.10.1":
+    version "3.10.1"
+    resolved "https://registry.yarnpkg.com/@types/htmlparser2/-/htmlparser2-3.10.1.tgz#1e65ba81401d53f425c1e2ba5a3d05c90ab742c7"
+    integrity sha512-fCxmHS4ryCUCfV9+CJZY1UjkbR+6Al/EQdX5Jh03qBj9gdlPG5q+7uNoDgE/ZNXb3XNWSAQgqKIWnbRCbOyyWA==
+    dependencies:
+      "@types/domhandler" "*"
+      "@types/domutils" "*"
+      "@types/node" "*"
   
   "@types/http-proxy-middleware@*":
     version "0.19.3"
@@ -245,6 +274,11 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/@types/json-schema/-/json-schema-7.0.6.tgz#f4c7ec43e81b319a9815115031709f26987891f0"
     integrity sha512-3c+yGKvVP5Y9TYBEibGNR+kLtijnj7mYrXRg+WpFb2X9xm04g/DXYkfg4hmzJQosc9snFNUPkbYIhu+KAm6jJw==
   
+  "@types/lodash@^4.14.164":
+    version "4.14.164"
+    resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.164.tgz#52348bcf909ac7b4c1bcbeda5c23135176e5dfa0"
+    integrity sha512-fXCEmONnrtbYUc5014avwBeMdhHHO8YJCkOBflUL9EoJBSKZ1dei+VO74fA7JkTHZ1GvZack2TyIw5U+1lT8jg==
+  
   "@types/mime@*":
     version "2.0.3"
     resolved "https://registry.yarnpkg.com/@types/mime/-/mime-2.0.3.tgz#c893b73721db73699943bfc3653b1deb7faa4a3a"
@@ -259,6 +293,11 @@ Lockfile:
     version "14.14.2"
     resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.2.tgz#d25295f9e4ca5989a2c610754dc02a9721235eeb"
     integrity sha512-jeYJU2kl7hL9U5xuI/BhKPZ4vqGM/OmK6whiFAXVhlstzZhVamWhDSmHyGLIp+RVyuF9/d0dqr2P85aFj4BvJg==
+  
+  "@types/node@^12.12.3":
+    version "12.19.1"
+    resolved "https://registry.yarnpkg.com/@types/node/-/node-12.19.1.tgz#303f74c8a2b35644594139e948b2be470ae1186f"
+    integrity sha512-/xaVmBBjOGh55WCqumLAHXU9VhjGtmyTGqJzFBXRWZzByOXI5JAJNx9xPVGEsNizrNwcec92fQMj458MWfjN1A==
   
   "@types/prop-types@*":
     version "15.7.3"
@@ -344,7 +383,7 @@ Lockfile:
     dependencies:
       "@types/react" "*"
   
-  "@types/react@*", "@types/react@^16.9.49":
+  "@types/react@*", "@types/react@^16.9.11", "@types/react@^16.9.49":
     version "16.9.53"
     resolved "https://registry.yarnpkg.com/@types/react/-/react-16.9.53.tgz#40cd4f8b8d6b9528aedd1fff8fcffe7a112a3d23"
     integrity sha512-4nW60Sd4L7+WMXH1D6jCdVftuW7j4Za6zdp6tJ33Rqv0nk1ZAmQKML9ZLD4H0dehA3FZxXR/GM8gXplf82oNGw==
@@ -980,6 +1019,11 @@ Lockfile:
     dependencies:
       pako "~1.0.5"
   
+  bs-platform@^8.3.1:
+    version "8.3.1"
+    resolved "https://registry.yarnpkg.com/bs-platform/-/bs-platform-8.3.1.tgz#49ac0d7b84bcec190a7361353557cae965f92c67"
+    integrity sha512-U7nKEGF1BfvODzcv1g2loeltE8YRCgX8mMlCojImsgI0HwfQKEq7ggO5dF1ae9ZfFxiLaI0069ZyoK5GLBO2OQ==
+  
   buffer-from@^1.0.0:
     version "1.1.1"
     resolved "https://registry.yarnpkg.com/buffer-from/-/buffer-from-1.1.1.tgz#32713bc028f75c02fdb710d7c7bcec1f2c6070ef"
@@ -1072,6 +1116,11 @@ Lockfile:
     version "6.1.0"
     resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-6.1.0.tgz#27dc176173725fb0adf8a48b647f4d7871944d78"
     integrity sha512-WCMml9ivU60+8rEJgELlFp1gxFcEGxwYleE3bziHEDeqsqAWGHdimB7beBFGjLzVNgPGyDsfgXLQEYMpmIFnVQ==
+  
+  canvas2svg@^1.0.16:
+    version "1.0.16"
+    resolved "https://registry.yarnpkg.com/canvas2svg/-/canvas2svg-1.0.16.tgz#0814c53bbab7c3406e7387279cdf257fe4f6f2bd"
+    integrity sha1-CBTFO7q3w0Buc4cnnN8lf+T28r0=
   
   chalk@^2.0.1, chalk@^2.1.0, chalk@^2.4.1, chalk@^2.4.2:
     version "2.4.2"
@@ -1428,6 +1477,21 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/cyclist/-/cyclist-1.0.1.tgz#596e9698fd0c80e12038c2b82d6eb1b35b6224d9"
     integrity sha1-WW6WmP0MgOEgOMK4LW6xs1tiJNk=
   
+  cytoscape-cxtmenu@^3.2.0:
+    version "3.2.0"
+    resolved "https://registry.yarnpkg.com/cytoscape-cxtmenu/-/cytoscape-cxtmenu-3.2.0.tgz#24b86c785ee74f40a3b73d0b77fd061f72bd2206"
+    integrity sha512-YbVLqiHj1+ZNeCyT79EqgQmKKQJG3Nz871CUPOHGaaO0SrQOazrjd3IngHFq30lVtGq3ER9ax4iRpWRQgLadcQ==
+  
+  cytoscape-svg@^0.3.1:
+    version "0.3.1"
+    resolved "https://registry.yarnpkg.com/cytoscape-svg/-/cytoscape-svg-0.3.1.tgz#5f49b7438e8cf9c779c1a999802f4a52384e4533"
+    integrity sha512-CaU6sUWIcCJcOWw+G1ZWHqC7ssHwXabWVo6okyIPUy3veEKoodZ3Ud2AG3Zbd8vFl8Z1W10hzyXnyy25aBXFXA==
+  
+  cytoscape-undo-redo@^1.3.3:
+    version "1.3.3"
+    resolved "https://registry.yarnpkg.com/cytoscape-undo-redo/-/cytoscape-undo-redo-1.3.3.tgz#63431a0b22f639f3bb594c6060b4ab641eea0a05"
+    integrity sha512-BjTXe0Oiytj4+UtYkkwYHG3BILi6MZD1MuZ+06kopgEtiyumcMEqX53zHMhY90kqJMPwLfpcrlmKmJtNAa2v2Q==
+  
   cytoscape@3.2.19:
     version "3.2.19"
     resolved "https://registry.yarnpkg.com/cytoscape/-/cytoscape-3.2.19.tgz#7810624e118b7592acc4f4e62ca2ace70477d899"
@@ -1650,7 +1714,7 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/domelementtype/-/domelementtype-2.0.2.tgz#f3b6e549201e46f588b59463dd77187131fe6971"
     integrity sha512-wFwTwCVebUrMgGeAwRL/NhZtHAUyT9n9yg4IMDwf10+6iCMxSkVq9MGCVEH+QZWo1nNidy8kNvwmv4zWHDTqvA==
   
-  domhandler@^2.3.0:
+  domhandler@2.4.2, domhandler@^2.3.0, domhandler@^2.4.0:
     version "2.4.2"
     resolved "https://registry.yarnpkg.com/domhandler/-/domhandler-2.4.2.tgz#8805097e933d65e85546f726d60f5eb88b44f803"
     integrity sha512-JiK04h0Ht5u/80fdLMCEmV4zkNh2BcoMFBmZ/91WtYZ8qVXSKjiw7fXMgFPnHcSZgOo3XdinHvmnDUeMf5R4wA==
@@ -2390,6 +2454,15 @@ Lockfile:
       readable-stream "^2.0.1"
       wbuf "^1.1.0"
   
+  html-dom-parser@0.3.0:
+    version "0.3.0"
+    resolved "https://registry.yarnpkg.com/html-dom-parser/-/html-dom-parser-0.3.0.tgz#19864ca42836ec8750b439600633f145ab5409b9"
+    integrity sha512-WDEYpO5gHGKuJbf0rwndGq7yUHJ4xboNj9l9mRGw5RsKFc3jfRozCsGAMu69zXxt4Ol8UkbqubKxu8ys0BLKtA==
+    dependencies:
+      "@types/domhandler" "2.4.1"
+      domhandler "2.4.2"
+      htmlparser2 "3.10.1"
+  
   html-entities@^1.3.1:
     version "1.3.1"
     resolved "https://registry.yarnpkg.com/html-entities/-/html-entities-1.3.1.tgz#fb9a1a4b5b14c5daba82d3e34c6ae4fe701a0e44"
@@ -2408,6 +2481,16 @@ Lockfile:
       relateurl "^0.2.7"
       terser "^4.6.3"
   
+  html-react-parser@^0.14.0:
+    version "0.14.0"
+    resolved "https://registry.yarnpkg.com/html-react-parser/-/html-react-parser-0.14.0.tgz#56038a23eeba5a40acc3eba7c2ae347cdc7fda5b"
+    integrity sha512-YpmqYg+36EAK65NgpBVyoV4sjKlmT9w71aS4+lrSjMMLrxhFOSVpm+HRwvAiu4CuiVboqjm4z3ymIdLnOZas7Q==
+    dependencies:
+      "@types/htmlparser2" "3.10.1"
+      html-dom-parser "0.3.0"
+      react-property "1.0.1"
+      style-to-object "0.3.0"
+  
   html-webpack-plugin@^4.4.1:
     version "4.5.0"
     resolved "https://registry.yarnpkg.com/html-webpack-plugin/-/html-webpack-plugin-4.5.0.tgz#625097650886b97ea5dae331c320e3238f6c121c"
@@ -2423,7 +2506,7 @@ Lockfile:
       tapable "^1.1.3"
       util.promisify "1.0.0"
   
-  htmlparser2@^3.3.0:
+  htmlparser2@3.10.1, htmlparser2@^3.3.0:
     version "3.10.1"
     resolved "https://registry.yarnpkg.com/htmlparser2/-/htmlparser2-3.10.1.tgz#bd679dc3f59897b6a34bb10749c855bb53a9392f"
     integrity sha512-IgieNijUMbkDovyoKObU1DUhm1iwNYE/fuifEoEHfd1oZKZDaONBSkal7Y01shxsM49R4XaMdGez3WnF9UfiCQ==
@@ -2587,6 +2670,11 @@ Lockfile:
     version "1.3.5"
     resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.5.tgz#eee25f56db1c9ec6085e0c22778083f596abf927"
     integrity sha512-RZY5huIKCMRWDUqZlEi72f/lmXKMvuszcMBduliQ3nnWbx9X/ZBQO7DijMEYS9EhHBb2qacRUMtC7svLwe0lcw==
+  
+  inline-style-parser@0.1.1:
+    version "0.1.1"
+    resolved "https://registry.yarnpkg.com/inline-style-parser/-/inline-style-parser-0.1.1.tgz#ec8a3b429274e9c0a1f1c4ffa9453a7fef72cea1"
+    integrity sha512-7NXolsK4CAS5+xvdj5OMMbI962hU/wvwoxk+LWR9Ek9bVtyuuYScDN6eS0rUm6TxApFpw7CX1o4uJzcd4AyD3Q==
   
   internal-ip@^4.3.0:
     version "4.3.0"
@@ -3736,7 +3824,7 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/promise-inflight/-/promise-inflight-1.0.1.tgz#98472870bf228132fcbdd868129bad12c3c029e3"
     integrity sha1-mEcocL8igTL8vdhoEputEsPAKeM=
   
-  prop-types@^15.6.0, prop-types@^15.6.2, prop-types@^15.7.2:
+  prop-types@^15.6.2, prop-types@^15.7.2:
     version "15.7.2"
     resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.7.2.tgz#52c41e75b8c87e72b9d9360e0206b99dcbffa6c5"
     integrity sha512-8QQikdH7//R2vurIJSutZ1smHYTcLpRWEOlHnzcWHmBYrOGUysKwSsrC89BCiFj3CbrfJ/nXFdJepOVrY1GCHQ==
@@ -3912,14 +4000,21 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/react-is/-/react-is-17.0.1.tgz#5b3531bd76a645a4c9fb6e693ed36419e3301339"
     integrity sha512-NAnt2iGDXohE5LI7uBnLnqvLQMtzhkiAOLXTmv+qnF9Ky7xAPcX8Up/xWIhxvLVGJvuLiNc4xQLtuqDRzb4fSA==
   
-  react-mathjax2@^0.0.2:
-    version "0.0.2"
-    resolved "https://registry.yarnpkg.com/react-mathjax2/-/react-mathjax2-0.0.2.tgz#31a8478d0eb45601d26a66c90682360be062724d"
-    integrity sha512-m63PiOej2OTpcgvT4+VAxTr0zxQVfRmmkSD66QSEcQgSh8ryU/oInlnBCpBJRH6Za5GW8N3/pevTuzI+FG6OkA==
+  react-mathjax-ts@^0.1.2:
+    version "0.1.2"
+    resolved "https://registry.yarnpkg.com/react-mathjax-ts/-/react-mathjax-ts-0.1.2.tgz#40c835de71ee7b182a5c5d9c67419638d7a32fe1"
+    integrity sha512-Fhwug+pPtceNEnMRtEt9j2OkqS429fVk7ZqezXLKAWnT/EqyzJbOOm/t/+25csh8OalhPhBd2ZfvOqsN61/DIg==
     dependencies:
+      "@types/node" "^12.12.3"
+      "@types/react" "^16.9.11"
       load-script "^1.0.0"
-      prop-types "^15.6.0"
-      react "^16.0.0"
+      react "^16.11.0"
+      typescript "^3.6.4"
+  
+  react-property@1.0.1:
+    version "1.0.1"
+    resolved "https://registry.yarnpkg.com/react-property/-/react-property-1.0.1.tgz#4ae4211557d0a0ae050a71aa8ad288c074bea4e6"
+    integrity sha512-1tKOwxFn3dXVomH6pM9IkLkq2Y8oh+fh/lYW3MJ/B03URswUTqttgckOlbxY2XHF3vPG6uanSc4dVsLW/wk3wQ==
   
   react-redux@^7.2.1:
     version "7.2.1"
@@ -3949,7 +4044,7 @@ Lockfile:
       loose-envify "^1.4.0"
       prop-types "^15.6.2"
   
-  react@^16.0.0, react@^16.13.1:
+  react@^16.11.0, react@^16.13.1:
     version "16.14.0"
     resolved "https://registry.yarnpkg.com/react/-/react-16.14.0.tgz#94d776ddd0aaa37da3eda8fc5b6b18a4c9a3114d"
     integrity sha512-0X2CImDkJGApiAlcf0ODKIneSwBPhqJawOa5wCtKbu7ZECrmS26NvtSILynQ66cgkT/RJ4LidJOc3bUESwmU8g==
@@ -4603,6 +4698,13 @@ Lockfile:
       loader-utils "^2.0.0"
       schema-utils "^2.7.0"
   
+  style-to-object@0.3.0:
+    version "0.3.0"
+    resolved "https://registry.yarnpkg.com/style-to-object/-/style-to-object-0.3.0.tgz#b1b790d205991cc783801967214979ee19a76e46"
+    integrity sha512-CzFnRRXhzWIdItT3OmF8SQfWyahHhjq3HwcMNCNLn+N7klOOqPjMeG/4JSu77D7ypZdGvSzvkrbyeTMizz2VrA==
+    dependencies:
+      inline-style-parser "0.1.1"
+  
   supports-color@^5.3.0:
     version "5.5.0"
     resolved "https://registry.yarnpkg.com/supports-color/-/supports-color-5.5.0.tgz#e2e69a44ac8772f78a1ec0b35b689df6530efc8f"
@@ -4763,6 +4865,11 @@ Lockfile:
     version "0.0.6"
     resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
     integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
+  
+  typescript@^3.6.4:
+    version "3.9.7"
+    resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.7.tgz#98d600a5ebdc38f40cb277522f12dc800e9e25fa"
+    integrity sha512-BLbiRkiBzAwsjut4x/dsibSTB6yWpwT5qWmC2OfuCg3GgVQCSgMs4vEctYPhsaGtd0AeuuHMkjZ2h2WG8MSzRw==
   
   typescript@^4.0.2:
     version "4.0.3"

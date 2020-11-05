@@ -7,6 +7,7 @@ export const stylesheet = [
             "width": "1",
             "label": "",
             "font-size": 2,
+            "overlay-padding": 0.5
         }
     },
     {
@@ -64,6 +65,7 @@ export const stylesheet = [
             "line-color": "black",
             "label": "data(label)",
             "width": "0.5",
+            "overlay-padding": 0.5
         }
     },
     {

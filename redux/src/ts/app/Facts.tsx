@@ -4,14 +4,18 @@ import { useDispatch, useSelector } from "react-redux";
 import { betaRedexes, prettyPrint, prettyPrintDeBruijn, variables, uniqueVariables, freeVariables, applications, abstractions, subterms, crossings, bridges, linear, planar, closed, bridgeless, printRedexesArray } from "../../bs/Lambda.bs";
 import { RootState } from "./reducers"
 import { Collapse } from "react-collapse"
+//import CytoscapeSVG from "cytoscape-svg"
 import { Term } from "../../bs/Lambda.bs"
 
 import Up from "../../svgs/up-chevron.svg"
 import Down from "../../svgs/down-chevron.svg"
 import Left from "../../svgs/left-chevron.svg"
 import Right from "../../svgs/right-chevron.svg"
+import Back from "../../svgs/back.svg"
+import Refresh from "../../svgs/refresh.svg"
+
 import { normalise } from "../../bs/Evaluator.bs";
-import { newTerm, updateTerm, toggleFactsBar, resetTerm } from "./reducers/slice";
+import { newTerm, updateTerm, toggleFactsBar, resetTerm, downloadSvg } from "./reducers/slice";
 
 enum StatType {
     VARIABLES,
@@ -128,6 +132,8 @@ export default function Facts() {
 
     const normaliseButton = (e: React.MouseEvent<any>) => dispatch(updateTerm(normalise(term)))
     const resetButton = (e: React.MouseEvent<any>) => dispatch(resetTerm())
+    const svgButton = (e: React.MouseEvent<any>) => dispatch(downloadSvg())
+    const backButton = (e: React.MouseEvent<any>) => console.log("back!")
 
     const toggleBar = () => {
         dispatch(toggleFactsBar(!factsOpen))
@@ -170,18 +176,22 @@ export default function Facts() {
                         </div>
                     </Collapse>
                     <div className="normalisation">
-                        <div className="normalisation-row">
-                            <button type="button" className="normalisation-button" onClick={normaliseButton}>Normalise</button>
-                            <button type="button" className="normalisation-button" onClick={resetButton}>Reset</button>
+                        <div className="button-row">
+                            <button type="button" className="left flex-button" onClick={normaliseButton}>Normalise</button>
+                            <button type="button" className="flex-button icon-button" onClick={backButton}><img src={Back} className={"icon"} alt={"Back"} /></button>
+                            <button type="button" className="right flex-button icon-button" onClick={resetButton}><img src={Refresh} className={"icon"} alt={"Reset"} /></button>
                         </div>
-                        <div className="normalisation-row">
-                            <button type="button" className="normalisation-button">Reduce</button>
-                            <select name="strategy" id="strategy" className="normalisation-button">
+                        <div className="button-row">
+                            <button type="button" className="left flex-button">Reduce</button>
+                            <select name="strategy" id="strategy" className="right flex-button">
                                 <option value="outermost">Outermost</option>
                                 <option value="innermost">Innermost</option>"
                     <option value="random">Random</option>
                             </select>
                         </div>
+                    </div>
+                    <div className="button-row">
+                        <button type="button" className="left right flex-button" onClick={svgButton}>Export map</button>
                     </div>
                 </div>)}
         </div >

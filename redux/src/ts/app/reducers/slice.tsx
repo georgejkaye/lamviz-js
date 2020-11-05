@@ -28,12 +28,13 @@ interface State {
     currentTermText: string,
     currentContextText: string,
     currentTerm: Term,
-    originalTerm: Term,
+    termHistory: Term[],
     currentContext: Context,
     screenDimensions: Dimensions,
     graphDimensions: Dimensions,
     factsOpen: boolean,
-    error: string
+    error: string,
+    svgTime: boolean
 }
 
 const getGraphWidth = (dimensions: Dimensions, facts: boolean) => dimensions.width - (toggleWidth + sidebarWidth) - (facts ? factsWidth : 0)
@@ -47,12 +48,18 @@ const initialState: State = {
     currentTermText: "",
     currentContextText: "",
     currentTerm: undefined,
-    originalTerm: undefined,
+    termHistory: [],
     currentContext: undefined,
     screenDimensions: { width: window.innerWidth, height: window.innerHeight },
     graphDimensions: getGraphDimensions({ width: window.innerWidth, height: window.innerHeight }, factsOpenCheck()),
     factsOpen: factsOpenCheck(),
-    error: ""
+    error: "",
+    svgTime: false
+}
+
+function pop<T>(array: T[]) {
+    let a = array.pop()
+    return [a, array]
 }
 
 export const slice = createSlice({
@@ -64,20 +71,28 @@ export const slice = createSlice({
         resize: (state, action: PayloadAction<Dimensions>) =>
             state = { ...state, screenDimensions: action.payload, factsOpen: factsOpenCheck(), graphDimensions: getGraphDimensions(action.payload, factsOpenCheck()) },
         newTerm: (state, action: PayloadAction<[string, string, Term, Context]>) =>
-            state = { ...state, currentTermText: action.payload[0], currentContextText: action.payload[1], currentTerm: action.payload[2], originalTerm: action.payload[2], currentContext: action.payload[3], error: "" },
+            state = { ...state, currentTermText: action.payload[0], currentContextText: action.payload[1], currentTerm: action.payload[2], termHistory: [action.payload[2]], currentContext: action.payload[3], error: "" },
         newError: (state, action: PayloadAction<string>) =>
             state = { ...state, error: action.payload },
         updateTerm: (state, action: PayloadAction<Term>) =>
             state = { ...state, currentTerm: action.payload },
         toggleFactsBar: (state, action: PayloadAction<boolean>) =>
             state = { ...state, factsOpen: action.payload, graphDimensions: getGraphDimensions(state.screenDimensions, action.payload) },
+        backTerm: (state) => {
+            let term = state.termHistory.pop()
+            state = { ...state, currentTerm: term, termHistory: state.termHistory }
+        },
         resetTerm: (state) =>
-            state = { ...state, currentTerm: state.originalTerm },
+            state = { ...state, currentTerm: state.termHistory[0], termHistory: [state.termHistory[0]] },
         clear: (state) =>
-            state = { ...state, currentTermText: "", currentContextText: "", currentTerm: undefined, error: "" }
+            state = { ...state, currentTermText: "", currentContextText: "", currentTerm: undefined, error: "" },
+        downloadSvg: (state) =>
+            state = { ...state, svgTime: true },
+        downloadedSvg: (state) =>
+            state = { ...state, svgTime: false }
     },
 })
 
-export const { changeMode, resize, newTerm, newError, updateTerm, resetTerm, toggleFactsBar, clear } = slice.actions
+export const { changeMode, resize, newTerm, newError, updateTerm, resetTerm, toggleFactsBar, clear, downloadSvg, downloadedSvg } = slice.actions
 
 export default slice.reducer

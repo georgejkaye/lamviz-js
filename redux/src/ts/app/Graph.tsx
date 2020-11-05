@@ -3,11 +3,16 @@ import { useSelector, useDispatch } from "react-redux"
 import { RootState } from "./reducers"
 
 import CytoscapeComponent from "react-cytoscapejs"
-import { cloneDeep, isObject } from "lodash"
+
+import cytoscape from "cytoscape"
 
 import { stylesheet } from "./style.js"
 import { generateGraphElementsArray, GraphEdge, GraphNode, nodeDistanceX, nodeDistanceY } from "../../bs/Graph.bs"
-import { Term, Context, prettyPrint } from "../../bs/Lambda.bs"
+import { Term, Context, } from "../../bs/Lambda.bs"
+
+import { svg } from "./convert-to-svg"
+
+import { downloadSvg, downloadedSvg } from "./reducers/slice";
 
 interface GraphProps {
     dimensions: { width: number, height: number }
@@ -19,12 +24,15 @@ export default function Graph(props: GraphProps) {
 
     let cy: cytoscape.Core
 
+    let dispatch = useDispatch()
+
     function generateElements(term: Term, ctx: Context): [cytoscape.ElementDefinition[], [string, string, string], [string, string, string]] {
         let [nodes, edges, frees, mps] = generateGraphElementsArray(term, ctx)
         return [nodes.concat(edges), frees, mps]
     }
 
     const graphDimensions = useSelector((state: RootState) => state.currentState).graphDimensions
+    const svgTime = useSelector((state: RootState) => state.currentState).svgTime
 
     useEffect(() => {
         cy.fit()
@@ -81,10 +89,19 @@ export default function Graph(props: GraphProps) {
 
             /* Make the map fill the screen */
             cy.fit()
-            cy.minZoom(cy.zoom() - 10);
+            cy.minZoom(cy.zoom() - 10)
+            cy.fit()
+            cy.minZoom(cy.zoom() - 10)
         }
     }, [props.graph])
 
+    useEffect(() => {
+        console.log(svgTime)
+        if (svgTime) {
+            svg(cy)
+            dispatch(downloadedSvg)
+        }
+    }, [svgTime])
 
     return (
         <div key={props.dimensions.width} className="graph">

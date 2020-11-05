@@ -5,7 +5,6 @@
 
 ## Graph generation
 
-* Positioning of free variables
 * Adding redexes as classes
 
 ## Interface
@@ -15,7 +14,6 @@
 * Normalise by clicking on redexes
 * Animate normalisation
 * Aliases
-* Export as png, svg, tikz
 
 ## Normalisation graphs
 
