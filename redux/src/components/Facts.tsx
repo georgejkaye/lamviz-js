@@ -1,7 +1,7 @@
 
 import React, { useState, KeyboardEvent, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { betaRedexes, prettyPrint, prettyPrintDeBruijn, variables, uniqueVariables, freeVariables, applications, abstractions, subterms, crossings, bridges, linear, planar, closed, bridgeless, printRedexesArray } from "../bs/Lambda.bs";
+import { betaRedexes, variables, uniqueVariables, freeVariables, applications, abstractions, subterms, crossings, bridges, linear, planar, closed, bridgeless, printRedexesArray } from "../bs/Lambda.bs";
 import { RootState } from "./../reducers"
 import { Collapse } from "react-collapse"
 import { Term } from "../bs/Lambda.bs"
@@ -14,7 +14,7 @@ import Back from "../data/svgs/back.svg"
 import Refresh from "../data/svgs/refresh.svg"
 
 import { normalise } from "../bs/Evaluator.bs";
-import { newTerm, updateTerm, toggleFactsBar, resetTerm, downloadSvg } from "./../reducers/slice";
+import { updateTerm, backTerm, toggleFactsBar, resetTerm, downloadSvg } from "./../reducers/slice";
 
 enum StatType {
     VARIABLES,
@@ -124,6 +124,7 @@ export default function Facts() {
     const term = useSelector((state: RootState) => state.currentState).currentTerm
     const ctx = useSelector((state: RootState) => state.currentState).currentContext
     const factsOpen = useSelector((state: RootState) => state.currentState).factsOpen
+    const termHistory = useSelector((state: RootState) => state.currentState).termHistory
 
     const [betasOpen, setBetasOpen] = useState(false)
 
@@ -132,7 +133,7 @@ export default function Facts() {
     const normaliseButton = (e: React.MouseEvent<any>) => dispatch(updateTerm(normalise(term)))
     const resetButton = (e: React.MouseEvent<any>) => dispatch(resetTerm())
     const svgButton = (e: React.MouseEvent<any>) => dispatch(downloadSvg())
-    const backButton = (e: React.MouseEvent<any>) => console.log("back!")
+    const backButton = (e: React.MouseEvent<any>) => dispatch(backTerm())
 
     const toggleBar = () => {
         dispatch(toggleFactsBar(!factsOpen))

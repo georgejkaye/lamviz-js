@@ -75,19 +75,17 @@ export const slice = createSlice({
         resize: (state, action: PayloadAction<Dimensions>) =>
             state = { ...state, screenDimensions: action.payload, factsOpen: factsOpenCheck(), graphDimensions: getGraphDimensions(action.payload, factsOpenCheck()) },
         newTerm: (state, action: PayloadAction<[string, string, Term, Context]>) =>
-            state = { ...state, currentTermText: action.payload[0], currentContextText: action.payload[1], currentTerm: action.payload[2], termHistory: [action.payload[2]], currentContext: action.payload[3], error: "" },
+            state = { ...state, currentTermText: action.payload[0], currentContextText: action.payload[1], currentTerm: action.payload[2], currentContext: action.payload[3], error: "" },
         newError: (state, action: PayloadAction<string>) =>
             state = { ...state, error: action.payload },
         updateTerm: (state, action: PayloadAction<Term>) =>
-            state = { ...state, currentTerm: action.payload },
+            state = { ...state, termHistory: [state.currentTerm].concat(state.termHistory), currentTerm: action.payload },
         toggleFactsBar: (state, action: PayloadAction<boolean>) =>
             state = { ...state, factsOpen: action.payload, graphDimensions: getGraphDimensions(state.screenDimensions, action.payload) },
-        backTerm: (state) => {
-            let term = state.termHistory.pop()
-            state = { ...state, currentTerm: term, termHistory: state.termHistory }
-        },
+        backTerm: (state) =>
+            state.termHistory.length > 0 ? state = { ...state, currentTerm: state.termHistory[0], termHistory: state.termHistory.slice(1) } : state,
         resetTerm: (state) =>
-            state = { ...state, currentTerm: state.termHistory[0], termHistory: [state.termHistory[0]] },
+            state.termHistory.length > 0 ? state = { ...state, currentTerm: state.termHistory[0], termHistory: [state.termHistory[0]] } : state,
         clear: (state) =>
             state = { ...state, currentTermText: "", currentContextText: "", currentTerm: undefined, error: "" },
         downloadSvg: (state) =>
@@ -101,6 +99,6 @@ export const slice = createSlice({
     },
 })
 
-export const { changeMode, resize, newTerm, newError, updateTerm, resetTerm, toggleFactsBar, clear, downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels } = slice.actions
+export const { changeMode, resize, newTerm, newError, updateTerm, resetTerm, backTerm, toggleFactsBar, clear, downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels } = slice.actions
 
 export default slice.reducer
