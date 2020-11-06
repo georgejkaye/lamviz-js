@@ -26,22 +26,17 @@ export default function Visualiser() {
             <div className="top-bar">
                 {term == undefined ? "" : parse(printHTML(term, false, context))}
             </div>
-            <Collapse isOpened={visualiserMode == VisualiserMode.TERM}>
-                < Collapse isOpened={true}>
-                    <div className="subtop-bar">
-                        {term == undefined ? "" : parse(printHTML(term, true, context))}
-                    </div>
-                </Collapse >
-                <div className="main-stage" style={{ height: String(graphDimensions.height) + "px" }}>
-                    <div className="main-graph">
-                        <Graph dimensions={graphDimensions} graph={{ term: term, context: context }} zoom />
-                    </div>
-                    <Facts />
+            <div className="subtop-bar">
+                {term == undefined ? "" : parse(printHTML(term, true, context))}
+            </div>
+            <div className="main-stage" style={{ height: String(graphDimensions.height) + "px" }}>
+                <div className="main-graph">
+                    <Graph dimensions={graphDimensions} graph={{ term: term, context: context }} zoom />
                 </div>
-            </Collapse>
+                <Facts />
+            </div>
             <div className="bottom-bar">Reduction graph</div>
-            <Collapse isOpened={visualiserMode == VisualiserMode.REDUCTIONS}>
-                <div className="reductions"></div>
-            </Collapse>
+            <div className="reductions"></div>
+
         </div >)
 }
