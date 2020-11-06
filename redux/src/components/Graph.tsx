@@ -18,6 +18,8 @@ interface GraphProps {
     dimensions: { width: number, height: number }
     graph: { term: Term, context: Context }
     zoom: boolean
+    nodeLabels: boolean
+    edgeLabels: boolean
 }
 
 export default function Graph(props: GraphProps) {
@@ -31,12 +33,26 @@ export default function Graph(props: GraphProps) {
         return [nodes.concat(edges), frees, mps]
     }
 
+    const updateNodeLabels = () => {
+        if (props.nodeLabels) {
+            cy.nodes(".abstraction, .application").addClass("nodelabelled")
+        } else {
+            cy.nodes(".abstraction, .application").removeClass("nodelabelled")
+        }
+    }
+
+    const updateEdgeLabels = () => {
+        if (props.edgeLabels) {
+            cy.elements(".arc, .abs-edge, .abs-edge-r, .app-edge-l, .app-edge-r, .var-edge-l, .var-edge-r, .term-edge").addClass("termlabelled")
+        } else {
+            cy.elements(".arc, .abs-edge, .abs-edge-r, .app-edge-l, .app-edge-r, .var-edge-l, .var-edge-r, .term-edge").removeClass("termlabelled")
+        }
+    }
+
     const graphDimensions = useSelector((state: RootState) => state.currentState).graphDimensions
     const svgTime = useSelector((state: RootState) => state.currentState).svgTime
-
-    useEffect(() => {
-        cy.fit()
-    }, [])
+    const [lastNodeLabels, setLastNodeLabels] = useState(props.nodeLabels)
+    const [lastEdgeLabels, setLastEdgeLabels] = useState(props.edgeLabels)
 
     useEffect(() => {
 
@@ -87,11 +103,16 @@ export default function Graph(props: GraphProps) {
 
             }
 
+            updateNodeLabels()
+            updateEdgeLabels()
+
+            cy.zoomingEnabled(props.zoom)
+
             /* Make the map fill the screen */
-            cy.fit()
-            cy.minZoom(cy.zoom() - 10)
-            cy.fit()
-            cy.minZoom(cy.zoom() - 10)
+
+            if (props.nodeLabels == lastNodeLabels && props.edgeLabels == lastEdgeLabels) {
+                cy.fit(cy.elements(), 50)
+            }
         }
     }, [props.graph])
 
@@ -102,6 +123,16 @@ export default function Graph(props: GraphProps) {
             svg(cy)
         }
     }, [svgTime])
+
+    useEffect(() => {
+        updateNodeLabels()
+        setLastNodeLabels(props.nodeLabels)
+    }, [props.nodeLabels])
+
+    useEffect(() => {
+        updateEdgeLabels()
+        setLastEdgeLabels(props.edgeLabels)
+    }, [props.edgeLabels])
 
     return (
         <div key={props.dimensions.width} className="graph">

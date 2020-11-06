@@ -204,7 +204,20 @@ and generateGraphElements' = (
   | Var(x, a) => {
       let (x, b) = List.nth(dict, x)
 
-      let node1 = createNode(nodes, nid(VAR_MP, vars), ["midpoint"], mpPosX, mpPosY, "")
+      let labelclass = switch dir {
+      | U => "term-edge"
+      | L => "var-edge-l"
+      | R => "var-edge-r"
+      }
+
+      let node1 = createNode(
+        nodes,
+        nid(VAR_MP, vars),
+        ["midpoint", labelclass],
+        mpPosX,
+        mpPosY,
+        lookup(ctx, x),
+      )
       let node2 = createNode(nodes, nid(VAR, vars), ["support"], posX, posY, "")
       let node3 = createNode(nodes, nid(VAR_TOP, vars), ["top"], posX, posY - nodeDistanceY, "")
 
@@ -239,7 +252,7 @@ and generateGraphElements' = (
         ["arc"],
         node3["data"]["id"],
         nid(ABS_TOP, x),
-        "",
+        lookup(ctx, x),
       )
 
       let midpoint = (node1["data"]["id"], parent["data"]["id"], node2["data"]["id"])
@@ -254,15 +267,24 @@ and generateGraphElements' = (
       )
     }
   | Abs(t, x, a) => {
-      let node1 = createNode(nodes, nid(ABS_MP, abs), ["midpoint"], mpPosX, mpPosY, "")
+      let classes = ptype == ROOT ? ["midpoint", "term-edge"] : ["midpoint", "abs-edge"]
+
+      let node1 = createNode(
+        nodes,
+        nid(ABS_MP, abs),
+        classes,
+        mpPosX,
+        mpPosY,
+        prettyPrint(term, ctx),
+      )
       let node2 = createNode(nodes, nid(ABS, abs), ["abstraction"], posX, posY, lambda)
       let node3 = createNode(
         nodes,
         nid(ABS_SP_MP, abs),
-        ["midpoint"],
+        ["midpoint", "abs-edge-r"],
         posX + nodeDistanceX / 2,
         posY - nodeDistanceY / 2,
-        "",
+        x,
       )
       let node4 = createNode(
         nodes,
@@ -361,7 +383,20 @@ and generateGraphElements' = (
       )
     }
   | App(t1, t2, a) => {
-      let node1 = createNode(nodes, nid(APP_MP, apps), ["midpoint"], mpPosX, mpPosY, "")
+      let labelclass = switch dir {
+      | U => "term-edge"
+      | L => "app-edge-l"
+      | R => "app-edge-r"
+      }
+
+      let node1 = createNode(
+        nodes,
+        nid(APP_MP, apps),
+        ["midpoint", labelclass],
+        mpPosX,
+        mpPosY,
+        prettyPrint(term, ctx),
+      )
       let node2 = createNode(nodes, nid(APP, apps), ["application"], posX, posY, "@")
 
       let edge1 = createEdge(

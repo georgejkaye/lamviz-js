@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./../reducers"
-import { Mode, changeMode, newTerm, newError, clear } from "./../reducers/slice"
+import { newTerm, newError, clear, toggleNodeLabels, toggleEdgeLabels } from "./../reducers/slice"
 import { lexAndParse } from "../bs/Parser.bs";
 import { Collapse } from "react-collapse"
 
@@ -9,6 +9,8 @@ export default function VisualiserSidebar() {
 
     const dispatch = useDispatch()
     const error = useSelector((state: RootState) => state.currentState).error
+    const nodeLabels = useSelector((state: RootState) => state.currentState).nodeLabels
+    const edgeLabels = useSelector((state: RootState) => state.currentState).edgeLabels
 
     const [exampleOpen, setExampleOpen] = useState(false)
     const [termText, setTermText] = useState("")
@@ -49,6 +51,9 @@ export default function VisualiserSidebar() {
         dispatch(clear())
     }
 
+    const toggleNodeLabelsButton = () => dispatch(toggleNodeLabels())
+    const toggleEdgeLabelsButton = () => dispatch(toggleEdgeLabels())
+
 
     return (
         <div className="visualiser-sidebar">
@@ -67,13 +72,14 @@ export default function VisualiserSidebar() {
                     <input id="context-box" className="textbox" type="text" value={contextText} placeholder="a b c..." onChange={handleContextTextChange} onKeyDown={onKeyDown}></input>
                 </div>
             </div>
-            <div className="sidebar-content"><button type="button" onClick={generateButton}>Generate</button><button type="button" onClick={resetButton}>Clear</button></div>
-
+            <div className="sidebar-content">
+                <button type="button" onClick={generateButton}>Generate</button>
+                <button type="button" onClick={resetButton}>Clear</button>
+            </div>
             <div className="sidebar-heading">View options</div>
             <div className="sidebar-content">
-                <label className="left"><input type="radio" id="yes-labels" name="labels" value="yes" /> Show labels</label>
-                <label className="right"><input type="radio" id="yes-labels" name="labels" value="yes" /> Hide labels</label>
-
+                <button type="button" className={nodeLabels ? "on" : "off"} onClick={toggleNodeLabelsButton} >{nodeLabels ? "Node labels on" : "Node labels off"}</button>
+                <button type="button" className={edgeLabels ? "on" : "off"} onClick={toggleEdgeLabelsButton} >{edgeLabels ? "Edge labels on" : "Edge labels off"}</button>
             </div>
             <div className="sidebar-heading">Macros</div>
         </div >)

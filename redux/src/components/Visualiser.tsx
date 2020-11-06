@@ -19,7 +19,18 @@ export default function Visualiser() {
     const screenDimensions = useSelector((state: RootState) => state.currentState).screenDimensions
     const graphDimensions = useSelector((state: RootState) => state.currentState).graphDimensions
 
+    const nodeLabels = useSelector((state: RootState) => state.currentState).nodeLabels
+    const edgeLabels = useSelector((state: RootState) => state.currentState).edgeLabels
+
     const [visualiserMode, setVisualiserMode] = useState(VisualiserMode.TERM)
+
+    useEffect(() => {
+
+    }, [nodeLabels])
+
+    useEffect(() => {
+
+    }, [edgeLabels])
 
     return (
         <div className="stage" >
@@ -31,7 +42,7 @@ export default function Visualiser() {
             </div>
             <div className="main-stage" style={{ height: String(graphDimensions.height) + "px" }}>
                 <div className="main-graph">
-                    <Graph dimensions={graphDimensions} graph={{ term: term, context: context }} zoom />
+                    <Graph dimensions={graphDimensions} graph={{ term: term, context: context }} nodeLabels={nodeLabels} edgeLabels={edgeLabels} zoom />
                 </div>
                 <Facts />
             </div>

@@ -6,8 +6,7 @@ export const stylesheet = [
             "height": "1",
             "width": "1",
             "label": "",
-            "font-size": 2,
-            "overlay-padding": 0.5
+            "overlay-padding": 0.5,
         }
     },
     {
@@ -37,7 +36,7 @@ export const stylesheet = [
         "style": {
             "background-color": "black",
             "width": "0.75",
-            "height": "0.75"
+            "height": "0.75",
         }
     },
 
@@ -63,9 +62,9 @@ export const stylesheet = [
         "selector": "edge",
         "style": {
             "line-color": "black",
-            "label": "data(label)",
+            "label": "",
             "width": "0.5",
-            "overlay-padding": 0.5
+            "overlay-padding": 0.5,
         }
     },
     {
@@ -85,7 +84,7 @@ export const stylesheet = [
             "control-point-weights": "0.5",
             "loop-direction": "45deg",
             "source-endpoint": "0 0",
-            "target-endpoint": "0 0"
+            "target-endpoint": "0 0",
 
         }
     },
@@ -95,5 +94,29 @@ export const stylesheet = [
             "background-color": "red",
             "line-color": "red"
         }
-    }
+    },
+    {
+        selector: ".nodelabelled",
+        style: {
+            "label": "data(label)",
+            "font-size": 1.5,
+            "text-valign": "center",
+            "text-margin-y": 0.025
+        }
+    },
+
+    {
+        selector: ".termlabelled",
+        style: {
+            "label": "data(label)",
+            "text-valign": "center",
+            "font-size": 1,
+            "text-background-color": "black",
+            "text-background-padding": "0.3",
+            "text-background-opacity": "1",
+            "color": "#9c9c9c"
+        }
+    },
+
+
 ]

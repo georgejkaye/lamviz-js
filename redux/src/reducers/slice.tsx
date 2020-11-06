@@ -34,7 +34,9 @@ interface State {
     graphDimensions: Dimensions,
     factsOpen: boolean,
     error: string,
-    svgTime: boolean
+    svgTime: boolean,
+    nodeLabels: boolean,
+    edgeLabels: boolean,
 }
 
 const getGraphWidth = (dimensions: Dimensions, facts: boolean) => dimensions.width - (toggleWidth + sidebarWidth) - (facts ? factsWidth : 0)
@@ -54,7 +56,9 @@ const initialState: State = {
     graphDimensions: getGraphDimensions({ width: window.innerWidth, height: window.innerHeight }, factsOpenCheck()),
     factsOpen: factsOpenCheck(),
     error: "",
-    svgTime: false
+    svgTime: false,
+    nodeLabels: false,
+    edgeLabels: false
 }
 
 function pop<T>(array: T[]) {
@@ -90,9 +94,13 @@ export const slice = createSlice({
             state = { ...state, svgTime: true },
         downloadedSvg: (state) =>
             state = { ...state, svgTime: false },
+        toggleNodeLabels: (state) =>
+            state = { ...state, nodeLabels: !state.nodeLabels },
+        toggleEdgeLabels: (state) =>
+            state = { ...state, edgeLabels: !state.edgeLabels },
     },
 })
 
-export const { changeMode, resize, newTerm, newError, updateTerm, resetTerm, toggleFactsBar, clear, downloadSvg, downloadedSvg } = slice.actions
+export const { changeMode, resize, newTerm, newError, updateTerm, resetTerm, toggleFactsBar, clear, downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels } = slice.actions
 
 export default slice.reducer
