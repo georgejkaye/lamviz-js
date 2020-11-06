@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { RootState } from "./reducers"
+import { RootState } from "./../reducers"
 
 import CytoscapeComponent from "react-cytoscapejs"
 
 import cytoscape from "cytoscape"
 
-import { stylesheet } from "./style.js"
-import { generateGraphElementsArray, GraphEdge, GraphNode, nodeDistanceX, nodeDistanceY } from "../../bs/Graph.bs"
-import { Term, Context, } from "../../bs/Lambda.bs"
+import { stylesheet } from "./../data/style.js"
+import { generateGraphElementsArray, GraphEdge, GraphNode, nodeDistanceX, nodeDistanceY } from "../bs/Graph.bs"
+import { Term, Context, } from "../bs/Lambda.bs"
 
-import { svg } from "./convert-to-svg"
+import { svg } from "./../libs/convert-to-svg"
 
-import { downloadSvg, downloadedSvg } from "./reducers/slice";
+import { downloadSvg, downloadedSvg } from "./../reducers/slice";
 
 interface GraphProps {
     dimensions: { width: number, height: number }

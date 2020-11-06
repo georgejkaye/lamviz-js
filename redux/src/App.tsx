@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "./app/reducers"
-import { Mode, resize } from "./app/reducers/slice";
-import Sidebar from "./app/Sidebar"
-import Visualiser from "./app/Visualiser"
+import { RootState } from "./reducers"
+import { Mode, resize } from "./reducers/slice";
+import Sidebar from "./components/Sidebar"
+import Visualiser from "./components/Visualiser"
 
 export default function App() {
 

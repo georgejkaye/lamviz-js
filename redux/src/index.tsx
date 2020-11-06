@@ -2,7 +2,7 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 import App from "./App";
 import { Provider } from "react-redux"
-import store from "./app/store"
+import store from "./reducers/store"
 import "./styles.css";
 
 import WebFont from 'webfontloader';

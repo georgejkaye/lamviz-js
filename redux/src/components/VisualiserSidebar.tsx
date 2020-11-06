@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "./reducers"
-import { Mode, changeMode, newTerm, newError, clear } from "./reducers/slice"
-import { lexAndParse } from "../../bs/Parser.bs";
+import { RootState } from "./../reducers"
+import { Mode, changeMode, newTerm, newError, clear } from "./../reducers/slice"
+import { lexAndParse } from "../bs/Parser.bs";
 import { Collapse } from "react-collapse"
 
 export default function VisualiserSidebar() {
