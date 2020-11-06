@@ -18,12 +18,10 @@ export default function Sidebar() {
 
     return (
         <div className="sidebar">
-            <div className="sidebar-heading">
-                <div className="sidebar-introducing">Welcome to the</div>
-                <div className="sidebar-header">Lambda {mode == Mode.VISUALISER ? "visualiser" : "gallery"}</div>
-            </div>
+            <div className="sidebar-heading">Welcome to the</div>
+            <div className="sidebar-title">Lambda {mode == Mode.VISUALISER ? "visualiser" : "gallery"}</div>
             <div className="sidebar-content sidebar-text">
-                <div>This project was first developed as my dissertation from my undergraduate project supervised by <a href="https://noamz.org">Noam Zeilberger</a>, and later improved in my spare time. If you're interested in the maths behind this, you can read <a href="http://noamz.org/papers/trivalinlam-jfp-final.pdf">this paper</a> by Noam. You can also check out <a href="https://github.com/noamz/linlam">LinLam</a>, a Haskell library for experimental linear lambda calculus.</div>
+                <div>This project was first developed as my dissertation from my undergraduate project supervised by <a href="https://noamz.org">Noam Zeilberger</a>, and later improved in my spare time. <a href="https://www.georgejkaye.com/lambda-visualiser">Read more</a>.</div>
             </div>
             <div className="sidebar-content sidebar-text">
                 <div className="credit">Graph drawing powered by <a href="https://js.cytoscape.org">Cytoscape.js</a>.</div>

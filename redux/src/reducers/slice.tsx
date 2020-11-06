@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import CytoscapeComponent from "react-cytoscapejs"
 
 import { Term, Context } from "./../bs/Lambda.bs"
-import { GraphNode, GraphEdge, generateGraphElementsArray } from "./../bs/Graph.bs"
+import { Macro } from "./../components/Macro"
 
 export enum Mode {
     VISUALISER, GALLERY
@@ -37,6 +37,7 @@ interface State {
     svgTime: boolean,
     nodeLabels: boolean,
     edgeLabels: boolean,
+    macros: Macro[]
 }
 
 const getGraphWidth = (dimensions: Dimensions, facts: boolean) => dimensions.width - (toggleWidth + sidebarWidth) - (facts ? factsWidth : 0)
@@ -58,7 +59,8 @@ const initialState: State = {
     error: "",
     svgTime: false,
     nodeLabels: false,
-    edgeLabels: false
+    edgeLabels: false,
+    macros: []
 }
 
 function pop<T>(array: T[]) {
@@ -82,6 +84,8 @@ export const slice = createSlice({
             state = { ...state, termHistory: [state.currentTerm].concat(state.termHistory), currentTerm: action.payload },
         toggleFactsBar: (state, action: PayloadAction<boolean>) =>
             state = { ...state, factsOpen: action.payload, graphDimensions: getGraphDimensions(state.screenDimensions, action.payload) },
+        updateMacro: (state, action: PayloadAction<[number, Macro]>) =>
+            state = { ...state, macros: state.macros.slice(0, action.payload[0]).concat([action.payload[1]]).concat(state.macros.slice(action.payload[0] + 1)) },
         backTerm: (state) =>
             state.termHistory.length > 0 ? state = { ...state, currentTerm: state.termHistory[0], termHistory: state.termHistory.slice(1) } : state,
         resetTerm: (state) =>
@@ -96,9 +100,17 @@ export const slice = createSlice({
             state = { ...state, nodeLabels: !state.nodeLabels },
         toggleEdgeLabels: (state) =>
             state = { ...state, edgeLabels: !state.edgeLabels },
+        addMacro: (state) =>
+            state = { ...state, macros: state.macros.concat({ name: "", termstring: "", term: undefined, contextstring: "", context: undefined, active: true }) },
+        removeMacro: (state, action: PayloadAction<number>) =>
+            state = { ...state, macros: state.macros.slice(0, action.payload).concat(state.macros.slice(action.payload + 1)) },
+        removeAllMacros: (state) =>
+            state = { ...state, macros: [] }
     },
 })
 
-export const { changeMode, resize, newTerm, newError, updateTerm, resetTerm, backTerm, toggleFactsBar, clear, downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels } = slice.actions
+export const {
+    changeMode, resize, newTerm, newError, updateTerm, resetTerm, backTerm, toggleFactsBar, clear,
+    downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels, addMacro, updateMacro, removeMacro, removeAllMacros } = slice.actions
 
 export default slice.reducer

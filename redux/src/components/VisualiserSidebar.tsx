@@ -1,9 +1,15 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./../reducers"
-import { newTerm, newError, clear, toggleNodeLabels, toggleEdgeLabels } from "./../reducers/slice"
+import { newTerm, newError, clear, toggleNodeLabels, toggleEdgeLabels, addMacro, removeAllMacros } from "./../reducers/slice"
 import { lexAndParse } from "../bs/Parser.bs";
 import { Collapse } from "react-collapse"
+
+import { Macro, ActiveMacro } from "./Macro"
+
+import Add from "../data/svgs/add-white.svg"
+import Delete from "../data/svgs/bin.svg"
+import Pencil from "../data/svgs/pencil.svg"
 
 export default function VisualiserSidebar() {
 
@@ -11,6 +17,7 @@ export default function VisualiserSidebar() {
     const error = useSelector((state: RootState) => state.currentState).error
     const nodeLabels = useSelector((state: RootState) => state.currentState).nodeLabels
     const edgeLabels = useSelector((state: RootState) => state.currentState).edgeLabels
+    const macros = useSelector((state: RootState) => state.currentState).macros
 
     const [exampleOpen, setExampleOpen] = useState(false)
     const [termText, setTermText] = useState("")
@@ -51,9 +58,14 @@ export default function VisualiserSidebar() {
         dispatch(clear())
     }
 
+    const addMacroButton = () => dispatch(addMacro())
+
+    const removeAllMacrosButton = () => dispatch(removeAllMacros())
+
     const toggleNodeLabelsButton = () => dispatch(toggleNodeLabels())
     const toggleEdgeLabelsButton = () => dispatch(toggleEdgeLabels())
 
+    console.log(macros)
 
     return (
         <div className="visualiser-sidebar">
@@ -65,11 +77,11 @@ export default function VisualiserSidebar() {
                 </Collapse>
                 <div className="term">
                     <div className="textbox-label">Term</div>
-                    <input id="term-box" className="textbox" type="text" value={termText} placeholder="\x.\y.\z. x (y z)..." onChange={handleTermTextChange} onKeyDown={onKeyDown}></input>
+                    <input id="term-box" className="full-textbox" type="text" value={termText} placeholder="\x.\y.\z. x (y z)..." onChange={handleTermTextChange} onKeyDown={onKeyDown}></input>
                 </div>
                 <div className="context">
                     <div className="textbox-label">Context</div>
-                    <input id="context-box" className="textbox" type="text" value={contextText} placeholder="a b c..." onChange={handleContextTextChange} onKeyDown={onKeyDown}></input>
+                    <input id="context-box" className="full-textbox" type="text" value={contextText} placeholder="a b c..." onChange={handleContextTextChange} onKeyDown={onKeyDown}></input>
                 </div>
             </div>
             <div className="sidebar-content">
@@ -81,6 +93,15 @@ export default function VisualiserSidebar() {
                 <button type="button" className={nodeLabels ? "on" : "off"} onClick={toggleNodeLabelsButton} >{nodeLabels ? "Node labels on" : "Node labels off"}</button>
                 <button type="button" className={edgeLabels ? "on" : "off"} onClick={toggleEdgeLabelsButton} >{edgeLabels ? "Edge labels on" : "Edge labels off"}</button>
             </div>
-            <div className="sidebar-heading">Macros</div>
+            <div className="sidebar-heading">
+                <div><img src={Delete} className="icon left-icon clickable" onClick={removeAllMacrosButton} /></div>
+                <div className="heading-icon">Macros</div>
+                <div><img src={Add} className="icon right-icon clickable" onClick={addMacroButton} /></div>
+            </div>
+            <div className="macro-list">{
+                macros.map((mac, i) => (
+                    mac.active ? <ActiveMacro macro={mac} no={i} /> : <Macro macro={mac} no={i} />
+                ))}
+            </div>
         </div >)
 }

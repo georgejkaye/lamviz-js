@@ -99,7 +99,7 @@ export const stylesheet = [
         selector: ".nodelabelled",
         style: {
             "label": "data(label)",
-            "font-size": 1.5,
+            "font-size": 1.25,
             "text-valign": "center",
             "text-margin-y": 0.025
         }
