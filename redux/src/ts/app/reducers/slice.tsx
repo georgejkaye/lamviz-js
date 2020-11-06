@@ -89,7 +89,7 @@ export const slice = createSlice({
         downloadSvg: (state) =>
             state = { ...state, svgTime: true },
         downloadedSvg: (state) =>
-            state = { ...state, svgTime: false }
+            state = { ...state, svgTime: false },
     },
 })
 

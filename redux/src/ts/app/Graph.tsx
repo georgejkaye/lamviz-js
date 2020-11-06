@@ -98,8 +98,8 @@ export default function Graph(props: GraphProps) {
     useEffect(() => {
         console.log(svgTime)
         if (svgTime) {
+            dispatch(downloadedSvg())
             svg(cy)
-            dispatch(downloadedSvg)
         }
     }, [svgTime])
 
