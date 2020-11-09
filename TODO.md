@@ -1,36 +1,26 @@
-# TODO
 
-* ~~Make the edges go the right way round on graphs (order matters!)~~:
-  * ~~lambda (anti-clockwise)~~
-    * ~~abstraction from bottom (A -> B)~~
-    * ~~right is variable A~~
-    * ~~left is body B~~
-  * ~~application (clockwise)~~
-    * ~~function top: A -> B~~
-    * ~~argument u right A~~
-    * ~~t(u) left B~~
-    * ~~I think I've done this!~~
-* ~~Actually do proposal~~
-* ~~Graph labels are pretty dodgy, fix these~~
-* ~~Make Haskell functions for generating and enumerating terms of various types~~
-* ~~Convert these Haskell functions into Javascript~~
-* ~~Generate 'galleries' of terms from various fragments~~
-* ~~Fix map drawing bug involving free variables with the same name as bound variables (e.g. (\x.x) x)~~
-* ~~Highlighting issues when redex exists inside alias~~
-* ~~Work on pair functions~~
-* ~~Crazy reset bug reset visualiser to random term, maybe not setting current term somewhere?~~
-* ~~Make sure terms with infinite reduction loops are handled gracefully~~
-* ~~Free variables aren't being labelled properly for some reason~~
-* ~~Way of automatically parsing in aliases?~~
-* ~~Identify what makes the long time for graphs~~
-* ~~Make normalisation graphs less laggy somehow~~
-* ~~Work on making maps easier to read for big boys~~
-* ~~Check that normalisation graph terminates!~~
-* Highlighting stops when you return from a normalisation graph
-* ~~Implement some groovier animations when reducing~~
-* Make everything tidier
-* Make interface more polished
-* ~~Ability to sort gallery~~
-* Highlight paths on normalisation graph
-* Replace alias'd subterms with blocks to make identifying them easier
-  
+# Todo
+
+## Visualiser
+
+## Graph generation
+
+* Adding redexes as classes
+
+## Interface
+
+* View options
+* Highlight redexes in graph
+* Normalise by clicking on redexes
+* Animate normalisation
+* Aliases
+
+## Normalisation graphs
+
+* Generate and display normalisation graphs
+
+## Gallery
+
+* Implement gallery
+* Display lambda terms for given n and k
+* Filter and sort
