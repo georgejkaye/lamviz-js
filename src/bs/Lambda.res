@@ -13,6 +13,14 @@ open Helpers
 
 type context = list<string>
 
+let rec prettyPrintContext = ctx => {
+  switch ctx {
+  | list{} => ""
+  | list{x} => x
+  | list{x, y, ...xs} => x ++ ", " ++ prettyPrintContext(list{y, ...xs})
+  }
+}
+
 let variableNames = list{"x", "y", "z", "w", "u", "v", "t", "p", "q", "r", "s", "m", "n", "o"}
 let varNameNo = List.length(variableNames)
 let freeVariableNames = list{"a", "b", "c", "d", "e"}
@@ -286,11 +294,11 @@ let rec printRedexes = (t, ctx) => {
 
 let printRedexesArray = (t, ctx) => Array.of_list(printRedexes(t, ctx))
 
-let rec printHTML = (t, db, ctx) => {
-  let (string, _, _, _, _) = printHTML'(t, db, ctx, 0, 0, 0, 0, 0)
+let rec printHTML = (t, ctx, db) => {
+  let (string, _, _, _, _) = printHTML'(t, ctx, db, 0, 0, 0, 0, 0)
   string
 }
-and printHTML' = (t, db, ctx, x, vars, abs, apps, betas) => {
+and printHTML' = (t, ctx, db, x, vars, abs, apps, betas) => {
   switch t {
   | Var(n, a) => {
       let label = db ? str(n) : a != "" ? a : lookup(ctx, n)
@@ -300,8 +308,8 @@ and printHTML' = (t, db, ctx, x, vars, abs, apps, betas) => {
   | Abs(t, l, a) => {
       let (scope, vars, abs, apps, betas) = printHTML'(
         t,
-        db,
         list{l, ...ctx},
+        db,
         0,
         vars,
         abs + 1,
@@ -341,15 +349,15 @@ and printHTML' = (t, db, ctx, x, vars, abs, apps, betas) => {
 
               let (lhs, vars, abs, apps, betas) = printHTML'(
                 t1,
-                db,
                 ctx,
+                db,
                 y,
                 vars,
                 abs,
                 apps + 1,
                 betas + btn,
               )
-              let (rhs, vars, abs, apps, betas) = printHTML'(t2, db, ctx, z, vars, abs, apps, betas)
+              let (rhs, vars, abs, apps, betas) = printHTML'(t2, ctx, db, z, vars, abs, apps, betas)
               let b1 = x == 0 ? "" : "("
               let b2 = x == 0 ? "" : ")"
               (b1 ++ lhs ++ " " ++ rhs ++ b2, vars, abs, apps, betas)
@@ -360,6 +368,18 @@ and printHTML' = (t, db, ctx, x, vars, abs, apps, betas) => {
       (string, vars, abs, apps, betas)
     }
   }
+}
+
+let rec prettyPrintTermAndContext = (term, ctx) => {
+  let printedTerm = prettyPrint(term, ctx)
+  let printedContext = prettyPrintContext(ctx)
+  `${printedContext} ⊢ ${printedTerm}`
+}
+
+let printHTMLAndContext = (term, ctx, db) => {
+  let printedHTML = printHTML(term, ctx, db)
+  let printedContext = prettyPrintContext(ctx)
+  "<span>" ++ printedContext ++ " &#x22a2; " ++ printedHTML ++ "</span>"
 }
 
 let rec refreshVariableNames = (t, ctx) => (

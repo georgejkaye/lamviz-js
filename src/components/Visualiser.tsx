@@ -1,6 +1,6 @@
 import React, { useState, KeyboardEvent, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { betaRedexes, prettyPrint, printHTML, prettyPrintDeBruijn } from "../bs/Lambda.bs";
+import { betaRedexes, prettyPrint, printHTML, printHTMLAndContext, prettyPrintDeBruijn } from "../bs/Lambda.bs";
 import { RootState } from "./../reducers"
 import { Collapse } from "react-collapse"
 import parse from "html-react-parser"
@@ -36,10 +36,10 @@ export default function Visualiser() {
     return (
         <div className="stage" >
             <div className="top-bar">
-                {term == undefined ? "" : parse(printHTML(term, false, context))}
+                {term == undefined ? "" : parse(printHTMLAndContext(term, context, false))}
             </div>
             <div className="subtop-bar">
-                {term == undefined ? "" : parse(printHTML(term, true, context))}
+                {term == undefined ? "" : parse(printHTML(term, context, true))}
             </div>
             <div className="main-stage" style={{ height: String(graphDimensions.height) + "px" }}>
                 <div className="main-graph">

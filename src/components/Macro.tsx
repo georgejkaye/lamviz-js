@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./../reducers"
 import { updateMacro } from "./../reducers/slice"
-import { Term, Context } from "../bs/Lambda.bs"
+import { Term, Context, prettyPrint } from "../bs/Lambda.bs"
 
 import Up from "../data/svgs/up-chevron.svg"
 import Down from "../data/svgs/down-chevron.svg"
@@ -30,13 +30,18 @@ export function Macro(props: MacroProps) {
     let [isOpen, setOpen] = useState(false)
 
     return (
-        <div className="macro">
+        /*<div className="macro">
             <div className="macro-name">
                 <div><img src={isOpen ? Up : Down} className="icon left-icon" alt={isOpen ? "\u2191" : "\u2193"} /></div>
                 <div>{props.macro.name}</div>
                 <div><img src={Delete} className="icon left-icon" alt="x" /></div>
             </div>
             <div className={isOpen ? "macro-def open" : "macro-def closed"}>{props.macro.term}</div>
+        </div>*/
+        <div className="macro">
+            <div>{props.macro.name}</div>
+            <div>{props.macro.termstring}</div>
+            <div>{props.macro.contextstring}</div>
         </div>
     )
 }
@@ -45,18 +50,17 @@ export function ActiveMacro(props: MacroProps) {
 
     let dispatch = useDispatch()
 
-    const ctx = useSelector((state: RootState) => state.currentState).currentContext
-
     let [nameText, setNameText] = useState(props.macro.name)
     let [termText, setTermText] = useState(props.macro.termstring)
     let [ctxText, setCtxText] = useState(props.macro.contextstring)
 
-    const nameChange = (event: React.ChangeEvent<any>) => {
-        props.macro.name = event.target.value
-    }
+    const nameChange = (event: React.ChangeEvent<any>) => setNameText(event.target.value)
+    const termChange = (event: React.ChangeEvent<any>) => setTermText(event.target.value)
+    const ctxChange = (event: React.ChangeEvent<any>) => setCtxText(event.target.value)
 
     const doneButton = () => {
         let [term, ctx] = lexAndParse(termText, ctxText)
+        console.log(prettyPrint(term, ctx))
         dispatch(updateMacro([props.no, { name: nameText, termstring: termText, term: term, contextstring: ctxText, context: ctx, active: false }]))
     }
 
@@ -64,15 +68,15 @@ export function ActiveMacro(props: MacroProps) {
         <div className="macro-field">
             <div className="macro-field-name">Name</div>
             <div className="macro-input-field"><input type="text" className="macrotext" onChange={nameChange} defaultValue={props.macro.name} /></div>
-            <div><img src={Tick} className="icon right clickable" /></div>
+            <div><img src={Tick} className="icon right clickable" onClick={doneButton} /></div>
         </div>
         <div className="macro-field">
             <div className="macro-field-name">Term</div>
-            <div className="macro-input-field"><input type="text" className="macro-text" value={props.macro.termstring} /></div>
+            <div className="macro-input-field"><input type="text" className="macro-text" onChange={termChange} defaultValue={props.macro.termstring} /></div>
         </div>
         <div className="macro-field">
             <div className="macro-field-name">Context</div>
-            <div className="macro-input-field"><input type="text" className="macro-text" value={props.macro.contextstring} /></div>
+            <div className="macro-input-field"><input type="text" className="macro-text" onChange={ctxChange} defaultValue={props.macro.contextstring} /></div>
         </div>
     </div >)
 }

@@ -29,6 +29,7 @@ interface State {
     currentContextText: string,
     redraw: boolean, /* redraw NOW */
     currentTerm: Term,
+    originalTerm: Term,
     termHistory: Term[],
     currentContext: Context,
     screenDimensions: Dimensions,
@@ -53,6 +54,7 @@ const initialState: State = {
     currentContextText: "",
     redraw: false,
     currentTerm: undefined,
+    originalTerm: undefined,
     termHistory: [],
     currentContext: undefined,
     screenDimensions: { width: window.innerWidth, height: window.innerHeight },
@@ -70,6 +72,14 @@ function pop<T>(array: T[]) {
     return [a, array]
 }
 
+function smartConcatHead<T>(a: T, array: T[]) {
+    if (a == undefined) {
+        return array
+    }
+
+    return [a].concat(array)
+}
+
 export const slice = createSlice({
     name: "slice",
     initialState,
@@ -79,11 +89,11 @@ export const slice = createSlice({
         resize: (state, action: PayloadAction<Dimensions>) =>
             state = { ...state, screenDimensions: action.payload, factsOpen: factsOpenCheck(), graphDimensions: getGraphDimensions(action.payload, factsOpenCheck()) },
         newTerm: (state, action: PayloadAction<[string, string, Term, Context]>) =>
-            state = { ...state, currentTermText: action.payload[0], currentContextText: action.payload[1], currentTerm: action.payload[2], currentContext: action.payload[3], error: "" },
+            state = { ...state, currentTermText: action.payload[0], currentContextText: action.payload[1], currentTerm: action.payload[2], originalTerm: action.payload[2], currentContext: action.payload[3], termHistory: smartConcatHead(state.currentTerm, state.termHistory), error: "" },
         newError: (state, action: PayloadAction<string>) =>
             state = { ...state, error: action.payload },
         updateTerm: (state, action: PayloadAction<Term>) =>
-            state = { ...state, termHistory: [state.currentTerm].concat(state.termHistory), currentTerm: action.payload },
+            state = { ...state, termHistory: smartConcatHead(state.currentTerm, state.termHistory), currentTerm: action.payload },
         toggleFactsBar: (state, action: PayloadAction<boolean>) =>
             state = { ...state, factsOpen: action.payload, graphDimensions: getGraphDimensions(state.screenDimensions, action.payload) },
         updateMacro: (state, action: PayloadAction<[number, Macro]>) =>
@@ -91,7 +101,7 @@ export const slice = createSlice({
         backTerm: (state) =>
             state.termHistory.length > 0 ? state = { ...state, currentTerm: state.termHistory[0], termHistory: state.termHistory.slice(1) } : state,
         resetTerm: (state) =>
-            state.termHistory.length > 0 ? state = { ...state, currentTerm: state.termHistory[0], termHistory: [state.termHistory[0]] } : state = { ...state, redraw: true },
+            state = { ...state, currentTerm: state.originalTerm, termHistory: smartConcatHead(state.currentTerm, state.termHistory), redraw: true },
         finishedDrawing: (state) =>
             state = { ...state, redraw: false },
         clear: (state) =>

@@ -202,7 +202,7 @@ and generateGraphElements' = (
 
   switch term {
   | Var(x, a) => {
-      let (x, b) = List.nth(dict, x)
+      let (i, b) = List.nth(dict, x)
 
       let labelclass = switch dir {
       | U => "term-edge"
@@ -248,10 +248,10 @@ and generateGraphElements' = (
       )
       let edge4 = createEdge(
         edges,
-        eid(VAR_TOP, vars, ABS_TOP, x),
+        eid(VAR_TOP, vars, ABS_TOP, i),
         ["arc"],
         node3["data"]["id"],
-        nid(ABS_TOP, x),
+        nid(ABS_TOP, i),
         lookup(ctx, x),
       )
 
