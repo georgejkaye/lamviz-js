@@ -382,8 +382,14 @@ label {
 .macro {
     background-color: #004d66;
     border: 2px #41809c solid;
-    border-radius: 10px;
+    border-radius: 5px;
     margin: 5px 5px;
+    padding: 5px 5px;
+}
+
+.macro-title {
+    font-size: 1.2em;
+    font-weight: bold;
 }
 
 .macro-field {

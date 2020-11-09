@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./../reducers"
 import { updateMacro } from "./../reducers/slice"
-import { Term, Context, prettyPrint } from "../bs/Lambda.bs"
+import { Term, Context, prettyPrint, printTermAndContext } from "../bs/Lambda.bs"
 
 import Up from "../data/svgs/up-chevron.svg"
 import Down from "../data/svgs/down-chevron.svg"
@@ -39,9 +39,8 @@ export function Macro(props: MacroProps) {
             <div className={isOpen ? "macro-def open" : "macro-def closed"}>{props.macro.term}</div>
         </div>*/
         <div className="macro">
-            <div>{props.macro.name}</div>
-            <div>{props.macro.termstring}</div>
-            <div>{props.macro.contextstring}</div>
+            <div className="macro-title">{props.macro.name}</div>
+            <div>{printTermAndContext(props.macro.term, props.macro.context)}</div>
         </div>
     )
 }

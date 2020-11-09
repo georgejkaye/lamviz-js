@@ -370,7 +370,7 @@ and printHTML' = (t, ctx, db, x, vars, abs, apps, betas) => {
   }
 }
 
-let rec prettyPrintTermAndContext = (term, ctx) => {
+let rec printTermAndContext = (term, ctx) => {
   let printedTerm = prettyPrint(term, ctx)
   let printedContext = prettyPrintContext(ctx)
   `${printedContext} ⊢ ${printedTerm}`

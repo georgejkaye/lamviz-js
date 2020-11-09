@@ -104,21 +104,21 @@ and generateFreeVariableElements' = (ctx, dict, nodes, edges, frees, n) => {
   switch ctx {
   | list{} => (nodes, edges, dict, frees, n)
   | list{x, ...xs} => {
-      let node1 = createNode(nodes, nid(ABS, n), ["abstraction", "free"], 0, 0, "")
+      let node1 = createNode(nodes, nid(ABS, n), ["abstraction", "free"], 0, 0, lambda)
       let node2 = createNode(nodes, nid(ABS_SP, n), ["support", "free"], 0, 0, "")
       let node3 = createNode(nodes, nid(ABS_TOP, n), ["top", "free"], 0, 0, "")
       let edge1 = createEdge(
         edges,
         eid(ABS, n, ABS_SP, n),
-        ["absedge", "free"],
+        ["abs-edge", "free"],
         node1["data"]["id"],
         node2["data"]["id"],
-        "",
+        x,
       )
       let edge2 = createEdge(
         edges,
         eid(ABS_SP, n, ABS_TOP, n),
-        ["absedge", "free"],
+        ["abs-edge", "free"],
         node2["data"]["id"],
         node3["data"]["id"],
         "",
