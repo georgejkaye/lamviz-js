@@ -130,6 +130,15 @@ button {
     margin-left: 5px;
 }
 
+button:hover {
+    background-color: #41809c;
+}
+
+button:disabled {
+    background-color: #024055;
+    cursor: auto;
+}
+
 .flex-button {
     flex: 1;
 }
@@ -144,6 +153,12 @@ select {
     outline: none;
     margin: 2px 5px;
     padding: 10px;
+    cursor: pointer;
+}
+
+select:disabled {
+    cursor: auto;
+    background-color: #024055;
 }
 
 .left {
@@ -152,10 +167,6 @@ select {
 
 .right {
     margin-right: 10px;
-}
-
-button:hover {
-    background-color: #41809c;
 }
 
 .stage {

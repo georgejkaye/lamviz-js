@@ -12,7 +12,7 @@ import { Term, Context, } from "../bs/Lambda.bs"
 
 import { svg } from "./../libs/convert-to-svg"
 
-import { downloadSvg, downloadedSvg } from "./../reducers/slice";
+import { downloadSvg, downloadedSvg, finishedDrawing } from "./../reducers/slice";
 
 interface GraphProps {
     dimensions: { width: number, height: number }
@@ -20,6 +20,7 @@ interface GraphProps {
     zoom: boolean
     nodeLabels: boolean
     edgeLabels: boolean
+    redraw: boolean
 }
 
 export default function Graph(props: GraphProps) {
@@ -59,7 +60,6 @@ export default function Graph(props: GraphProps) {
         cy.elements().remove()
 
         if (props.graph.term != undefined) {
-
 
             /* Generate elements for the current term */
             let [elements, frees, mps] = generateElements(props.graph.term, props.graph.context)
@@ -114,7 +114,12 @@ export default function Graph(props: GraphProps) {
                 cy.fit(cy.elements(), 50)
             }
         }
-    }, [props.graph])
+
+        if (props.redraw) {
+            dispatch(finishedDrawing())
+        }
+
+    }, [props.graph, props.redraw])
 
     useEffect(() => {
         console.log(svgTime)

@@ -27,6 +27,7 @@ interface State {
     mode: Mode,
     currentTermText: string,
     currentContextText: string,
+    redraw: boolean, /* redraw NOW */
     currentTerm: Term,
     termHistory: Term[],
     currentContext: Context,
@@ -50,6 +51,7 @@ const initialState: State = {
     mode: Mode.VISUALISER,
     currentTermText: "",
     currentContextText: "",
+    redraw: false,
     currentTerm: undefined,
     termHistory: [],
     currentContext: undefined,
@@ -89,7 +91,9 @@ export const slice = createSlice({
         backTerm: (state) =>
             state.termHistory.length > 0 ? state = { ...state, currentTerm: state.termHistory[0], termHistory: state.termHistory.slice(1) } : state,
         resetTerm: (state) =>
-            state.termHistory.length > 0 ? state = { ...state, currentTerm: state.termHistory[0], termHistory: [state.termHistory[0]] } : state,
+            state.termHistory.length > 0 ? state = { ...state, currentTerm: state.termHistory[0], termHistory: [state.termHistory[0]] } : state = { ...state, redraw: true },
+        finishedDrawing: (state) =>
+            state = { ...state, redraw: false },
         clear: (state) =>
             state = { ...state, currentTermText: "", currentContextText: "", currentTerm: undefined, error: "" },
         downloadSvg: (state) =>
@@ -110,7 +114,7 @@ export const slice = createSlice({
 })
 
 export const {
-    changeMode, resize, newTerm, newError, updateTerm, resetTerm, backTerm, toggleFactsBar, clear,
+    changeMode, resize, newTerm, newError, updateTerm, resetTerm, finishedDrawing, backTerm, toggleFactsBar, clear,
     downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels, addMacro, updateMacro, removeMacro, removeAllMacros } = slice.actions
 
 export default slice.reducer

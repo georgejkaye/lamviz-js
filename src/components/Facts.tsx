@@ -1,10 +1,14 @@
 
 import React, { useState, KeyboardEvent, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Collapse } from "react-collapse"
+import ReactTooltip from "react-tooltip"
+
+import { Term } from "../bs/Lambda.bs"
 import { betaRedexes, variables, uniqueVariables, freeVariables, applications, abstractions, subterms, crossings, bridges, linear, planar, closed, bridgeless, printRedexesArray } from "../bs/Lambda.bs";
 import { RootState } from "./../reducers"
-import { Collapse } from "react-collapse"
-import { Term } from "../bs/Lambda.bs"
+import { normalise } from "../bs/Evaluator.bs";
+import { updateTerm, backTerm, toggleFactsBar, resetTerm, downloadSvg } from "./../reducers/slice";
 
 import Up from "../data/svgs/up-chevron.svg"
 import Down from "../data/svgs/down-chevron.svg"
@@ -12,9 +16,6 @@ import Left from "../data/svgs/left-chevron.svg"
 import Right from "../data/svgs/right-chevron.svg"
 import Back from "../data/svgs/back.svg"
 import Refresh from "../data/svgs/refresh.svg"
-
-import { normalise } from "../bs/Evaluator.bs";
-import { updateTerm, backTerm, toggleFactsBar, resetTerm, downloadSvg } from "./../reducers/slice";
 
 enum StatType {
     VARIABLES,
@@ -177,13 +178,16 @@ export default function Facts() {
                     </Collapse>
                     <div className="normalisation">
                         <div className="button-row">
-                            <button type="button" className="left flex-button" onClick={normaliseButton}>Normalise</button>
-                            <button type="button" className="flex-button icon-button" onClick={backButton}><img src={Back} className={"icon"} alt={"Back"} /></button>
-                            <button type="button" className="right flex-button icon-button" onClick={resetButton}><img src={Refresh} className={"icon"} alt={"Reset"} /></button>
+                            <button type="button" className="left flex-button" onClick={normaliseButton} disabled={betaRedexes(term) == 0 ? true : false}>Normalise</button>
+                            <button data-tip="back-tooltip" data-for="back" type="button" className="flex-button icon-button" onClick={backButton} disabled={termHistory.length == 0 ? true : false}><img src={Back} className={"icon"} alt={"Back"} /></button>
+                            <ReactTooltip id="back" type="dark" place="left" effect="float">Back</ReactTooltip>
+
+                            <button data-tip="reset-tooltip" data-for="reset" type="button" className="right flex-button icon-button" onClick={resetButton}><img src={Refresh} className={"icon"} alt={"Reset"} /></button>
+                            <ReactTooltip id="reset" type="dark" place="left" effect="float">Reset</ReactTooltip>
                         </div>
                         <div className="button-row">
-                            <button type="button" className="left flex-button">Reduce</button>
-                            <select name="strategy" id="strategy" className="right flex-button">
+                            <button type="button" className="left flex-button" disabled={betaRedexes(term) == 0 ? true : false}>Reduce</button>
+                            <select name="strategy" id="strategy" className="right flex-button" disabled={betaRedexes(term) == 0 ? true : false}>
                                 <option value="outermost">Outermost</option>
                                 <option value="innermost">Innermost</option>"
                     <option value="random">Random</option>
@@ -193,7 +197,8 @@ export default function Facts() {
                     <div className="button-row">
                         <button type="button" className="left right flex-button" onClick={svgButton}>Export map</button>
                     </div>
-                </div>)}
+                </div>)
+            }
         </div >
     )
 }

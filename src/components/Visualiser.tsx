@@ -15,6 +15,7 @@ enum VisualiserMode {
 export default function Visualiser() {
 
     const term = useSelector((state: RootState) => state.currentState).currentTerm
+    const redraw = useSelector((state: RootState) => state.currentState).redraw
     const context = useSelector((state: RootState) => state.currentState).currentContext
     const screenDimensions = useSelector((state: RootState) => state.currentState).screenDimensions
     const graphDimensions = useSelector((state: RootState) => state.currentState).graphDimensions
@@ -42,7 +43,7 @@ export default function Visualiser() {
             </div>
             <div className="main-stage" style={{ height: String(graphDimensions.height) + "px" }}>
                 <div className="main-graph">
-                    <Graph dimensions={graphDimensions} graph={{ term: term, context: context }} nodeLabels={nodeLabels} edgeLabels={edgeLabels} zoom />
+                    <Graph dimensions={graphDimensions} redraw={redraw} graph={{ term: term, context: context }} nodeLabels={nodeLabels} edgeLabels={edgeLabels} zoom />
                 </div>
                 <Facts />
             </div>
