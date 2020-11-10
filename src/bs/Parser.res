@@ -21,7 +21,7 @@ let token_cmp = (token1, token2) => token_type(token1) == token_type(token2)
 
 let next_char = (s, i) => i < String.length(s) ? Some(String.get(s, i)) : None
 
-let letters = %re("/[a-z]/")
+let letters = %re("/[a-zA-Z]/")
 
 let rec lexer' = (term, i, seen) => {
   let x = next_char(term, i)
@@ -78,68 +78,72 @@ let skip = (token, tokens) => {
   next(token, tokens) ? (true, List.tl(tokens)) : (false, tokens)
 }
 
-let rec term = (ctx, tokens) => {
+let rec term = (ctx, tokens, macros) => {
   let (b, tokens) = skip(LAMBDA, tokens)
 
   if b {
     let (id, tokens) = token(ID(""), tokens)
     let tokens = match(DOT, tokens)
-    let (term, tokens) = term(list{value(id), ...ctx}, tokens)
+    let (term, tokens) = term(list{value(id), ...ctx}, tokens, macros)
     (Abs(term, value(id), ""), tokens)
   } else {
-    application(ctx, tokens)
+    application(ctx, tokens, macros)
   }
 }
 
-and application = (ctx, tokens) => {
-  let (lhs, tokens) = atom(ctx, tokens)
+and application = (ctx, tokens, macros) => {
+  let (lhs, tokens) = atom(ctx, tokens, macros)
 
   let lhs = switch lhs {
   | None => raise(ParseError("Unexpected character encountered."))
   | Some(t) => t
   }
 
-  application'(lhs, ctx, tokens)
+  application'(lhs, ctx, tokens, macros)
 }
-and application' = (lhs, ctx, tokens) => {
-  let (rhs, tokens) = atom(ctx, tokens)
+and application' = (lhs, ctx, tokens, macros) => {
+  let (rhs, tokens) = atom(ctx, tokens, macros)
 
   switch rhs {
   | None => (lhs, tokens)
   | Some(t) =>
     let lhs = App(lhs, t, "")
-    application'(lhs, ctx, tokens)
+    application'(lhs, ctx, tokens, macros)
   }
 }
 
-and atom = (ctx, tokens) => {
+and atom = (ctx, tokens, macros) => {
   let (b1, tokens) = skip(LBRACKET, tokens)
   let b2 = next(ID(""), tokens)
 
   if b1 {
-    let (term, tokens) = term(ctx, tokens)
+    let (term, tokens) = term(ctx, tokens, macros)
     let tokens = match(RBRACKET, tokens)
     (Some(term), tokens)
   } else if b2 {
     let (id, tokens) = token(ID(""), tokens)
-    switch index(value(id), ctx) {
-    | x => (Some(Var(x, "")), tokens)
-    | exception Not_found => raise(ParseError("Unexpected variable encountered."))
+    switch lookupMacro(macros, value(id)) {
+    | t => (Some(t), tokens)
+    | exception Not_found =>
+      switch index(value(id), ctx) {
+      | x => (Some(Var(x, "")), tokens)
+      | exception Not_found => raise(ParseError("Unexpected variable encountered."))
+      }
     }
   } else {
     (None, tokens)
   }
 }
 
-let parse = (context, tokens) => {
-  let (result, tokens) = term(context, tokens)
+let parse = (tokens, context, macros, macro) => {
+  let (result, tokens) = term(context, tokens, macros)
   let _ = match(EOF, tokens)
-  result
+  macro == "" ? result : rename(result, macro)
 }
 
-let lexAndParse = (term, context) => {
+let lexAndParse = (term, context, macros, macro) => {
   let lexed = lexer(term)
   let context = context == "" ? list{} : split(context, ' ')
-  let parsed = parse(context, lexed)
+  let parsed = parse(lexed, context, Array.to_list(macros), macro)
   (parsed, context)
 }

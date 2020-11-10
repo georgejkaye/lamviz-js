@@ -201,8 +201,8 @@ and generateGraphElements' = (
   }
 
   switch term {
-  | Var(x, a) => {
-      let (i, b) = List.nth(dict, x)
+  | Var(x, _) => {
+      let (i, _) = List.nth(dict, x)
 
       let labelclass = switch dir {
       | U => "term-edge"
@@ -266,7 +266,7 @@ and generateGraphElements' = (
         apps,
       )
     }
-  | Abs(t, x, a) => {
+  | Abs(t, x, _) => {
       let classes = ptype == ROOT ? ["midpoint", "term-edge"] : ["midpoint", "abs-edge"]
 
       let node1 = createNode(
@@ -275,7 +275,7 @@ and generateGraphElements' = (
         classes,
         mpPosX,
         mpPosY,
-        prettyPrint(term, ctx),
+        prettyPrint(term, ctx, false),
       )
       let node2 = createNode(nodes, nid(ABS, abs), ["abstraction"], posX, posY, lambda)
       let node3 = createNode(
@@ -382,7 +382,7 @@ and generateGraphElements' = (
         apps',
       )
     }
-  | App(t1, t2, a) => {
+  | App(t1, t2, _) => {
       let labelclass = switch dir {
       | U => "term-edge"
       | L => "app-edge-l"
@@ -395,7 +395,7 @@ and generateGraphElements' = (
         ["midpoint", labelclass],
         mpPosX,
         mpPosY,
-        prettyPrint(term, ctx),
+        prettyPrint(term, ctx, false),
       )
       let node2 = createNode(nodes, nid(APP, apps), ["application"], posX, posY, "@")
 

@@ -1,0 +1,1 @@
+\a.\b.\c.\d.\e.\f.\g.\h.\i.a(\j.\k.((\l.\m.\n.b(\o.c(\p.d (l (m ((n o) p))))))(\q.\r.\s. e (\t. f (\u. g (q (r ((s t) u)))))))(\v.\w.h (\x. i (j ((k v)(w x))))))

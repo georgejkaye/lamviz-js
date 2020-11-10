@@ -42,7 +42,7 @@ export default function VisualiserSidebar() {
         if (termText != "") {
             try {
                 let contextTextTrimmed = contextText.trim()
-                let [term, context] = lexAndParse(termText, contextTextTrimmed)
+                let [term, context] = lexAndParse(termText, contextTextTrimmed, macros, "")
                 dispatch(newTerm([termText, contextTextTrimmed, term, context]))
             } catch (e) {
                 dispatch(newError(e._1))
@@ -64,8 +64,6 @@ export default function VisualiserSidebar() {
 
     const toggleNodeLabelsButton = () => dispatch(toggleNodeLabels())
     const toggleEdgeLabelsButton = () => dispatch(toggleEdgeLabels())
-
-    console.log(macros)
 
     return (
         <div className="visualiser-sidebar">

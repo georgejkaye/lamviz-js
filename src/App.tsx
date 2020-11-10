@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./reducers"
-import { Mode, resize } from "./reducers/slice";
+import { Mode, resize, addMacro } from "./reducers/slice";
 import Sidebar from "./components/Sidebar"
 import Visualiser from "./components/Visualiser"
 

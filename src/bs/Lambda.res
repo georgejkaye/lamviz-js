@@ -12,6 +12,7 @@ open Helpers
  */
 
 type context = list<string>
+let emptyContext = list{}
 
 let rec prettyPrintContext = ctx => {
   switch ctx {
@@ -64,18 +65,18 @@ and refreshFreeVariableNames' = (ctx, n) => {
 /**
  * Lambda term type
  * Can be a
- *  - Variable : index * alias
- *  - Abstraction : subterm * initial label * alias
- *  - Application : left * right * alias
+ *  - Variable : index * macro
+ *  - Abstraction : subterm * initial label * macro
+ *  - Application : left * right * macro
  */
 type rec lambdaTerm =
   | Var(int, string)
   | Abs(lambdaTerm, string, string)
   | App(lambdaTerm, lambdaTerm, string)
 
-let newVar = (i, alias) => Var(i, alias)
-let newAbs = (t, x, alias) => Abs(t, x, alias)
-let newApp = (t1, t2, alias) => App(t1, t2, alias)
+let newVar = (i, macro) => Var(i, macro)
+let newAbs = (t, x, macro) => Abs(t, x, macro)
+let newApp = (t1, t2, macro) => App(t1, t2, macro)
 
 /**
  * Pretty print a lambda term with De Bruijn indices
@@ -106,25 +107,31 @@ and prettyPrintDeBruijn' = (t, x) => {
  * @return a pretty printed term
  */
 
-let rec prettyPrint = (t, ctx) => prettyPrint'(t, ctx, 0)
-and prettyPrint' = (t, ctx, x) => {
+let rec prettyPrint = (t, ctx, mac) => {
+  prettyPrint'(t, ctx, mac, 0)
+}
+and prettyPrint' = (t, ctx, mac, x) => {
   switch t {
-  | Var(i, "") => lookup(ctx, i)
-  | Var(_, a) => a
-  | Abs(t, y, "") => {
-      let ctx' = pushTerm(ctx, y)
-      let string = `λ${y}. ${prettyPrint'(t, ctx', 0)}`
-      x == 0 ? string : "(" ++ string ++ ")"
-    }
-  | Abs(_, _, a) => a
-  | App(t1, t2, "") =>
-    x == 0
-      ? switch t1 {
-        | Abs(_, _, _) => "(" ++ prettyPrint'(t1, ctx, 0) ++ ") " ++ prettyPrint'(t2, ctx, 1)
-        | _ => prettyPrint'(t1, ctx, 0) ++ " " ++ prettyPrint'(t2, ctx, 1)
+  | Var(i, a) => mac && a != "" ? a : lookup(ctx, i)
+  | Abs(t, y, a) =>
+    mac && a != ""
+      ? a
+      : {
+          let ctx' = pushTerm(ctx, y)
+          let string = `λ${y}. ${prettyPrint'(t, ctx', mac, 0)}`
+          x == 0 ? string : "(" ++ string ++ ")"
         }
-      : "(" ++ prettyPrint'(t1, ctx, x) ++ " " ++ prettyPrint'(t2, ctx, x) ++ ")"
-  | App(_, _, a) => a
+
+  | App(t1, t2, a) =>
+    mac && a != ""
+      ? a
+      : x == 0
+      ? switch t1 {
+      | Abs(_, _, _) =>
+        "(" ++ prettyPrint'(t1, ctx, mac, 0) ++ ") " ++ prettyPrint'(t2, ctx, mac, 1)
+      | _ => prettyPrint'(t1, ctx, mac, 0) ++ " " ++ prettyPrint'(t2, ctx, mac, 1)
+      }
+      : "(" ++ prettyPrint'(t1, ctx, mac, x) ++ " " ++ prettyPrint'(t2, ctx, mac, x) ++ ")"
   }
 }
 
@@ -224,6 +231,8 @@ let rec applications = t => {
   | App(t1, t2, _) => 1 + applications(t1) + applications(t2)
   }
 }
+
+/* TODO - Fix */
 
 let rec uniqueVariables = t => fst(uniqueVariables'(t, list{}))
 and uniqueVariables' = (t, seen) => {
@@ -370,8 +379,8 @@ and printHTML' = (t, ctx, db, x, vars, abs, apps, betas) => {
   }
 }
 
-let rec printTermAndContext = (term, ctx) => {
-  let printedTerm = prettyPrint(term, ctx)
+let printTermAndContext = (term, ctx, mac) => {
+  let printedTerm = prettyPrint(term, ctx, mac)
   let printedContext = prettyPrintContext(ctx)
   `${printedContext} ⊢ ${printedTerm}`
 }
@@ -400,5 +409,22 @@ and refreshVariableNames' = (t, n) => {
       (App(lhs, rhs, ""), n'')
     }
   | App(_, _, _) => (t, n)
+  }
+}
+
+type macro = {"name": string, "termstring": string, "term": lambdaTerm, "active": bool}
+
+let rec lookupMacro = (macs, mac) => {
+  switch macs {
+  | list{} => raise(Not_found)
+  | list{x, ...xs} => x["name"] == mac ? x["term"] : lookupMacro(xs, mac)
+  }
+}
+
+let rename = (term, macro) => {
+  switch term {
+  | Var(x, _) => Var(x, macro)
+  | Abs(t, x, _) => Abs(t, x, macro)
+  | App(t1, t2, _) => App(t1, t2, macro)
   }
 }

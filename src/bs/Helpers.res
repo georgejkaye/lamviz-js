@@ -21,6 +21,14 @@ and index' = (a, xs, n) => {
   }
 }
 
+let rec zip = (xs, ys) => {
+  switch (xs, ys) {
+  | (list{}, list{}) => list{}
+  | (list{x, ...xs}, list{y, ...ys}) => list{(x, y), ...zip(xs, ys)}
+  | _ => failwith("Lists not same length")
+  }
+}
+
 let rec contains = (a, xs) => {
   switch xs {
   | list{} => false
