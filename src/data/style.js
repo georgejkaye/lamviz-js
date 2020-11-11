@@ -7,6 +7,8 @@ export const stylesheet = [
             "width": "1",
             "label": "",
             "overlay-padding": 0.5,
+            "transition-property": "background-color, opacity",
+            "transition-duration": "0.5s",
         }
     },
     {
@@ -65,6 +67,8 @@ export const stylesheet = [
             "label": "",
             "width": "0.5",
             "overlay-padding": 0.5,
+            "transition-property": "background-color, line-color, mid-target-arrow-color, opacity",
+            "transition-duration": "0.75s"
         }
     },
     {
@@ -117,6 +121,12 @@ export const stylesheet = [
             "color": "#9c9c9c"
         }
     },
+    {
+        selector: ".transparent",
+        style: {
+            "opacity": 0
+        }
+    }
 
 
 ]

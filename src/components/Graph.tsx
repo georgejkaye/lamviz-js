@@ -57,12 +57,15 @@ export default function Graph(props: GraphProps) {
 
     useEffect(() => {
 
+        cy.elements().addClass("transparent")
         cy.elements().remove()
 
         if (props.graph.term != undefined) {
 
             /* Generate elements for the current term */
             let [elements, frees, mps] = generateElements(props.graph.term, props.graph.context)
+
+            console.log(elements)
 
             /* Add all the elements */
             cy.add(elements)
@@ -109,17 +112,14 @@ export default function Graph(props: GraphProps) {
             cy.zoomingEnabled(props.zoom)
 
             /* Make the map fill the screen */
-
             if (props.nodeLabels == lastNodeLabels && props.edgeLabels == lastEdgeLabels) {
                 cy.fit(cy.elements(), 50)
             }
+
+            cy.elements().removeClass("transparent")
         }
 
-        if (props.redraw) {
-            dispatch(finishedDrawing())
-        }
-
-    }, [props.graph, props.redraw])
+    }, [props.graph])
 
     useEffect(() => {
         console.log(svgTime)

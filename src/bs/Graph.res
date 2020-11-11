@@ -143,7 +143,7 @@ let nodeDistanceY = 5
 let rec generateGraphElements = (term, ctx) => {
   let (nodes, edges, dict, frees, n) = generateFreeVariableElements(ctx, list{})
 
-  let root = createNode(nodes, "root", ["root"], 0, 0, "")
+  let root = createNode(nodes, "root", ["root", "transparent"], 0, 0, "")
 
   let (nodes', edges', midpoints, _, _, _) = generateGraphElements'(
     term,
@@ -213,18 +213,25 @@ and generateGraphElements' = (
       let node1 = createNode(
         nodes,
         nid(VAR_MP, vars),
-        ["midpoint", labelclass],
+        ["midpoint", "transparent", labelclass],
         mpPosX,
         mpPosY,
         lookup(ctx, x),
       )
-      let node2 = createNode(nodes, nid(VAR, vars), ["support"], posX, posY, "")
-      let node3 = createNode(nodes, nid(VAR_TOP, vars), ["top"], posX, posY - nodeDistanceY, "")
+      let node2 = createNode(nodes, nid(VAR, vars), ["support", "transparent"], posX, posY, "")
+      let node3 = createNode(
+        nodes,
+        nid(VAR_TOP, vars),
+        ["top", "transparent"],
+        posX,
+        posY - nodeDistanceY,
+        "",
+      )
 
       let edge1 = createEdge(
         edges,
         eid(ptype, pn, VAR_MP, vars),
-        ["varedge"],
+        ["varedge", "transparent"],
         parent["data"]["id"],
         node1["data"]["id"],
         "",
@@ -233,7 +240,7 @@ and generateGraphElements' = (
       let edge2 = createEdge(
         edges,
         eid(VAR_MP, vars, VAR, vars),
-        ["varedge"],
+        ["varedge", "transparent"],
         node1["data"]["id"],
         node2["data"]["id"],
         "",
@@ -241,7 +248,7 @@ and generateGraphElements' = (
       let edge3 = createEdge(
         edges,
         eid(VAR, vars, VAR_TOP, vars),
-        ["varedge"],
+        ["varedge", "transparent"],
         node2["data"]["id"],
         node3["data"]["id"],
         "",
@@ -249,7 +256,7 @@ and generateGraphElements' = (
       let edge4 = createEdge(
         edges,
         eid(VAR_TOP, vars, ABS_TOP, i),
-        ["arc"],
+        ["arc", "transparent"],
         node3["data"]["id"],
         nid(ABS_TOP, i),
         lookup(ctx, x),
@@ -267,7 +274,10 @@ and generateGraphElements' = (
       )
     }
   | Abs(t, x, _) => {
-      let classes = ptype == ROOT ? ["midpoint", "term-edge"] : ["midpoint", "abs-edge"]
+      let classes =
+        ptype == ROOT
+          ? ["midpoint", "term-edge", "transparent"]
+          : ["midpoint", "abs-edge", "transparent"]
 
       let node1 = createNode(
         nodes,
@@ -277,11 +287,18 @@ and generateGraphElements' = (
         mpPosY,
         prettyPrint(term, ctx, false, true),
       )
-      let node2 = createNode(nodes, nid(ABS, abs), ["abstraction"], posX, posY, lambda)
+      let node2 = createNode(
+        nodes,
+        nid(ABS, abs),
+        ["abstraction", "transparent"],
+        posX,
+        posY,
+        lambda,
+      )
       let node3 = createNode(
         nodes,
         nid(ABS_SP_MP, abs),
-        ["midpoint", "abs-edge-r"],
+        ["midpoint", "abs-edge-r", "transparent"],
         posX + nodeDistanceX / 2,
         posY - nodeDistanceY / 2,
         x,
@@ -289,7 +306,7 @@ and generateGraphElements' = (
       let node4 = createNode(
         nodes,
         nid(ABS_SP, abs),
-        ["support"],
+        ["support", "transparent"],
         posX + nodeDistanceX,
         posY - nodeDistanceY,
         "",
@@ -297,7 +314,7 @@ and generateGraphElements' = (
       let node5 = createNode(
         nodes,
         nid(ABS_TOP, abs),
-        ["top"],
+        ["top", "transparent"],
         posX + nodeDistanceX,
         posY - 2 * nodeDistanceY,
         "",
@@ -306,7 +323,7 @@ and generateGraphElements' = (
       let edge1 = createEdge(
         edges,
         eid(ptype, pn, ABS_MP, abs),
-        ["absedge"],
+        ["absedge", "transparent"],
         parent["data"]["id"],
         node1["data"]["id"],
         "",
@@ -314,7 +331,7 @@ and generateGraphElements' = (
       let edge2 = createEdge(
         edges,
         eid(ABS_MP, abs, ABS, abs),
-        ["absedge"],
+        ["absedge", "transparent"],
         node1["data"]["id"],
         node2["data"]["id"],
         "",
@@ -322,7 +339,7 @@ and generateGraphElements' = (
       let edge3 = createEdge(
         edges,
         eid(ABS, abs, ABS_SP_MP, abs),
-        ["varedge"],
+        ["varedge", "transparent"],
         node2["data"]["id"],
         node3["data"]["id"],
         "",
@@ -330,7 +347,7 @@ and generateGraphElements' = (
       let edge4 = createEdge(
         edges,
         eid(ABS_SP_MP, abs, ABS_SP, abs),
-        ["varedge"],
+        ["varedge", "transparent"],
         node3["data"]["id"],
         node4["data"]["id"],
         "",
@@ -338,7 +355,7 @@ and generateGraphElements' = (
       let edge5 = createEdge(
         edges,
         eid(ABS_SP, abs, ABS_TOP, abs),
-        ["varedge"],
+        ["varedge", "transparent"],
         node4["data"]["id"],
         node5["data"]["id"],
         "",
@@ -392,17 +409,17 @@ and generateGraphElements' = (
       let node1 = createNode(
         nodes,
         nid(APP_MP, apps),
-        ["midpoint", labelclass],
+        ["midpoint", "transparent", labelclass],
         mpPosX,
         mpPosY,
         prettyPrint(term, ctx, false, true),
       )
-      let node2 = createNode(nodes, nid(APP, apps), ["application"], posX, posY, "@")
+      let node2 = createNode(nodes, nid(APP, apps), ["application", "transparent"], posX, posY, "@")
 
       let edge1 = createEdge(
         edges,
         eid(ptype, pn, APP_MP, apps),
-        ["appedge"],
+        ["appedge", "transparent"],
         parent["data"]["id"],
         node1["data"]["id"],
         "",
@@ -410,7 +427,7 @@ and generateGraphElements' = (
       let edge2 = createEdge(
         edges,
         eid(APP_MP, apps, APP, apps),
-        ["appedge"],
+        ["appedge", "transparent"],
         node1["data"]["id"],
         node2["data"]["id"],
         "",
