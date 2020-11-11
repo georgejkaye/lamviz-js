@@ -107,31 +107,34 @@ and prettyPrintDeBruijn' = (t, x) => {
  * @return a pretty printed term
  */
 
-let rec prettyPrint = (t, ctx, mac) => {
-  prettyPrint'(t, ctx, mac, 0)
+let rec prettyPrint = (t, ctx, mac, topmac) => {
+  prettyPrint'(t, ctx, mac, topmac, 0)
 }
-and prettyPrint' = (t, ctx, mac, x) => {
+and prettyPrint' = (t, ctx, mac, topmac, x) => {
   switch t {
-  | Var(i, a) => mac && a != "" ? a : lookup(ctx, i)
+  | Var(i, a) => mac && topmac && a != "" ? a : lookup(ctx, i)
   | Abs(t, y, a) =>
-    mac && a != ""
+    mac && topmac && a != ""
       ? a
       : {
           let ctx' = pushTerm(ctx, y)
-          let string = `λ${y}. ${prettyPrint'(t, ctx', mac, 0)}`
+          let string = `λ${y}. ${prettyPrint'(t, ctx', mac, false, 0)}`
           x == 0 ? string : "(" ++ string ++ ")"
         }
 
   | App(t1, t2, a) =>
-    mac && a != ""
+    mac && topmac && a != ""
       ? a
       : x == 0
       ? switch t1 {
       | Abs(_, _, _) =>
-        "(" ++ prettyPrint'(t1, ctx, mac, 0) ++ ") " ++ prettyPrint'(t2, ctx, mac, 1)
-      | _ => prettyPrint'(t1, ctx, mac, 0) ++ " " ++ prettyPrint'(t2, ctx, mac, 1)
+        "(" ++ prettyPrint'(t1, ctx, mac, true, 0) ++ ") " ++ prettyPrint'(t2, ctx, mac, true, 1)
+      | _ => prettyPrint'(t1, ctx, mac, true, 0) ++ " " ++ prettyPrint'(t2, ctx, mac, true, 1)
       }
-      : "(" ++ prettyPrint'(t1, ctx, mac, x) ++ " " ++ prettyPrint'(t2, ctx, mac, x) ++ ")"
+      : "(" ++
+        prettyPrint'(t1, ctx, mac, true, x) ++
+        " " ++
+        prettyPrint'(t2, ctx, mac, true, x) ++ ")"
   }
 }
 
@@ -379,8 +382,8 @@ and printHTML' = (t, ctx, db, x, vars, abs, apps, betas) => {
   }
 }
 
-let printTermAndContext = (term, ctx, mac) => {
-  let printedTerm = prettyPrint(term, ctx, mac)
+let printTermAndContext = (term, ctx, mac, topmac) => {
+  let printedTerm = prettyPrint(term, ctx, mac, topmac)
   let printedContext = prettyPrintContext(ctx)
   `${printedContext} ⊢ ${printedTerm}`
 }

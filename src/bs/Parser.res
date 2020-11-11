@@ -21,7 +21,7 @@ let token_cmp = (token1, token2) => token_type(token1) == token_type(token2)
 
 let next_char = (s, i) => i < String.length(s) ? Some(String.get(s, i)) : None
 
-let letters = %re("/[a-zA-Z]/")
+let letters = %re("/[a-zA-Z0-9]/")
 
 let rec lexer' = (term, i, seen) => {
   let x = next_char(term, i)
@@ -122,11 +122,10 @@ and atom = (ctx, tokens, macros) => {
     (Some(term), tokens)
   } else if b2 {
     let (id, tokens) = token(ID(""), tokens)
-    switch lookupMacro(macros, value(id)) {
-    | t => (Some(t), tokens)
-    | exception Not_found =>
-      switch index(value(id), ctx) {
-      | x => (Some(Var(x, "")), tokens)
+    switch index(value(id), ctx) {
+    | x => (Some(Var(x, "")), tokens)
+    | exception Not_found => switch lookupMacro(macros, value(id)) {
+      | t => (Some(t), tokens)
       | exception Not_found => raise(ParseError("Unexpected variable encountered."))
       }
     }

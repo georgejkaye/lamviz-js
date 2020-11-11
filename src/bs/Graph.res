@@ -275,7 +275,7 @@ and generateGraphElements' = (
         classes,
         mpPosX,
         mpPosY,
-        prettyPrint(term, ctx, false),
+        prettyPrint(term, ctx, false, true),
       )
       let node2 = createNode(nodes, nid(ABS, abs), ["abstraction"], posX, posY, lambda)
       let node3 = createNode(
@@ -395,7 +395,7 @@ and generateGraphElements' = (
         ["midpoint", labelclass],
         mpPosX,
         mpPosY,
-        prettyPrint(term, ctx, false),
+        prettyPrint(term, ctx, false, true),
       )
       let node2 = createNode(nodes, nid(APP, apps), ["application"], posX, posY, "@")
 

@@ -37,9 +37,9 @@ export function Macro(props: MacroProps) {
             </div>
             <div className={isOpen ? "macro-def open" : "macro-def closed"}>{props.macro.term}</div>
         </div>*/
-        <div className="macro">
+        <div className="macro" key="aaa" >
             <div className="macro-title">{props.macro.name}</div>
-            <div>{prettyPrint(props.macro.term, emptyContext, false)}</div>
+            <div>{prettyPrint(props.macro.term, emptyContext, true, false)}</div>
         </div>
     )
 }

@@ -1,7 +1,7 @@
 
 declare module "Lambda.bs"
 export function prettyPrintContext(ctx: Context): string
-export function prettyPrint(t: Term, ctx: Context, mac: boolean): string
+export function prettyPrint(t: Term, ctx: Context, mac: boolean, topmac: boolean): string
 export function prettyPrintDeBruijn(t: Term): string
 export function subterms(t: Term): number
 export function freeVariables(t: Term): number

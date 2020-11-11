@@ -9,6 +9,14 @@ input {
     font-family: 'Montserrat', sans-serif;
 }
 
+input[type="file"] {
+    display: none;
+}
+
+textarea {
+    resize: none;
+}
+
 a {
     color: #8be9fd;
 }
