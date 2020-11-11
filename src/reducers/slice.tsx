@@ -120,6 +120,8 @@ export const slice = createSlice({
             state = { ...state, macros: state.macros.concat(action.payload) },
         addMacros: (state, action: PayloadAction<Macro[]>) =>
             state = { ...state, macros: state.macros.concat(action.payload) },
+        toggleMacro: (state, action: PayloadAction<number>) =>
+            state = { ...state, macros: state.macros.slice(0, action.payload).concat([{ ...state.macros[action.payload], active: !state.macros[action.payload].active }]).concat(state.macros.slice(action.payload + 1)) },
         removeMacro: (state, action: PayloadAction<number>) =>
             state = { ...state, macros: state.macros.slice(0, action.payload).concat(state.macros.slice(action.payload + 1)) },
         removeAllMacros: (state) =>
@@ -129,6 +131,6 @@ export const slice = createSlice({
 
 export const {
     changeMode, resize, newTerm, newError, updateTerm, resetTerm, finishedDrawing, backTerm, toggleFactsBar, clear,
-    downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels, addMacro, defineMacro, updateMacro, addMacros, removeMacro, removeAllMacros } = slice.actions
+    downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels, addMacro, defineMacro, updateMacro, toggleMacro, addMacros, removeMacro, removeAllMacros } = slice.actions
 
 export default slice.reducer

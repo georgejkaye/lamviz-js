@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./../reducers"
-import { updateMacro } from "./../reducers/slice"
-import { Term, Context, prettyPrint, printTermAndContext, emptyContext } from "../bs/Lambda.bs"
+import { newTerm, updateMacro, toggleMacro, removeMacro } from "./../reducers/slice"
+import { Term, prettyPrint, emptyContext } from "../bs/Lambda.bs"
 import { Collapse } from "react-collapse"
 
-import Up from "../data/svgs/up-chevron.svg"
-import Down from "../data/svgs/down-chevron.svg"
-import Delete from "../data/svgs/close.svg"
 import Tick from "../data/svgs/tick.svg"
-import { generateGraphElementsArray } from "../bs/Graph.bs";
+import Cross from "../data/svgs/close.svg"
+import Pencil from "../data/svgs/pencil.svg"
 import { lexAndParse } from "../bs/Parser.bs";
 
 export interface Macro {
@@ -26,20 +24,25 @@ interface MacroProps {
 
 export function Macro(props: MacroProps) {
 
-    let [isOpen, setOpen] = useState(false)
+    let dispatch = useDispatch()
+
+    const clickMacro = () => {
+        dispatch(newTerm([props.macro.termstring, "", props.macro.term, emptyContext]))
+    }
+
+    const removeMacroButton = (e: React.MouseEvent<any>) => { dispatch(removeMacro(props.no)); e.stopPropagation() }
+    const editMacroButton = (e: React.MouseEvent<any>) => { dispatch(toggleMacro(props.no)); e.stopPropagation() }
 
     return (
-        /*<div className="macro">
-            <div className="macro-name">
-                <div><img src={isOpen ? Up : Down} className="icon left-icon" alt={isOpen ? "\u2191" : "\u2193"} /></div>
-                <div>{props.macro.name}</div>
-                <div><img src={Delete} className="icon left-icon" alt="x" /></div>
+        <div className="macro ready-macro" key="aaa" onClick={clickMacro} >
+            <div>
+                <img src={Cross} className="icon clickable padded" onClick={removeMacroButton} />
             </div>
-            <div className={isOpen ? "macro-def open" : "macro-def closed"}>{props.macro.term}</div>
-        </div>*/
-        <div className="macro" key="aaa" >
-            <div className="macro-title">{props.macro.name}</div>
-            <div>{prettyPrint(props.macro.term, emptyContext, true, false)}</div>
+            <div className="ready-macro-main">
+                <div className="macro-title">{props.macro.name}</div>
+                <div>{prettyPrint(props.macro.term, emptyContext, true, false)}</div>
+            </div>
+            <div><img src={Pencil} className="icon clickable padded" onClick={editMacroButton} /></div>
         </div>
     )
 }
@@ -63,19 +66,39 @@ export function ActiveMacro(props: MacroProps) {
     }
 
     const doneButton = () => {
-        if (nameText == "") {
+
+        let name = nameText.replace(" ", "")
+
+        if (name == "") {
             setError("No name set.")
-        } else if (macros.map((x) => x.name).includes(nameText)) {
-            setError("Macro already exists!")
         } else if (termText == "") {
             setError("No macro definition provided.")
         } else {
             try {
-                let [term, _] = lexAndParse(termText, "", macros.filter((x) => x.term != undefined), nameText)
-                dispatch(updateMacro([props.no, { name: nameText, termstring: termText, term: term, active: false }]))
+                let [term, _] = lexAndParse(termText, "", macros.filter((x) => x.term != undefined), name)
+
+                let i: number
+
+
+
+                dispatch(updateMacro([props.no, { name: name, termstring: termText, term: term, active: false }]))
+
+                if (macros.map((x) => x.name).includes(name)) {
+                    let i = macros.map((x) => x.name).indexOf(name)
+                    dispatch(removeMacro(i))
+                }
+
             } catch (e) {
                 setError(e._1)
             }
+        }
+    }
+
+    const cancelButton = () => {
+        if (props.macro.term == undefined || props.macro.name == undefined) {
+            dispatch(removeMacro(props.no))
+        } else {
+            dispatch(toggleMacro(props.no))
         }
     }
 
@@ -99,6 +122,7 @@ export function ActiveMacro(props: MacroProps) {
         <div className="macro-field">
             <div className="macro-field-name">Term</div>
             <div className="macro-input-field"><input type="text" className="macro-text" onChange={termChange} onKeyDown={onKeyDown} defaultValue={props.macro.termstring} /></div>
+            <div><img src={Cross} className="icon right clickable" onClick={cancelButton} /></div>
         </div>
     </div >)
 }

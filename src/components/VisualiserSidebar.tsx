@@ -4,10 +4,11 @@ import { RootState } from "./../reducers"
 import { newTerm, newError, clear, toggleNodeLabels, toggleEdgeLabels, addMacro, addMacros, removeAllMacros } from "./../reducers/slice"
 import { lexAndParse } from "../bs/Parser.bs";
 import { Collapse } from "react-collapse"
+import ReactTooltip from "react-tooltip"
 
 import { Macro, ActiveMacro } from "./Macro"
 
-import Add from "../data/svgs/add-white.svg"
+import Add from "../data/svgs/add-black.svg"
 import Delete from "../data/svgs/bin.svg"
 import Upload from "../data/svgs/upload.svg"
 import Download from "../data/svgs/download.svg"
@@ -104,13 +105,29 @@ export default function VisualiserSidebar() {
         macroError == "" ? dispatch(addMacros(parsedMacros)) : setMacroError(macroError)
     }
 
-    const uploadMacros = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadMacrosButton = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files != undefined) {
             setMacroError("")
             fileReader = new FileReader()
             fileReader.onloadend = uploadedMacros
             fileReader.readAsText(e.target.files[0])
         }
+    }
+
+    const downloadMacrosButton = () => {
+        let string = macros.reduce((acc, mac) => {
+            return acc + mac.name + " := " + mac.termstring + "\n"
+        }, "")
+
+        let data = new Blob([string], { type: "text/plain" })
+        let url = window.URL.createObjectURL(data)
+        var downloadLink = document.createElement("a");
+        downloadLink.href = url;
+        downloadLink.download = "macros.txt";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+
     }
 
     const removeAllMacrosButton = () => {
@@ -148,12 +165,16 @@ export default function VisualiserSidebar() {
                 <button type="button" className={edgeLabels ? "on" : "off"} onClick={toggleEdgeLabelsButton} >{edgeLabels ? "Edge labels on" : "Edge labels off"}</button>
             </div>
             <div className="sidebar-heading">
-                <div><img src={Add} className="icon left-icon clickable" onClick={addMacroButton} /></div>
-                <div><img src={Delete} className="icon left-icon clickable" onClick={removeAllMacrosButton} /></div>
+                <div><button data-tip="add-tooltip" data-for="add" type="button" className="icon-button" onClick={addMacroButton}><img src={Add} className={"icon"} alt={"Add"} /></button></div>
+                <ReactTooltip id="add" type="dark" place="right" effect="float">Add</ReactTooltip>
+                <div><button data-tip="delete-tooltip" data-for="delete" type="button" className="icon-button" onClick={removeAllMacrosButton} disabled={macros.length == 0}><img src={Delete} className={"icon"} alt={"Delete"} /></button></div>
+                <ReactTooltip id="delete" type="dark" place="right" effect="float">Remove all</ReactTooltip>
                 <div className="heading-icon">Macros</div>
-                <input type="file" accept="text/plain" id="upload-macros" onChange={uploadMacros} />
-                <label htmlFor="upload-macros"><div><img src={Upload} className="icon right-icon clickable" /></div></label>
-                <div><img src={Download} className="icon right-icon clickable" /></div>
+                <input type="file" accept="text/plain" id="upload-macros" onChange={uploadMacrosButton} />
+                <div><button data-tip="upload-tooltip" data-for="upload" type="button" className="icon-button paddingless"><label htmlFor="upload-macros"><img src={Upload} className={"icon padded clickable"} alt={"Upload"} /></label></button></div>
+                <ReactTooltip id="upload" type="dark" place="left" effect="float">Upload</ReactTooltip>
+                <div><button data-tip="download-tooltip" data-for="download" type="button" className="icon-button" onClick={downloadMacrosButton} disabled={macros.length == 0}><img src={Download} className={"icon"} alt={"Download"} /></button></div>
+                <ReactTooltip id="download" type="dark" place="left" effect="float">Download</ReactTooltip>
             </div>
             <Collapse isOpened={macroError != ""}>
                 <div className="error">

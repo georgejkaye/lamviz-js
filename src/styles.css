@@ -149,6 +149,7 @@ button:disabled {
 
 .flex-button {
     flex: 1;
+    justify-content: center;
 }
 
 .icon-button {
@@ -348,9 +349,7 @@ select:disabled {
     margin-top: 10px;
 }
 
-label {
-    margin: 0px 5px
-}
+label {}
 
 .on {
     background-color: #15e177;
@@ -395,6 +394,21 @@ label {
     padding: 5px 5px;
 }
 
+.ready-macro {
+    display: flex;
+    cursor: pointer;
+    transition: 0.3s;
+    align-items: center;
+}
+
+.ready-macro-main {
+    flex: 1;
+}
+
+.ready-macro:hover {
+    background-color: #027399;
+}
+
 .macro-title {
     font-size: 1.2em;
     font-weight: bold;
@@ -421,4 +435,12 @@ label {
     margin: 5px 0px;
     text-align: left;
 
+}
+
+.paddingless {
+    padding: 0px;
+}
+
+.padded {
+    padding: 10px;
 }

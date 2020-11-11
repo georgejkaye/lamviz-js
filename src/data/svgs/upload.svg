@@ -28,17 +28,18 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1920"
-   inkscape:window-height="1044"
+   inkscape:window-width="1848"
+   inkscape:window-height="1137"
    id="namedview39"
    showgrid="false"
    inkscape:zoom="0.87099351"
    inkscape:cx="166.76644"
    inkscape:cy="227.63219"
-   inkscape:window-x="0"
-   inkscape:window-y="120"
+   inkscape:window-x="1920"
+   inkscape:window-y="27"
    inkscape:window-maximized="1"
-   inkscape:current-layer="g6" />
+   inkscape:current-layer="g4"
+   inkscape:document-rotation="0" />
 <g
    id="g6">
 	<g
@@ -47,7 +48,7 @@
 		<path
    d="M374.293,47.467l-29.547-35.84C338.773,4.587,329.92,0,320,0H64c-9.92,0-18.773,4.587-24.64,11.627L9.813,47.467    C3.627,54.933,0,64.32,0,74.667v266.667C0,364.907,19.093,384,42.667,384h298.667C364.907,384,384,364.907,384,341.333V74.667    C384,64.32,380.373,54.933,374.293,47.467z M234.667,256v42.667h-85.333V256H74.667L192,138.667L309.333,256H234.667z     M45.333,42.667L62.72,21.333h256l19.947,21.333H45.333z"
    id="path2"
-   style="fill:#f2f2f2;fill-opacity:1" />
+   style="fill:#000000;fill-opacity:1" />
 	</g>
 </g>
 <g

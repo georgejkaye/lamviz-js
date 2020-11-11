@@ -17,7 +17,7 @@
    style="enable-background:new 0 0 459 459;"
    xml:space="preserve"
    sodipodi:docname="bin.svg"
-   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"><metadata
+   inkscape:version="1.0.1 (1.0.1+r74)"><metadata
    id="metadata42"><rdf:RDF><cc:Work
        rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
          rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
@@ -30,17 +30,18 @@
    guidetolerance="10"
    inkscape:pageopacity="0"
    inkscape:pageshadow="2"
-   inkscape:window-width="1920"
-   inkscape:window-height="1044"
+   inkscape:window-width="1848"
+   inkscape:window-height="1137"
    id="namedview38"
    showgrid="false"
    inkscape:zoom="2.0610022"
    inkscape:cx="229.5"
    inkscape:cy="229.5"
-   inkscape:window-x="0"
-   inkscape:window-y="120"
+   inkscape:window-x="1920"
+   inkscape:window-y="27"
    inkscape:window-maximized="1"
-   inkscape:current-layer="delete" />
+   inkscape:current-layer="delete"
+   inkscape:document-rotation="0" />
 <g
    id="g5">
 	<g
@@ -48,7 +49,7 @@
 		<path
    d="M76.5,408c0,28.05,22.95,51,51,51h204c28.05,0,51-22.95,51-51V102h-306V408z M408,25.5h-89.25L293.25,0h-127.5l-25.5,25.5    H51v51h357V25.5z"
    id="path2"
-   style="fill:#f2f2f2;fill-opacity:1" />
+   style="fill:#000000;fill-opacity:1" />
 	</g>
 </g>
 <g
