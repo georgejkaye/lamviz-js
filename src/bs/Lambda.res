@@ -118,7 +118,7 @@ and prettyPrint' = (t, ctx, mac, topmac, x) => {
       ? a
       : {
           let ctx' = pushTerm(ctx, y)
-          let string = `λ${y}. ${prettyPrint'(t, ctx', mac, false, 0)}`
+          let string = `λ${y}. ${prettyPrint'(t, ctx', mac, true, 0)}`
           x == 0 ? string : "(" ++ string ++ ")"
         }
 

@@ -47,6 +47,8 @@ export function Macro(props: MacroProps) {
     )
 }
 
+const nameRegexp = new RegExp("^[A-Za-z]*$")
+
 export function ActiveMacro(props: MacroProps) {
 
     let dispatch = useDispatch()
@@ -73,6 +75,8 @@ export function ActiveMacro(props: MacroProps) {
             setError("No name set.")
         } else if (termText == "") {
             setError("No macro definition provided.")
+        } else if (!nameRegexp.test(name)) {
+            setError("Names cannot include special characters.")
         } else {
             try {
                 let [term, _] = lexAndParse(termText, "", macros.filter((x) => x.term != undefined), name)
