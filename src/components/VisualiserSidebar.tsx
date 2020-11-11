@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./../reducers"
 import { newTerm, newError, clear, toggleNodeLabels, toggleEdgeLabels, addMacro, addMacros, removeAllMacros } from "./../reducers/slice"
@@ -30,6 +30,10 @@ export default function VisualiserSidebar() {
     const [macroError, setMacroError] = useState("")
 
     let fileReader: FileReader;
+
+    useEffect(() => {
+        setMacroError("")
+    }, [macros])
 
     const handleTermTextChange = (event: React.ChangeEvent<any>) => {
         setTermText(event.target.value)
@@ -66,7 +70,9 @@ export default function VisualiserSidebar() {
         dispatch(clear())
     }
 
-    const addMacroButton = () => dispatch(addMacro())
+    const addMacroButton = () => {
+        dispatch(addMacro())
+    }
 
     const uploadedMacros = (e: ProgressEvent<FileReader>) => {
         let content: any = fileReader.result
@@ -107,7 +113,6 @@ export default function VisualiserSidebar() {
 
     const uploadMacrosButton = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files != undefined) {
-            setMacroError("")
             fileReader = new FileReader()
             fileReader.onloadend = uploadedMacros
             fileReader.readAsText(e.target.files[0])
@@ -132,7 +137,6 @@ export default function VisualiserSidebar() {
 
     const removeAllMacrosButton = () => {
         dispatch(removeAllMacros())
-        setMacroError("")
     }
 
     const toggleNodeLabelsButton = () => dispatch(toggleNodeLabels())
@@ -176,12 +180,13 @@ export default function VisualiserSidebar() {
                 <div><button data-tip="download-tooltip" data-for="download" type="button" className="icon-button" onClick={downloadMacrosButton} disabled={macros.length == 0}><img src={Download} className={"icon"} alt={"Download"} /></button></div>
                 <ReactTooltip id="download" type="dark" place="left" effect="float">Download</ReactTooltip>
             </div>
+            <div className="sidebar-content">To upload a macros file, define each macro on its own line in the form <span className="code">id := \x.x</span></div>
             <Collapse isOpened={macroError != ""}>
-                <div className="error">
+                <div className="sidebar-content error">
                     {macroError}
                 </div>
             </Collapse>
-            <div className="macro-list">{
+            <div className="sidebar-content macro-list">{
                 macros.map((mac, i) => (
                     mac.active ? <ActiveMacro macro={mac} no={i} /> : <Macro macro={mac} no={i} />
                 ))}

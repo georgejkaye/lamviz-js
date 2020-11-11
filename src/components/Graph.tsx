@@ -119,7 +119,7 @@ export default function Graph(props: GraphProps) {
             cy.elements().removeClass("transparent")
         }
 
-    }, [props.graph])
+    }, [props.graph, props.redraw])
 
     useEffect(() => {
         console.log(svgTime)
