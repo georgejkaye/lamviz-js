@@ -36,10 +36,10 @@ export default function Visualiser() {
     return (
         <div className="stage" >
             <div className="top-bar">
-                {term == undefined ? "" : parse(printHTMLAndContext(term, context, false))}
+                {term == undefined ? "" : parse(printHTMLAndContext(term, context, false, true))}
             </div>
             <div className="subtop-bar">
-                {term == undefined ? "" : parse(printHTML(term, context, true))}
+                {term == undefined ? "" : parse(printHTML(term, context, true, false))}
             </div>
             <div className="main-stage" style={{ height: String(graphDimensions.height) + "px" }}>
                 <div className="main-graph">

@@ -2,6 +2,13 @@ open Lambda
 
 exception Timeout
 
+/**
+ * Shifts all the de Bruijn indices in a term by a certain amount.
+ * @param {lambdaTerm} t - The lambda term to do the shifting to.
+ * @param {int}        d - The number of places to shift by.
+ * @param {int}        c - The cutoff point, below which numbers will not be shifted by.
+ * @return {lambdaterm}  - The newly shifted lambda term.
+ */
 let rec shift = (t, d) => shift'(t, d, 0)
 and shift' = (t, d, c) => {
   switch t {
@@ -11,25 +18,39 @@ and shift' = (t, d, c) => {
   }
 }
 
-let rec substitute = (j, s, t) => substitute'(j, s, t, 0)
-and substitute' = (j, s, t, c) => {
+/**
+ * Substitute a term for a variable in a term - i.e. t [j -> s] .
+ * @param {lambdaTerm} t - The term the substitution is to be performed in.
+ * @param {int}        j - The index of the variable to substitute.
+ * @param {lambdaTerm} s - The term to substitute in.
+ * @return {Object}      - The newly substituted lambda term.
+ */
+let rec substitute = (t, j, s) => {
   switch t {
-  | Var(x, a) => x == j + c ? shift(s, c) : t
-  | Abs(t, x, a) =>
-    let t' = substitute'(j, s, t, c + 1)
-    t == t ? Abs(t, x, a) : Abs(t', x, "")
-  | App(t1, t2, a) =>
-    let t1' = substitute'(j, s, t1, c)
-    let t2' = substitute'(j, s, t2, c)
-    t1 == t1' && t2 == t2' ? App(t1, t2, a) : App(t1', t2', "")
+  | Var(x, a) => x == j ? s : t
+  | Abs(t, x, a) => {
+      let t' = substitute(t, j + 1, shift(s, 1))
+      equal(t, t') ? Abs(t, x, a) : Abs(t', x, "")
+    }
+  | App(t1, t2, a) => {
+      let t1' = substitute(t1, j, s)
+      let t2' = substitute(t2, j, s)
+      equal(t1, t1') && equal(t2, t2') ? App(t1, t2, a) : App(t1', t2', "")
+    }
   }
 }
 
 //let substituteVariable = (j, t) => substitute(j, Var(s, ""), t)
 
+/**
+ * Perform a beta-reduction.
+ * @param {lambdaTerm}  abs - The abstraction to substitute the value in.
+ * @param {lambdaTerm}  val - The value to substitute into the abstraction.
+ * @return {lambdaTerm}     - The beta-reduced expression.
+ */
 let performBetaReduction = (t, u) => {
   switch t {
-  | Abs(t, _, _) => shift(substitute(0, shift(u, 1), t), -1)
+  | Abs(t, _, _) => shift(substitute(t, 0, shift(u, 1)), -1)
   | _ => failwith("This is not a beta redex")
   }
 }
@@ -62,31 +83,31 @@ and evaluate' = (t, n) => {
       }
 }
 
-let rec normalise = t => fst(normalise'(t, 1))
+let rec normalise = t => fst(normalise'(t, 0))
 and normalise' = (t, n) => {
-  timeout(n)
+  let n = n + 1
+  betaRedexes(t) == 0
+    ? (t, n)
+    : timeout(n)
     ? raise(Timeout)
     : {
         switch t {
         | Var(_, _) => (t, n)
-        | Abs(t, x, a) => {
-            let (t', n) = normalise'(t, n + 1)
-            t == t' ? (Abs(t, x, a), n) : (Abs(t', x, ""), n)
-          }
+        | Abs(t, x, a) =>
+          let (t', n) = normalise'(t, n)
+          equal(t, t') ? (Abs(t, x, a), n) : (Abs(t', x, ""), n)
         | App(t1, t2, a) =>
           isBetaRedex(t)
-            ? normalise'(performBetaReduction(t1, t2), n + 1)
+            ? {
+                Js.log("beta redex " ++ prettyPrintDeBruijn(t))
+                normalise'(performBetaReduction(t1, t2), n)
+              }
             : {
                 let (t1', n) = normalise'(t1, n + 1)
                 let (t2', n) = normalise'(t2, n + 1)
-                t1 == t1' && t2 == t2'
+                equal(t1, t1') && equal(t2, t2')
                   ? (App(t1, t2, a), n)
-                  : {
-                      switch t1 {
-                      | Abs(_, _, _) => normalise'(App(t1', t2', ""), n + 1)
-                      | _ => (App(t1', t2', ""), n)
-                      }
-                    }
+                  : normalise'(App(t1', t2', ""), n)
               }
         }
       }

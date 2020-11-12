@@ -1,4 +1,4 @@
-Pair    := \x.\y.\v. v x y
+Pair    := \x.\y.\z. z x y
 fst     := \p. p (\x.\y. x)
 snd     := \p. p (\x.\y. y)
 swap    := \x.\y. x (\z.\w. y w z)

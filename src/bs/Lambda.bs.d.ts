@@ -17,9 +17,9 @@ export function betaRedexes(t: Term): number
 export function linear(t: Term): boolean
 export function planar(t: Term): boolean
 export function printRedexesArray(t: Term, ctx: Context): string[]
-export function printHTML(t: Term, ctx: Context, db: boolean): string
+export function printHTML(t: Term, ctx: Context, db: boolean, mac: boolean): string
 export function printTermAndContext(t: Term, ctx: Context, mac: boolean): string
-export function printHTMLAndContext(t: Term, ctx: Context, db: boolean): string
+export function printHTMLAndContext(t: Term, ctx: Context, db: boolean, mac: boolean): string
 export function refreshVariableNames(t: Term, ctx: Context): [Term, any]
 
 export type Context = {

@@ -78,6 +78,15 @@ let newVar = (i, macro) => Var(i, macro)
 let newAbs = (t, x, macro) => Abs(t, x, macro)
 let newApp = (t1, t2, macro) => App(t1, t2, macro)
 
+let rec equal = (t1, t2) => {
+  switch (t1, t2) {
+  | (Var(x, _), Var(x', _)) => x == x'
+  | (Abs(t, _, _), Abs(t', _, _)) => equal(t, t')
+  | (App(t1, t2, _), App(t1', t2', _)) => equal(t1, t1') && equal(t2, t2')
+  | _ => false
+  }
+}
+
 /**
  * Pretty print a lambda term with De Bruijn indices
  * @param t a lambda term
@@ -306,14 +315,14 @@ let rec printRedexes = (t, ctx) => {
 
 let printRedexesArray = (t, ctx) => Array.of_list(printRedexes(t, ctx))
 
-let rec printHTML = (t, ctx, db) => {
-  let (string, _, _, _, _) = printHTML'(t, ctx, db, 0, 0, 0, 0, 0)
+let rec printHTML = (t, ctx, db, mac) => {
+  let (string, _, _, _, _) = printHTML'(t, ctx, db, mac, 0, 0, 0, 0, 0)
   string
 }
-and printHTML' = (t, ctx, db, x, vars, abs, apps, betas) => {
+and printHTML' = (t, ctx, db, mac, x, vars, abs, apps, betas) => {
   switch t {
   | Var(n, a) => {
-      let label = db ? str(n) : a != "" ? a : lookup(ctx, n)
+      let label = db ? str(n) : a != "" && mac ? a : lookup(ctx, n)
       let string = "<span class = \"var-" ++ str(vars) ++ "\">" ++ label ++ "</span>"
       (string, vars + 1, abs, apps, betas)
     }
@@ -322,6 +331,7 @@ and printHTML' = (t, ctx, db, x, vars, abs, apps, betas) => {
         t,
         list{l, ...ctx},
         db,
+        mac,
         0,
         vars,
         abs + 1,
@@ -330,7 +340,7 @@ and printHTML' = (t, ctx, db, x, vars, abs, apps, betas) => {
       )
 
       let label =
-        a != ""
+        a != "" && mac
           ? a
           : {
               let b1 = x == 0 ? "" : "("
@@ -348,7 +358,7 @@ and printHTML' = (t, ctx, db, x, vars, abs, apps, betas) => {
       let btn = bt1 == "" ? 0 : 1
 
       let (label, vars, abs, apps, betas) =
-        a != ""
+        a != "" && mac
           ? (a, vars, abs, apps, betas)
           : {
               let (y, z) =
@@ -363,13 +373,24 @@ and printHTML' = (t, ctx, db, x, vars, abs, apps, betas) => {
                 t1,
                 ctx,
                 db,
+                mac,
                 y,
                 vars,
                 abs,
                 apps + 1,
                 betas + btn,
               )
-              let (rhs, vars, abs, apps, betas) = printHTML'(t2, ctx, db, z, vars, abs, apps, betas)
+              let (rhs, vars, abs, apps, betas) = printHTML'(
+                t2,
+                ctx,
+                db,
+                mac,
+                z,
+                vars,
+                abs,
+                apps,
+                betas,
+              )
               let b1 = x == 0 ? "" : "("
               let b2 = x == 0 ? "" : ")"
               (b1 ++ lhs ++ " " ++ rhs ++ b2, vars, abs, apps, betas)
@@ -388,8 +409,8 @@ let printTermAndContext = (term, ctx, mac, topmac) => {
   `${printedContext} ⊢ ${printedTerm}`
 }
 
-let printHTMLAndContext = (term, ctx, db) => {
-  let printedHTML = printHTML(term, ctx, db)
+let printHTMLAndContext = (term, ctx, db, mac) => {
+  let printedHTML = printHTML(term, ctx, db, mac)
   let printedContext = prettyPrintContext(ctx)
   "<span>" ++ printedContext ++ " &#x22a2; " ++ printedHTML ++ "</span>"
 }
