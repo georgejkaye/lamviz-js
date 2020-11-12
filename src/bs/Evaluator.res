@@ -2,38 +2,39 @@ open Lambda
 
 exception Timeout
 
-let rec shift = (t, d, c) => {
+let rec shift = (t, d) => shift'(t, d, 0)
+and shift' = (t, d, c) => {
   switch t {
   | Var(x, a) => x < c ? t : Var(x + d, a)
-  | Abs(t, x, a) => Abs(shift(t, d, c + 1), x, a)
-  | App(t1, t2, a) => App(shift(t1, d, c), shift(t2, d, c), a)
+  | Abs(t, x, a) => Abs(shift'(t, d, c + 1), x, a)
+  | App(t1, t2, a) => App(shift'(t1, d, c), shift'(t2, d, c), a)
   }
 }
 
-let rec substitute = (s, j, t) => {
+let rec substitute = (j, s, t) => substitute'(j, s, t, 0)
+and substitute' = (j, s, t, c) => {
   switch t {
-  | Var(x, _) => x == j ? s : t
+  | Var(x, a) => x == j + c ? shift(s, c) : t
   | Abs(t, x, a) =>
-    let t' = substitute(shift(s, 1, 0), j + 1, t)
+    let t' = substitute'(j, s, t, c + 1)
     t == t ? Abs(t, x, a) : Abs(t', x, "")
   | App(t1, t2, a) =>
-    let t1' = substitute(s, j, t1)
-    let t2' = substitute(s, j, t2)
+    let t1' = substitute'(j, s, t1, c)
+    let t2' = substitute'(j, s, t2, c)
     t1 == t1' && t2 == t2' ? App(t1, t2, a) : App(t1', t2', "")
   }
 }
 
-let substituteVariable = (s, j, t) => substitute(Var(s, ""), j, t)
+//let substituteVariable = (j, t) => substitute(j, Var(s, ""), t)
 
 let performBetaReduction = (t, u) => {
   switch t {
-  | Abs(t, _, _) => shift(substitute(shift(u, 1, 0), 0, t), -1, 0)
+  | Abs(t, _, _) => shift(substitute(0, shift(u, 1), t), -1)
   | _ => failwith("This is not a beta redex")
   }
 }
 
-let maxReductions = 100
-
+let maxReductions = 500
 let timeout = curr => curr > maxReductions
 
 let rec evaluate = t => fst(evaluate'(t, 1))

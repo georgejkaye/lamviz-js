@@ -243,7 +243,7 @@ and uniqueVariables' = (t, seen) => {
   | Var(x, _) => contains(x, seen) ? (0, seen) : (1, list{x, ...seen})
   | Abs(t, _, _) => {
       let (vs, seen) = uniqueVariables'(t, List.map(x => x + 1, seen))
-      (vs, List.map(x => x - 1, seen))
+      (vs, List.filter(x => x >= 0, List.map(x => x - 1, seen)))
     }
   | App(t1, t2, _) => {
       let (lhs, seen) = uniqueVariables'(t1, seen)
