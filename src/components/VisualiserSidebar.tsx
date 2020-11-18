@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./../reducers"
-import { newTerm, newError, clear, toggleNodeLabels, toggleEdgeLabels, addMacro, addMacros, removeAllMacros } from "./../reducers/slice"
+import { newTerm, newError, clear, toggleNodeLabels, toggleEdgeLabels, toggleMacrosOn, addMacro, setMacros, removeAllMacros } from "./../reducers/slice"
 import { lexAndParse } from "../bs/Parser.bs";
 import { Collapse } from "react-collapse"
 import ReactTooltip from "react-tooltip"
@@ -12,8 +12,6 @@ import Add from "../data/svgs/add-black.svg"
 import Delete from "../data/svgs/bin.svg"
 import Upload from "../data/svgs/upload.svg"
 import Download from "../data/svgs/download.svg"
-import Pencil from "../data/svgs/pencil.svg"
-import { emptyContext, Term } from "../bs/Lambda.bs";
 
 export default function VisualiserSidebar() {
 
@@ -21,12 +19,11 @@ export default function VisualiserSidebar() {
     const error = useSelector((state: RootState) => state.currentState).error
     const nodeLabels = useSelector((state: RootState) => state.currentState).nodeLabels
     const edgeLabels = useSelector((state: RootState) => state.currentState).edgeLabels
+    const macrosOn = useSelector((state: RootState) => state.currentState).macrosOn
     const macros = useSelector((state: RootState) => state.currentState).macros
 
-    const [exampleOpen, setExampleOpen] = useState(false)
     const [termText, setTermText] = useState("")
     const [contextText, setContextText] = useState("")
-    const [bulkMacros, setBulkMacros] = useState(false)
     const [macroError, setMacroError] = useState("")
 
     let fileReader: FileReader;
@@ -90,25 +87,22 @@ export default function VisualiserSidebar() {
                     let name = split[0].replaceAll(" ", "")
                     let termtext = split[1].trim()
 
-                    console.log(name, ":=", termtext)
-
                     try {
-                        let [term, ctx] = lexAndParse(termtext, "", parsedMacros, name)
-                        console.log(term)
+                        let [term, _] = lexAndParse(termtext, "", parsedMacros, name)
                         let newMac = { name: name, termstring: termtext, term: term, active: false }
+                        parsedMacros = parsedMacros.filter((x) => x.name !== name)
                         parsedMacros.push(newMac)
+                        console.log(parsedMacros)
                     } catch (e) {
-                        console.log("Line", i, "error", e)
-                        macroError = "Line " + (i + 1) + ": " + e._1
+                        macroError = (macroError == "") ? "Line " + (i + 1) + ": " + e._1 : macroError
                     }
                 } else {
-                    console.log("Line", i, "error")
                     macroError = "Line " + (i + 1) + ": malformed input"
                 }
             }
         })
 
-        macroError == "" ? dispatch(addMacros(parsedMacros)) : setMacroError(macroError)
+        macroError == "" ? dispatch(setMacros(parsedMacros)) : setMacroError(macroError)
     }
 
     const uploadMacrosButton = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -141,6 +135,7 @@ export default function VisualiserSidebar() {
 
     const toggleNodeLabelsButton = () => dispatch(toggleNodeLabels())
     const toggleEdgeLabelsButton = () => dispatch(toggleEdgeLabels())
+    const toggleMacrosButton = () => dispatch(toggleMacrosOn())
 
     return (
         <div className="visualiser-sidebar">
@@ -165,6 +160,7 @@ export default function VisualiserSidebar() {
             </div>
             <div className="sidebar-heading">View options</div>
             <div className="sidebar-content">
+                <button type="button" className={macrosOn ? "on" : "off"} onClick={toggleMacrosButton} >{macrosOn ? "Macros on" : "Macros off"}</button>
                 <button type="button" className={nodeLabels ? "on" : "off"} onClick={toggleNodeLabelsButton} >{nodeLabels ? "Node labels on" : "Node labels off"}</button>
                 <button type="button" className={edgeLabels ? "on" : "off"} onClick={toggleEdgeLabelsButton} >{edgeLabels ? "Edge labels on" : "Edge labels off"}</button>
             </div>

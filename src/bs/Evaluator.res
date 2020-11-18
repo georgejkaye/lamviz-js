@@ -112,3 +112,48 @@ and normalise' = (t, n) => {
         }
       }
 }
+
+let rec outermostReduction = term => {
+  !hasBetaRedex(term)
+    ? term
+    : switch term {
+      | Var(_, _) => failwith("This should never ever happen")
+      | Abs(t, x, _) => Abs(outermostReduction(t), x, "")
+      | App(t1, t2, _) =>
+        isBetaRedex(term)
+          ? performBetaReduction(t1, t2)
+          : hasBetaRedex(t1)
+          ? App(outermostReduction(t1), t2, "")
+          : App(t1, outermostReduction(t2), "")
+      }
+}
+
+let rec innermostLeftmostReduction = term => {
+  !hasBetaRedex(term)
+    ? term
+    : switch term {
+      | Var(_, _) => failwith("This should never ever happen")
+      | Abs(t, x, _) => Abs(innermostLeftmostReduction(t), x, "")
+      | App(t1, t2, _) =>
+        hasBetaRedex(t1)
+          ? App(innermostLeftmostReduction(t1), t2, "")
+          : hasBetaRedex(t2)
+          ? App(t1, innermostLeftmostReduction(t2), "")
+          : performBetaReduction(t1, t2)
+      }
+}
+
+let rec innermostRightmostReduction = term => {
+  !hasBetaRedex(term)
+    ? term
+    : switch term {
+      | Var(_, _) => failwith("This should never ever happen")
+      | Abs(t, x, _) => Abs(innermostLeftmostReduction(t), x, "")
+      | App(t1, t2, _) =>
+        hasBetaRedex(t2)
+          ? App(t1, innermostLeftmostReduction(t2), "")
+          : hasBetaRedex(t1)
+          ? App(innermostLeftmostReduction(t1), t2, "")
+          : performBetaReduction(t1, t2)
+      }
+}

@@ -124,9 +124,11 @@ and atom = (ctx, tokens, macros) => {
     let (id, tokens) = token(ID(""), tokens)
     switch index(value(id), ctx) {
     | x => (Some(Var(x, "")), tokens)
-    | exception Not_found => switch lookupMacro(macros, value(id)) {
+    | exception Not_found =>
+      switch lookupMacro(macros, value(id)) {
       | t => (Some(t), tokens)
-      | exception Not_found => raise(ParseError("Unexpected variable encountered."))
+      | exception Not_found =>
+        raise(ParseError("Unexpected variable '" ++ value(id) ++ "' encountered."))
       }
     }
   } else {

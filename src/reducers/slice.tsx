@@ -39,6 +39,7 @@ interface State {
     svgTime: boolean,
     nodeLabels: boolean,
     edgeLabels: boolean,
+    macrosOn: boolean,
     macros: Macro[]
 }
 
@@ -64,6 +65,7 @@ const initialState: State = {
     svgTime: false,
     nodeLabels: false,
     edgeLabels: false,
+    macrosOn: true,
     macros: []
 }
 
@@ -114,12 +116,14 @@ export const slice = createSlice({
             state = { ...state, nodeLabels: !state.nodeLabels },
         toggleEdgeLabels: (state) =>
             state = { ...state, edgeLabels: !state.edgeLabels },
+        toggleMacrosOn: (state) =>
+            state = { ...state, macrosOn: !state.macrosOn },
         addMacro: (state) =>
             state = { ...state, macros: state.macros.concat({ name: "", termstring: "", term: undefined, active: true }) },
         defineMacro: (state, action: PayloadAction<Macro>) =>
             state = { ...state, macros: state.macros.concat(action.payload) },
-        addMacros: (state, action: PayloadAction<Macro[]>) =>
-            state = { ...state, macros: state.macros.concat(action.payload) },
+        setMacros: (state, action: PayloadAction<Macro[]>) =>
+            state = { ...state, macros: action.payload },
         toggleMacro: (state, action: PayloadAction<number>) =>
             state = { ...state, macros: state.macros.slice(0, action.payload).concat([{ ...state.macros[action.payload], active: !state.macros[action.payload].active }]).concat(state.macros.slice(action.payload + 1)) },
         removeMacro: (state, action: PayloadAction<number>) =>
@@ -131,6 +135,6 @@ export const slice = createSlice({
 
 export const {
     changeMode, resize, newTerm, newError, updateTerm, resetTerm, finishedDrawing, backTerm, toggleFactsBar, clear,
-    downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels, addMacro, defineMacro, updateMacro, toggleMacro, addMacros, removeMacro, removeAllMacros } = slice.actions
+    downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels, toggleMacrosOn, addMacro, defineMacro, updateMacro, toggleMacro, setMacros, removeMacro, removeAllMacros } = slice.actions
 
 export default slice.reducer

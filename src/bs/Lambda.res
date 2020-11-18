@@ -309,7 +309,7 @@ let rec printRedexes = (t, ctx) => {
   | Abs(t, x, _) => printRedexes(t, list{x, ...ctx})
   | App(t1, t2, _) =>
     let redexes = List.concat(list{printRedexes(t1, ctx), printRedexes(t2, ctx)})
-    isBetaRedex(t) ? list{prettyPrint(t, ctx), ...redexes} : redexes
+    isBetaRedex(t) ? list{prettyPrint(t, ctx, false, false), ...redexes} : redexes
   }
 }
 

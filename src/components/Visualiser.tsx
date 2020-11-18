@@ -22,6 +22,7 @@ export default function Visualiser() {
 
     const nodeLabels = useSelector((state: RootState) => state.currentState).nodeLabels
     const edgeLabels = useSelector((state: RootState) => state.currentState).edgeLabels
+    const macrosOn = useSelector((state: RootState) => state.currentState).macrosOn
 
     const [visualiserMode, setVisualiserMode] = useState(VisualiserMode.TERM)
 
@@ -36,7 +37,7 @@ export default function Visualiser() {
     return (
         <div className="stage" >
             <div className="top-bar">
-                {term == undefined ? "" : parse(printHTMLAndContext(term, context, false, true))}
+                {term == undefined ? "" : parse(printHTMLAndContext(term, context, false, macrosOn))}
             </div>
             <div className="subtop-bar">
                 {term == undefined ? "" : parse(printHTML(term, context, true, false))}
@@ -50,5 +51,5 @@ export default function Visualiser() {
             <div className="bottom-bar">Reduction graph</div>
             <div className="reductions"></div>
 
-        </div >)
+        </div>)
 }
