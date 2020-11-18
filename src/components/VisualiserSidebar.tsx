@@ -92,7 +92,6 @@ export default function VisualiserSidebar() {
                         let newMac = { name: name, termstring: termtext, term: term, active: false }
                         parsedMacros = parsedMacros.filter((x) => x.name !== name)
                         parsedMacros.push(newMac)
-                        console.log(parsedMacros)
                     } catch (e) {
                         macroError = (macroError == "") ? "Line " + (i + 1) + ": " + e._1 : macroError
                     }

@@ -19,8 +19,6 @@ export default function App() {
             const width = window.innerWidth
 
             dispatch(resize({ height: height, width: width }))
-
-            console.log("resized to: ", width, "x", height)
         }
 
         window.addEventListener("resize", onResize)

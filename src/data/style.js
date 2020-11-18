@@ -8,8 +8,6 @@ export const stylesheet = [
             "label": "",
             "font-size": 1,
             "overlay-padding": 0.5,
-            "transition-property": "background-color",
-            "transition-duration": "0.5s",
         }
     },
     {
@@ -68,8 +66,6 @@ export const stylesheet = [
             "label": "",
             "width": "0.5",
             "overlay-padding": 0.5,
-            "transition-property": "background-color, line-color, mid-target-arrow-color",
-            "transition-duration": "0.5s"
         }
     },
     {

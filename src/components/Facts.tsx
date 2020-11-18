@@ -136,7 +136,6 @@ export default function Facts() {
     }
 
     const mouseoverRedex = (i: number) => {
-        console.log("highlighting", i)
         toggleClassOnElement("beta-" + i, true, "highlighted-redex")
         dispatch(highlightRedex(i))
     }

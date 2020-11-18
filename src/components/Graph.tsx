@@ -55,9 +55,7 @@ export default function Graph(props: GraphProps) {
         cy.elements(".highlighted").removeClass("highlighted")
 
         if (i != -1) {
-            console.log(cy.elements(".beta-" + i))
             cy.elements(".beta-" + i).addClass("highlighted")
-            console.log(cy.elements(".beta-" + i))
         }
     }
 
@@ -65,11 +63,12 @@ export default function Graph(props: GraphProps) {
     const svgTime = useSelector((state: RootState) => state.currentState).svgTime
     const [lastNodeLabels, setLastNodeLabels] = useState(props.nodeLabels)
     const [lastEdgeLabels, setLastEdgeLabels] = useState(props.edgeLabels)
+    const [lastTerm, setLastTerm] = useState(props.graph.term)
 
     const arcRegex = /var_top_[0-9]*_to_abs_top_([0-9]*)/
 
-    useEffect(() => {
-
+    const redrawTerm = () => {
+        console.log("aa")
         cy.elements().addClass("transparent")
         cy.elements().remove()
 
@@ -77,8 +76,6 @@ export default function Graph(props: GraphProps) {
 
             /* Generate elements for the current term */
             let [elements, frees, mps] = generateElements(props.graph.term, props.graph.context)
-
-            console.log(elements)
 
             /* Add all the elements */
             cy.add(elements)
@@ -110,7 +107,6 @@ export default function Graph(props: GraphProps) {
                 cy.nodes(".top").map((n) => {
                     if (n.degree(true) == 1) {
                         let x = n.data("id").split("_")[2]
-                        console.log(x)
                         cy.remove("#abs_sp_mp_" + x)
                         cy.remove("#abs_sp_" + x)
                         cy.remove("#abs_top_" + x)
@@ -121,7 +117,6 @@ export default function Graph(props: GraphProps) {
                 for (var i = 0; i < betaRedexes(props.graph.term); i++) {
                     let arcs = cy.edges(".arc.beta-" + i)
                     let absid = arcs[arcs.length - 1].data("id").match(arcRegex)[1]
-                    console.log(absid)
                     cy.$("#abs_" + absid).addClass("beta-" + i)
                     cy.$("#abs_sp_mp_" + absid).addClass("beta-" + i)
                     cy.$("#abs_sp_" + absid).addClass("beta-" + i)
@@ -146,11 +141,17 @@ export default function Graph(props: GraphProps) {
 
             cy.elements().removeClass("transparent")
         }
-
-    }, [props.graph, props.redraw])
+    }
 
     useEffect(() => {
-        console.log(svgTime)
+        redrawTerm()
+    }, [props.graph.term])
+
+    useEffect(() => {
+        redrawTerm()
+    }, [props.redraw])
+
+    useEffect(() => {
         if (svgTime) {
             dispatch(downloadedSvg())
             svg(cy)
@@ -168,9 +169,9 @@ export default function Graph(props: GraphProps) {
     }, [props.edgeLabels])
 
     useEffect(() => {
+        console.log("ee")
         highlightRedex(props.highlightedRedex)
     }, [props.highlightedRedex])
-
 
     return (
         <div key={props.dimensions.width} className="graph">
