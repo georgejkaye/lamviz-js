@@ -17,6 +17,18 @@ let token_type = token => {
   }
 }
 
+let string_of_token = token => {
+  switch token {
+  | EOF => "eof"
+  | LAMBDA => "\\"
+  | LBRACKET => "("
+  | RBRACKET => ")"
+  | DOT => "."
+  | ID(x) => x
+  | GARBAGE => "?"
+  }
+}
+
 let token_cmp = (token1, token2) => token_type(token1) == token_type(token2)
 
 let next_char = (s, i) => i < String.length(s) ? Some(String.get(s, i)) : None
@@ -70,7 +82,11 @@ let token = (token, tokens) => {
 
 /* Assert the next token has a given type, then skip it */
 let match = (token, tokens) => {
-  next(token, tokens) ? List.tl(tokens) : raise(ParseError("Unexpected token encountered."))
+  next(token, tokens)
+    ? List.tl(tokens)
+    : raise(
+        ParseError("Unexpected token '" ++ string_of_token(List.hd(tokens)) ++ "' encountered."),
+      )
 }
 
 /* Skip the next token if it has a given type */

@@ -23,6 +23,7 @@ export default function Visualiser() {
     const nodeLabels = useSelector((state: RootState) => state.currentState).nodeLabels
     const edgeLabels = useSelector((state: RootState) => state.currentState).edgeLabels
     const macrosOn = useSelector((state: RootState) => state.currentState).macrosOn
+    const redexToHighlight = useSelector((state: RootState) => state.currentState).redexToHighlight
 
     const [visualiserMode, setVisualiserMode] = useState(VisualiserMode.TERM)
 
@@ -44,7 +45,7 @@ export default function Visualiser() {
             </div>
             <div className="main-stage" style={{ height: String(graphDimensions.height) + "px" }}>
                 <div className="main-graph">
-                    <Graph dimensions={graphDimensions} redraw={redraw} graph={{ term: term, context: context }} nodeLabels={nodeLabels} edgeLabels={edgeLabels} zoom />
+                    <Graph dimensions={graphDimensions} redraw={redraw} graph={{ term: term, context: context }} nodeLabels={nodeLabels} edgeLabels={edgeLabels} zoom highlightedRedex={redexToHighlight} />
                 </div>
                 <Facts />
             </div>

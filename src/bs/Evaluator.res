@@ -157,3 +157,30 @@ let rec innermostRightmostReduction = term => {
           : performBetaReduction(t1, t2)
       }
 }
+
+let rec specificReduction = (term, i) => fst(specificReduction'(term, i))
+and specificReduction' = (term, i) => {
+  !hasBetaRedexInside(term)
+    ? (term, i)
+    : switch term {
+      | Var(_, _) => (term, i)
+      | Abs(t, x, _) => {
+          let (scopeReduction, i) = specificReduction'(t, i)
+          i == -1 ? (Abs(scopeReduction, x, ""), i) : (term, i)
+        }
+      | App(t1, t2, _) =>
+        isBetaRedex(term) && i == 0
+          ? {
+              (performBetaReduction(t1, t2), -1)
+            }
+          : hasBetaRedex(t1)
+          ? {
+            let (lhsReduction, i) = specificReduction'(t1, i)
+            i == -1 ? (App(lhsReduction, t2, ""), i) : (term, i)
+          }
+          : {
+              let (rhsReduction, i) = specificReduction'(t2, i)
+              i == -1 ? (App(t1, rhsReduction, ""), i) : (term, i)
+            }
+      }
+}

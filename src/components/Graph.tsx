@@ -8,7 +8,7 @@ import cytoscape from "cytoscape"
 
 import { stylesheet } from "./../data/style.js"
 import { generateGraphElementsArray, GraphEdge, GraphNode, nodeDistanceX, nodeDistanceY } from "../bs/Graph.bs"
-import { Term, Context, } from "../bs/Lambda.bs"
+import { Term, Context, betaRedexes } from "../bs/Lambda.bs"
 
 import { svg } from "./../libs/convert-to-svg"
 
@@ -21,6 +21,7 @@ interface GraphProps {
     nodeLabels: boolean
     edgeLabels: boolean
     redraw: boolean
+    highlightedRedex: number
 }
 
 export default function Graph(props: GraphProps) {
@@ -50,10 +51,22 @@ export default function Graph(props: GraphProps) {
         }
     }
 
+    const highlightRedex = (i: number) => {
+        cy.elements(".highlighted").removeClass("highlighted")
+
+        if (i != -1) {
+            console.log(cy.elements(".beta-" + i))
+            cy.elements(".beta-" + i).addClass("highlighted")
+            console.log(cy.elements(".beta-" + i))
+        }
+    }
+
     const graphDimensions = useSelector((state: RootState) => state.currentState).graphDimensions
     const svgTime = useSelector((state: RootState) => state.currentState).svgTime
     const [lastNodeLabels, setLastNodeLabels] = useState(props.nodeLabels)
     const [lastEdgeLabels, setLastEdgeLabels] = useState(props.edgeLabels)
+
+    const arcRegex = /var_top_[0-9]*_to_abs_top_([0-9]*)/
 
     useEffect(() => {
 
@@ -104,6 +117,21 @@ export default function Graph(props: GraphProps) {
                     }
                 })
 
+                /* Propagate beta classes */
+                for (var i = 0; i < betaRedexes(props.graph.term); i++) {
+                    let arcs = cy.edges(".arc.beta-" + i)
+                    let absid = arcs[arcs.length - 1].data("id").match(arcRegex)[1]
+                    console.log(absid)
+                    cy.$("#abs_" + absid).addClass("beta-" + i)
+                    cy.$("#abs_sp_mp_" + absid).addClass("beta-" + i)
+                    cy.$("#abs_sp_" + absid).addClass("beta-" + i)
+                    cy.$("#abs_top_" + absid).addClass("beta-" + i)
+                    cy.$("#abs_" + i + "_to_abs_sp_mp_" + absid).addClass("beta-" + i)
+                    cy.$("#abs_sp_mp_" + i + "_to_abs_sp_" + absid).addClass("beta-" + i)
+                    cy.$("#abs_sp_" + i + "_to_abs_top_" + absid).addClass("beta-" + i)
+                }
+
+                highlightRedex(props.highlightedRedex)
             }
 
             updateNodeLabels()
@@ -138,6 +166,11 @@ export default function Graph(props: GraphProps) {
         updateEdgeLabels()
         setLastEdgeLabels(props.edgeLabels)
     }, [props.edgeLabels])
+
+    useEffect(() => {
+        highlightRedex(props.highlightedRedex)
+    }, [props.highlightedRedex])
+
 
     return (
         <div key={props.dimensions.width} className="graph">

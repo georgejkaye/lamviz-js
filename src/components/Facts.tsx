@@ -8,7 +8,7 @@ import { Term } from "../bs/Lambda.bs"
 import { betaRedexes, variables, uniqueVariables, freeVariables, applications, abstractions, subterms, crossings, bridges, linear, planar, closed, bridgeless, printRedexesArray } from "../bs/Lambda.bs";
 import { RootState } from "./../reducers"
 import { normalise } from "../bs/Evaluator.bs";
-import { updateTerm, backTerm, toggleFactsBar, resetTerm, downloadSvg } from "./../reducers/slice";
+import { updateTerm, backTerm, toggleFactsBar, resetTerm, downloadSvg, performReduction, highlightRedex, unhighlightRedex } from "./../reducers/slice";
 
 import Up from "../data/svgs/up-chevron.svg"
 import Down from "../data/svgs/down-chevron.svg"
@@ -111,15 +111,6 @@ function toggleClassOnElement(className: string, on: boolean, newClass: string) 
     }
 }
 
-function highlightRedex(i: number) {
-    console.log("highlighting", i)
-    toggleClassOnElement("beta-" + i, true, "highlighted-redex")
-}
-
-function unhighlightRedex(i: number) {
-    toggleClassOnElement("beta-" + i, false, "highlighted-redex")
-}
-
 export default function Facts() {
 
     const term = useSelector((state: RootState) => state.currentState).currentTerm
@@ -138,6 +129,21 @@ export default function Facts() {
 
     const toggleBar = () => {
         dispatch(toggleFactsBar(!factsOpen))
+    }
+
+    const clickRedex = (i: number) => {
+        dispatch(performReduction(i))
+    }
+
+    const mouseoverRedex = (i: number) => {
+        console.log("highlighting", i)
+        toggleClassOnElement("beta-" + i, true, "highlighted-redex")
+        dispatch(highlightRedex(i))
+    }
+
+    const mouseleaveRedex = (i: number) => {
+        toggleClassOnElement("beta-" + i, false, "highlighted-redex")
+        dispatch(unhighlightRedex())
     }
 
     return (
@@ -173,7 +179,7 @@ export default function Facts() {
                     </div>
                     <Collapse isOpened={betasOpen}>
                         <div className="redexes">
-                            {printRedexesArray(term, ctx).map((r, i) => <div className="redex" onMouseOver={(e) => highlightRedex(i)} onMouseLeave={(e) => unhighlightRedex(i)}>{r}</div>)}
+                            {printRedexesArray(term, ctx).map((r, i) => <div className="redex" onMouseOver={(e) => mouseoverRedex(i)} onMouseLeave={(e) => mouseleaveRedex(i)} onClick={(e) => clickRedex(i)}>{r}</div>)}
                         </div>
                     </Collapse>
                     <div className="normalisation">
@@ -189,7 +195,8 @@ export default function Facts() {
                             <button type="button" className="left flex-button" disabled={betaRedexes(term) == 0 ? true : false}>Reduce</button>
                             <select name="strategy" id="strategy" className="right flex-button" disabled={betaRedexes(term) == 0 ? true : false}>
                                 <option value="outermost">Outermost</option>
-                                <option value="innermost">Innermost</option>"
+                                <option value="innermost">Innermost leftmost</option>"
+                                <option value="innermost">Innermost rightmost</option>"
                     <option value="random">Random</option>
                             </select>
                         </div>

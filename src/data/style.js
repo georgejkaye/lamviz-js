@@ -6,6 +6,7 @@ export const stylesheet = [
             "height": "1",
             "width": "1",
             "label": "",
+            "font-size": 1,
             "overlay-padding": 0.5,
             "transition-property": "background-color",
             "transition-duration": "0.5s",
@@ -68,7 +69,7 @@ export const stylesheet = [
             "width": "0.5",
             "overlay-padding": 0.5,
             "transition-property": "background-color, line-color, mid-target-arrow-color",
-            "transition-duration": "0.75s"
+            "transition-duration": "0.5s"
         }
     },
     {
@@ -126,7 +127,14 @@ export const stylesheet = [
         style: {
             "opacity": 0
         }
-    }
+    },
+    {
+        selector: ".highlighted",
+        style: {
+            "background-color": "#227daa",
+            "line-color": "#227daa",
+        }
+    },
 
 
 ]

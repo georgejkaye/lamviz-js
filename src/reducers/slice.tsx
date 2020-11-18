@@ -40,7 +40,9 @@ interface State {
     nodeLabels: boolean,
     edgeLabels: boolean,
     macrosOn: boolean,
-    macros: Macro[]
+    macros: Macro[],
+    redexToHighlight: number
+    reductionToPerform: number
 }
 
 const getGraphWidth = (dimensions: Dimensions, facts: boolean) => dimensions.width - (toggleWidth + sidebarWidth) - (facts ? factsWidth : 0)
@@ -66,7 +68,9 @@ const initialState: State = {
     nodeLabels: false,
     edgeLabels: false,
     macrosOn: true,
-    macros: []
+    macros: [],
+    redexToHighlight: -1,
+    reductionToPerform: -1
 }
 
 function pop<T>(array: T[]) {
@@ -129,12 +133,21 @@ export const slice = createSlice({
         removeMacro: (state, action: PayloadAction<number>) =>
             state = { ...state, macros: state.macros.slice(0, action.payload).concat(state.macros.slice(action.payload + 1)) },
         removeAllMacros: (state) =>
-            state = { ...state, macros: [] }
+            state = { ...state, macros: [] },
+        highlightRedex: (state, action: PayloadAction<number>) =>
+            state = { ...state, redexToHighlight: action.payload },
+        unhighlightRedex: (state) =>
+            state = { ...state, redexToHighlight: -1 },
+        performReduction: (state, action: PayloadAction<number>) =>
+            state = { ...state, reductionToPerform: action.payload },
+        reductionPerformed: (state) =>
+            state = { ...state, reductionToPerform: -1 }
     },
 })
 
 export const {
     changeMode, resize, newTerm, newError, updateTerm, resetTerm, finishedDrawing, backTerm, toggleFactsBar, clear,
-    downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels, toggleMacrosOn, addMacro, defineMacro, updateMacro, toggleMacro, setMacros, removeMacro, removeAllMacros } = slice.actions
+    downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels, toggleMacrosOn, addMacro, defineMacro, updateMacro,
+    toggleMacro, setMacros, removeMacro, removeAllMacros, highlightRedex, unhighlightRedex, performReduction } = slice.actions
 
 export default slice.reducer
