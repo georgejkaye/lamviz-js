@@ -121,6 +121,7 @@ input {
 
 .error {
     padding: 10px 0px;
+    margin-top: 5px;
     background-color: darkred;
 }
 
@@ -375,7 +376,7 @@ label {}
     margin-right: 15px;
 }
 
-.visualiser-sidebar {
+.sub-sidebar {
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -447,4 +448,37 @@ label {}
 
 .code {
     font-family: monospace;
+}
+
+/* Gallery */
+
+.number-boxes {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-top: 5px;
+}
+
+.number-item {
+    margin: 5px;
+}
+
+.number-box {
+    width: 3em;
+}
+
+.radio-button {
+    margin: 0 5px;
+}
+
+.sort-option {
+    display: flex;
+    flex-direction: row;
+    margin: 2.5px 0;
+}
+
+.sort-text {
+    text-align: center;
+    flex: 1;
 }

@@ -4,6 +4,7 @@ import { RootState } from "./reducers"
 import { Mode, resize, addMacro } from "./reducers/slice";
 import Sidebar from "./components/Sidebar"
 import Visualiser from "./components/Visualiser"
+import Gallery from "./components/Gallery"
 
 export default function App() {
 
@@ -33,7 +34,7 @@ export default function App() {
         <div className="window">
             <div className="content">
                 <Sidebar />
-                {mode == Mode.VISUALISER ? <Visualiser /> : <div></div>}
+                {mode == Mode.VISUALISER ? <Visualiser /> : <Gallery />}
             </div>
         </div>)
 }

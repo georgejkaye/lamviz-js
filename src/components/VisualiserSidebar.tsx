@@ -137,7 +137,7 @@ export default function VisualiserSidebar() {
     const toggleMacrosButton = () => dispatch(toggleMacrosOn())
 
     return (
-        <div className="visualiser-sidebar">
+        <div className="sub-sidebar">
             <div className="sidebar-content">
                 <Collapse isOpened={error != ""}>
                     <div className="error">
