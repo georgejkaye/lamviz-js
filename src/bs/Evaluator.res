@@ -148,39 +148,42 @@ let rec innermostRightmostReduction = term => {
     ? term
     : switch term {
       | Var(_, _) => failwith("This should never ever happen")
-      | Abs(t, x, _) => Abs(innermostLeftmostReduction(t), x, "")
+      | Abs(t, x, _) => Abs(innermostRightmostReduction(t), x, "")
       | App(t1, t2, _) =>
         hasBetaRedex(t2)
-          ? App(t1, innermostLeftmostReduction(t2), "")
+          ? App(t1, innermostRightmostReduction(t2), "")
           : hasBetaRedex(t1)
-          ? App(innermostLeftmostReduction(t1), t2, "")
+          ? App(innermostRightmostReduction(t1), t2, "")
           : performBetaReduction(t1, t2)
       }
 }
 
-let rec specificReduction = (term, i) => fst(specificReduction'(term, i))
+let rec specificReduction = (term, i) => {
+  Js.log(i)
+  fst(specificReduction'(term, i))
+}
 and specificReduction' = (term, i) => {
-  !hasBetaRedexInside(term)
-    ? (term, i)
-    : switch term {
-      | Var(_, _) => (term, i)
-      | Abs(t, x, _) => {
-          let (scopeReduction, i) = specificReduction'(t, i)
-          i == -1 ? (Abs(scopeReduction, x, ""), i) : (term, i)
+  switch term {
+  | Var(_, _) => (term, i)
+  | Abs(t, x, _) => {
+      let (scopeReduction, i) = specificReduction'(t, i)
+      i == -1 ? (Abs(scopeReduction, x, ""), i) : (term, i)
+    }
+  | App(t1, t2, _) =>
+    isBetaRedex(term) && i == 0
+      ? {
+          Js.log("the one!")
+          (performBetaReduction(t1, t2), -1)
         }
-      | App(t1, t2, _) =>
-        isBetaRedex(term) && i == 0
-          ? {
-              (performBetaReduction(t1, t2), -1)
-            }
-          : hasBetaRedex(t1)
-          ? {
-            let (lhsReduction, i) = specificReduction'(t1, i)
-            i == -1 ? (App(lhsReduction, t2, ""), i) : (term, i)
-          }
-          : {
-              let (rhsReduction, i) = specificReduction'(t2, i)
-              i == -1 ? (App(t1, rhsReduction, ""), i) : (term, i)
-            }
-      }
+      : {
+          let i = isBetaRedex(term) ? i - 1 : i
+          let (lhsReduction, i) = specificReduction'(t1, i)
+          i == -1
+            ? (App(lhsReduction, t2, ""), i)
+            : {
+                let (rhsReduction, i) = specificReduction'(t2, i)
+                i == -1 ? (App(t1, rhsReduction, ""), i) : (term, i)
+              }
+        }
+  }
 }

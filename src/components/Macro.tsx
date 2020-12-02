@@ -34,7 +34,7 @@ export function Macro(props: MacroProps) {
     const editMacroButton = (e: React.MouseEvent<any>) => { dispatch(toggleMacro(props.no)); e.stopPropagation() }
 
     return (
-        <div className="macro ready-macro" key="aaa" onClick={clickMacro} >
+        <div key={props.no} className="macro ready-macro" onClick={clickMacro} >
             <div>
                 <img src={Cross} className="icon clickable padded" onClick={removeMacroButton} />
             </div>
@@ -112,7 +112,7 @@ export function ActiveMacro(props: MacroProps) {
         nameInput.focus()
     }, [])
 
-    return (<div className="active-macro macro">
+    return (<div key={props.no} className="active-macro macro">
         <Collapse isOpened={error != ""}>
             <div className="error">
                 {error}

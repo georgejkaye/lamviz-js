@@ -7,7 +7,7 @@ import ReactTooltip from "react-tooltip"
 import { Term } from "../bs/Lambda.bs"
 import { betaRedexes, variables, uniqueVariables, freeVariables, applications, abstractions, subterms, crossings, bridges, linear, planar, closed, bridgeless, printRedexesArray } from "../bs/Lambda.bs";
 import { RootState } from "./../reducers"
-import { normalise } from "../bs/Evaluator.bs";
+import { normalise, specificReduction } from "../bs/Evaluator.bs";
 import { updateTerm, backTerm, toggleFactsBar, resetTerm, downloadSvg, performReduction, highlightRedex, unhighlightRedex } from "./../reducers/slice";
 
 import Up from "../data/svgs/up-chevron.svg"
@@ -132,7 +132,7 @@ export default function Facts() {
     }
 
     const clickRedex = (i: number) => {
-        dispatch(performReduction(i))
+        dispatch(updateTerm(specificReduction(term, i)))
     }
 
     const mouseoverRedex = (i: number) => {
@@ -178,7 +178,7 @@ export default function Facts() {
                     </div>
                     <Collapse isOpened={betasOpen}>
                         <div className="redexes">
-                            {printRedexesArray(term, ctx).map((r, i) => <div className="redex" onMouseOver={(e) => mouseoverRedex(i)} onMouseLeave={(e) => mouseleaveRedex(i)} onClick={(e) => clickRedex(i)}>{r}</div>)}
+                            {printRedexesArray(term, ctx).map((r, i) => <div key={i} className="redex" onMouseOver={(e) => mouseoverRedex(i)} onMouseLeave={(e) => mouseleaveRedex(i)} onClick={(e) => clickRedex(i)}>{r}</div>)}
                         </div>
                     </Collapse>
                     <div className="normalisation">
@@ -196,7 +196,7 @@ export default function Facts() {
                                 <option value="outermost">Outermost</option>
                                 <option value="innermost">Innermost leftmost</option>"
                                 <option value="innermost">Innermost rightmost</option>"
-                    <option value="random">Random</option>
+                                <option value="random">Random</option>
                             </select>
                         </div>
                     </div>

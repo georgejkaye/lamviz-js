@@ -65,7 +65,7 @@ export const stylesheet = [
         "selector": "edge",
         "style": {
             "line-color": "black",
-            "label": "data(id)",
+            "label": "",
             "font-size": "1",
             "width": "0.5",
             "overlay-padding": 0.5,
