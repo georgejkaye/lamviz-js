@@ -8,6 +8,8 @@ export const stylesheet = [
             "label": "",
             "font-size": 1,
             "overlay-padding": 0.5,
+            "transition-property": "background-color",
+            "transition-duration": "0.25s",
         }
     },
     {
@@ -63,9 +65,12 @@ export const stylesheet = [
         "selector": "edge",
         "style": {
             "line-color": "black",
-            "label": "",
+            "label": "data(id)",
+            "font-size": "1",
             "width": "0.5",
             "overlay-padding": 0.5,
+            "transition-property": "background-color, line-color, mid-target-arrow-color",
+            "transition-duration": "0.25s"
         }
     },
     {

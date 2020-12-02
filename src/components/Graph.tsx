@@ -65,10 +65,9 @@ export default function Graph(props: GraphProps) {
     const [lastEdgeLabels, setLastEdgeLabels] = useState(props.edgeLabels)
     const [lastTerm, setLastTerm] = useState(props.graph.term)
 
-    const arcRegex = /var_top_[0-9]*_to_abs_top_([0-9]*)/
+    const arcRegex = /var_top_([0-9]*)_to_abs_top_([0-9]*)/
 
     const redrawTerm = () => {
-        console.log("aa")
         cy.elements().addClass("transparent")
         cy.elements().remove()
 
@@ -115,15 +114,18 @@ export default function Graph(props: GraphProps) {
 
                 /* Propagate beta classes */
                 for (var i = 0; i < betaRedexes(props.graph.term); i++) {
-                    let arcs = cy.edges(".arc.beta-" + i)
-                    let absid = arcs[arcs.length - 1].data("id").match(arcRegex)[1]
-                    cy.$("#abs_" + absid).addClass("beta-" + i)
-                    cy.$("#abs_sp_mp_" + absid).addClass("beta-" + i)
-                    cy.$("#abs_sp_" + absid).addClass("beta-" + i)
-                    cy.$("#abs_top_" + absid).addClass("beta-" + i)
-                    cy.$("#abs_" + i + "_to_abs_sp_mp_" + absid).addClass("beta-" + i)
-                    cy.$("#abs_sp_mp_" + i + "_to_abs_sp_" + absid).addClass("beta-" + i)
-                    cy.$("#abs_sp_" + i + "_to_abs_top_" + absid).addClass("beta-" + i)
+                    let arcs = cy.edges(".arc.beta-" + i).toArray()
+
+                    for (var j = 0; j < arcs.length; j++) {
+                        let absId = arcs[j].data("id").match(arcRegex)[2]
+                        cy.$("#abs_" + absId).addClass("beta-" + i)
+                        cy.$("#abs_sp_mp_" + absId).addClass("beta-" + i)
+                        cy.$("#abs_sp_" + absId).addClass("beta-" + i)
+                        cy.$("#abs_top_" + absId).addClass("beta-" + i)
+                        cy.$("#abs_" + absId + "_to_abs_sp_mp_" + absId).addClass("beta-" + i)
+                        cy.$("#abs_sp_mp_" + absId + "_to_abs_sp_" + absId).addClass("beta-" + i)
+                        cy.$("#abs_sp_" + absId + "_to_abs_top_" + absId).addClass("beta-" + i)
+                    }
                 }
 
                 highlightRedex(props.highlightedRedex)
@@ -169,7 +171,6 @@ export default function Graph(props: GraphProps) {
     }, [props.edgeLabels])
 
     useEffect(() => {
-        console.log("ee")
         highlightRedex(props.highlightedRedex)
     }, [props.highlightedRedex])
 
