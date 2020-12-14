@@ -40,7 +40,14 @@ let rec substitute = (t, j, s) => {
   }
 }
 
-//let substituteVariable = (j, t) => substitute(j, Var(s, ""), t)
+/**
+ * Substitute a variable for a variable in a term - i.e. t [j -> s] .
+ * @param {lambdaTerm} t - The term the substitution is to be performed in.
+ * @param {int}        j - The index of the variable to substitute.
+ * @param {lambdaTerm} s - The variable to substitute in.
+ * @return {Object}      - The newly substituted lambda term.
+ */
+let substituteVariable = (t, j, s) => substitute(t, j, Var(s, ""))
 
 /**
  * Perform a beta-reduction.

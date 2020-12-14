@@ -47,3 +47,5 @@ let print_list = (xs, f) => {
   let printed = print_list'(xs, f)
   "[" ++ String.sub(printed, 0, String.length(printed) - 3) ++ "]"
 }
+
+let lists_equal = (xs, ys) => List.fold_left2((acc, x, y) => x == y && acc, true, xs, ys)
