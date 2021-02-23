@@ -24,10 +24,11 @@ module.exports = {
             loader: "source-map-loader"
         },
         {
-            test: /\.css$/,
+            test: /\.(scss|css)$/,
             use: [
                 'style-loader',
-                'css-loader'
+                'css-loader',
+                'sass-loader'
             ]
         },
         {
@@ -46,7 +47,7 @@ module.exports = {
             template: path.resolve(__dirname, "src", "index.html"),
         }),
         new MiniCssExtractPlugin({
-            filename: "./build/styles.css",
+            filename: "./build/styles.scss",
         }),
     ]
 };

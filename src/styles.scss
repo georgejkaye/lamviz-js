@@ -482,3 +482,15 @@ label {}
     text-align: center;
     flex: 1;
 }
+
+.church-room {
+    display: flex;
+    flex-wrap: wrap;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.portrait {
+    margin: 10px;
+    flex: 0;
+}

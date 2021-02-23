@@ -3,7 +3,7 @@ import * as ReactDOM from "react-dom";
 import App from "./App";
 import { Provider } from "react-redux"
 import store from "./reducers/store"
-import "./styles.css";
+import "./styles.scss";
 
 import WebFont from 'webfontloader';
 

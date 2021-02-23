@@ -2,20 +2,26 @@ import React, { useState, KeyboardEvent, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { betaRedexes, prettyPrint, printHTML, printHTMLAndContext, prettyPrintDeBruijn } from "../bs/Lambda.bs";
 import { RootState } from "../reducers"
-import { initialiseMemory, generateTerms, generateContext } from "../bs/Generators.bs"
+import { initialiseMemory, generateTermsArray, generateContext } from "../bs/Generators.bs"
+import Portrait from "./Portrait"
 
 export default function Gallery() {
 
     const n = useSelector((state: RootState) => state.gallerySlice).n
     const k = useSelector((state: RootState) => state.gallerySlice).k
 
-    let mem = initialiseMemory(16, 16)
-    console.log(mem)
+    var mem = initialiseMemory(16, 16)
     let ctx = generateContext(k)
-    let terms = generateTerms(n, ctx, mem)
+    var [terms, mem] = generateTermsArray(n, ctx, mem)
+
+    for (var i = 0; i < terms.length; i++) {
+        console.log(prettyPrintDeBruijn(terms[i]))
+    }
 
     return (
-        <div className="stage" >
-            Generating the gallery for terms of size {n} with {k} free variables
+        <div className="church-room" >
+            {terms.map((term) =>
+                <Portrait key={prettyPrintDeBruijn(term)} term={term} context={ctx} />
+            )}
         </div>)
 }

@@ -3,6 +3,9 @@
 
 ## Visualiser
 
+* Free variable positioning
+  * Currently the wrong way round
+
 ## Graph generation
 
 * Adding redexes as classes

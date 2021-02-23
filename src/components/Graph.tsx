@@ -18,6 +18,8 @@ interface GraphProps {
     dimensions: { width: number, height: number }
     graph: { term: Term, context: Context }
     zoom: boolean
+    pan: boolean
+    margin: number
     nodeLabels: boolean
     edgeLabels: boolean
     redraw: boolean
@@ -59,7 +61,7 @@ export default function Graph(props: GraphProps) {
         }
     }
 
-    const graphDimensions = useSelector((state: RootState) => state.currentState).graphDimensions
+    //const graphDimensions = useSelector((state: RootState) => state.currentState).graphDimensions
     const svgTime = useSelector((state: RootState) => state.currentState).svgTime
     const [lastNodeLabels, setLastNodeLabels] = useState(props.nodeLabels)
     const [lastEdgeLabels, setLastEdgeLabels] = useState(props.edgeLabels)
@@ -134,13 +136,14 @@ export default function Graph(props: GraphProps) {
             updateNodeLabels()
             updateEdgeLabels()
 
-            cy.zoomingEnabled(props.zoom)
-
             /* Make the map fill the screen */
             if (props.nodeLabels == lastNodeLabels && props.edgeLabels == lastEdgeLabels) {
-                cy.fit(cy.elements(), 50)
+                console.log("re")
+                cy.fit(cy.elements(), props.margin)
             }
 
+            cy.panningEnabled(props.pan)
+            cy.zoomingEnabled(props.zoom)
             cy.elements().removeClass("transparent")
         }
     }
@@ -178,7 +181,7 @@ export default function Graph(props: GraphProps) {
         <div key={props.dimensions.width} className="graph">
             <CytoscapeComponent
                 elements={[]}
-                style={graphDimensions}
+                style={props.dimensions}
                 stylesheet={stylesheet}
                 cy={(cyObj) => { cy = cyObj }}
             />

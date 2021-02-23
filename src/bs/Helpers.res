@@ -1,6 +1,13 @@
 let str = string_of_int
 let int = int_of_string
 
+let rec nos = i => {
+  switch i {
+  | 0 => list{0}
+  | n => list{n, ...nos(i - 1)}
+  }
+}
+
 let rec split = (s, c) => {
   switch String.index(s, c) {
   | exception Not_found => list{s}
