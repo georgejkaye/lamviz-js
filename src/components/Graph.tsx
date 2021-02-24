@@ -139,6 +139,8 @@ export default function Graph(props: GraphProps) {
             /* Make the map fill the screen */
             if (props.nodeLabels == lastNodeLabels && props.edgeLabels == lastEdgeLabels) {
                 console.log("re")
+                cy.panningEnabled(true)
+                cy.zoomingEnabled(true)
                 cy.fit(cy.elements(), props.margin)
             }
 

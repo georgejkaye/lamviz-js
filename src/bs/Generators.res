@@ -71,21 +71,23 @@ let rec generateTerms = (n, ks, mem) => generateTerms'(n, ks, mem, 0)
  */
 and generateTerms' = (n, ks, mem, next) => {
   // First check if we already have the entry in the memory
-  switch mem[n][List.length(ks)] {
-  | None => generateTerms''(n, ks, mem, next)
-  | Some(field) =>
-    // Does the field contain our selection of variables?
-    switch lookupTerms(field, ks) {
-    | exception Not_found => {
-        // Get a new entry populated with our variables
-        let newTerms = replaceVariables(List.hd(field), ks)
-        // Add it to the memory
-        mem[n][List.length(ks)] = Some(list{{"vars": ks, "terms": newTerms}, ...field})
-        (newTerms, mem, next)
+  n < Array.length(mem) && List.length(ks) < Array.length(mem[n])
+    ? switch mem[n][List.length(ks)] {
+      | None => generateTerms''(n, ks, mem, next)
+      | Some(field) =>
+        // Does the field contain our selection of variables?
+        switch lookupTerms(field, ks) {
+        | exception Not_found => {
+            // Get a new entry populated with our variables
+            let newTerms = replaceVariables(List.hd(field), ks)
+            // Add it to the memory
+            mem[n][List.length(ks)] = Some(list{{"vars": ks, "terms": newTerms}, ...field})
+            (newTerms, mem, next)
+          }
+        | entry => (entry["terms"], mem, next)
+        }
       }
-    | entry => (entry["terms"], mem, next)
-    }
-  }
+    : generateTerms''(n, ks, mem, next)
 }
 /* * Helper for generateTerms'
  * @param n     the size of the term
@@ -103,12 +105,16 @@ and generateTerms'' = (n, ks, mem, next) => {
 
   let newEntry = {"vars": ks, "terms": terms}
 
-  let newField = switch mem[n][List.length(ks)] {
-  | None => Some(list{newEntry})
-  | Some(entry) => Some(list{newEntry, ...entry})
-  }
+  n < Array.length(mem) && List.length(ks) < Array.length(mem[n])
+    ? {
+        let newField = switch mem[n][List.length(ks)] {
+        | None => list{newEntry}
+        | Some(entry) => list{newEntry, ...entry}
+        }
+        mem[n][List.length(ks)] = Some(newField)
+      }
+    : ()
 
-  mem[n][List.length(ks)] = newField
   (terms, mem, next)
 }
 

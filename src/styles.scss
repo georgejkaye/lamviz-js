@@ -484,13 +484,15 @@ label {}
 }
 
 .church-room {
-    display: flex;
-    flex-wrap: wrap;
+    height: 98vh;
+    margin-top: 10px;
+    margin-left: 10px;
     overflow-y: auto;
     flex: 1;
 }
 
 .portrait {
-    margin: 10px;
+    display: inline-block;
+    margin: 15px;
     flex: 0;
 }
