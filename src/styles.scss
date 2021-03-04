@@ -1,8 +1,22 @@
+$cyan:#8be9fd;
+$white: #f2f2f2;
+$default-bg: #282a36;
+$sidebar-bg: #00171F;
+$graph-bg: #9c9c9c;
+$active-tab: #41809c;
+$inactive-tab: #004D66;
+$on: #15e177;
+$off: #c80000;
+$title-bar: #003459;
+$subtitle-bar: #227DAA;
+$disabled: #024055;
+
+
 body {
     margin: 0px;
-    background-color: #282a36;
+    background-color: $default-bg;
     font-family: 'Montserrat', sans-serif;
-    color: #f2f2f2;
+    color: $white;
 }
 
 input {
@@ -18,7 +32,7 @@ textarea {
 }
 
 a {
-    color: #8be9fd;
+    color: $cyan;
 }
 
 .window {
@@ -35,7 +49,7 @@ a {
     margin: 0.5em 0;
     text-align: center;
     font-size: 2.5em;
-    background-color: #003459;
+    background-color: $title-bar;
 }
 
 .sidebar {
@@ -44,7 +58,7 @@ a {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background-color: #00171F;
+    background-color: $sidebar-bg;
     overflow-y: scroll;
     text-align: center;
 }
@@ -103,16 +117,16 @@ input {
 }
 
 .active-tab {
-    background-color: #41809c
+    background-color: $active-tab
 }
 
 .inactive-tab {
     transition: 0.5s;
-    background-color: #004D66;
+    background-color: $inactive-tab;
 }
 
 .inactive-tab:hover {
-    background-color: #41809c
+    background-color: $active-tab
 }
 
 .ReactCollapse--collapse {
@@ -140,11 +154,11 @@ button {
 }
 
 button:hover {
-    background-color: #41809c;
+    background-color: $active-tab;
 }
 
 button:disabled {
-    background-color: #024055;
+    background-color: $disabled;
     cursor: auto;
 }
 
@@ -168,7 +182,7 @@ select {
 
 select:disabled {
     cursor: auto;
-    background-color: #024055;
+    background-color: $disabled;
 }
 
 .left {
@@ -185,7 +199,7 @@ select:disabled {
 }
 
 .top-bar {
-    background-color: #003459;
+    background-color: $title-bar;
     font-size: 40px;
     height: 50px;
     padding: 10px;
@@ -197,7 +211,7 @@ select:disabled {
 }
 
 .subtop-bar {
-    background-color: #227DAA;
+    background-color: $subtitle-bar;
     font-size: 15px;
     height: 25px;
     padding: 10px;
@@ -212,7 +226,7 @@ select:disabled {
 }
 
 .graph {
-    background-color: #9c9c9c;
+    background-color: $graph-bg;
 }
 
 .main-stage {
@@ -234,16 +248,16 @@ select:disabled {
     cursor: pointer;
     width: 20px;
     transition: 0.3s;
-    background-color: #004D66;
+    background-color: $inactive-tab;
 }
 
 .toggle-bar:hover {
-    background-color: #41809c;
+    background-color: $active-tab;
 }
 
 .facts {
     flex: 1;
-    background-color: #00171F;
+    background-color: $sidebar-bg;
     font-family: 'Roboto Mono', monospace;
     overflow-y: auto;
     width: 330px;
@@ -329,7 +343,7 @@ select:disabled {
 }
 
 .redex:hover {
-    background-color: #41809c;
+    background-color: $active-tab;
 }
 
 .highlighted-redex {
@@ -353,11 +367,11 @@ select:disabled {
 label {}
 
 .on {
-    background-color: #15e177;
+    background-color: $on;
 }
 
 .off {
-    background-color: #c80000;
+    background-color: $off;
 }
 
 .heading-icon {
@@ -388,8 +402,8 @@ label {}
 }
 
 .macro {
-    background-color: #004d66;
-    border: 2px #41809c solid;
+    background-color: $inactive-tab;
+    border: 2px $active-tab solid;
     border-radius: 5px;
     margin: 5px 5px;
     padding: 5px 5px;
@@ -407,7 +421,7 @@ label {}
 }
 
 .ready-macro:hover {
-    background-color: #027399;
+    background-color: $active-tab;
 }
 
 .macro-title {
@@ -494,5 +508,6 @@ label {}
 .portrait {
     display: inline-block;
     margin: 15px;
+    border: $white;
     flex: 0;
 }

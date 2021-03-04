@@ -14,6 +14,14 @@ const portraitDimensions = {
   height: 250
 }
 
+function Caption(props: PortraitProps) {
+  return (
+    <div className="caption">
+      <div>{prettyPrint(props.term, props.context, false, false)}</div>
+    </div>
+  )
+}
+
 export default function Portrait(props: PortraitProps) {
 
   return (
@@ -28,7 +36,7 @@ export default function Portrait(props: PortraitProps) {
         pan={false}
         margin={10}
       />
-      <div>{prettyPrintDeBruijn(props.term)}</div>
+      <Caption term={props.term} context={props.context} />
     </div>
   )
 }
