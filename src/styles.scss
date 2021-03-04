@@ -505,9 +505,12 @@ label {}
     flex: 1;
 }
 
-.portrait {
+.exhibit {
     display: inline-block;
     margin: 15px;
-    border: $white;
+}
+
+.portrait {
+    border: 5px solid $white;
     flex: 0;
 }

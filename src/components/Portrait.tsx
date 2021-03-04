@@ -25,8 +25,8 @@ function Caption(props: PortraitProps) {
 export default function Portrait(props: PortraitProps) {
 
   return (
-    <div className="portrait">
-      <Graph graph={props}
+    <div className="exhibit">
+      <div className="portrait"><Graph graph={props}
         dimensions={portraitDimensions}
         highlightedRedex={-1}
         zoom={false}
@@ -35,8 +35,8 @@ export default function Portrait(props: PortraitProps) {
         redraw={true}
         pan={false}
         margin={10}
-      />
+      /></div>
       <Caption term={props.term} context={props.context} />
-    </div>
+    </div >
   )
 }

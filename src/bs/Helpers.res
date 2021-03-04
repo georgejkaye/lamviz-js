@@ -8,6 +8,15 @@ let rec nos = i => {
   }
 }
 
+/* [0,n] both inclusive */
+let rec range = (m, n) => {
+  n < m
+    ? failwith("range: n must be greater than or equal to m")
+    : m == n
+    ? list{m}
+    : list{m, ...range(m + 1, n)}
+}
+
 let rec split = (s, c) => {
   switch String.index(s, c) {
   | exception Not_found => list{s}

@@ -97,10 +97,31 @@ and generateTerms' = (n, ks, mem, next) => {
  * @return (terms, memory, next)
  */
 and generateTerms'' = (n, ks, mem, next) => {
-  let terms = switch n {
-  | 0 => list{}
-  | 1 => List.map(i => Var(i, ""), ks)
-  | n => failwith("todo")
+  let (terms, mem, next) = switch n {
+  | 0 => (list{}, mem, next)
+  | 1 => (List.map(i => Var(i, ""), ks), mem, next)
+  | n => {
+      // Generate terms of one less subterm and one more free variable
+      let (absTerms, mem, next) = generateTerms'(
+        n - 1,
+        list{0, ...List.map(x => x + 1, ks)},
+        mem,
+        next,
+      )
+      // Wrap these terms in abstractions
+      let (absTerms, next) = List.fold_left(((acc, next), t) => {
+        (list{Abs(t, fst(genVarName(next)), ""), ...acc}, next + 1)
+      }, (list{}, next), absTerms)
+      let absTerms = List.rev(absTerms)
+
+      // Generate all subterms of one less subterm and all variables
+      let (appTerms, mem, next) = n > 2 ? List.fold_left(((acc, mem, next), m) => {
+              let (appTerms, mem, next) = generateAppTerms(m, n, ks, mem, next)
+              (List.append(acc, appTerms), mem, next)
+            }, (list{}, mem, next), range(1, n - 2)) : (list{}, mem, next)
+
+      (List.append(absTerms, appTerms), mem, next)
+    }
   }
 
   let newEntry = {"vars": ks, "terms": terms}
@@ -117,8 +138,19 @@ and generateTerms'' = (n, ks, mem, next) => {
 
   (terms, mem, next)
 }
+and generateAppTerms = (m, n, ks, mem, next) => {
+  let (lhsTerms, mem, next) = generateTerms'(m, ks, mem, next)
+  let (rhsTerms, mem, next) = generateTerms'(n - 1 - m, ks, mem, next)
+  let appTerms = List.fold_left((acc, lhs) => {
+    List.append(
+      acc,
+      List.rev(List.fold_left((acc, rhs) => list{App(lhs, rhs, ""), ...acc}, list{}, rhsTerms)),
+    )
+  }, list{}, lhsTerms)
+  (appTerms, mem, next)
+}
 
-let rec generateTermsArray = (n, k, mem) => {
+let generateTermsArray = (n, k, mem) => {
   let (terms, _, mem) = generateTerms(n, k, mem)
   (Array.of_list(terms), mem)
 }
