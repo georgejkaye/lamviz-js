@@ -35,6 +35,7 @@ export default function Portrait(props: PortraitProps) {
         redraw={true}
         pan={false}
         margin={10}
+        interactive={false}
       /></div>
       <Caption term={props.term} context={props.context} />
     </div >

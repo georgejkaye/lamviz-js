@@ -45,7 +45,7 @@ export default function Visualiser() {
             </div>
             <div className="main-stage" style={{ height: String(graphDimensions.height) + "px" }}>
                 <div className="main-graph">
-                    <Graph dimensions={graphDimensions} redraw={redraw} graph={{ term: term, context: context }} nodeLabels={nodeLabels} edgeLabels={edgeLabels} zoom pan highlightedRedex={redexToHighlight} margin={50} />
+                    <Graph dimensions={graphDimensions} redraw={redraw} graph={{ term: term, context: context }} nodeLabels={nodeLabels} edgeLabels={edgeLabels} zoom pan highlightedRedex={redexToHighlight} margin={50} interactive />
                 </div>
                 <Facts />
             </div>

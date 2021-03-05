@@ -17,10 +17,11 @@ export default function Gallery() {
     var mem = initialiseTermBank(16, 16)
     let ctx = generateContext(k)
     var [terms, mem] = generateTermsArray(n, ctx, PLANAR, mem)
+    console.log("done generating")
 
-    for (var i = 0; i < terms.length; i++) {
-        console.log(prettyPrintDeBruijn(terms[i]))
-    }
+    //for (var i = 0; i < terms.length; i++) {
+    //    console.log(prettyPrintDeBruijn(terms[i]))
+    //}
 
     return (
         <div className="church-room" >

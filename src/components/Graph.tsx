@@ -10,9 +10,10 @@ import { stylesheet } from "./../data/style.js"
 import { generateGraphElementsArray, GraphEdge, GraphNode, nodeDistanceX, nodeDistanceY } from "../bs/Graph.bs"
 import { Term, Context, betaRedexes } from "../bs/Lambda.bs"
 
-import { svg } from "./../libs/convert-to-svg"
+import { generateSvg, generateAndDownloadSvg } from "./../libs/convert-to-svg"
 
 import { downloadSvg, downloadedSvg, finishedDrawing } from "./../reducers/slice";
+import { verify } from "crypto"
 
 interface GraphProps {
     dimensions: { width: number, height: number }
@@ -24,6 +25,7 @@ interface GraphProps {
     edgeLabels: boolean
     redraw: boolean
     highlightedRedex: number
+    interactive: boolean
 }
 
 export default function Graph(props: GraphProps) {
@@ -31,6 +33,8 @@ export default function Graph(props: GraphProps) {
     let cy: cytoscape.Core
 
     let dispatch = useDispatch()
+
+    let [currentSvg, setCurrentSvg] = useState("")
 
     function generateElements(term: Term, ctx: Context): [cytoscape.ElementDefinition[], [string, string, string], [string, string, string]] {
         let [nodes, edges, frees, mps] = generateGraphElementsArray(term, ctx)
@@ -146,6 +150,7 @@ export default function Graph(props: GraphProps) {
             cy.boxSelectionEnabled(false);
 
             cy.elements().removeClass("transparent")
+            setCurrentSvg(generateSvg(cy))
         }
     }
 
@@ -160,7 +165,7 @@ export default function Graph(props: GraphProps) {
     useEffect(() => {
         if (svgTime) {
             dispatch(downloadedSvg())
-            svg(cy)
+            generateAndDownloadSvg(cy)
         }
     }, [svgTime])
 
