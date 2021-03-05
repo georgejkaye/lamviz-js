@@ -27,3 +27,4 @@
 * Implement gallery
 * Display lambda terms for given n and k
 * Filter and sort
+* Generate SVGS and display them, we don't need it to be cytoscape instances

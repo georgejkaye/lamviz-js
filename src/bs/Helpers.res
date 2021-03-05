@@ -65,3 +65,19 @@ let print_list = (xs, f) => {
 }
 
 let lists_equal = (xs, ys) => List.fold_left2((acc, x, y) => x == y && acc, true, xs, ys)
+
+let rec take = (n, xs) =>
+  n == 0
+    ? list{}
+    : switch xs {
+      | list{} => failwith("take: not enough list to take")
+      | list{x, ...xs} => list{x, ...take(n - 1, xs)}
+      }
+
+let rec splitList = (n, xs) => splitList'(n, list{}, xs)
+and splitList' = (n, acc, xs) => {
+  switch n {
+  | 0 => (List.rev(acc), xs)
+  | n => splitList'(n - 1, list{List.hd(xs), ...acc}, List.tl(xs))
+  }
+}
