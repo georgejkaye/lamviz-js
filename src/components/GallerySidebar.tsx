@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./../reducers"
-import { newTerms, reset, error } from "./../reducers/gallerySlice"
+import { newTerms, reset, error, setFragment, Fragment } from "./../reducers/gallerySlice"
 import { Term } from "../bs/Lambda.bs"
 import { Collapse } from "react-collapse"
 
@@ -21,6 +21,43 @@ function SortBox(props: SortProps) {
 
 }
 
+const setText = (func: (value: React.SetStateAction<string>) => void, event: React.ChangeEvent<any>) => {
+    func(event.target.value)
+}
+
+interface FiltersProps {
+    onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void
+}
+
+function Filters(props: FiltersProps) {
+    const [crossingsText, setCrossingsText] = useState("")
+    const [redexesText, setRedexesText] = useState("")
+    const [bridgesText, setBridgesText] = useState("")
+    const [variablesText, setVariablesText] = useState("")
+    const [abstractionsText, setAbstractionsText] = useState("")
+    const [applicationsText, setApplicationsText] = useState("")
+
+    return (<div>
+        <div className="sidebar-heading">Filtering options</div>
+        <SortBox text={"Crossings"} value={crossingsText} onChange={(e) => setText(setCrossingsText, e)} onKeyDown={props.onKeyDown} />
+        <SortBox text={"Redexes"} value={redexesText} onChange={(e) => setText(setRedexesText, e)} onKeyDown={props.onKeyDown} />
+        <SortBox text={"Bridges"} value={bridgesText} onChange={(e) => setText(setBridgesText, e)} onKeyDown={props.onKeyDown} />
+        <SortBox text={"Variables"} value={variablesText} onChange={(e) => setText(setVariablesText, e)} onKeyDown={props.onKeyDown} />
+        <SortBox text={"Abstractions"} value={abstractionsText} onChange={(e) => setText(setAbstractionsText, e)} onKeyDown={props.onKeyDown} />
+        <SortBox text={"Applications"} value={applicationsText} onChange={(e) => setText(setApplicationsText, e)} onKeyDown={props.onKeyDown} />
+    </div>)
+}
+
+interface FragmentButtonProps {
+    fragment: Fragment
+}
+
+function FragmentButton(props: FragmentButtonProps) {
+    const dispatch = useDispatch()
+    const fragment = useSelector((state: RootState) => state.gallerySlice).fragment
+    return <button type="button" className={fragment == props.fragment ? "on" : "off"} onClick={(_) => dispatch(setFragment(props.fragment))}>{props.fragment}</button>
+}
+
 export default function VisualiserSidebar() {
 
     const dispatch = useDispatch()
@@ -30,12 +67,6 @@ export default function VisualiserSidebar() {
 
     const [sizeText, setSizeText] = useState("")
     const [freeText, setFreeText] = useState("")
-    const [crossingsText, setCrossingsText] = useState("")
-    const [redexesText, setRedexesText] = useState("")
-    const [bridgesText, setBridgesText] = useState("")
-    const [variablesText, setVariablesText] = useState("")
-    const [abstractionsText, setAbstractionsText] = useState("")
-    const [applicationsText, setApplicationsText] = useState("")
     const [error, setError] = useState("")
 
     const handleSizeChange = (event: React.ChangeEvent<any>) => {
@@ -45,12 +76,7 @@ export default function VisualiserSidebar() {
         setFreeText(event.target.value)
     }
 
-    const setText = (func: (value: React.SetStateAction<string>) => void, event: React.ChangeEvent<any>) => {
-        func(event.target.value)
-    }
-
     const onKeyDown = (event: React.KeyboardEvent<any>) => {
-
         if (event.key === "Enter") {
             generateButton()
         }
@@ -67,9 +93,7 @@ export default function VisualiserSidebar() {
             setError("Parse error: bad k")
         } else {
             setError("")
-
             let terms: Term[] = []
-
             dispatch(newTerms([newSize, newFree, terms]))
 
         }
@@ -77,11 +101,9 @@ export default function VisualiserSidebar() {
 
     }
     const resetButton = () => {
-
         setSizeText("")
         setFreeText("")
         dispatch(reset())
-
     }
 
     return (
@@ -103,20 +125,14 @@ export default function VisualiserSidebar() {
                 </div>
             </div>
             <div className="sidebar-content number-boxes">
-                <div className="radio-button"><label><input type="radio" id="pure" name="fragment" value="pure" />Pure</label></div>
-                <div className="radio-button"><label><input type="radio" id="linear" name="fragment" value="linear" />Linear</label></div>
-                <div className="radio-button"><label><input type="radio" id="planar" name="fragment" value="planar" />Planar</label></div>
+                <FragmentButton fragment={Fragment.Pure} />
+                <FragmentButton fragment={Fragment.Linear} />
+                <FragmentButton fragment={Fragment.Planar} />
             </div>
             <div className="sidebar-content">
                 <button type="button" onClick={generateButton}>Generate</button>
                 <button type="button" onClick={resetButton}>Clear</button>
             </div>
-            <div className="sidebar-heading">Filtering options</div>
-            <SortBox text={"Crossings"} value={crossingsText} onChange={(e) => setText(setCrossingsText, e)} onKeyDown={onKeyDown} />
-            <SortBox text={"Redexes"} value={redexesText} onChange={(e) => setText(setRedexesText, e)} onKeyDown={onKeyDown} />
-            <SortBox text={"Bridges"} value={bridgesText} onChange={(e) => setText(setBridgesText, e)} onKeyDown={onKeyDown} />
-            <SortBox text={"Variables"} value={variablesText} onChange={(e) => setText(setVariablesText, e)} onKeyDown={onKeyDown} />
-            <SortBox text={"Abstractions"} value={abstractionsText} onChange={(e) => setText(setAbstractionsText, e)} onKeyDown={onKeyDown} />
-            <SortBox text={"Applications"} value={applicationsText} onChange={(e) => setText(setApplicationsText, e)} onKeyDown={onKeyDown} />
+            <Filters onKeyDown={onKeyDown} />
         </div >)
 }

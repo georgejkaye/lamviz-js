@@ -13,15 +13,11 @@ export default function Gallery() {
 
     const n = useSelector((state: RootState) => state.gallerySlice).n
     const k = useSelector((state: RootState) => state.gallerySlice).k
+    const fragment = useSelector((state: RootState) => state.gallerySlice).fragment
 
     var mem = initialiseTermBank(16, 16)
     let ctx = generateContext(k)
-    var [terms, mem] = generateTermsArray(n, ctx, PLANAR, mem)
-    console.log("done generating")
-
-    //for (var i = 0; i < terms.length; i++) {
-    //    console.log(prettyPrintDeBruijn(terms[i]))
-    //}
+    var [terms, mem] = generateTermsArray(n, ctx, fragment, mem)
 
     return (
         <div className="church-room" >

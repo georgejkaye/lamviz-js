@@ -6,10 +6,10 @@ type fragment = Pure | Linear | Planar
 
 let toFragment = n => {
   switch n {
-  | 0 => Pure
-  | 1 => Linear
-  | 2 => Planar
-  | _ => failwith("toFragment: bad number")
+  | "Pure" => Pure
+  | "Linear" => Linear
+  | "Planar" => Planar
+  | _ => failwith("toFragment: bad fragment")
   }
 }
 
@@ -194,7 +194,6 @@ and generatePureAppTerms = (m, n, ks, tb, next) => {
   (appTerms, tb, next)
 }
 and generatePlanarAppTerms = (m, n, ks, tb, next) => {
-  Js.log("Planar!")
   let (appTerms, tb, next) = List.fold_left(((acc, tb, next), i) => {
     let (rhsVars, lhsVars) = splitList(List.length(ks) - i, ks)
     let (lhsTerms, tb, next) = generateTerms'(m, lhsVars, Planar, tb, next)
