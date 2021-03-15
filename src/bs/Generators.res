@@ -15,6 +15,28 @@ let toFragment = n => {
 
 let genVarName = i => ("b" ++ str(i + 1), i + 1)
 
+let rec chooseLists = xs => {
+  List.fold_left((acc, n) => List.append(chooseElems(xs, n), acc), list{}, nos(List.length(xs)))
+}
+and chooseElems = (xs, n) => chooseElems'(xs, n, list{})
+and chooseElems' = (xs, n, acc) => {
+  switch xs {
+  | list{} => list{}
+  | list{x, ...xs} =>
+    switch n {
+    | 0 => list{}
+    | n =>
+      List.length(xs) == n
+        ? List.append(acc, list{xs})
+        : chooseElems'(
+            xs,
+            n,
+            List.append(acc, List.map(ys => list{x, ...ys}, chooseElems(xs, n - 1))),
+          )
+    }
+  }
+}
+
 // A dict entry for n,k is a list of tuples mapping lists of variables to lists of lambda terms
 type variablesEntry = {"vars": list<int>, "terms": list<lambdaTerm>}
 type dictionaryField = list<variablesEntry>
@@ -133,8 +155,7 @@ and generateTerms'' = (n, ks, frag, tb, next) => {
   | 1 =>
     switch frag {
     | Pure => (List.map(i => Var(i, ""), ks), tb, next)
-    | Linear => failwith("todo")
-    | Planar =>
+    | _ =>
       let term = List.length(ks) == 1 ? list{Var(List.hd(ks), "")} : list{}
       (term, tb, next)
     }
@@ -158,7 +179,7 @@ and generateTerms'' = (n, ks, frag, tb, next) => {
       let (appTerms, tb, next) = n > 2 ? List.fold_left(((acc, tb, next), m) => {
               let (appTerms, tb, next) = switch frag {
               | Pure => generatePureAppTerms(m, n, ks, tb, next)
-              | Linear => failwith("todo")
+              | Linear => generateLinearAppTerms(m, n, ks, tb, next)
               | Planar => generatePlanarAppTerms(m, n, ks, tb, next)
               }
               (List.append(acc, appTerms), tb, next)
@@ -206,6 +227,22 @@ and generatePlanarAppTerms = (m, n, ks, tb, next) => {
     }, list{}, lhsTerms)
     (List.append(acc, appTerms), tb, next)
   }, (list{}, tb, next), range(0, List.length(ks)))
+  (appTerms, tb, next)
+}
+and generateLinearAppTerms = (m, n, ks, tb, next) => {
+  let chooses = chooseLists(ks)
+  let (appTerms, tb, next) = List.fold_left(((acc, tb, next), lhsVars) => {
+    let rhsVars = List.filter(x => !List.exists(y => x == y, lhsVars), ks)
+    let (lhsTerms, tb, next) = generateTerms'(m, lhsVars, Linear, tb, next)
+    let (rhsTerms, tb, next) = generateTerms'(n - 1 - m, rhsVars, Linear, tb, next)
+    let appTerms = List.fold_left((acc, lhs) => {
+      List.append(
+        acc,
+        List.rev(List.fold_left((acc, rhs) => list{App(lhs, rhs, ""), ...acc}, list{}, rhsTerms)),
+      )
+    }, list{}, lhsTerms)
+    (List.append(acc, appTerms), tb, next)
+  }, (list{}, tb, next), chooses)
   (appTerms, tb, next)
 }
 
