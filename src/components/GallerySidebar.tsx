@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./../reducers"
-import { newTerms, reset, error, setFragment, Fragment } from "./../reducers/gallerySlice"
+import { newParams, reset, error, setFragment, Fragment } from "./../reducers/gallerySlice"
 import { Term } from "../bs/Lambda.bs"
 import { Collapse } from "react-collapse"
 
@@ -93,9 +93,7 @@ export default function VisualiserSidebar() {
             setError("Parse error: bad k")
         } else {
             setError("")
-            let terms: Term[] = []
-            dispatch(newTerms([newSize, newFree, terms]))
-
+            dispatch(newParams([newSize, newFree]))
         }
 
 

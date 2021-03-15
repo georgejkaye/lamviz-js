@@ -16,7 +16,7 @@ let toFragment = n => {
 let genVarName = i => ("b" ++ str(i + 1), i + 1)
 
 let rec chooseLists = xs => {
-  List.fold_left((acc, n) => List.append(chooseElems(xs, n), acc), list{}, nos(List.length(xs)))
+  List.fold_left((acc, n) => List.append(chooseElems(xs, n), acc), list{}, nos(List.length(xs) + 1))
 }
 and chooseElems = (xs, n) => chooseElems'(xs, n, list{})
 and chooseElems' = (xs, n, acc) => {
@@ -48,12 +48,14 @@ type termBank = {"pure": memory, "linear": memory, "planar": memory}
 // Fill an n x k memory with Nones
 let initialiseMemory: (int, int) => memory = (n, k) => Array.init(n, _ => Array.init(k, _ => None))
 
-let initialiseTermBank = (n, k) =>
+let initialiseTermBank = (n, k) => {
+  Js.log("initialising")
   {
     "pure": initialiseMemory(n, k),
     "linear": initialiseMemory(n, k),
     "planar": initialiseMemory(n, k),
   }
+}
 
 let getFragmentBank = (tb, frag) => {
   switch frag {
@@ -230,7 +232,8 @@ and generatePlanarAppTerms = (m, n, ks, tb, next) => {
   (appTerms, tb, next)
 }
 and generateLinearAppTerms = (m, n, ks, tb, next) => {
-  let chooses = chooseLists(ks)
+  let chooses = chooseElems(ks, m)
+  Js.log(Array.of_list(List.map(x => Array.of_list(x), chooses)))
   let (appTerms, tb, next) = List.fold_left(((acc, tb, next), lhsVars) => {
     let rhsVars = List.filter(x => !List.exists(y => x == y, lhsVars), ks)
     let (lhsTerms, tb, next) = generateTerms'(m, lhsVars, Linear, tb, next)
