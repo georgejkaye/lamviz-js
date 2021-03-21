@@ -65,6 +65,26 @@ let getFragmentBank = (tb, frag) => {
   }
 }
 
+let updateFragmentBank = (tb, frag, newmem) => {
+  switch frag {
+  | Pure => {
+      "pure": newmem,
+      "linear": tb["linear"],
+      "planar": tb["planar"],
+    }
+  | Linear => {
+      "pure": tb["linear"],
+      "linear": newmem,
+      "planar": tb["planar"],
+    }
+  | Planar => {
+      "pure": tb["pure"],
+      "linear": tb["linear"],
+      "planar": newmem,
+    }
+  }
+}
+
 // generate a context with k free variables
 let rec generateContext = k => List.rev(generateContext'(k))
 and generateContext' = k => {
@@ -114,8 +134,10 @@ and replaceVariables' = (terms, vars, ks, acc) => {
  * @param frag  the fragment to generate terms for
  * @param tb   the memory object
  */
-let rec generateTerms = (n, ks, frag, tb) =>
-  generateTerms'(n, ks, frag, getFragmentBank(tb, frag), 0)
+let rec generateTerms = (n, ks, frag, tb) => {
+  let (terms, mem, _) = generateTerms'(n, ks, frag, getFragmentBank(tb, frag), 0)
+  (terms, updateFragmentBank(tb, frag, mem))
+}
 /* * Helper for generateTerms
  * @param n     the size of the term
  * @param ks    the list of indices of the free variables
@@ -233,7 +255,6 @@ and generatePlanarAppTerms = (m, n, ks, tb, next) => {
 }
 and generateLinearAppTerms = (m, n, ks, tb, next) => {
   let chooses = chooseElems(ks, m)
-  Js.log(Array.of_list(List.map(x => Array.of_list(x), chooses)))
   let (appTerms, tb, next) = List.fold_left(((acc, tb, next), lhsVars) => {
     let rhsVars = List.filter(x => !List.exists(y => x == y, lhsVars), ks)
     let (lhsTerms, tb, next) = generateTerms'(m, lhsVars, Linear, tb, next)
@@ -250,6 +271,6 @@ and generateLinearAppTerms = (m, n, ks, tb, next) => {
 }
 
 let generateTermsArray = (n, k, frag, tb) => {
-  let (terms, _, tb) = generateTerms(n, k, toFragment(frag), tb)
+  let (terms, tb) = generateTerms(n, k, toFragment(frag), tb)
   (Array.of_list(terms), tb)
 }
