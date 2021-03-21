@@ -497,8 +497,13 @@ label {}
     flex: 1;
 }
 
-.church-room {
+.gallery {
+    display: flex;
     height: 98vh;
+    flex-direction: column;
+}
+
+.church-room {
     margin-top: 10px;
     margin-left: 10px;
     overflow-y: auto;

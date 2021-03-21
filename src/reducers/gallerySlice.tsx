@@ -7,6 +7,17 @@ export enum Fragment {
     Pure = "Pure", Linear = "Linear", Planar = "Planar"
 }
 
+export function getLowerFragmentString(fragment: Fragment) {
+    switch (fragment) {
+        case Fragment.Pure:
+            return "pure"
+        case Fragment.Linear:
+            return "linear"
+        case Fragment.Planar:
+            return "planar"
+    }
+}
+
 interface Dimensions {
     width: number
     height: number
