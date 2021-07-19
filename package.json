@@ -39,6 +39,7 @@
     "cytoscape-undo-redo": "^1.3.3",
     "elliptic": "^6.5.4",
     "file-loader": "^6.1.0",
+    "glob-parent": "^5.1.2",
     "html-react-parser": "^0.14.0",
     "html-webpack-plugin": "^4.4.1",
     "lodash": "^4.17.20",
