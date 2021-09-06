@@ -1,8 +1,5 @@
-import React, { useState, KeyboardEvent, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../reducers"
-import { Term, Context, betaRedexes, prettyPrint, prettyPrintDeBruijn } from "../bs/Lambda.bs"
-import Graph from "./Graph"
+import { Term, Context, prettyPrint } from "../../bs/Lambda.bs"
+import Graph from "../workbench/Graph"
 
 interface PortraitProps {
   term: Term

@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "./../reducers"
-import { newParams, reset, error, setFragment, Fragment } from "./../reducers/gallerySlice"
-import { Term } from "../bs/Lambda.bs"
+import { useDispatch } from "react-redux";
+
 import { Collapse } from "react-collapse"
+
+import { useAppSelector } from "../redux/hooks";
+import { newParams, reset, setFragment, Fragment } from "../gallery/gallerySlice"
+
+import { Term } from "../../bs/Lambda.bs"
 
 interface SortProps {
     text: string
@@ -18,7 +21,6 @@ function SortBox(props: SortProps) {
             <div className="sort-text">{props.text}</div>
             <input id="size-box" className="number-box" type="text" value={props.value} onChange={props.onChange} onKeyDown={props.onKeyDown}></input>
         </div>)
-
 }
 
 const setText = (func: (value: React.SetStateAction<string>) => void, event: React.ChangeEvent<any>) => {
@@ -54,16 +56,16 @@ interface FragmentButtonProps {
 
 function FragmentButton(props: FragmentButtonProps) {
     const dispatch = useDispatch()
-    const fragment = useSelector((state: RootState) => state.gallerySlice).fragment
-    return <button type="button" className={fragment == props.fragment ? "on" : "off"} onClick={(_) => dispatch(setFragment(props.fragment))}>{props.fragment}</button>
+    const fragment = useAppSelector((state) => state.gallery).fragment
+    return <button type="button" className={fragment === props.fragment ? "on" : "off"} onClick={(_) => dispatch(setFragment(props.fragment))}>{props.fragment}</button>
 }
 
 export default function VisualiserSidebar() {
 
     const dispatch = useDispatch()
 
-    const n = useSelector((state: RootState) => state.gallerySlice).n
-    const k = useSelector((state: RootState) => state.gallerySlice).k
+    const n = useAppSelector((state) => state.gallery).n
+    const k = useAppSelector((state) => state.gallery).k
 
     const [sizeText, setSizeText] = useState("")
     const [freeText, setFreeText] = useState("")
@@ -85,7 +87,7 @@ export default function VisualiserSidebar() {
     const generateButton = () => {
 
         let newSize = parseInt(sizeText)
-        let newFree = freeText == "" ? 0 : parseInt(freeText)
+        let newFree = freeText === "" ? 0 : parseInt(freeText)
 
         if (isNaN(newSize)) {
             setError("Parse error: bad n")
@@ -107,7 +109,7 @@ export default function VisualiserSidebar() {
     return (
         <div className="sub-sidebar">
             <div className="sidebar-content">Set subterms and free variables</div>
-            <Collapse isOpened={error != ""}>
+            <Collapse isOpened={error !== ""}>
                 <div className="error">
                     {error}
                 </div>

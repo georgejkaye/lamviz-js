@@ -1,7 +1,5 @@
-**/node_modules/
-**/__pycache__
-**/.vscode/
-**/.bsb.lock
-**/.merlin
-**/lib/
-**/**/*.bs.js
+node_modules/
+.vscode/
+build/
+
+*.bs.js

@@ -1,8 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
-import { Term, Context } from "../bs/Lambda.bs"
-import { initialiseTermBank } from "../bs/Generators.bs"
-
 export enum Fragment {
     Pure = "Pure", Linear = "Linear", Planar = "Planar"
 }
@@ -16,11 +13,6 @@ export function getLowerFragmentString(fragment: Fragment) {
         case Fragment.Planar:
             return "planar"
     }
-}
-
-interface Dimensions {
-    width: number
-    height: number
 }
 
 interface GalleryState {

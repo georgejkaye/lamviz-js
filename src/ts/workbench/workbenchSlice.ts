@@ -1,15 +1,10 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
-import CytoscapeComponent from "react-cytoscapejs"
 
-import { Term, Context } from "./../bs/Lambda.bs"
-import { Macro } from "./../components/Macro"
+import { Term, Context, emptyContext } from "./../../bs/Lambda.bs"
 
 export enum Mode {
     VISUALISER, GALLERY
 }
-
-let barWidth: number = 750
-let barHeight: number = 150
 
 export const sidebarWidth = 400;
 export const topHeight = 80
@@ -39,8 +34,6 @@ interface State {
     svgTime: boolean,
     nodeLabels: boolean,
     edgeLabels: boolean,
-    macrosOn: boolean,
-    macros: Macro[],
     redexToHighlight: number
     reductionToPerform: number
 }
@@ -59,7 +52,7 @@ const initialState: State = {
     currentTerm: undefined,
     originalTerm: undefined,
     termHistory: [],
-    currentContext: undefined,
+    currentContext: emptyContext,
     screenDimensions: { width: window.innerWidth, height: window.innerHeight },
     graphDimensions: getGraphDimensions({ width: window.innerWidth, height: window.innerHeight }, factsOpenCheck()),
     factsOpen: factsOpenCheck(),
@@ -67,19 +60,12 @@ const initialState: State = {
     svgTime: false,
     nodeLabels: false,
     edgeLabels: false,
-    macrosOn: true,
-    macros: [],
     redexToHighlight: -1,
     reductionToPerform: -1
 }
 
-function pop<T>(array: T[]) {
-    let a = array.pop()
-    return [a, array]
-}
-
 function smartConcatHead<T>(a: T, array: T[]) {
-    if (a == undefined) {
+    if (!a) {
         return array
     }
 
@@ -102,8 +88,6 @@ export const slice = createSlice({
             state = { ...state, termHistory: smartConcatHead(state.currentTerm, state.termHistory), currentTerm: action.payload },
         toggleFactsBar: (state, action: PayloadAction<boolean>) =>
             state = { ...state, factsOpen: action.payload, graphDimensions: getGraphDimensions(state.screenDimensions, action.payload) },
-        updateMacro: (state, action: PayloadAction<[number, Macro]>) =>
-            state = { ...state, macros: state.macros.slice(0, action.payload[0]).concat([action.payload[1]]).concat(state.macros.slice(action.payload[0] + 1)) },
         backTerm: (state) =>
             state.termHistory.length > 0 ? state = { ...state, currentTerm: state.termHistory[0], termHistory: state.termHistory.slice(1) } : state,
         resetTerm: (state) =>
@@ -120,20 +104,6 @@ export const slice = createSlice({
             state = { ...state, nodeLabels: !state.nodeLabels },
         toggleEdgeLabels: (state) =>
             state = { ...state, edgeLabels: !state.edgeLabels },
-        toggleMacrosOn: (state) =>
-            state = { ...state, macrosOn: !state.macrosOn },
-        addMacro: (state) =>
-            state = { ...state, macros: state.macros.concat({ name: "", termstring: "", term: undefined, active: true }) },
-        defineMacro: (state, action: PayloadAction<Macro>) =>
-            state = { ...state, macros: state.macros.concat(action.payload) },
-        setMacros: (state, action: PayloadAction<Macro[]>) =>
-            state = { ...state, macros: action.payload },
-        toggleMacro: (state, action: PayloadAction<number>) =>
-            state = { ...state, macros: state.macros.slice(0, action.payload).concat([{ ...state.macros[action.payload], active: !state.macros[action.payload].active }]).concat(state.macros.slice(action.payload + 1)) },
-        removeMacro: (state, action: PayloadAction<number>) =>
-            state = { ...state, macros: state.macros.slice(0, action.payload).concat(state.macros.slice(action.payload + 1)) },
-        removeAllMacros: (state) =>
-            state = { ...state, macros: [] },
         highlightRedex: (state, action: PayloadAction<number>) =>
             state = { ...state, redexToHighlight: action.payload },
         unhighlightRedex: (state) =>
@@ -147,7 +117,6 @@ export const slice = createSlice({
 
 export const {
     changeMode, resize, newTerm, newError, updateTerm, resetTerm, finishedDrawing, backTerm, toggleFactsBar, clear,
-    downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels, toggleMacrosOn, addMacro, defineMacro, updateMacro,
-    toggleMacro, setMacros, removeMacro, removeAllMacros, highlightRedex, unhighlightRedex, performReduction } = slice.actions
+    downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels, highlightRedex, unhighlightRedex, performReduction } = slice.actions
 
 export default slice.reducer

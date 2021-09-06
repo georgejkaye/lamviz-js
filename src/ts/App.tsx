@@ -1,14 +1,17 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "./reducers"
-import { Mode, resize, addMacro } from "./reducers/slice";
-import Sidebar from "./components/Sidebar"
-import Visualiser from "./components/Visualiser"
-import Gallery from "./components/Gallery"
+import { useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+
+import { RootState } from "./redux/store"
+import { Mode } from "./sidebar/sidebarSlice";
+import { resize } from "./workbench/workbenchSlice"
+
+import Sidebar from "./sidebar/Sidebar"
+import Workbench from "./workbench/Workbench"
+import Gallery from "./gallery/Gallery"
 
 export default function App() {
 
-    const mode = useSelector((state: RootState) => state.currentState).mode
+    const mode = useSelector((state: RootState) => state.sidebar).mode
 
     const dispatch = useDispatch()
 
@@ -34,7 +37,7 @@ export default function App() {
         <div className="window">
             <div className="content">
                 <Sidebar />
-                {mode == Mode.VISUALISER ? <Visualiser /> : <Gallery />}
+                {mode === Mode.VISUALISER ? <Workbench /> : <Gallery />}
             </div>
         </div>)
 }

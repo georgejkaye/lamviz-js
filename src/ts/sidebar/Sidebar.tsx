@@ -1,16 +1,15 @@
-import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "./../reducers"
-import { Mode, changeMode, newTerm, newError, clear } from "./../reducers/slice"
+import { useAppSelector, useAppDispatch } from "../redux/hooks"
+import { RootState } from "./../redux/store"
+import { Mode, changeMode } from "./sidebarSlice"
 
-import VisualiserSidebar from "./VisualiserSidebar"
+import VisualiserSidebar from "./WorkbenchSidebar"
 import GallerySidebar from "./GallerySidebar"
 
 export default function Sidebar() {
 
-    let dispatch = useDispatch()
+    let dispatch = useAppDispatch()
 
-    const mode = useSelector((state: RootState) => state.currentState).mode
+    const mode = useAppSelector((state: RootState) => state.workbench).mode
 
     function setMode(mode: Mode) {
         dispatch(changeMode(mode))
@@ -19,7 +18,7 @@ export default function Sidebar() {
     return (
         <div className="sidebar">
             <div className="sidebar-heading">Welcome to the</div>
-            <div className="sidebar-title">Lambda {mode == Mode.VISUALISER ? "visualiser" : "gallery"}</div>
+            <div className="sidebar-title">Lambda {mode === Mode.VISUALISER ? "visualiser" : "gallery"}</div>
             <div className="sidebar-content sidebar-text">
                 <div>This project was first developed as my dissertation from my undergraduate project supervised by <a href="https://noamz.org">Noam Zeilberger</a>, and later improved in my spare time. <a href="https://www.georgejkaye.com/lambda-visualiser">Read more</a>.</div>
             </div>

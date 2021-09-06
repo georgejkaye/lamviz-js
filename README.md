@@ -1,37 +1,70 @@
-# A visualiser for λ-terms as rooted maps
+# Getting Started with Create React App
 
-My MSci final year project: a set of tools to help investigation of terms from various fragments of the λ-calculus. The core function of the tools is to represent these λ-terms as *maps* - some background on maps and how λ-terms can be represented as them can be found in my [**Scientific Paper**](/docs/2018-11-23-scientific-paper.pdf).
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-## Tools
-Two tools were made for the project:
-* [**λ-term visualiser**](https://www.georgejkaye.com/fyp/visualiser)
-* [**λ-term gallery**](https://www.georgejkaye.com/fyp/gallery)
+## Available Scripts
 
-### λ-term visualiser
-![λ-term visualiser](/pics/visualiser.png)
+In the project directory, you can run:
 
-This is a tool to visualise λ-terms as maps. A user can input a term and a set of free variables, and the tool will draw the corresponding map.
+### `yarn start`
 
-### λ-term gallery
-![λ-term gallery](/pics/gallery.png)
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-This tool builds on the visualiser to generate galleries of λ-terms that fulfill certain critera. The primary parameters for generating terms are the size and the number of free variables. Terms can be generated from the pure, linear or planar λ-calculus. The generated terms can also be filtered by a number of different properties, such as crossings in the generated maps.
+The page will reload if you make edits.\
+You will also see any lint errors in the console.
 
-### λ-term portraits
-![Redex 1](/pics/redex1.png)
-![Redex 2](/pics/redex2.png)
+### `yarn test`
 
-All sorts of interesting information is provided about terms, such as the available beta-redexes. By hovering over these redexes, they will be highlighted in the term and on the visualised map. Reductions can be performed by clicking on the redexes, or alternatively the process can be animated in innermost or outermost strategies.
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### Normalisation graphs
-![Normalisation graph](/pics/normalisation-graph.png)
-![Omega normalisation graph](/pics/omega.png)
-Normalisation graphs can also be generated for terms!
+### `yarn build`
 
-## Documentation
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-The [**Project Proposal**](/docs/2018-10-26-project-proposal.pdf) is a brief overview of the aim of this project and a possible schedule.
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-The [**Scientific Paper**](/docs/2018-11-23-scientific-paper.pdf) gives some background on the topics involved, and how the project was progressing towards the end of November.
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-The [**Project Report**](/docs/2019-04-08-final-report.pdf) is the report from the end of the project - the dissertation!
+### `yarn eject`
+
+**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+
+If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+
+You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+
+## Learn More
+
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+
+To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Code Splitting
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+
+### Analyzing the Bundle Size
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+
+### Making a Progressive Web App
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+
+### Advanced Configuration
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+
+### Deployment
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+
+### `yarn build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)

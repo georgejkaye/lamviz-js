@@ -1,6 +1,3 @@
-
-'use strict';
-
 /**
  * GK: This has been adapted from "cytoscape-svg" https://github.com/kinimesi/cytoscape-svg/ 
  * because I couldn't get it to work with cytoscape/react/typescript
@@ -9,9 +6,9 @@
  * and adapted
  */
 
-import C2S from 'canvas2svg';
+import C2S from 'canvas2svg'
+import svg from "cytoscape"
 
-var CRp = {};
 var is = {};
 
 is.number = obj =>

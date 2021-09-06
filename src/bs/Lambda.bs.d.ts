@@ -22,12 +22,12 @@ export function printTermAndContext(t: Term, ctx: Context, mac: boolean): string
 export function printHTMLAndContext(t: Term, ctx: Context, db: boolean, mac: boolean): string
 export function refreshVariableNames(t: Term, ctx: Context): [Term, any]
 
+export const emptyContext: Context
+
 export type Context = {
     hd: string,
     tl: Context
 }
-
-export const emptyContext: Context
 
 export type Var = {
     TAG: number,
@@ -49,4 +49,4 @@ export type App = {
     _2: string
 }
 
-export type Term = Var | Abs | App
+export type Term = Var | Abs | App | undefined

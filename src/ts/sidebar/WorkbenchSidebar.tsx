@@ -1,26 +1,30 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "./../reducers"
-import { newTerm, newError, clear, toggleNodeLabels, toggleEdgeLabels, toggleMacrosOn, addMacro, setMacros, removeAllMacros } from "./../reducers/slice"
-import { lexAndParse } from "../bs/Parser.bs";
+import React, { useEffect, useState } from "react"
+
 import { Collapse } from "react-collapse"
 import ReactTooltip from "react-tooltip"
 
-import { Macro, ActiveMacro } from "./Macro"
+import { useAppDispatch, useAppSelector } from "../redux/hooks"
+import { newTerm, newError, clear, toggleNodeLabels, toggleEdgeLabels } from "./../workbench/workbenchSlice"
+import { toggleMacrosOn, addMacro, setMacros, removeAllMacros } from "./macroSlice"
 
-import Add from "../data/svgs/add-black.svg"
-import Delete from "../data/svgs/bin.svg"
-import Upload from "../data/svgs/upload.svg"
-import Download from "../data/svgs/download.svg"
+import { Macro, MacroDetails, ActiveMacro } from "../workbench/Macro"
+
+import { lexAndParse } from "../../bs/Parser.bs"
+
+import Add from "../../data/svgs/add-black.svg"
+import Delete from "../../data/svgs/bin.svg"
+import Upload from "../../data/svgs/upload.svg"
+import Download from "../../data/svgs/download.svg"
 
 export default function VisualiserSidebar() {
 
-    const dispatch = useDispatch()
-    const error = useSelector((state: RootState) => state.currentState).error
-    const nodeLabels = useSelector((state: RootState) => state.currentState).nodeLabels
-    const edgeLabels = useSelector((state: RootState) => state.currentState).edgeLabels
-    const macrosOn = useSelector((state: RootState) => state.currentState).macrosOn
-    const macros = useSelector((state: RootState) => state.currentState).macros
+    const dispatch = useAppDispatch()
+    const error = useAppSelector((state) => state.workbench).error
+    const nodeLabels = useAppSelector((state) => state.workbench).nodeLabels
+    const edgeLabels = useAppSelector((state) => state.workbench).edgeLabels
+
+    const macrosOn = useAppSelector((state) => state.macros).macrosOn
+    const macros = useAppSelector((state) => state.macros).macros
 
     const [termText, setTermText] = useState("")
     const [contextText, setContextText] = useState("")
@@ -48,12 +52,12 @@ export default function VisualiserSidebar() {
     }
 
     const generateButton = () => {
-        if (termText != "") {
+        if (termText !== "") {
             try {
                 let contextTextTrimmed = contextText.trim()
                 let [term, context] = lexAndParse(termText, contextTextTrimmed, macros, "")
                 dispatch(newTerm([termText, contextTextTrimmed, term, context]))
-            } catch (e) {
+            } catch (e: any) {
                 dispatch(newError(e._1))
             }
         } else {
@@ -75,7 +79,7 @@ export default function VisualiserSidebar() {
         let content: any = fileReader.result
         let newMacros = content.split("\n")
 
-        let parsedMacros: Macro[] = macros.concat([])
+        let parsedMacros: MacroDetails[] = macros.concat([])
         let macroError = ""
 
         newMacros.map((mac: any, i: number) => {
@@ -83,7 +87,7 @@ export default function VisualiserSidebar() {
             if (mac.length > 2) {
                 let split = mac.split(":=")
 
-                if (split.length == 2) {
+                if (split.length === 2) {
                     let name = split[0].replaceAll(" ", "")
                     let termtext = split[1].trim()
 
@@ -92,8 +96,8 @@ export default function VisualiserSidebar() {
                         let newMac = { name: name, termstring: termtext, term: term, active: false }
                         parsedMacros = parsedMacros.filter((x) => x.name !== name)
                         parsedMacros.push(newMac)
-                    } catch (e) {
-                        macroError = (macroError == "") ? "Line " + (i + 1) + ": " + e._1 : macroError
+                    } catch (e: any) {
+                        macroError = (macroError === "") ? "Line " + (i + 1) + ": " + e._1 : macroError
                     }
                 } else {
                     macroError = "Line " + (i + 1) + ": malformed input"
@@ -101,11 +105,11 @@ export default function VisualiserSidebar() {
             }
         })
 
-        macroError == "" ? dispatch(setMacros(parsedMacros)) : setMacroError(macroError)
+        macroError === "" ? dispatch(setMacros(parsedMacros)) : setMacroError(macroError)
     }
 
     const uploadMacrosButton = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files != undefined) {
+        if (e.target.files) {
             fileReader = new FileReader()
             fileReader.onloadend = uploadedMacros
             fileReader.readAsText(e.target.files[0])
@@ -139,7 +143,7 @@ export default function VisualiserSidebar() {
     return (
         <div className="sub-sidebar">
             <div className="sidebar-content">
-                <Collapse isOpened={error != ""}>
+                <Collapse isOpened={error !== ""}>
                     <div className="error">
                         {error}
                     </div>
@@ -166,17 +170,17 @@ export default function VisualiserSidebar() {
             <div className="sidebar-heading">
                 <div><button data-tip="add-tooltip" data-for="add" type="button" className="icon-button" onClick={addMacroButton}><img src={Add} className={"icon"} alt={"Add"} /></button></div>
                 <ReactTooltip id="add" type="dark" place="right" effect="float">Add</ReactTooltip>
-                <div><button data-tip="delete-tooltip" data-for="delete" type="button" className="icon-button" onClick={removeAllMacrosButton} disabled={macros.length == 0}><img src={Delete} className={"icon"} alt={"Delete"} /></button></div>
+                <div><button data-tip="delete-tooltip" data-for="delete" type="button" className="icon-button" onClick={removeAllMacrosButton} disabled={macros.length === 0}><img src={Delete} className={"icon"} alt={"Delete"} /></button></div>
                 <ReactTooltip id="delete" type="dark" place="right" effect="float">Remove all</ReactTooltip>
                 <div className="heading-icon">Macros</div>
                 <input type="file" accept="text/plain" id="upload-macros" onChange={uploadMacrosButton} />
                 <div><button data-tip="upload-tooltip" data-for="upload" type="button" className="icon-button paddingless"><label htmlFor="upload-macros"><img src={Upload} className={"icon padded clickable"} alt={"Upload"} /></label></button></div>
                 <ReactTooltip id="upload" type="dark" place="left" effect="float">Upload</ReactTooltip>
-                <div><button data-tip="download-tooltip" data-for="download" type="button" className="icon-button" onClick={downloadMacrosButton} disabled={macros.length == 0}><img src={Download} className={"icon"} alt={"Download"} /></button></div>
+                <div><button data-tip="download-tooltip" data-for="download" type="button" className="icon-button" onClick={downloadMacrosButton} disabled={macros.length === 0}><img src={Download} className={"icon"} alt={"Download"} /></button></div>
                 <ReactTooltip id="download" type="dark" place="left" effect="float">Download</ReactTooltip>
             </div>
             <div className="sidebar-content">To upload a macros file, define each macro on its own line in the form <span className="code">id := \x.x</span></div>
-            <Collapse isOpened={macroError != ""}>
+            <Collapse isOpened={macroError !== ""}>
                 <div className="sidebar-content error">
                     {macroError}
                 </div>

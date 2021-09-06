@@ -1,11 +1,13 @@
-import React, { useState, KeyboardEvent, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { betaRedexes, prettyPrint, printHTML, printHTMLAndContext, prettyPrintDeBruijn } from "../bs/Lambda.bs";
-import { RootState } from "../reducers"
-import { Fragment, getLowerFragmentString } from "../reducers/gallerySlice"
-import { initialiseTermBank, generateTermsArray, generateContext } from "../bs/Generators.bs"
+import React, { useState, useEffect } from "react"
+import { useDispatch } from "react-redux"
+
+import { Fragment, getLowerFragmentString } from "./gallerySlice"
+import { useAppSelector } from "../redux/hooks";
+
 import Portrait from "./Portrait"
-import { updateTerm } from "../reducers/slice";
+
+import { Term, prettyPrintDeBruijn } from "../../bs/Lambda.bs"
+import { initialiseTermBank, generateTermsArray, generateContext } from "../../bs/Generators.bs"
 
 interface GalleryHeaderProps {
     selected: number
@@ -21,21 +23,18 @@ function GalleryHeader(props: GalleryHeaderProps) {
 
 export default function Gallery() {
 
-    let dispatch = useDispatch()
+    const n = useAppSelector((state) => state.gallery).n
+    const k = useAppSelector((state) => state.gallery).k
+    const fragment = useAppSelector((state) => state.gallery).fragment
 
-    const n = useSelector((state: RootState) => state.gallerySlice).n
-    const k = useSelector((state: RootState) => state.gallerySlice).k
-    const fragment = useSelector((state: RootState) => state.gallerySlice).fragment
-
-    let [ctx, setCtx] = useState(undefined)
-    let [terms, setTerms] = useState([])
+    let [ctx, setCtx] = useState(generateContext(k))
+    let [terms, setTerms] = useState<Term[]>([])
     let [mem, setMem] = useState(initialiseTermBank(16, 16))
 
     let [total, setTotal] = useState(0)
     let [selected, setSelected] = useState(0)
 
     useEffect(() => {
-        setCtx(generateContext(k))
         var [newTerms, newMem] = generateTermsArray(n, ctx, fragment, mem)
         console.log(newMem)
         setTotal(newTerms.length)
