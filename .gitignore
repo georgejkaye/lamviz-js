@@ -1,5 +1,8 @@
-node_modules/
-.vscode/
-build/
+/node_modules/
+/.vscode/
+/build/
 
+.bsb.lock
+.merlin
 *.bs.js
+/lib/

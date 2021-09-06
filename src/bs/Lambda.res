@@ -452,3 +452,9 @@ let rename = (term, macro) => {
   | App(t1, t2, _) => App(t1, t2, macro)
   }
 }
+
+let example = Abs(
+  Abs(Abs(App(Var(0, "x"), App(Var(1, "y"), Var(2, "z"), ""), ""), "", ""), "", ""),
+  "",
+  "",
+)

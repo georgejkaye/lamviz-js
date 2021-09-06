@@ -122,7 +122,6 @@ export default function Facts() {
 
     const term = useAppSelector((state) => state.workbench).currentTerm
     const ctx = useAppSelector((state) => state.workbench).currentContext
-    const factsOpen = useAppSelector((state) => state.workbench).factsOpen
     const termHistory = useAppSelector((state) => state.workbench).termHistory
 
     const [betasOpen, setBetasOpen] = useState(false)
@@ -133,10 +132,6 @@ export default function Facts() {
     const resetButton = (e: React.MouseEvent<any>) => dispatch(resetTerm())
     const svgButton = (e: React.MouseEvent<any>) => dispatch(downloadSvg())
     const backButton = (e: React.MouseEvent<any>) => dispatch(backTerm())
-
-    const toggleBar = () => {
-        dispatch(toggleFactsBar(!factsOpen))
-    }
 
     const clickRedex = (i: number) => {
         dispatch(updateTerm(specificReduction(term, i)))
@@ -154,64 +149,58 @@ export default function Facts() {
 
     return (
         <div className="facts-panel">
-            <div className="toggle-bar" onClick={(e) => toggleBar()}>
-                <div><img src={factsOpen ? Right : Left} className={"lr-icon"} alt={factsOpen ? "\u2b9e" : "\u2b9c"} /></div>
-            </div>
-            {(term === undefined
-                ? <div className={factsOpen ? "facts" : "facts closed"}></div>
-                : <div className={factsOpen ? "facts" : "facts closed"}>
-                    <div className="properties">
-                        <div className={"property " + (linear(term) ? "yes" : "no")}>Linear </div>
-                        <div className={"property " + (planar(term) ? "yes" : "no")}>Planar </div>
+            <div className={"facts"}>
+                <div className="properties">
+                    <div className={"property " + (linear(term) ? "yes" : "no")}>Linear </div>
+                    <div className={"property " + (planar(term) ? "yes" : "no")}>Planar </div>
+                </div>
+                <div className="properties">
+                    <div className={"property " + (closed(term) ? "yes" : "no")}>Closed </div>
+                    <div className={"property " + (bridgeless(term) ? "yes" : "no")}>Bridgeless </div>
+                </div>
+                <div className="stats">
+                    <StatBox term={term} stat={StatType.SUBTERMS} />
+                    <StatBox term={term} stat={StatType.VARIABLES} />
+                    <StatBox term={term} stat={StatType.UNIQUE_VARIABLES} />
+                    <StatBox term={term} stat={StatType.FREE_VARIABLES} />
+                    <StatBox term={term} stat={StatType.ABSTRACTIONS} />
+                    <StatBox term={term} stat={StatType.APPLICATIONS} />
+                    <StatBox term={term} stat={StatType.CROSSINGS} />
+                    <StatBox term={term} stat={StatType.BRIDGES} />
+                </div>
+                <div className="betas-header" onClick={(e) => setBetasOpen(!betasOpen)}>
+                    <div className="expand-arrow"><img src={betasOpen ? Up : Down} className={"icon" + (betaRedexes(term) === 0 ? " hidden" : "")} alt={betasOpen ? "\u2191" : "\u2193"} /></div>
+                    <div className="beta-text fact-text">Beta redexes</div>
+                    <div className="fact-value">{String(betaRedexes(term))}</div>
+                </div>
+                <Collapse isOpened={betasOpen}>
+                    <div className="redexes">
+                        {printRedexesArray(term, ctx).map((r, i) => <div key={i} className="redex" onMouseOver={(e) => mouseoverRedex(i)} onMouseLeave={(e) => mouseleaveRedex(i)} onClick={(e) => clickRedex(i)}>{r}</div>)}
                     </div>
-                    <div className="properties">
-                        <div className={"property " + (closed(term) ? "yes" : "no")}>Closed </div>
-                        <div className={"property " + (bridgeless(term) ? "yes" : "no")}>Bridgeless </div>
-                    </div>
-                    <div className="stats">
-                        <StatBox term={term} stat={StatType.SUBTERMS} />
-                        <StatBox term={term} stat={StatType.VARIABLES} />
-                        <StatBox term={term} stat={StatType.UNIQUE_VARIABLES} />
-                        <StatBox term={term} stat={StatType.FREE_VARIABLES} />
-                        <StatBox term={term} stat={StatType.ABSTRACTIONS} />
-                        <StatBox term={term} stat={StatType.APPLICATIONS} />
-                        <StatBox term={term} stat={StatType.CROSSINGS} />
-                        <StatBox term={term} stat={StatType.BRIDGES} />
-                    </div>
-                    <div className="betas-header" onClick={(e) => setBetasOpen(!betasOpen)}>
-                        <div className="expand-arrow"><img src={betasOpen ? Up : Down} className={"icon" + (betaRedexes(term) === 0 ? " hidden" : "")} alt={betasOpen ? "\u2191" : "\u2193"} /></div>
-                        <div className="beta-text fact-text">Beta redexes</div>
-                        <div className="fact-value">{String(betaRedexes(term))}</div>
-                    </div>
-                    <Collapse isOpened={betasOpen}>
-                        <div className="redexes">
-                            {printRedexesArray(term, ctx).map((r, i) => <div key={i} className="redex" onMouseOver={(e) => mouseoverRedex(i)} onMouseLeave={(e) => mouseleaveRedex(i)} onClick={(e) => clickRedex(i)}>{r}</div>)}
-                        </div>
-                    </Collapse>
-                    <div className="normalisation">
-                        <div className="button-row">
-                            <button type="button" className="left flex-button" onClick={normaliseButton} disabled={betaRedexes(term) === 0 ? true : false}>Normalise</button>
-                            <button data-tip="back-tooltip" data-for="back" type="button" className="flex-button icon-button" onClick={backButton} disabled={termHistory.length === 0 ? true : false}><img src={Back} className={"icon"} alt={"Back"} /></button>
-                            <ReactTooltip id="back" type="dark" place="left" effect="float">Back</ReactTooltip>
+                </Collapse>
+                <div className="normalisation">
+                    <div className="button-row">
+                        <button type="button" className="left flex-button" onClick={normaliseButton} disabled={betaRedexes(term) === 0 ? true : false}>Normalise</button>
+                        <button data-tip="back-tooltip" data-for="back" type="button" className="flex-button icon-button" onClick={backButton} disabled={termHistory.length === 0 ? true : false}><img src={Back} className={"icon"} alt={"Back"} /></button>
+                        <ReactTooltip id="back" type="dark" place="left" effect="float">Back</ReactTooltip>
 
-                            <button data-tip="reset-tooltip" data-for="reset" type="button" className="right flex-button icon-button" onClick={resetButton}><img src={Refresh} className={"icon"} alt={"Reset"} /></button>
-                            <ReactTooltip id="reset" type="dark" place="left" effect="float">Reset</ReactTooltip>
-                        </div>
-                        <div className="button-row">
-                            <button type="button" className="left flex-button" disabled={betaRedexes(term) === 0 ? true : false}>Reduce</button>
-                            <select name="strategy" id="strategy" className="right flex-button" disabled={betaRedexes(term) === 0 ? true : false}>
-                                <option value="outermost">Outermost</option>
-                                <option value="innermost">Innermost leftmost</option>"
-                                <option value="innermost">Innermost rightmost</option>"
-                                <option value="random">Random</option>
-                            </select>
-                        </div>
+                        <button data-tip="reset-tooltip" data-for="reset" type="button" className="right flex-button icon-button" onClick={resetButton}><img src={Refresh} className={"icon"} alt={"Reset"} /></button>
+                        <ReactTooltip id="reset" type="dark" place="left" effect="float">Reset</ReactTooltip>
                     </div>
                     <div className="button-row">
-                        <button type="button" className="left right flex-button" onClick={svgButton}>Export map</button>
+                        <button type="button" className="left flex-button" disabled={betaRedexes(term) === 0 ? true : false}>Reduce</button>
+                        <select name="strategy" id="strategy" className="right flex-button" disabled={betaRedexes(term) === 0 ? true : false}>
+                            <option value="outermost">Outermost</option>
+                            <option value="innermost">Innermost leftmost</option>"
+                            <option value="innermost">Innermost rightmost</option>"
+                            <option value="random">Random</option>
+                        </select>
                     </div>
-                </div>)
-            }
+                </div>
+                <div className="button-row">
+                    <button type="button" className="left right flex-button" onClick={svgButton}>Export map</button>
+                </div>
+            </div>
         </div >
     )
 }

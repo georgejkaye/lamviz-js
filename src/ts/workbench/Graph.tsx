@@ -157,11 +157,11 @@ export default function Graph(props: GraphProps) {
 
     useEffect(() => {
         redrawTerm()
-    }, [props.graph.term, redrawTerm])
+    }, [props.graph.term])
 
     useEffect(() => {
         redrawTerm()
-    }, [props.redraw, redrawTerm])
+    }, [props.redraw])
 
     useEffect(() => {
         if (svgTime) {
@@ -173,12 +173,12 @@ export default function Graph(props: GraphProps) {
     useEffect(() => {
         updateNodeLabels()
         setLastNodeLabels(props.nodeLabels)
-    }, [props.nodeLabels, updateNodeLabels])
+    }, [props.nodeLabels])
 
     useEffect(() => {
         updateEdgeLabels()
         setLastEdgeLabels(props.edgeLabels)
-    }, [props.edgeLabels, updateEdgeLabels])
+    }, [props.edgeLabels])
 
     useEffect(() => {
         highlightRedex(props.highlightedRedex)

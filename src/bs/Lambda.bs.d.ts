@@ -22,6 +22,7 @@ export function printTermAndContext(t: Term, ctx: Context, mac: boolean): string
 export function printHTMLAndContext(t: Term, ctx: Context, db: boolean, mac: boolean): string
 export function refreshVariableNames(t: Term, ctx: Context): [Term, any]
 
+export const example: Term
 export const emptyContext: Context
 
 export type Context = {

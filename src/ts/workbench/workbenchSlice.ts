@@ -1,16 +1,16 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 
-import { Term, Context, emptyContext } from "./../../bs/Lambda.bs"
+import { Term, Context, emptyContext, example } from "./../../bs/Lambda.bs"
 
 export enum Mode {
     VISUALISER, GALLERY
 }
 
-export const sidebarWidth = 400;
-export const topHeight = 80
-export const subtopHeight = 45
+export const sidebarWidth = 50
+export const topBarHeight = 80
+export const subBarHeight = 45
 export const toggleHeight = 25
-export const factsWidth = 330
+export const factsWidth = 0
 export const toggleWidth = 20
 
 interface Dimensions {
@@ -29,7 +29,6 @@ interface State {
     currentContext: Context,
     screenDimensions: Dimensions,
     graphDimensions: Dimensions,
-    factsOpen: boolean,
     error: string,
     svgTime: boolean,
     nodeLabels: boolean,
@@ -38,24 +37,25 @@ interface State {
     reductionToPerform: number
 }
 
-const getGraphWidth = (dimensions: Dimensions, facts: boolean) => dimensions.width - (toggleWidth + sidebarWidth) - (facts ? factsWidth : 0)
-const getGraphHeight = (dimensions: Dimensions) => dimensions.height - (topHeight + subtopHeight + toggleHeight)
-const getGraphDimensions = (dimensions: Dimensions, facts: boolean) => ({ width: getGraphWidth(dimensions, facts), height: getGraphHeight(dimensions) })
-
-const factsOpenCheck = () => window.innerWidth > 1500
+const getWindowDimensions = () => ({ width: window.innerWidth, height: window.innerHeight })
+const getGraphWidth = (dimensions: Dimensions) => dimensions.width - sidebarWidth
+const getGraphHeight = (dimensions: Dimensions) => dimensions.height - (topBarHeight + subBarHeight)
+const getGraphDimensions = () => {
+    let dimensions = getWindowDimensions()
+    return { width: getGraphWidth(dimensions), height: getGraphHeight(dimensions) }
+}
 
 const initialState: State = {
     mode: Mode.VISUALISER,
     currentTermText: "",
     currentContextText: "",
     redraw: false,
-    currentTerm: undefined,
+    currentTerm: example,
     originalTerm: undefined,
     termHistory: [],
     currentContext: emptyContext,
-    screenDimensions: { width: window.innerWidth, height: window.innerHeight },
-    graphDimensions: getGraphDimensions({ width: window.innerWidth, height: window.innerHeight }, factsOpenCheck()),
-    factsOpen: factsOpenCheck(),
+    screenDimensions: getWindowDimensions(),
+    graphDimensions: getGraphDimensions(),
     error: "",
     svgTime: false,
     nodeLabels: false,
@@ -79,7 +79,7 @@ export const slice = createSlice({
         changeMode: (state, action: PayloadAction<Mode>) =>
             state = { ...state, mode: action.payload },
         resize: (state, action: PayloadAction<Dimensions>) =>
-            state = { ...state, screenDimensions: action.payload, factsOpen: factsOpenCheck(), graphDimensions: getGraphDimensions(action.payload, factsOpenCheck()) },
+            state = { ...state, screenDimensions: action.payload, graphDimensions: getGraphDimensions() },
         newTerm: (state, action: PayloadAction<[string, string, Term, Context]>) =>
             state = { ...state, currentTermText: action.payload[0], currentContextText: action.payload[1], currentTerm: action.payload[2], originalTerm: action.payload[2], currentContext: action.payload[3], termHistory: smartConcatHead(state.currentTerm, state.termHistory), error: "" },
         newError: (state, action: PayloadAction<string>) =>
@@ -87,7 +87,7 @@ export const slice = createSlice({
         updateTerm: (state, action: PayloadAction<Term>) =>
             state = { ...state, termHistory: smartConcatHead(state.currentTerm, state.termHistory), currentTerm: action.payload },
         toggleFactsBar: (state, action: PayloadAction<boolean>) =>
-            state = { ...state, factsOpen: action.payload, graphDimensions: getGraphDimensions(state.screenDimensions, action.payload) },
+            state = { ...state, graphDimensions: getGraphDimensions() },
         backTerm: (state) =>
             state.termHistory.length > 0 ? state = { ...state, currentTerm: state.termHistory[0], termHistory: state.termHistory.slice(1) } : state,
         resetTerm: (state) =>
