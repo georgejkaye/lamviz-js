@@ -13,16 +13,14 @@ $title-bar: #003459;
 $subtitle-bar: #227DAA;
 $disabled: #024055;
 
+html {
+    font-family: 'Source Code Pro', sans-serif;
+}
 
 body {
     margin: 0px;
     background-color: $default-bg;
-    font-family: 'Montserrat', sans-serif;
     color: $light-text;
-}
-
-input {
-    font-family: 'Montserrat', sans-serif;
 }
 
 input[type="file"] {
@@ -34,7 +32,8 @@ textarea {
 }
 
 a {
-    color: $cyan;
+    color: inherit;
+    text-decoration: none;
 }
 
 .window {
@@ -55,14 +54,33 @@ a {
 }
 
 .sidebar {
-    min-height: 0;
-    flex: 0 0 400px;
-    height: 100vh;
     display: flex;
     flex-direction: column;
     background-color: $sidebar-bg;
-    overflow-y: scroll;
     text-align: center;
+}
+
+.sidebar-block {
+    width: 100%;
+    cursor: pointer;
+    height: 75px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        background-color: $active-tab;
+    }
+}
+
+.spacer {
+    flex: 1;
+}
+
+.sidebar-icon {
+    width: 100%;
+    font-size: 3em;
+    vertical-align: middle;
 }
 
 .sidebar-heading {
