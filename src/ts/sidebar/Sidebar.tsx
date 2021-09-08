@@ -2,7 +2,6 @@ import { useAppSelector, useAppDispatch } from "../redux/hooks"
 import { RootState } from "./../redux/store"
 import { Mode, changeMode } from "./sidebarSlice"
 
-import VisualiserSidebar from "./WorkbenchSidebar"
 import GallerySidebar from "./GallerySidebar"
 import { sidebarWidth } from "../workbench/workbenchSlice"
 

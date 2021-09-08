@@ -14,14 +14,6 @@ open Helpers
 type context = list<string>
 let emptyContext = list{}
 
-let rec prettyPrintContext = ctx => {
-  switch ctx {
-  | list{} => ""
-  | list{x} => x
-  | list{x, y, ...xs} => x ++ ", " ++ prettyPrintContext(list{y, ...xs})
-  }
-}
-
 let variableNames = list{"x", "y", "z", "w", "u", "v", "t", "p", "q", "r", "s", "m", "n", "o"}
 let varNameNo = List.length(variableNames)
 let freeVariableNames = list{"a", "b", "c", "d", "e"}
@@ -317,7 +309,7 @@ let printRedexesArray = (t, ctx) => Array.of_list(printRedexes(t, ctx))
 
 let rec printHTML = (t, ctx, db, mac) => {
   let (string, _, _, _, _) = printHTML'(t, ctx, db, mac, 0, 0, 0, 0, 0)
-  string
+  string == "" ? "()" : string
 }
 and printHTML' = (t, ctx, db, mac, x, vars, abs, apps, betas) => {
   switch t {
@@ -403,6 +395,18 @@ and printHTML' = (t, ctx, db, mac, x, vars, abs, apps, betas) => {
   }
 }
 
+let prettyPrintContext = ctx => {
+  let rec ppContext = ctx => {
+    switch ctx {
+    | list{} => ""
+    | list{x} => x
+    | list{x, y, ...ctx} => x ++ "," ++ ppContext(list{y, ...ctx})
+    }
+  }
+  let str = ppContext(ctx)
+  str == "" ? "()" : str
+}
+
 let printTermAndContext = (term, ctx, mac, topmac) => {
   let printedTerm = prettyPrint(term, ctx, mac, topmac)
   let printedContext = prettyPrintContext(ctx)
@@ -454,7 +458,7 @@ let rename = (term, macro) => {
 }
 
 let example = Abs(
-  Abs(Abs(App(Var(0, "x"), App(Var(1, "y"), Var(2, "z"), ""), ""), "", ""), "", ""),
-  "",
+  Abs(Abs(App(Var(0, "x"), App(Var(1, "y"), Var(2, "z"), ""), ""), "z", ""), "y", ""),
+  "x",
   "",
 )

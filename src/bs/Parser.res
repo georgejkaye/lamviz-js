@@ -127,7 +127,6 @@ and application' = (lhs, ctx, tokens, macros) => {
     application'(lhs, ctx, tokens, macros)
   }
 }
-
 and atom = (ctx, tokens, macros) => {
   let (b1, tokens) = skip(LBRACKET, tokens)
   let b2 = next(ID(""), tokens)
@@ -163,4 +162,14 @@ let lexAndParse = (term, context, macros, macro) => {
   let context = context == "" ? list{} : split(context, ' ')
   let parsed = parse(lexed, context, Array.to_list(macros), macro)
   (parsed, context)
+}
+
+let parseContext = context => {
+  context == "" ? list{} : split(context, ',')
+}
+
+let parseTerm = (term, context, macros, macro) => {
+  let lexed = lexer(term)
+  let parsed = parse(lexed, context, Array.to_list(macros), macro)
+  parsed
 }

@@ -8,7 +8,6 @@ import { newTerm } from "./workbenchSlice"
 import { updateMacro, toggleMacro, removeMacro } from "./../sidebar/macroSlice"
 
 import { Term, prettyPrint, emptyContext } from "../../bs/Lambda.bs"
-import { lexAndParse } from "../../bs/Parser.bs"
 
 import Tick from "../../data/svgs/tick.svg"
 import Cross from "../../data/svgs/close.svg"
@@ -31,7 +30,7 @@ export function Macro(props: MacroProps) {
     let dispatch = useAppDispatch()
 
     const clickMacro = () => {
-        dispatch(newTerm([props.macro.termstring, "", props.macro.term, emptyContext]))
+        // dispatch(newTerm([props.macro.termstring, "", props.macro.term, emptyContext]))
     }
 
     const removeMacroButton = (e: React.MouseEvent<any>) => { dispatch(removeMacro(props.no)); e.stopPropagation() }
@@ -73,29 +72,29 @@ export function ActiveMacro(props: MacroProps) {
 
     const doneButton = () => {
 
-        let name = nameText.replace(" ", "")
+        // let name = nameText.replace(" ", "")
 
-        if (name === "") {
-            setError("No name set.")
-        } else if (termText === "") {
-            setError("No macro definition provided.")
-        } else if (!nameRegexp.test(name)) {
-            setError("Names cannot include special characters.")
-        } else {
-            try {
-                let [term, _] = lexAndParse(termText, "", macros.filter((x) => x.term !== undefined), name)
+        // if (name === "") {
+        //     setError("No name set.")
+        // } else if (termText === "") {
+        //     setError("No macro definition provided.")
+        // } else if (!nameRegexp.test(name)) {
+        //     setError("Names cannot include special characters.")
+        // } else {
+        //     try {
+        //         let [term, _] = lexAndParse(termText, "", macros.filter((x) => x.term !== undefined), name)
 
-                dispatch(updateMacro([props.no, { name: name, termstring: termText, term: term, active: false }]))
+        //         dispatch(updateMacro([props.no, { name: name, termstring: termText, term: term, active: false }]))
 
-                if (macros.map((x) => x.name).includes(name)) {
-                    let i = macros.map((x) => x.name).indexOf(name)
-                    dispatch(removeMacro(i))
-                }
+        //         if (macros.map((x) => x.name).includes(name)) {
+        //             let i = macros.map((x) => x.name).indexOf(name)
+        //             dispatch(removeMacro(i))
+        //         }
 
-            } catch (e: any) {
-                setError(e._1)
-            }
-        }
+        //     } catch (e: any) {
+        //         setError(e._1)
+        //     }
+        // }
     }
 
     const cancelButton = () => {

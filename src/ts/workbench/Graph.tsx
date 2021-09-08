@@ -157,7 +157,7 @@ export default function Graph(props: GraphProps) {
 
     useEffect(() => {
         redrawTerm()
-    }, [props.graph.term])
+    }, [props.graph.term, props.graph.context, props.dimensions])
 
     useEffect(() => {
         redrawTerm()

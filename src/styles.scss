@@ -3,6 +3,8 @@ $white: #f2f2f2;
 $default-bg: #282a36;
 $sidebar-bg: #00171F;
 $graph-bg: #9c9c9c;
+$dark-text: $sidebar-bg;
+$light-text: $white;
 $active-tab: #41809c;
 $inactive-tab: #004D66;
 $on: #15e177;
@@ -16,7 +18,7 @@ body {
     margin: 0px;
     background-color: $default-bg;
     font-family: 'Montserrat', sans-serif;
-    color: $white;
+    color: $light-text;
 }
 
 input {
@@ -196,22 +198,37 @@ select:disabled {
 .stage {
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 
-.top-bar {
-    background-color: $title-bar;
+.bar {
+    display: flex;
+    flex-direction: row;
+    font-family: 'Source Code Pro', sans-serif;
+    position: absolute;
+    bottom: 0px;
+    color: $dark-text;
     font-size: 40px;
+    cursor: default;
+    overflow-x: auto;
+}
+
+.toggle-box {
+    border-radius: 10px;
+    padding: 2.5px 10px 10px 10px;
+    margin: 0 10px 0 20px;
+}
+
+.toggle-box-display {
+    cursor: pointer;
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
 }
 
-.subtop-bar {
-    background-color: $subtitle-bar;
-    font-size: 15px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
+.toggle-box-display:hover,
+.toggle-box-edit {
+    background-color: transparentize($sidebar-bg, 0.9);
 }
 
 .bottom-bar {

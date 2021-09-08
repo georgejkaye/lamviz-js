@@ -1,14 +1,14 @@
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 
 import parse from "html-react-parser"
 
-import { useAppSelector } from "../redux/hooks"
-import { topBarHeight, subBarHeight } from "./workbenchSlice"
+import { useAppDispatch, useAppSelector } from "../redux/hooks"
+import { topBarHeight, subBarHeight, newError, newTerm, newContext } from "./workbenchSlice"
 
 import Graph from "./Graph"
 import Facts from "./Facts"
 
-import { printHTML, printHTMLAndContext } from "../../bs/Lambda.bs";
+import { prettyPrintContext, printHTML, printHTMLAndContext } from "../../bs/Lambda.bs";
 
 
 enum VisualiserMode {
@@ -18,8 +18,10 @@ enum VisualiserMode {
 export default function Visualiser() {
 
     const term = useAppSelector((state) => state.workbench).currentTerm
-    const redraw = useAppSelector((state) => state.workbench).redraw
     const context = useAppSelector((state) => state.workbench).currentContext
+
+    const redraw = useAppSelector((state) => state.workbench).redraw
+
     const graphDimensions = useAppSelector((state) => state.workbench).graphDimensions
 
     const nodeLabels = useAppSelector((state) => state.workbench).nodeLabels
@@ -29,29 +31,71 @@ export default function Visualiser() {
 
     const macrosOn = useAppSelector((state) => state.macros).macrosOn
 
-    const [visualiserMode, setVisualiserMode] = useState(VisualiserMode.TERM)
+    let dispatch = useAppDispatch()
 
-    useEffect(() => {
+    interface InputBoxProps {
+        submit: (text: string) => void
+        print: (obj: any) => string
+        basis: any
+    }
 
-    }, [nodeLabels])
+    function ToggleBox(props: InputBoxProps) {
+        let [editing, setEditing] = useState(false)
+        const toggleBox = () => setEditing(!editing)
+        let [text, setText] = useState(props.print(props.basis))
+        let [tempText, setTempText] = useState("")
 
-    useEffect(() => {
+        useEffect(() => {
+            setText(props.print(props.basis))
+        }, [props.basis])
 
-    }, [edgeLabels])
+        const onChange = (e: React.ChangeEvent<any>) => {
+            setTempText(e.target.value)
+        }
+        const onKeyDown = (e: React.KeyboardEvent<any>) => {
+            switch (e.key) {
+                case "Enter":
+                    try {
+                        props.submit(tempText)
+                    } catch (e: any) {
+                        dispatch(newError(e._1))
+                    }
+                    break
+                case "Escape":
+                    toggleBox()
+                    setTempText(text)
+                    break
+            }
+        }
+        const handleClick = (e: React.MouseEvent<any>) => {
+            toggleBox()
+        }
+
+        console.log(text)
+        return (
+            <div className="">{
+                editing
+                    ? <input autoFocus className="toggle-box toggle-box-edit" size={2 + tempText.length} onChange={onChange} onKeyDown={onKeyDown} value={tempText} />
+                    : <span className="toggle-box toggle-box-display" onClick={handleClick}>{parse(text)}</span>
+            }
+            </div>
+        )
+    }
+
+    const Bar = () =>
+        <div className="bar" style={{ height: topBarHeight, maxWidth: graphDimensions.width }}>
+            <ToggleBox submit={(text) => dispatch(newContext(text))} print={(context) => prettyPrintContext(context)} basis={context} />
+            <span>⇒</span>
+            <ToggleBox submit={(text) => dispatch(newTerm(text))} print={(term) => printHTML(term, context, false, true)} basis={term} />
+        </div >
 
     return (
         <div className="stage" >
-            <div style={{ height: topBarHeight }} className="top-bar">
-                {!term ? "" : parse(printHTMLAndContext(term, context, false, macrosOn))}
-            </div>
-            <div style={{ height: subBarHeight }} className="subtop-bar">
-                {!term ? "" : parse(printHTML(term, context, true, false))}
-            </div>
             <div className="main-stage" style={{ height: String(graphDimensions.height) + "px" }}>
                 <div className="main-graph">
                     <Graph dimensions={graphDimensions} redraw={redraw} graph={{ term: term, context: context }} nodeLabels={nodeLabels} edgeLabels={edgeLabels} zoom pan highlightedRedex={redexToHighlight} margin={50} interactive />
                 </div>
             </div>
-
+            <Bar />
         </div>)
 }

@@ -1,12 +1,14 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { parseContext, parseTerm } from "../../bs/Parser.bs"
 
 import { Term, Context, emptyContext, example } from "./../../bs/Lambda.bs"
+import { MacroDetails } from "./Macro"
 
 export enum Mode {
     VISUALISER, GALLERY
 }
 
-export const sidebarWidth = 50
+export const sidebarWidth = 75
 export const topBarHeight = 80
 export const subBarHeight = 45
 export const toggleHeight = 25
@@ -20,8 +22,6 @@ interface Dimensions {
 
 interface State {
     mode: Mode,
-    currentTermText: string,
-    currentContextText: string,
     redraw: boolean, /* redraw NOW */
     currentTerm: Term,
     originalTerm: Term,
@@ -35,11 +35,12 @@ interface State {
     edgeLabels: boolean,
     redexToHighlight: number
     reductionToPerform: number
+    macros: MacroDetails[]
 }
 
 const getWindowDimensions = () => ({ width: window.innerWidth, height: window.innerHeight })
 const getGraphWidth = (dimensions: Dimensions) => dimensions.width - sidebarWidth
-const getGraphHeight = (dimensions: Dimensions) => dimensions.height - (topBarHeight + subBarHeight)
+const getGraphHeight = (dimensions: Dimensions) => dimensions.height
 const getGraphDimensions = () => {
     let dimensions = getWindowDimensions()
     return { width: getGraphWidth(dimensions), height: getGraphHeight(dimensions) }
@@ -47,8 +48,6 @@ const getGraphDimensions = () => {
 
 const initialState: State = {
     mode: Mode.VISUALISER,
-    currentTermText: "",
-    currentContextText: "",
     redraw: false,
     currentTerm: example,
     originalTerm: undefined,
@@ -61,7 +60,8 @@ const initialState: State = {
     nodeLabels: false,
     edgeLabels: false,
     redexToHighlight: -1,
-    reductionToPerform: -1
+    reductionToPerform: -1,
+    macros: []
 }
 
 function smartConcatHead<T>(a: T, array: T[]) {
@@ -80,8 +80,10 @@ export const slice = createSlice({
             state = { ...state, mode: action.payload },
         resize: (state, action: PayloadAction<Dimensions>) =>
             state = { ...state, screenDimensions: action.payload, graphDimensions: getGraphDimensions() },
-        newTerm: (state, action: PayloadAction<[string, string, Term, Context]>) =>
-            state = { ...state, currentTermText: action.payload[0], currentContextText: action.payload[1], currentTerm: action.payload[2], originalTerm: action.payload[2], currentContext: action.payload[3], termHistory: smartConcatHead(state.currentTerm, state.termHistory), error: "" },
+        newTerm: (state, action: PayloadAction<string>) =>
+            state = { ...state, currentTerm: parseTerm(action.payload, state.currentContext, state.macros, ""), termHistory: smartConcatHead(state.currentTerm, state.termHistory), error: "" },
+        newContext: (state, action: PayloadAction<string>) =>
+            state = { ...state, currentContext: parseContext(action.payload) },
         newError: (state, action: PayloadAction<string>) =>
             state = { ...state, error: action.payload },
         updateTerm: (state, action: PayloadAction<Term>) =>
@@ -95,7 +97,7 @@ export const slice = createSlice({
         finishedDrawing: (state) =>
             state = { ...state, redraw: false },
         clear: (state) =>
-            state = { ...state, currentTermText: "", currentContextText: "", currentTerm: undefined, error: "" },
+            state = { ...state, currentTerm: undefined, error: "" },
         downloadSvg: (state) =>
             state = { ...state, svgTime: true },
         downloadedSvg: (state) =>
@@ -116,7 +118,7 @@ export const slice = createSlice({
 })
 
 export const {
-    changeMode, resize, newTerm, newError, updateTerm, resetTerm, finishedDrawing, backTerm, toggleFactsBar, clear,
+    changeMode, resize, newTerm, newContext, newError, updateTerm, resetTerm, finishedDrawing, backTerm, toggleFactsBar, clear,
     downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels, highlightRedex, unhighlightRedex, performReduction } = slice.actions
 
 export default slice.reducer
