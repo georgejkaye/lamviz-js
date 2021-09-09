@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="50"
+   height="50"
+   viewBox="0 0 13.229167 13.229167"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1 (c4e8f9ed74, 2021-05-24)"
+   sodipodi:docname="lambda.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     width="50px"
+     units="px"
+     inkscape:zoom="6.2217172"
+     inkscape:cx="46.932381"
+     inkscape:cy="17.197825"
+     inkscape:window-width="2560"
+     inkscape:window-height="1404"
+     inkscape:window-x="2560"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-63.526649,-132.60838)">
+    <g
+       aria-label="λ"
+       id="text1706"
+       style="font-size:10.5833px;line-height:1.25;fill:#ffffff;fill-opacity:1;stroke-width:0.264583"
+       transform="matrix(1.5655779,0,0,1.5655779,-33.208396,-74.499743)">
+      <path
+         d="m 64.024069,140.41886 2.116659,-4.76249 h 0.04233 l 1.820327,4.6884 H 68.5008 l -2.201326,-5.5774 c -0.571498,-1.46049 -0.96308,-2.15899 -1.95791,-2.15899 -0.359833,0 -0.613832,0.0847 -0.804331,0.16933 l 0.148166,0.41275 c 0.158749,-0.0847 0.349249,-0.16933 0.613831,-0.16933 0.740831,0 1.079497,0.52916 1.523995,1.77799 l 0.127,0.29634 -2.423576,5.24931 z"
+         style="font-weight:300;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro Light';fill:#ffffff;fill-opacity:1"
+         id="path16092" />
+    </g>
+  </g>
+</svg>

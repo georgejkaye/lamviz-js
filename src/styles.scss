@@ -14,7 +14,8 @@ $subtitle-bar: #227DAA;
 $disabled: #024055;
 
 html {
-    font-family: 'Source Code Pro', sans-serif;
+    font-family: 'Source Code Pro', monospace;
+    font-weight: 300;
 }
 
 body {
@@ -247,6 +248,12 @@ select:disabled {
 .toggle-box-display:hover,
 .toggle-box-edit {
     background-color: transparentize($sidebar-bg, 0.9);
+}
+
+.toggle-box-edit {
+    font-size: 40px;
+    font-family: inherit;
+    font-weight: inherit;
 }
 
 .bottom-bar {

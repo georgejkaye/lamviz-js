@@ -3,17 +3,11 @@ import React, { useState, useEffect } from "react"
 import parse from "html-react-parser"
 
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
-import { topBarHeight, subBarHeight, newError, newTerm, newContext } from "./workbenchSlice"
+import { topBarHeight, newError, newTerm, newContext } from "./workbenchSlice"
 
 import Graph from "./Graph"
-import Facts from "./Facts"
 
-import { prettyPrintContext, printHTML, printHTMLAndContext } from "../../bs/Lambda.bs";
-
-
-enum VisualiserMode {
-    TERM, REDUCTIONS
-}
+import { prettyPrintContext, printHTML } from "../../bs/Lambda.bs";
 
 export default function Visualiser() {
 
@@ -40,14 +34,18 @@ export default function Visualiser() {
     }
 
     function ToggleBox(props: InputBoxProps) {
+
+        let print = props.print
+        let basis = props.basis
+
         let [editing, setEditing] = useState(false)
         const toggleBox = () => setEditing(!editing)
-        let [text, setText] = useState(props.print(props.basis))
+        let [text, setText] = useState(print(basis))
         let [tempText, setTempText] = useState("")
 
         useEffect(() => {
-            setText(props.print(props.basis))
-        }, [props.basis])
+            setText(print(basis))
+        }, [basis, print])
 
         const onChange = (e: React.ChangeEvent<any>) => {
             setTempText(e.target.value)
@@ -71,11 +69,10 @@ export default function Visualiser() {
             toggleBox()
         }
 
-        console.log(text)
         return (
             <div className="">{
                 editing
-                    ? <input autoFocus className="toggle-box toggle-box-edit" size={2 + tempText.length} onChange={onChange} onKeyDown={onKeyDown} value={tempText} />
+                    ? <input autoFocus className="toggle-box toggle-box-edit" style={{ width: (tempText.length / 1.66) + "em" }} onChange={onChange} onKeyDown={onKeyDown} value={tempText} />
                     : <span className="toggle-box toggle-box-display" onClick={handleClick}>{parse(text)}</span>
             }
             </div>
