@@ -35,7 +35,8 @@ interface State {
     edgeLabels: boolean,
     redexToHighlight: number
     reductionToPerform: number
-    macros: MacroDetails[]
+    macros: MacroDetails[],
+    activeBox: number,
 }
 
 const getWindowDimensions = () => ({ width: window.innerWidth, height: window.innerHeight })
@@ -61,14 +62,14 @@ const initialState: State = {
     edgeLabels: false,
     redexToHighlight: -1,
     reductionToPerform: -1,
-    macros: []
+    macros: [],
+    activeBox: -1
 }
 
 function smartConcatHead<T>(a: T, array: T[]) {
     if (!a) {
         return array
     }
-
     return [a].concat(array)
 }
 
@@ -113,12 +114,14 @@ export const slice = createSlice({
         performReduction: (state, action: PayloadAction<number>) =>
             state = { ...state, reductionToPerform: action.payload },
         reductionPerformed: (state) =>
-            state = { ...state, reductionToPerform: -1 }
+            state = { ...state, reductionToPerform: -1 },
+        setActiveBox: (state, action: PayloadAction<number>) =>
+            state = { ...state, activeBox: action.payload }
     },
 })
 
 export const {
     changeMode, resize, newTerm, newContext, newError, updateTerm, resetTerm, finishedDrawing, backTerm, toggleFactsBar, clear,
-    downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels, highlightRedex, unhighlightRedex, performReduction } = slice.actions
+    downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels, highlightRedex, unhighlightRedex, performReduction, setActiveBox } = slice.actions
 
 export default slice.reducer

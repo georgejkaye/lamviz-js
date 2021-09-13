@@ -155,9 +155,11 @@ input {
 }
 
 .error {
-    padding: 10px 0px;
-    margin-top: 5px;
+    font-size: 0.5em;
     background-color: darkred;
+    border-radius: 10px;
+    color: $white;
+    padding: 5px 10px;
 }
 
 .credit {
@@ -230,6 +232,7 @@ select:disabled {
     font-size: 40px;
     cursor: default;
     overflow-x: auto;
+    align-items: baseline;
 }
 
 .toggle-box {
