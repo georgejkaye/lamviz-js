@@ -1,7 +1,7 @@
 import { useAppSelector, useAppDispatch } from "../redux/hooks"
 import { Mode, changeMode } from "./sidebarSlice"
 
-import { sidebarWidth, updateTerm } from "../workbench/workbenchSlice"
+import { sidebarWidth, updateTerm, resetTerm } from "../workbench/workbenchSlice"
 
 import Github from "../../data/svgs/github.svg"
 import Lambda from "../../data/svgs/lambda.svg"
@@ -48,7 +48,10 @@ export default function Sidebar() {
     }
 
     const WorkbenchButtons = () => (
-        <ActionButton onClick={(e) => dispatch(updateTerm(normalise(currentTerm)))} title="Reduce the term completely" src={Skip} alt="Skip symbol" />
+        <div>
+            <ActionButton onClick={(e) => dispatch(updateTerm(normalise(currentTerm)))} title="Reduce the term completely" src={Skip} alt="Skip symbol" />
+            <ActionButton onClick={(e) => dispatch(resetTerm())} title="Reduce the term completely" src={Skip} alt="Reset symbol" />
+        </div>
     )
 
     return (
