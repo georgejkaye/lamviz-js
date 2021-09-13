@@ -9,6 +9,8 @@ import Sidebar from "./sidebar/Sidebar"
 import Workbench from "./workbench/Workbench"
 import Gallery from "./gallery/Gallery"
 
+export const Spacer = () => <div className="spacer" />
+
 export default function App() {
 
     const mode = useSelector((state: RootState) => state.sidebar).mode

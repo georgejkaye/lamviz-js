@@ -3,12 +3,12 @@ import React, { useState, useEffect } from "react"
 import parse from "html-react-parser"
 
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
-import { topBarHeight, subBarHeight, newError, newTerm, newContext, setActiveBox } from "./workbenchSlice"
+import { topBarHeight, subBarHeight, newError, newTerm, newContext, setActiveBox, toggleNodeLabels, toggleEdgeLabels, bottomBarHeight } from "./workbenchSlice"
 
 import Graph from "./Graph"
+import { Spacer } from "../App"
 
 import { prettyPrintContext, printHTML } from "../../bs/Lambda.bs";
-
 export default function Visualiser() {
 
     const term = useAppSelector((state) => state.workbench).currentTerm
@@ -24,6 +24,7 @@ export default function Visualiser() {
     const redexToHighlight = useAppSelector((state) => state.workbench).redexToHighlight
     const error = useAppSelector((state) => state.workbench).error
     const macrosOn = useAppSelector((state) => state.macros).macrosOn
+    const settingsOut = useAppSelector((state) => state.sidebar).settingsOut
 
     let dispatch = useAppDispatch()
     interface InputBoxProps {
@@ -33,7 +34,7 @@ export default function Visualiser() {
         basis: any
     }
 
-    function ToggleBox(props: InputBoxProps) {
+    function InputBox(props: InputBoxProps) {
 
         let print = props.print
         let basis = props.basis
@@ -95,12 +96,37 @@ export default function Visualiser() {
             </div>
         )
     }
+    interface ToggleBoxProps {
+        property: string
+        switch: boolean
+        onClick: (e: React.MouseEvent<any>) => void
+    }
+    function ToggleBox(props: ToggleBoxProps) {
+        let toggled = props.switch ? "on" : "off"
+        return (<div className={"toggle " + toggled} onClick={props.onClick}>{props.property} {toggled}</div >)
+    }
 
-    const Bar = () =>
-        <div className="bar" style={{ height: topBarHeight, maxWidth: graphDimensions.width }}>
-            <ToggleBox id={0} submit={(text) => dispatch(newContext(text))} print={(context) => prettyPrintContext(context)} basis={context} />
+    const TopBar = () => {
+        const nodeText = nodeLabels ? "on" : "off"
+        const edgeText = edgeLabels ? "on" : "off"
+
+        return (
+            <div className="bar top-bar" style={{ height: topBarHeight, width: graphDimensions.width }}>
+                <div className="label-toggles">
+                    <ToggleBox property="Node labels" onClick={(e) => dispatch(toggleNodeLabels())} switch={nodeLabels} />
+                    <ToggleBox property="Edge labels" onClick={(e) => dispatch(toggleEdgeLabels())} switch={edgeLabels} />
+                </div>
+                <Spacer />
+                <div>Planar</div>
+            </div >
+        )
+    }
+
+    const BottomBar = () =>
+        <div className="bar bottom-bar" style={{ height: bottomBarHeight, maxWidth: graphDimensions.width }}>
+            <InputBox id={0} submit={(text) => dispatch(newContext(text))} print={(context) => prettyPrintContext(context)} basis={context} />
             <span>⇒</span>
-            <ToggleBox id={1} submit={(text) => dispatch(newTerm(text))} print={(term) => printHTML(term, context, false, true)} basis={term} />
+            <InputBox id={1} submit={(text) => dispatch(newTerm(text))} print={(term) => printHTML(term, context, false, true)} basis={term} />
             {error != "" ? <div className="error">{error}</div> : ""}
         </div >
 
@@ -111,6 +137,7 @@ export default function Visualiser() {
                     <Graph dimensions={graphDimensions} redraw={redraw} graph={{ term: term, context: context }} nodeLabels={nodeLabels} edgeLabels={edgeLabels} zoom pan highlightedRedex={redexToHighlight} margin={50} interactive />
                 </div>
             </div>
-            <Bar />
+            <TopBar />
+            <BottomBar />
         </div>)
 }

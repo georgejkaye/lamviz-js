@@ -54,6 +54,11 @@ a {
     background-color: $title-bar;
 }
 
+.side {
+    display: flex;
+    flex-direction: row;
+}
+
 .sidebar {
     display: flex;
     flex-direction: column;
@@ -72,6 +77,11 @@ a {
     &:hover {
         background-color: $active-tab;
     }
+}
+
+.settings {
+    position: absolute;
+    background-color: $inactive-tab;
 }
 
 .spacer {
@@ -227,12 +237,33 @@ select:disabled {
     flex-direction: row;
     font-family: 'Source Code Pro', sans-serif;
     position: absolute;
-    bottom: 0px;
     color: $dark-text;
-    font-size: 40px;
+
     cursor: default;
     overflow-x: auto;
     align-items: baseline;
+}
+
+.top-bar {
+    font-size: 20px;
+    top: 0px;
+}
+
+
+.bottom-bar {
+    font-size: 40px;
+    bottom: 0px;
+}
+
+.label-toggles {
+    display: flex;
+}
+
+.toggle {
+    cursor: pointer;
+    border-radius: 10px;
+    padding: 5px;
+    margin: 10px;
 }
 
 .toggle-box {
@@ -400,8 +431,6 @@ select:disabled {
     display: flex;
     margin-top: 10px;
 }
-
-label {}
 
 .on {
     background-color: $on;

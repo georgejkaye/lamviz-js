@@ -11,23 +11,29 @@ interface Dimensions {
 
 interface State {
     mode: Mode,
+    settingsOut: boolean,
     screenDimensions: Dimensions
 }
 
 const initialState: State = {
     mode: Mode.VISUALISER,
+    settingsOut: false,
     screenDimensions: { width: window.innerWidth, height: window.innerHeight },
 }
 
 export const slice = createSlice({
-    name: "slice",
+    name: "sidebar",
     initialState,
     reducers: {
         changeMode: (state, action: PayloadAction<Mode>) =>
-            state = { ...state, mode: action.payload }
+            state = { ...state, mode: action.payload },
+        openSettings: (state, action: PayloadAction<boolean>) =>
+            state = { ...state, settingsOut: action.payload },
+        toggleSettings: (state) =>
+            state = { ...state, settingsOut: !state.settingsOut }
     }
 })
 
-export const { changeMode } = slice.actions
+export const { changeMode, toggleSettings } = slice.actions
 
 export default slice.reducer

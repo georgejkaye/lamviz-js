@@ -9,7 +9,9 @@ export enum Mode {
 }
 
 export const sidebarWidth = 75
-export const topBarHeight = 80
+export const settingsWidth = 250
+export const topBarHeight = 300
+export const bottomBarHeight = 80
 export const subBarHeight = 45
 export const toggleHeight = 25
 export const factsWidth = 0

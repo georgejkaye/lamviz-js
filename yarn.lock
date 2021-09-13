@@ -1483,6 +1483,21 @@
     "@types/yargs" "^16.0.0"
     chalk "^4.0.0"
 
+"@mdi/js@^6.1.95":
+  version "6.1.95"
+  resolved "https://registry.yarnpkg.com/@mdi/js/-/js-6.1.95.tgz#cc847be9442f5e3f3dfb43448558ae89fd086c3f"
+  integrity sha512-e6ZXoNB9uciA4smHHVkZWyYX/RRZsza8XfLvnOuvdLQttpzRKTqR26jG/COL0o4ES9vbAk9PX5mXTEstg0TCsg==
+
+"@mdi/light-font@^0.2.63":
+  version "0.2.63"
+  resolved "https://registry.yarnpkg.com/@mdi/light-font/-/light-font-0.2.63.tgz#5c58d95cff38d251207a44919224de5b41f787fb"
+  integrity sha512-6JaP/rHo2ik6G26zeWmuVNa7iEqsC4Rwry25DfO7BjLxiLckAMvYmQIGlzn1I7Y6PblHAwNlcPjL1vFIg366Og==
+
+"@mdi/react@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@mdi/react/-/react-1.5.0.tgz#461d2064ba12d509723bffc95e2f7169a6ac884a"
+  integrity sha512-NztRgUxSYD+ImaKN94Tg66VVVqXj4SmlDGzZoz48H9riJ+Awha56sfXH2fegw819NWo7KI3oeS1Es0lNQqwr0w==
+
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
   resolved "https://registry.yarnpkg.com/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz#7619c2eb21b25483f6d167548b4cfd5a7488c3d5"

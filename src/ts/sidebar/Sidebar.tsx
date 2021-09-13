@@ -1,5 +1,7 @@
 import { useAppSelector, useAppDispatch } from "../redux/hooks"
-import { Mode, changeMode } from "./sidebarSlice"
+import { Mode, changeMode, toggleSettings } from "./sidebarSlice"
+
+import Icon from "@mdi/react"
 
 import { sidebarWidth, updateTerm, resetTerm } from "../workbench/workbenchSlice"
 
@@ -7,6 +9,10 @@ import Github from "../../data/svgs/github.svg"
 import Lambda from "../../data/svgs/lambda.svg"
 import Skip from "../../data/svgs/skip.svg"
 import { normalise } from "../../bs/Evaluator.bs"
+
+import { Spacer } from "../App"
+
+import { mdiCog, mdiSkipNext, mdiRefresh } from "@mdi/js"
 
 interface LinkButtonProps {
     link: string
@@ -30,37 +36,37 @@ const LinkButton = (props: LinkButtonProps) => (
     </div>
 )
 const ActionButton = (props: ActionButtonProps) => (
-    <div className="sidebar-block">
-        <img className="sidebar-icon" src={props.src} alt={props.alt} onClick={props.onClick}>
-        </img>
+    <div className="sidebar-block" onClick={props.onClick} >
+        <Icon className="sidebar-icon" path={props.src} />
     </div>
 )
-const Spacer = () => <div className="spacer" />
 
 export default function Sidebar() {
 
     let dispatch = useAppDispatch()
     const mode = useAppSelector((state) => state.workbench).mode
     const currentTerm = useAppSelector((state) => state.workbench).currentTerm
-
     function setMode(mode: Mode) {
         dispatch(changeMode(mode))
     }
 
     const WorkbenchButtons = () => (
         <div>
-            <ActionButton onClick={(e) => dispatch(updateTerm(normalise(currentTerm)))} title="Reduce the term completely" src={Skip} alt="Skip symbol" />
-            <ActionButton onClick={(e) => dispatch(resetTerm())} title="Reduce the term completely" src={Skip} alt="Reset symbol" />
+            <ActionButton onClick={(e) => dispatch(updateTerm(normalise(currentTerm)))} title="Reduce the term completely" src={mdiSkipNext} alt="Skip symbol" />
+            <ActionButton onClick={(e) => dispatch(resetTerm())} title="Reduce the term completely" src={mdiRefresh} alt="Reset symbol" />
         </div>
     )
 
     return (
-        <div className="sidebar" style={{ width: sidebarWidth }}>
-            <LinkButton link="https://www.georgejkaye.com/lambda-visualiser" title="Details about the visualiser" src={Lambda} alt="Lambda symbol" />
-            <Spacer />
-            {mode === Mode.VISUALISER ? <WorkbenchButtons /> : ""}
-            <Spacer />
-            <LinkButton link="https://github.com/georgejkaye/lamviz" title="GitHub repository for this project" src={Github} alt="GitHub logo" />
-        </ div >
+        <div className="side">
+            <div className="sidebar" style={{ width: sidebarWidth }}>
+                <LinkButton link="https://www.georgejkaye.com/lambda-visualiser" title="Details about the visualiser" src={Lambda} alt="Lambda symbol" />
+                <Spacer />
+                {mode === Mode.VISUALISER ? <WorkbenchButtons /> : ""}
+                <Spacer />
+                <ActionButton onClick={(e) => { dispatch(toggleSettings()) }} title="Open settings panel" src={mdiCog} alt="Cog symbol" />
+                <LinkButton link="https://github.com/georgejkaye/lamviz" title="GitHub repository for this project" src={Github} alt="GitHub logo" />
+            </div>
+        </div>
     )
 }
