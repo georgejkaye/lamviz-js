@@ -7,8 +7,8 @@ $dark-text: $sidebar-bg;
 $light-text: $white;
 $active-tab: #41809c;
 $inactive-tab: #004D66;
-$on: #15e177;
-$off: #c80000;
+$on: #ccffcc;
+$off: #ff8888;
 $title-bar: #003459;
 $subtitle-bar: #227DAA;
 $disabled: #024055;
@@ -232,62 +232,72 @@ select:disabled {
     position: relative;
 }
 
-.bar {
-    display: flex;
-    flex-direction: row;
-    font-family: 'Source Code Pro', sans-serif;
+.overlay-bar {
     position: absolute;
+    display: flex;
     color: $dark-text;
-
-    cursor: default;
-    overflow-x: auto;
     align-items: baseline;
 }
 
-.top-bar {
+.card {
     font-size: 20px;
-    top: 0px;
+    color: $dark-text;
+    border-radius: 10px;
+    padding: 5px 10px 10px 10px;
+    margin: 10px 5px 0 5px;
 }
 
+.right-bar {
+    flex-direction: column;
+    align-items: flex-end;
+    right: 0px;
+    margin-right: 10px;
+    margin-top: 5px;
+}
+
+.top-bar {
+    top: 0px;
+    flex-direction: column;
+    margin-left: 10px;
+    margin-top: 5px;
+}
 
 .bottom-bar {
     font-size: 40px;
+    overflow-x: auto;
     bottom: 0px;
-}
-
-.label-toggles {
-    display: flex;
 }
 
 .toggle {
     cursor: pointer;
-    border-radius: 10px;
-    padding: 5px;
-    margin: 10px;
 }
 
-.toggle-box {
+.input-box {
     border-radius: 10px;
     padding: 2.5px 10px 10px 10px;
     margin: 0 10px 0 20px;
 }
 
-.toggle-box-display {
+.input-box-display {
     cursor: pointer;
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
 }
 
-.toggle-box-display:hover,
-.toggle-box-edit {
+.input-box-display:hover,
+.input-box-edit {
     background-color: transparentize($sidebar-bg, 0.9);
 }
 
-.toggle-box-edit {
+.input-box-edit {
     font-size: 40px;
     font-family: inherit;
     font-weight: inherit;
+}
+
+.predicates {
+    margin-right: 10px;
 }
 
 .bottom-bar {

@@ -8,7 +8,7 @@ import { topBarHeight, subBarHeight, newError, newTerm, newContext, setActiveBox
 import Graph from "./Graph"
 import { Spacer } from "../App"
 
-import { prettyPrintContext, printHTML } from "../../bs/Lambda.bs";
+import { betaRedexes, bridgeless, bridges, crossings, linear, planar, prettyPrintContext, printHTML, Term } from "../../bs/Lambda.bs";
 export default function Visualiser() {
 
     const term = useAppSelector((state) => state.workbench).currentTerm
@@ -90,8 +90,8 @@ export default function Visualiser() {
         return (
             <div className="">{
                 editing
-                    ? <input autoFocus className="toggle-box toggle-box-edit" style={{ width: (tempText.length / 1.66) + "em" }} onChange={onChange} onBlur={onBlur} onKeyDown={onKeyDown} value={tempText} />
-                    : <span className="toggle-box toggle-box-display" onMouseDown={onClick}>{parse(text)}</span>
+                    ? <input autoFocus className="input-box input-box-edit" style={{ width: (tempText.length / 1.66) + "em" }} onChange={onChange} onBlur={onBlur} onKeyDown={onKeyDown} value={tempText} />
+                    : <span className="input-box input-box-display" onMouseDown={onClick}>{parse(text)}</span>
             }
             </div>
         )
@@ -103,27 +103,52 @@ export default function Visualiser() {
     }
     function ToggleBox(props: ToggleBoxProps) {
         let toggled = props.switch ? "on" : "off"
-        return (<div className={"toggle " + toggled} onClick={props.onClick}>{props.property} {toggled}</div >)
+        return (<div className={"card toggle " + toggled} onClick={props.onClick}>{props.property} {toggled}</div >)
+    }
+    interface PredicateBoxProps {
+        property: string
+        pred: (t: Term) => boolean
+    }
+    function PredicateBox(props: PredicateBoxProps) {
+        return (
+            <div>
+                {props.pred(term) ? (< div className="card predicate-box on" > {props.property}</div >) : ""}
+            </div >)
+    }
+    interface CounterBoxProps {
+        property: string
+        count: (t: Term) => number
+    }
+    function CounterBox(props: CounterBoxProps) {
+        let count = props.count(term)
+        return (
+            <div className={"card counter-box " + (count == 0 ? "off" : "on")} > {props.property} | {count} </div >
+        )
     }
 
     const TopBar = () => {
-        const nodeText = nodeLabels ? "on" : "off"
-        const edgeText = edgeLabels ? "on" : "off"
-
         return (
-            <div className="bar top-bar" style={{ height: topBarHeight, width: graphDimensions.width }}>
-                <div className="label-toggles">
-                    <ToggleBox property="Node labels" onClick={(e) => dispatch(toggleNodeLabels())} switch={nodeLabels} />
-                    <ToggleBox property="Edge labels" onClick={(e) => dispatch(toggleEdgeLabels())} switch={edgeLabels} />
-                </div>
-                <Spacer />
-                <div>Planar</div>
+            <div className="overlay-bar top-bar">
+                <ToggleBox property="Node labels" onClick={(e) => dispatch(toggleNodeLabels())} switch={nodeLabels} />
+                <ToggleBox property="Edge labels" onClick={(e) => dispatch(toggleEdgeLabels())} switch={edgeLabels} />
             </div >
+        )
+    }
+    const RightBar = () => {
+        return (
+            <div className="overlay-bar right-bar">
+                <CounterBox property="Redexes" count={betaRedexes} />
+                <CounterBox property="Crossings" count={crossings} />
+                <CounterBox property="Bridges" count={bridges} />
+                <PredicateBox property="Planar" pred={planar} />
+                <PredicateBox property="Linear" pred={linear} />
+                <PredicateBox property="Bridgeless" pred={bridgeless} />
+            </div>
         )
     }
 
     const BottomBar = () =>
-        <div className="bar bottom-bar" style={{ height: bottomBarHeight, maxWidth: graphDimensions.width }}>
+        <div className="overlay-bar bottom-bar" style={{ height: bottomBarHeight, maxWidth: graphDimensions.width }}>
             <InputBox id={0} submit={(text) => dispatch(newContext(text))} print={(context) => prettyPrintContext(context)} basis={context} />
             <span>⇒</span>
             <InputBox id={1} submit={(text) => dispatch(newTerm(text))} print={(term) => printHTML(term, context, false, true)} basis={term} />
@@ -139,5 +164,6 @@ export default function Visualiser() {
             </div>
             <TopBar />
             <BottomBar />
+            <RightBar />
         </div>)
 }
