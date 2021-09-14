@@ -255,6 +255,12 @@ select:disabled {
     margin-top: 5px;
 }
 
+.right-bar-content {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+}
+
 .top-bar {
     top: 0px;
     flex-direction: column;
@@ -285,6 +291,7 @@ select:disabled {
     white-space: nowrap;
 }
 
+.clickable.icon:hover,
 .input-box-display:hover,
 .input-box-edit {
     background-color: transparentize($sidebar-bg, 0.9);
@@ -393,8 +400,10 @@ select:disabled {
 }
 
 .icon {
-    height: 15px;
-    width: 15px;
+    border-radius: 10px;
+    height: 50px;
+    width: 50px;
+    margin: 5px 0px;
 }
 
 .lr-icon {

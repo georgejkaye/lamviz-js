@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from "react"
 
 import parse from "html-react-parser"
+import Icon from "@mdi/react"
+import { mdiChevronDoubleUp, mdiChevronDoubleDown } from "@mdi/js"
 
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
 import { topBarHeight, subBarHeight, newError, newTerm, newContext, setActiveBox, toggleNodeLabels, toggleEdgeLabels, bottomBarHeight } from "./workbenchSlice"
 
 import Graph from "./Graph"
-import { Spacer } from "../App"
 
 import { betaRedexes, bridgeless, bridges, crossings, linear, planar, prettyPrintContext, printHTML, Term } from "../../bs/Lambda.bs";
+
 export default function Visualiser() {
 
     const term = useAppSelector((state) => state.workbench).currentTerm
@@ -135,14 +137,22 @@ export default function Visualiser() {
         )
     }
     const RightBar = () => {
+        let [visible, setVisible] = useState(true)
+        const toggleVisible = () => setVisible(!visible)
         return (
             <div className="overlay-bar right-bar">
-                <CounterBox property="Redexes" count={betaRedexes} />
-                <CounterBox property="Crossings" count={crossings} />
-                <CounterBox property="Bridges" count={bridges} />
-                <PredicateBox property="Planar" pred={planar} />
-                <PredicateBox property="Linear" pred={linear} />
-                <PredicateBox property="Bridgeless" pred={bridgeless} />
+                {visible ?
+                    <div className="right-bar-content">
+                        <CounterBox property="Redexes" count={betaRedexes} />
+                        <CounterBox property="Crossings" count={crossings} />
+                        <CounterBox property="Bridges" count={bridges} />
+                        <PredicateBox property="Planar" pred={planar} />
+                        <PredicateBox property="Linear" pred={linear} />
+                        <PredicateBox property="Bridgeless" pred={bridgeless} />
+                    </div> : ""}
+                <div className="clickable icon" onClick={(e) => toggleVisible()}>
+                    <Icon path={visible ? mdiChevronDoubleUp : mdiChevronDoubleDown} />
+                </div>
             </div>
         )
     }
