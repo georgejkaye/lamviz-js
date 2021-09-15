@@ -68,14 +68,17 @@ a {
 
 .sidebar-block {
     width: 100%;
-    cursor: pointer;
     height: 75px;
     display: flex;
     align-items: center;
     justify-content: center;
 
-    &:hover {
-        background-color: $active-tab;
+    &.clickable {
+        cursor: pointer;
+
+        &:hover {
+            background-color: $active-tab;
+        }
     }
 }
 
@@ -479,6 +482,10 @@ select:disabled {
     display: flex;
     flex-direction: column;
     flex: 1;
+}
+
+.separator {
+    margin: 10px;
 }
 
 .macro-list {

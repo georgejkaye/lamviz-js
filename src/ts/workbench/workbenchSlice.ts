@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
 import { parseContext, parseTerm } from "../../bs/Parser.bs"
 
-import { Term, Context, emptyContext, example } from "./../../bs/Lambda.bs"
+import { Term, Context, emptyContext } from "./../../bs/Lambda.bs"
 import { MacroDetails } from "./Macro"
 
 export enum Mode {
@@ -16,6 +16,9 @@ export const subBarHeight = 45
 export const toggleHeight = 25
 export const factsWidth = 0
 export const toggleWidth = 20
+
+const exampleTerm = "\\x.\\y.\\z.x y z"
+const exampleContext = emptyContext
 
 interface Dimensions {
     width: number
@@ -52,7 +55,7 @@ const getGraphDimensions = () => {
 const initialState: State = {
     mode: Mode.VISUALISER,
     redraw: false,
-    currentTerm: parseTerm("\\x.\\y.\\z.x y z", emptyContext, [], ""),
+    currentTerm: parseTerm(exampleTerm, exampleContext, [], ""),
     originalTerm: undefined,
     termHistory: [],
     currentContext: emptyContext,
@@ -85,7 +88,7 @@ export const slice = createSlice({
             state = { ...state, screenDimensions: action.payload, graphDimensions: getGraphDimensions() },
         newTerm: (state, action: PayloadAction<string>) => {
             let currentTerm = parseTerm(action.payload, state.currentContext, state.macros, "")
-            return state = { ...state, currentTerm: currentTerm, originalTerm: currentTerm, termHistory: smartConcatHead(state.currentTerm, state.termHistory), error: "" }
+            return state = { ...state, currentTerm: currentTerm, originalTerm: undefined, termHistory: smartConcatHead(state.currentTerm, state.termHistory), error: "" }
         },
         newContext: (state, action: PayloadAction<string>) =>
             state = { ...state, currentContext: parseContext(action.payload) },
@@ -98,7 +101,7 @@ export const slice = createSlice({
         backTerm: (state) =>
             state.termHistory.length > 0 ? state = { ...state, currentTerm: state.termHistory[0], termHistory: state.termHistory.slice(1) } : state,
         originalTerm: (state) =>
-            state = { ...state, currentTerm: state.originalTerm, termHistory: smartConcatHead(state.currentTerm, state.termHistory), redraw: true },
+            state = { ...state, currentTerm: state.originalTerm, originalTerm: undefined, termHistory: smartConcatHead(state.currentTerm, state.termHistory), redraw: true },
         resetTerm: (state) =>
             state = { ...state, redraw: true },
         finishedDrawing: (state) =>

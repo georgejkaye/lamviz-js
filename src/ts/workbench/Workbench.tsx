@@ -57,7 +57,7 @@ export default function Visualiser() {
             } else {
                 setEditing(false)
             }
-        }, [activeBox])
+        }, [activeBox, props.id])
 
         const onChange = (e: React.ChangeEvent<any>) => {
             setTempText(e.target.value)
@@ -124,7 +124,7 @@ export default function Visualiser() {
     function CounterBox(props: CounterBoxProps) {
         let count = props.count(term)
         return (
-            <div className={"card counter-box " + (count == 0 ? "off" : "on")} > {props.property} | {count} </div >
+            <div className={"card counter-box " + (count === 0 ? "off" : "on")} > {props.property} | {count} </div >
         )
     }
 
@@ -162,7 +162,7 @@ export default function Visualiser() {
             <InputBox id={0} submit={(text) => dispatch(newContext(text))} print={(context) => prettyPrintContext(context)} basis={context} />
             <span>⇒</span>
             <InputBox id={1} submit={(text) => dispatch(newTerm(text))} print={(term) => printHTML(term, context, false, true)} basis={term} />
-            {error != "" ? <div className="error">{error}</div> : ""}
+            {error !== "" ? <div className="error">{error}</div> : ""}
         </div >
 
     return (

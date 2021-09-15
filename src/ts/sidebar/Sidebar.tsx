@@ -3,7 +3,7 @@ import { Mode, changeMode, toggleSettings } from "./sidebarSlice"
 
 import Icon from "@mdi/react"
 
-import { sidebarWidth, updateTerm, originalTerm, resetTerm } from "../workbench/workbenchSlice"
+import { sidebarWidth, updateTerm, originalTerm, resetTerm, backTerm } from "../workbench/workbenchSlice"
 
 import Github from "../../data/svgs/github.svg"
 import Lambda from "../../data/svgs/lambda.svg"
@@ -12,7 +12,8 @@ import { normalise } from "../../bs/Evaluator.bs"
 
 import { Spacer } from "../App"
 
-import { mdiCog, mdiSkipNext, mdiSkipPrevious, mdiRefresh } from "@mdi/js"
+import { mdiCog, mdiSkipNext, mdiSkipPrevious, mdiRefresh, mdiArrowLeftCircle } from "@mdi/js"
+import { betaRedexes } from "../../bs/Lambda.bs"
 
 interface LinkButtonProps {
     link: string
@@ -20,13 +21,6 @@ interface LinkButtonProps {
     src: string
     alt: string
 }
-interface ActionButtonProps {
-    onClick: (e: React.MouseEvent<any>) => void
-    title: string
-    src: string
-    alt: string
-}
-
 const LinkButton = (props: LinkButtonProps) => (
     <div className="sidebar-block">
         <a href={props.link} title={props.title}>
@@ -35,9 +29,16 @@ const LinkButton = (props: LinkButtonProps) => (
         </a>
     </div>
 )
+interface ActionButtonProps {
+    onClick: (e: React.MouseEvent<any>) => void
+    clickable: () => boolean
+    title: string
+    src: string
+    alt: string
+}
 const ActionButton = (props: ActionButtonProps) => (
-    <div className="sidebar-block" onClick={props.onClick} >
-        <Icon className="sidebar-icon" path={props.src} />
+    <div className={"sidebar-block " + (props.clickable() ? "clickable" : "")} onClick={(e) => props.clickable() ? props.onClick(e) : ""} >
+        <Icon className="sidebar-icon" color={props.clickable() ? "#f2f2f2" : "#9c9c9c"} path={props.src} />
     </div>
 )
 
@@ -46,15 +47,19 @@ export default function Sidebar() {
     let dispatch = useAppDispatch()
     const mode = useAppSelector((state) => state.workbench).mode
     const currentTerm = useAppSelector((state) => state.workbench).currentTerm
+    const origTerm = useAppSelector((state) => state.workbench).originalTerm
+    const termHistory = useAppSelector((state) => state.workbench).termHistory
     function setMode(mode: Mode) {
         dispatch(changeMode(mode))
     }
-
+    const Separator = () => (<div className="separator"><hr /></div>)
     const WorkbenchButtons = () => (
         <div>
-            <ActionButton onClick={(e) => dispatch(originalTerm())} title="Return to the original term" src={mdiSkipPrevious} alt="Skip to beginning symbol" />
-            <ActionButton onClick={(e) => dispatch(updateTerm(normalise(currentTerm)))} title="Reduce the term completely" src={mdiSkipNext} alt="Skip to end symbol" />
-            <ActionButton onClick={(e) => dispatch(resetTerm())} title="Return to the original term" src={mdiRefresh} alt="Refresh symbol" />
+            <ActionButton onClick={(e) => dispatch(backTerm())} clickable={() => termHistory.length > 0} title="Back to previous term" src={mdiArrowLeftCircle} alt="Back symbol" />
+            <ActionButton onClick={(e) => dispatch(resetTerm())} clickable={() => true} title="Reset this term to its original shape" src={mdiRefresh} alt="Refresh symbol" />
+            <Separator />
+            <ActionButton onClick={(e) => dispatch(originalTerm())} clickable={() => origTerm !== undefined} title="Return to the original term" src={mdiSkipPrevious} alt="Skip to beginning symbol" />
+            <ActionButton onClick={(e) => dispatch(updateTerm(normalise(currentTerm)))} clickable={() => betaRedexes(currentTerm) > 0} title="Reduce the term completely" src={mdiSkipNext} alt="Skip to end symbol" />
         </div>
     )
 
@@ -65,7 +70,6 @@ export default function Sidebar() {
                 <Spacer />
                 {mode === Mode.VISUALISER ? <WorkbenchButtons /> : ""}
                 <Spacer />
-                <ActionButton onClick={(e) => { dispatch(toggleSettings()) }} title="Open settings panel" src={mdiCog} alt="Cog symbol" />
                 <LinkButton link="https://github.com/georgejkaye/lamviz" title="GitHub repository for this project" src={Github} alt="GitHub logo" />
             </div>
         </div>
