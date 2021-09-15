@@ -9,7 +9,8 @@ import { topBarHeight, subBarHeight, newError, newTerm, newContext, setActiveBox
 
 import Graph from "./Graph"
 
-import { betaRedexes, bridgeless, bridges, crossings, linear, planar, prettyPrintContext, printHTML, Term } from "../../bs/Lambda.bs";
+import { betaRedexes, bridgeless, bridges, crossings, linear, planar, prettyPrintContext, printHTML, printRedexesArray, Term } from "../../bs/Lambda.bs";
+import { Spacer } from "../App"
 
 export default function Visualiser() {
 
@@ -136,11 +137,11 @@ export default function Visualiser() {
             </div >
         )
     }
-    const RightBar = () => {
+    const TopRightBar = () => {
         let [visible, setVisible] = useState(true)
         const toggleVisible = () => setVisible(!visible)
         return (
-            <div className="overlay-bar right-bar">
+            <div className="overlay-bar right-bar right-top-bar">
                 {visible ?
                     <div className="right-bar-content">
                         <CounterBox property="Redexes" count={betaRedexes} />
@@ -152,6 +153,27 @@ export default function Visualiser() {
                     </div> : ""}
                 <div className="clickable icon" onClick={(e) => toggleVisible()}>
                     <Icon path={visible ? mdiChevronDoubleUp : mdiChevronDoubleDown} />
+                </div>
+            </div >)
+    }
+    interface RedexBoxProps {
+        id: number
+        redex: string
+    }
+    const RedexBox = (props: RedexBoxProps) => <div className="card on">{props.redex}</div>
+    const BotRightBar = () => {
+        let [visible, setVisible] = useState(true)
+        const toggleVisible = () => setVisible(!visible)
+
+        let redexes = printRedexesArray(term, context)
+
+        return (
+            <div className="overlay-bar right-bar right-bottom-bar">
+                {visible ?
+                    <div className="right-bar-content">{redexes.map((r, i) => <RedexBox id={i} redex={r} />)}</div> : ""
+                }
+                <div className="clickable icon" onClick={(e) => toggleVisible()}>
+                    <Icon path={visible ? mdiChevronDoubleDown : mdiChevronDoubleUp} />
                 </div>
             </div>
         )
@@ -174,6 +196,7 @@ export default function Visualiser() {
             </div>
             <TopBar />
             <BottomBar />
-            <RightBar />
+            <TopRightBar />
+            <BotRightBar />
         </div>)
 }

@@ -251,11 +251,20 @@ select:disabled {
 }
 
 .right-bar {
-    flex-direction: column;
-    align-items: flex-end;
     right: 0px;
     margin-right: 10px;
+    align-items: flex-end;
+}
+
+.right-top-bar {
+    flex-direction: column;
     margin-top: 5px;
+}
+
+.right-bottom-bar {
+    flex-direction: column-reverse;
+    bottom: 0px;
+    margin-bottom: 10px;
 }
 
 .right-bar-content {
