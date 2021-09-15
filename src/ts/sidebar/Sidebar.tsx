@@ -3,7 +3,7 @@ import { Mode, changeMode, toggleSettings } from "./sidebarSlice"
 
 import Icon from "@mdi/react"
 
-import { sidebarWidth, updateTerm, resetTerm } from "../workbench/workbenchSlice"
+import { sidebarWidth, updateTerm, originalTerm, resetTerm } from "../workbench/workbenchSlice"
 
 import Github from "../../data/svgs/github.svg"
 import Lambda from "../../data/svgs/lambda.svg"
@@ -12,7 +12,7 @@ import { normalise } from "../../bs/Evaluator.bs"
 
 import { Spacer } from "../App"
 
-import { mdiCog, mdiSkipNext, mdiRefresh } from "@mdi/js"
+import { mdiCog, mdiSkipNext, mdiSkipPrevious, mdiRefresh } from "@mdi/js"
 
 interface LinkButtonProps {
     link: string
@@ -52,8 +52,9 @@ export default function Sidebar() {
 
     const WorkbenchButtons = () => (
         <div>
-            <ActionButton onClick={(e) => dispatch(updateTerm(normalise(currentTerm)))} title="Reduce the term completely" src={mdiSkipNext} alt="Skip symbol" />
-            <ActionButton onClick={(e) => dispatch(resetTerm())} title="Reduce the term completely" src={mdiRefresh} alt="Reset symbol" />
+            <ActionButton onClick={(e) => dispatch(originalTerm())} title="Return to the original term" src={mdiSkipPrevious} alt="Skip to beginning symbol" />
+            <ActionButton onClick={(e) => dispatch(updateTerm(normalise(currentTerm)))} title="Reduce the term completely" src={mdiSkipNext} alt="Skip to end symbol" />
+            <ActionButton onClick={(e) => dispatch(resetTerm())} title="Return to the original term" src={mdiRefresh} alt="Refresh symbol" />
         </div>
     )
 

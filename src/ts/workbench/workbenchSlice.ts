@@ -52,7 +52,7 @@ const getGraphDimensions = () => {
 const initialState: State = {
     mode: Mode.VISUALISER,
     redraw: false,
-    currentTerm: example,
+    currentTerm: parseTerm("\\x.\\y.\\z.x y z", emptyContext, [], ""),
     originalTerm: undefined,
     termHistory: [],
     currentContext: emptyContext,
@@ -83,8 +83,10 @@ export const slice = createSlice({
             state = { ...state, mode: action.payload },
         resize: (state, action: PayloadAction<Dimensions>) =>
             state = { ...state, screenDimensions: action.payload, graphDimensions: getGraphDimensions() },
-        newTerm: (state, action: PayloadAction<string>) =>
-            state = { ...state, currentTerm: parseTerm(action.payload, state.currentContext, state.macros, ""), termHistory: smartConcatHead(state.currentTerm, state.termHistory), error: "" },
+        newTerm: (state, action: PayloadAction<string>) => {
+            let currentTerm = parseTerm(action.payload, state.currentContext, state.macros, "")
+            return state = { ...state, currentTerm: currentTerm, originalTerm: currentTerm, termHistory: smartConcatHead(state.currentTerm, state.termHistory), error: "" }
+        },
         newContext: (state, action: PayloadAction<string>) =>
             state = { ...state, currentContext: parseContext(action.payload) },
         newError: (state, action: PayloadAction<string>) =>
@@ -95,8 +97,10 @@ export const slice = createSlice({
             state = { ...state, graphDimensions: getGraphDimensions() },
         backTerm: (state) =>
             state.termHistory.length > 0 ? state = { ...state, currentTerm: state.termHistory[0], termHistory: state.termHistory.slice(1) } : state,
-        resetTerm: (state) =>
+        originalTerm: (state) =>
             state = { ...state, currentTerm: state.originalTerm, termHistory: smartConcatHead(state.currentTerm, state.termHistory), redraw: true },
+        resetTerm: (state) =>
+            state = { ...state, redraw: true },
         finishedDrawing: (state) =>
             state = { ...state, redraw: false },
         clear: (state) =>
@@ -123,7 +127,7 @@ export const slice = createSlice({
 })
 
 export const {
-    changeMode, resize, newTerm, newContext, newError, updateTerm, resetTerm, finishedDrawing, backTerm, toggleFactsBar, clear,
+    changeMode, resize, newTerm, newContext, newError, updateTerm, originalTerm, resetTerm, finishedDrawing, backTerm, toggleFactsBar, clear,
     downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels, highlightRedex, unhighlightRedex, performReduction, setActiveBox } = slice.actions
 
 export default slice.reducer

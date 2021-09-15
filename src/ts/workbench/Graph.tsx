@@ -4,7 +4,7 @@ import cytoscape from "cytoscape"
 import CytoscapeComponent from "react-cytoscapejs"
 
 import { useAppSelector, useAppDispatch } from "../redux/hooks"
-import { downloadedSvg } from "./workbenchSlice";
+import { downloadedSvg, finishedDrawing } from "./workbenchSlice";
 
 import { generateGraphElementsArray, nodeDistanceX, nodeDistanceY } from "../../bs/Graph.bs"
 import { Term, Context, betaRedexes } from "../../bs/Lambda.bs"
@@ -153,6 +153,7 @@ export default function Graph(props: GraphProps) {
                 setCurrentSvg(generateSvg(cy))
             }
         }
+        dispatch(finishedDrawing())
     }
 
     useEffect(() => {
@@ -160,6 +161,7 @@ export default function Graph(props: GraphProps) {
     }, [props.graph.term, props.graph.context, props.dimensions])
 
     useEffect(() => {
+        console.log("red")
         redrawTerm()
     }, [props.redraw])
 

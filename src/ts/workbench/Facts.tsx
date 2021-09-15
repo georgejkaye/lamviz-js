@@ -6,7 +6,7 @@ import ReactTooltip from "react-tooltip"
 import { useAppSelector, useAppDispatch } from "../redux/hooks"
 import { normalise, specificReduction } from "../../bs/Evaluator.bs";
 import {
-    updateTerm, backTerm, toggleFactsBar, resetTerm, downloadSvg, highlightRedex, unhighlightRedex
+    updateTerm, backTerm, toggleFactsBar, originalTerm, downloadSvg, highlightRedex, unhighlightRedex
 } from "./workbenchSlice";
 
 import { Term } from "../../bs/Lambda.bs"
@@ -129,7 +129,7 @@ export default function Facts() {
     let dispatch = useAppDispatch()
 
     const normaliseButton = (e: React.MouseEvent<any>) => dispatch(updateTerm(normalise(term)))
-    const resetButton = (e: React.MouseEvent<any>) => dispatch(resetTerm())
+    const resetButton = (e: React.MouseEvent<any>) => dispatch(originalTerm())
     const svgButton = (e: React.MouseEvent<any>) => dispatch(downloadSvg())
     const backButton = (e: React.MouseEvent<any>) => dispatch(backTerm())
 
