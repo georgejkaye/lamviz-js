@@ -1,3 +1,4 @@
+import { CollectionReturnValue } from "cytoscape"
 import { Context, Term } from "./Lambda.bs"
 
 export interface Position {
@@ -33,7 +34,35 @@ export interface Midpoint {
     target: string
 }
 
+export interface Redex {
+    rootParent: string
+    root: string
+    app: string
+    arg: string
+    argChild: string
+    stem: string
+    abs: string
+    out: string
+    outChild: string
+    bound: string
+    boundChild: string
+}
+
+export interface RedexNodes {
+    rootParent: CollectionReturnValue
+    root: CollectionReturnValue
+    app: CollectionReturnValue
+    arg: CollectionReturnValue
+    argChild: CollectionReturnValue
+    stem: CollectionReturnValue
+    abs: CollectionReturnValue
+    out: CollectionReturnValue
+    outChild: CollectionReturnValue
+    bound: CollectionReturnValue
+    boundChild: CollectionReturnValue
+}
+
 declare module "Graph.bs"
-export function generateGraphElementsArray(t: Term, ctx: Context): [cytoscape.ElementDefinition[], cytoscape.ElementDefinition[], [string, string, string], Midpoint[]]
+export function generateGraphElementsArray(t: Term, ctx: Context): [cytoscape.ElementDefinition[], cytoscape.ElementDefinition[], [string, string, string], Midpoint[], Redex[]]
 export const nodeDistanceX: number
 export const nodeDistanceY: number

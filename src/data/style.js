@@ -136,6 +136,4 @@ export const stylesheet = [
             "line-color": "#227daa",
         }
     },
-
-
 ]

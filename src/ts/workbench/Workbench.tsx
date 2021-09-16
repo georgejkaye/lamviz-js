@@ -5,7 +5,7 @@ import Icon from "@mdi/react"
 import { mdiChevronDoubleUp, mdiChevronDoubleDown } from "@mdi/js"
 
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
-import { topBarHeight, subBarHeight, newError, newTerm, newContext, setActiveBox, toggleNodeLabels, toggleEdgeLabels, bottomBarHeight, highlightRedex, unhighlightRedex } from "./workbenchSlice"
+import { topBarHeight, subBarHeight, newError, newTerm, newContext, setActiveBox, toggleNodeLabels, toggleEdgeLabels, bottomBarHeight, highlightRedex, unhighlightRedex, animateRedex } from "./workbenchSlice"
 
 import Graph from "./Graph"
 
@@ -25,6 +25,7 @@ export default function Visualiser() {
     const edgeLabels = useAppSelector((state) => state.workbench).edgeLabels
 
     const redexToHighlight = useAppSelector((state) => state.workbench).redexToHighlight
+    const redexToAnimate = useAppSelector((state) => state.workbench).redexToAnimate
     const error = useAppSelector((state) => state.workbench).error
     const macrosOn = useAppSelector((state) => state.macros).macrosOn
     const settingsOut = useAppSelector((state) => state.sidebar).settingsOut
@@ -169,8 +170,12 @@ export default function Visualiser() {
             console.log("hellO!")
             dispatch(unhighlightRedex())
         }
+        const onClick = (e: React.MouseEvent<any>) => {
+            dispatch(unhighlightRedex())
+            dispatch(animateRedex(props.id))
+        }
 
-        return (<div className="card-padding" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+        return (<div className="card-padding" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} onClick={onClick}>
             <div className="card redex on" >{props.redex}</div>
         </div>)
     }
@@ -204,7 +209,7 @@ export default function Visualiser() {
         <div className="stage" >
             <div className="main-stage" style={{ height: String(graphDimensions.height) + "px" }}>
                 <div className="main-graph">
-                    <Graph dimensions={graphDimensions} redraw={redraw} graph={{ term: term, context: context }} nodeLabels={nodeLabels} edgeLabels={edgeLabels} zoom pan highlightedRedex={redexToHighlight} margin={50} interactive />
+                    <Graph dimensions={graphDimensions} redraw={redraw} graph={{ term: term, context: context }} nodeLabels={nodeLabels} edgeLabels={edgeLabels} zoom pan highlightedRedex={redexToHighlight} animatedRedex={redexToAnimate} margin={50} interactive />
                 </div>
             </div>
             <TopBar />

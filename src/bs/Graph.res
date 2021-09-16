@@ -8,6 +8,28 @@ type nodedata = {"id": string, "label": string, "position": pos}
 type node = {"data": nodedata, "position": pos, "classes": array<string>}
 type edgedata = {"id": string, "source": string, "target": string, "label": string}
 type midpoint = {"source": string, "midpoint": string, "target": string}
+type redex = {
+  "rootParent": string,
+  "root": string,
+  "app": string,
+  "arg": string,
+  "argChild": string,
+  "stem": string,
+  "abs": string,
+  "bound": string,
+  "boundChild": string,
+  "out": string,
+  "outChild": string,
+}
+type nodeNeighbours = {
+  parent: string,
+  parentMidpoint: string,
+  this: string,
+  leftChildMidpoint: string,
+  leftChild: string,
+  rightChildMidpoint: string,
+  rightChild: string,
+}
 
 type nodeType =
   ABS | ABS_MP | ABS_SP_MP | ABS_SP | ABS_TOP | APP | APP_MP | VAR | VAR_MP | VAR_TOP | FREE | ROOT
@@ -157,12 +179,16 @@ type graphdata = {
   dir: direction, // Direction of this node relative to parent
   stats: stats, // The count of lambda elements so far
   betaClasses: list<string>, // The list of beta redexes the current term is part of
+  isBetaRedex: int, // Whether we are in the midst of a beta redex
+  redexes: list<redex>, // The list redex records: nodes associated with each redex
 }
 type graphret = {
   nodes: list<node>,
   edges: list<edge>,
   midpoints: list<midpoint>,
   stats: stats,
+  neighbours: nodeNeighbours, // data used for collecting the nodes associated with redex
+  redexes: list<redex>,
 }
 
 let rec generateGraphElements = (term, ctx) => {
@@ -180,6 +206,8 @@ let rec generateGraphElements = (term, ctx) => {
     dir: U,
     stats: {vars: n, apps: 0, abs: 0, betas: 0},
     betaClasses: list{},
+    isBetaRedex: -1,
+    redexes: list{},
   })
 
   (
@@ -187,6 +215,7 @@ let rec generateGraphElements = (term, ctx) => {
     List.concat(list{ret.edges, edges}),
     frees,
     ret.midpoints,
+    ret.redexes,
   )
 }
 and generateGraphElements' = data => {
@@ -217,10 +246,16 @@ and generateGraphElements' = data => {
 
       let id = data.stats.vars
 
+      let midpointClasses = list{"midpoint", labelclass, ...data.betaClasses}
+      let finalMidpointClasses =
+        data.isBetaRedex != -1
+          ? list{"redex-arg-" ++ str(data.isBetaRedex), ...midpointClasses}
+          : midpointClasses
+
       let node1 = createNodeList(
         data.nodes,
         nid(VAR_MP, id),
-        list{"midpoint", labelclass, ...data.betaClasses},
+        finalMidpointClasses,
         mpPosX,
         mpPosY,
         lookup(data.ctx, x),
@@ -241,7 +276,6 @@ and generateGraphElements' = data => {
         posY - nodeDistanceY,
         "",
       )
-
       let edge1 = createEdgeList(
         data.edges,
         eid(data.parent.nodeType, data.parent.id, VAR_MP, id),
@@ -250,7 +284,6 @@ and generateGraphElements' = data => {
         node1["data"]["id"],
         "",
       )
-
       let edge2 = createEdgeList(
         data.edges,
         eid(VAR_MP, id, VAR, id),
@@ -275,32 +308,44 @@ and generateGraphElements' = data => {
         nid(ABS_TOP, i),
         lookup(data.ctx, x),
       )
-
       let midpoint = {
         "source": data.parent.node["data"]["id"],
         "midpoint": node1["data"]["id"],
         "target": node2["data"]["id"],
       }
-
+      let neighbours = {
+        parent: data.parent.node["data"]["id"],
+        parentMidpoint: node1["data"]["id"],
+        this: node2["data"]["id"],
+        leftChildMidpoint: "",
+        leftChild: "",
+        rightChildMidpoint: "",
+        rightChild: "",
+      }
       {
         nodes: list{node1, node2, node3},
         edges: list{edge1, edge2, edge3, edge4},
         midpoints: list{midpoint},
         stats: {...data.stats, vars: id + 1},
+        redexes: data.redexes,
+        neighbours: neighbours,
       }
     }
   | Abs(t, x, _) => {
-      let classes = list{
+      let midpointClasses = list{
         "midpoint",
         data.parent.nodeType == ROOT ? "term-edge" : "abs-edge",
         ...data.betaClasses,
       }
-
+      let finalMidpointClasses =
+        data.isBetaRedex != -1
+          ? list{"redex-stem-" ++ str(data.stats.betas - 1), ...midpointClasses}
+          : midpointClasses
       let id = data.stats.abs
       let node1 = createNodeList(
         data.nodes,
         nid(ABS_MP, id),
-        classes,
+        finalMidpointClasses,
         mpPosX,
         mpPosY,
         prettyPrint(data.term, data.ctx, false, true),
@@ -313,10 +358,13 @@ and generateGraphElements' = data => {
         posY,
         lambda,
       )
+      let midpointClasses = list{"midpoint", "abs-edge-r", ...data.betaClasses}
+      let finalMidpointClasses =
+        data.isBetaRedex != -1 ? list{"redex-bound-" ++ str(data.stats.betas - 1)} : midpointClasses
       let node3 = createNodeList(
         data.nodes,
         nid(ABS_SP_MP, id),
-        list{"midpoint", "abs-edge-r", ...data.betaClasses},
+        finalMidpointClasses,
         posX + nodeDistanceX / 2,
         posY - nodeDistanceY / 2,
         x,
@@ -405,19 +453,30 @@ and generateGraphElements' = data => {
         dir: L,
         stats: {...data.stats, abs: data.stats.abs + 1},
         betaClasses: data.betaClasses,
+        isBetaRedex: data.isBetaRedex,
+        redexes: data.redexes,
       })
-
       let srightmost = furthestRight(scope.nodes)
       let scopeNodes =
         srightmost >= posX
           ? shiftNodeX(scope.nodes, -(srightmost - posX) - nodeDistanceX)
           : scope.nodes
-
+      let neighbours = {
+        parent: data.parent.node["data"]["id"],
+        parentMidpoint: node1["data"]["id"],
+        this: node2["data"]["id"],
+        leftChildMidpoint: scope.neighbours.parentMidpoint,
+        leftChild: scope.neighbours.this,
+        rightChildMidpoint: node3["data"]["id"],
+        rightChild: node4["data"]["id"],
+      }
       {
         nodes: List.concat(list{scopeNodes, newNodes}),
         edges: List.concat(list{scope.edges, newEdges}),
         midpoints: list{midpoint1, midpoint2, ...scope.midpoints},
         stats: scope.stats,
+        redexes: scope.redexes,
+        neighbours: neighbours,
       }
     }
   | App(t1, t2, _) => {
@@ -427,10 +486,15 @@ and generateGraphElements' = data => {
       | R => "app-edge-r"
       }
       let id = data.stats.apps
+      let isBetaRedex = isBetaRedex(data.term)
+      let midpointClasses = list{"midpoint", labelclass, ...data.betaClasses}
+      let finalMidpointClasses = isBetaRedex
+        ? list{"redex-root-" ++ str(data.stats.betas), ...midpointClasses}
+        : midpointClasses
       let node1 = createNodeList(
         data.nodes,
         nid(APP_MP, id),
-        list{"midpoint", labelclass, ...data.betaClasses},
+        finalMidpointClasses,
         mpPosX,
         mpPosY,
         prettyPrint(data.term, data.ctx, false, true),
@@ -438,7 +502,7 @@ and generateGraphElements' = data => {
       let node2 = createNodeList(
         data.nodes,
         nid(APP, id),
-        isBetaRedex(data.term)
+        isBetaRedex
           ? list{"application", "beta-" ++ str(data.stats.betas), ...data.betaClasses}
           : list{"application", ...data.betaClasses},
         posX,
@@ -479,6 +543,8 @@ and generateGraphElements' = data => {
         dir: L,
         stats: {...data.stats, apps: data.stats.apps + 1, betas: data.stats.betas + 1},
         betaClasses: list{"beta-" ++ str(data.stats.betas), ...data.betaClasses},
+        isBetaRedex: isBetaRedex ? data.stats.betas : -1,
+        redexes: data.redexes,
       })
       let rhs = generateGraphElements'({
         term: t2,
@@ -490,6 +556,8 @@ and generateGraphElements' = data => {
         dir: R,
         stats: lhs.stats,
         betaClasses: list{"beta-" ++ str(data.stats.betas), ...data.betaClasses},
+        isBetaRedex: isBetaRedex ? data.stats.betas : -1,
+        redexes: lhs.redexes,
       })
 
       let lhsRightmost = furthestRight(lhs.nodes)
@@ -502,17 +570,53 @@ and generateGraphElements' = data => {
       let rhsNodes =
         rhsLeftmost <= posX ? shiftNodeX(rhs.nodes, posX - rhsLeftmost + nodeDistanceX) : rhs.nodes
 
+      let redexes = isBetaRedex
+        ? list{
+            {
+              "rootParent": data.parent.node["data"]["id"],
+              "root": node1["data"]["id"],
+              "app": node2["data"]["id"],
+              "arg": rhs.neighbours.parentMidpoint,
+              "argChild": rhs.neighbours.this,
+              "stem": lhs.neighbours.parentMidpoint,
+              "abs": lhs.neighbours.this,
+              "out": lhs.neighbours.leftChildMidpoint,
+              "outChild": lhs.neighbours.leftChild,
+              "bound": lhs.neighbours.rightChildMidpoint,
+              "boundChild": lhs.neighbours.rightChild,
+            },
+            ...rhs.redexes,
+          }
+        : rhs.redexes
+
+      let neighbours = {
+        parent: data.parent.node["data"]["id"],
+        parentMidpoint: node1["data"]["id"],
+        this: node2["data"]["id"],
+        leftChildMidpoint: lhs.neighbours.parentMidpoint,
+        leftChild: lhs.neighbours.this,
+        rightChildMidpoint: rhs.neighbours.parentMidpoint,
+        rightChild: rhs.neighbours.this,
+      }
       {
         nodes: List.concat(list{lhsNodes, rhsNodes, list{node1, node2}}),
         edges: List.concat(list{lhs.edges, rhs.edges, list{edge1, edge2}}),
         midpoints: list{midpoint, ...List.concat(list{lhs.midpoints, rhs.midpoints})},
         stats: rhs.stats,
+        redexes: redexes,
+        neighbours: neighbours,
       }
     }
   }
 }
 
 let generateGraphElementsArray = (term, ctx) => {
-  let (nodes, edges, frees, midpoints) = generateGraphElements(term, ctx)
-  (Array.of_list(nodes), Array.of_list(edges), Array.of_list(frees), Array.of_list(midpoints))
+  let (nodes, edges, frees, midpoints, redexes) = generateGraphElements(term, ctx)
+  (
+    Array.of_list(nodes),
+    Array.of_list(edges),
+    Array.of_list(frees),
+    Array.of_list(midpoints),
+    Array.of_list(redexes),
+  )
 }

@@ -39,6 +39,7 @@ interface State {
     nodeLabels: boolean,
     edgeLabels: boolean,
     redexToHighlight: number
+    redexToAnimate: number
     reductionToPerform: number
     macros: MacroDetails[],
     activeBox: number,
@@ -66,6 +67,7 @@ const initialState: State = {
     nodeLabels: false,
     edgeLabels: false,
     redexToHighlight: -1,
+    redexToAnimate: -1,
     reductionToPerform: -1,
     macros: [],
     activeBox: -1
@@ -120,6 +122,10 @@ export const slice = createSlice({
             state = { ...state, redexToHighlight: action.payload },
         unhighlightRedex: (state) =>
             state = { ...state, redexToHighlight: -1 },
+        animateRedex: (state, action: PayloadAction<number>) =>
+            state = { ...state, redexToAnimate: action.payload },
+        doneAnimating: (state) =>
+            state = { ...state, redexToAnimate: -1 },
         performReduction: (state, action: PayloadAction<number>) =>
             state = { ...state, reductionToPerform: action.payload },
         reductionPerformed: (state) =>
@@ -131,6 +137,6 @@ export const slice = createSlice({
 
 export const {
     changeMode, resize, newTerm, newContext, newError, updateTerm, originalTerm, resetTerm, finishedDrawing, backTerm, toggleFactsBar, clear,
-    downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels, highlightRedex, unhighlightRedex, performReduction, setActiveBox } = slice.actions
+    downloadSvg, downloadedSvg, toggleNodeLabels, toggleEdgeLabels, highlightRedex, unhighlightRedex, animateRedex, doneAnimating, performReduction, setActiveBox } = slice.actions
 
 export default slice.reducer

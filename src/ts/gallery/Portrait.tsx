@@ -26,6 +26,7 @@ export default function Portrait(props: PortraitProps) {
       <div className="portrait"><Graph graph={props}
         dimensions={portraitDimensions}
         highlightedRedex={-1}
+        animatedRedex={-1}
         zoom={false}
         nodeLabels={false}
         edgeLabels={false}
