@@ -250,6 +250,15 @@ select:disabled {
     margin: 10px 5px 0 5px;
 }
 
+.redex {
+    padding: 5px 10px 10px 10px;
+    margin: 0;
+}
+
+.card-padding {
+    padding: 5px;
+}
+
 .right-bar {
     right: 0px;
     margin-right: 10px;
@@ -426,23 +435,6 @@ select:disabled {
 
 .beta-text {
     margin-left: 11px;
-}
-
-.redexes {
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.redex {
-    padding: 5px 0;
-    text-align: center;
-    font-size: 1.25em;
-    cursor: pointer;
-    transition-duration: 0.3s;
-}
-
-.redex:hover {
-    background-color: $active-tab;
 }
 
 .highlighted-redex {

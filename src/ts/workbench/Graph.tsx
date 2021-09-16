@@ -54,13 +54,11 @@ export default function Graph(props: GraphProps) {
             cy.elements(".arc, .abs-edge, .abs-edge-r, .app-edge-l, .app-edge-r, .var-edge-l, .var-edge-r, .term-edge").removeClass("termlabelled")
         }
     }
-
-    const highlightRedex = (i: number) => {
+    const unhighlightRedex = () => {
         cy.elements(".highlighted").removeClass("highlighted")
-
-        if (i !== -1) {
-            cy.elements(".beta-" + i).addClass("highlighted")
-        }
+    }
+    const highlightRedex = (i: number) => {
+        cy.elements(".beta-" + i).addClass("highlighted")
     }
 
     //const graphDimensions = useSelector((state: RootState) => state.currentState).graphDimensions
@@ -183,6 +181,7 @@ export default function Graph(props: GraphProps) {
     }, [props.edgeLabels])
 
     useEffect(() => {
+        unhighlightRedex()
         highlightRedex(props.highlightedRedex)
     }, [props.highlightedRedex])
 

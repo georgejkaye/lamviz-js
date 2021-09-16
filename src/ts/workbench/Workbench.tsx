@@ -5,7 +5,7 @@ import Icon from "@mdi/react"
 import { mdiChevronDoubleUp, mdiChevronDoubleDown } from "@mdi/js"
 
 import { useAppDispatch, useAppSelector } from "../redux/hooks"
-import { topBarHeight, subBarHeight, newError, newTerm, newContext, setActiveBox, toggleNodeLabels, toggleEdgeLabels, bottomBarHeight } from "./workbenchSlice"
+import { topBarHeight, subBarHeight, newError, newTerm, newContext, setActiveBox, toggleNodeLabels, toggleEdgeLabels, bottomBarHeight, highlightRedex, unhighlightRedex } from "./workbenchSlice"
 
 import Graph from "./Graph"
 
@@ -160,7 +160,20 @@ export default function Visualiser() {
         id: number
         redex: string
     }
-    const RedexBox = (props: RedexBoxProps) => <div className="card on">{props.redex}</div>
+    const RedexBox = (props: RedexBoxProps) => {
+
+        const onMouseEnter = (e: React.MouseEvent<any>) => {
+            dispatch(highlightRedex(props.id))
+        }
+        const onMouseLeave = (e: React.MouseEvent<any>) => {
+            console.log("hellO!")
+            dispatch(unhighlightRedex())
+        }
+
+        return (<div className="card-padding" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+            <div className="card redex on" >{props.redex}</div>
+        </div>)
+    }
     const BotRightBar = () => {
         let [visible, setVisible] = useState(true)
         const toggleVisible = () => setVisible(!visible)
@@ -170,7 +183,7 @@ export default function Visualiser() {
         return (
             <div className="overlay-bar right-bar right-bottom-bar">
                 {visible ?
-                    <div className="right-bar-content">{redexes.map((r, i) => <RedexBox id={i} redex={r} />)}</div> : ""
+                    <div className="right-bar-content">{redexes.map((r, i) => <RedexBox key={i} id={i} redex={r} />)}</div> : ""
                 }
                 <div className="clickable icon" onClick={(e) => toggleVisible()}>
                     <Icon path={visible ? mdiChevronDoubleDown : mdiChevronDoubleUp} />
