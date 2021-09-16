@@ -27,7 +27,7 @@ and shift' = (t, d, c) => {
  */
 let rec substitute = (t, j, s) => {
   switch t {
-  | Var(x, a) => x == j ? s : t
+  | Var(x, _) => x == j ? s : t
   | Abs(t, x, a) => {
       let t' = substitute(t, j + 1, shift(s, 1))
       equal(t, t') ? Abs(t, x, a) : Abs(t', x, "")

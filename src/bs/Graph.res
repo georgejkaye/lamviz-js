@@ -4,12 +4,10 @@ open Helpers
 let lambda = `λ`
 
 type pos = {"x": int, "y": int}
-
 type nodedata = {"id": string, "label": string, "position": pos}
-
 type node = {"data": nodedata, "position": pos, "classes": array<string>}
-
 type edgedata = {"id": string, "source": string, "target": string, "label": string}
+type midpoint = {"source": string, "midpoint": string, "target": string}
 
 type nodeType =
   ABS | ABS_MP | ABS_SP_MP | ABS_SP | ABS_TOP | APP | APP_MP | VAR | VAR_MP | VAR_TOP | FREE | ROOT
@@ -146,375 +144,370 @@ and generateFreeVariableElements' = (ctx, dict, nodes, edges, frees, n) => {
 let nodeDistanceX = 5
 let nodeDistanceY = 5
 
+type stats = {vars: int, apps: int, abs: int, betas: int}
+type parent = {node: node, id: int, nodeType: nodeType}
+
+type graphdata = {
+  term: lambdaTerm, // The term being translated
+  ctx: context, // The current context
+  dict: list<(int, bool)>, // Lookup table for variables
+  nodes: list<node>, // Current list of nodes
+  edges: list<edge>, // Current list of edges
+  parent: parent, // Parent of current node
+  dir: direction, // Direction of this node relative to parent
+  stats: stats, // The count of lambda elements so far
+  betaClasses: list<string>, // The list of beta redexes the current term is part of
+}
+type graphret = {
+  nodes: list<node>,
+  edges: list<edge>,
+  midpoints: list<midpoint>,
+  stats: stats,
+}
+
 let rec generateGraphElements = (term, ctx) => {
   let (nodes, edges, dict, frees, n) = generateFreeVariableElements(ctx, list{})
 
   let root = createNode(nodes, "root", ["root"], 0, 0, "")
 
-  let (nodes', edges', midpoints, _, _, _, _) = generateGraphElements'(
-    term,
-    ctx,
-    dict,
-    list{root, ...nodes},
-    edges,
-    root,
-    0,
-    ROOT,
-    U,
-    list{},
-    false,
-    0,
-    n,
-    0,
-    0,
-    list{},
-  )
+  let ret = generateGraphElements'({
+    term: term,
+    ctx: ctx,
+    dict: dict,
+    nodes: list{root, ...nodes},
+    edges: edges,
+    parent: {node: root, id: 0, nodeType: ROOT},
+    dir: U,
+    stats: {vars: n, apps: 0, abs: 0, betas: 0},
+    betaClasses: list{},
+  })
 
   (
-    list{root, ...List.concat(list{nodes', nodes})},
-    List.concat(list{edges', edges}),
+    list{root, ...List.concat(list{ret.nodes, nodes})},
+    List.concat(list{ret.edges, edges}),
     frees,
-    midpoints,
+    ret.midpoints,
   )
 }
-and generateGraphElements' = (
-  term,
-  ctx,
-  dict,
-  nodes,
-  edges,
-  parent,
-  pn,
-  ptype,
-  dir,
-  redexes,
-  redexEdge,
-  vars,
-  abs,
-  apps,
-  betas,
-  betaClasses,
-) => {
-  let posY = parent["data"]["position"]["y"] - nodeDistanceY
-  let mpPosY = parent["data"]["position"]["y"] - nodeDistanceY / 2
+and generateGraphElements' = data => {
+  let posY = data.parent.node["data"]["position"]["y"] - nodeDistanceY
+  let mpPosY = data.parent.node["data"]["position"]["y"] - nodeDistanceY / 2
 
-  let (posX, mpPosX) = switch dir {
-  | U => (parent["data"]["position"]["x"], parent["data"]["position"]["x"])
+  let (posX, mpPosX) = switch data.dir {
+  | U => (data.parent.node["data"]["position"]["x"], data.parent.node["data"]["position"]["x"])
   | L => (
-      parent["data"]["position"]["x"] - nodeDistanceX,
-      parent["data"]["position"]["x"] - nodeDistanceX / 2,
+      data.parent.node["data"]["position"]["x"] - nodeDistanceX,
+      data.parent.node["data"]["position"]["x"] - nodeDistanceX / 2,
     )
   | R => (
-      parent["data"]["position"]["x"] + nodeDistanceX,
-      parent["data"]["position"]["x"] + nodeDistanceX / 2,
+      data.parent.node["data"]["position"]["x"] + nodeDistanceX,
+      data.parent.node["data"]["position"]["x"] + nodeDistanceX / 2,
     )
   }
 
-  switch term {
+  switch data.term {
   | Var(x, _) => {
-      let (i, _) = List.nth(dict, x)
+      let (i, _) = List.nth(data.dict, x)
 
-      let labelclass = switch dir {
+      let labelclass = switch data.dir {
       | U => "term-edge"
       | L => "var-edge-l"
       | R => "var-edge-r"
       }
 
+      let id = data.stats.vars
+
       let node1 = createNodeList(
-        nodes,
-        nid(VAR_MP, vars),
-        list{"midpoint", labelclass, ...betaClasses},
+        data.nodes,
+        nid(VAR_MP, id),
+        list{"midpoint", labelclass, ...data.betaClasses},
         mpPosX,
         mpPosY,
-        lookup(ctx, x),
+        lookup(data.ctx, x),
       )
       let node2 = createNodeList(
-        nodes,
-        nid(VAR, vars),
-        list{"support", ...betaClasses},
+        data.nodes,
+        nid(VAR, id),
+        list{"support", ...data.betaClasses},
         posX,
         posY,
         "",
       )
       let node3 = createNodeList(
-        nodes,
-        nid(VAR_TOP, vars),
-        list{"top", ...betaClasses},
+        data.nodes,
+        nid(VAR_TOP, id),
+        list{"top", ...data.betaClasses},
         posX,
         posY - nodeDistanceY,
         "",
       )
 
       let edge1 = createEdgeList(
-        edges,
-        eid(ptype, pn, VAR_MP, vars),
-        list{"varedge", ...betaClasses},
-        parent["data"]["id"],
+        data.edges,
+        eid(data.parent.nodeType, data.parent.id, VAR_MP, id),
+        list{"varedge", ...data.betaClasses},
+        data.parent.node["data"]["id"],
         node1["data"]["id"],
         "",
       )
 
       let edge2 = createEdgeList(
-        edges,
-        eid(VAR_MP, vars, VAR, vars),
-        list{"varedge", ...betaClasses},
+        data.edges,
+        eid(VAR_MP, id, VAR, id),
+        list{"varedge", ...data.betaClasses},
         node1["data"]["id"],
         node2["data"]["id"],
         "",
       )
       let edge3 = createEdgeList(
-        edges,
-        eid(VAR, vars, VAR_TOP, vars),
-        list{"varedge", ...betaClasses},
+        data.edges,
+        eid(VAR, id, VAR_TOP, id),
+        list{"varedge", ...data.betaClasses},
         node2["data"]["id"],
         node3["data"]["id"],
         "",
       )
       let edge4 = createEdgeList(
-        edges,
-        eid(VAR_TOP, vars, ABS_TOP, i),
-        list{"arc", ...betaClasses},
+        data.edges,
+        eid(VAR_TOP, id, ABS_TOP, i),
+        list{"arc", ...data.betaClasses},
         node3["data"]["id"],
         nid(ABS_TOP, i),
-        lookup(ctx, x),
+        lookup(data.ctx, x),
       )
 
-      let midpoint = (node1["data"]["id"], parent["data"]["id"], node2["data"]["id"])
+      let midpoint = {
+        "source": data.parent.node["data"]["id"],
+        "midpoint": node1["data"]["id"],
+        "target": node2["data"]["id"],
+      }
 
-      (
-        list{node1, node2, node3},
-        list{edge1, edge2, edge3, edge4},
-        list{midpoint},
-        vars + 1,
-        abs,
-        apps,
-        betas,
-      )
+      {
+        nodes: list{node1, node2, node3},
+        edges: list{edge1, edge2, edge3, edge4},
+        midpoints: list{midpoint},
+        stats: {...data.stats, vars: id + 1},
+      }
     }
   | Abs(t, x, _) => {
-      let classes = list{"midpoint", ptype == ROOT ? "term-edge" : "abs-edge", ...betaClasses}
+      let classes = list{
+        "midpoint",
+        data.parent.nodeType == ROOT ? "term-edge" : "abs-edge",
+        ...data.betaClasses,
+      }
 
+      let id = data.stats.abs
       let node1 = createNodeList(
-        nodes,
-        nid(ABS_MP, abs),
+        data.nodes,
+        nid(ABS_MP, id),
         classes,
         mpPosX,
         mpPosY,
-        prettyPrint(term, ctx, false, true),
+        prettyPrint(data.term, data.ctx, false, true),
       )
       let node2 = createNodeList(
-        nodes,
-        nid(ABS, abs),
-        list{"abstraction", ...betaClasses},
+        data.nodes,
+        nid(ABS, id),
+        list{"abstraction", ...data.betaClasses},
         posX,
         posY,
         lambda,
       )
       let node3 = createNodeList(
-        nodes,
-        nid(ABS_SP_MP, abs),
-        list{"midpoint", "abs-edge-r", ...betaClasses},
+        data.nodes,
+        nid(ABS_SP_MP, id),
+        list{"midpoint", "abs-edge-r", ...data.betaClasses},
         posX + nodeDistanceX / 2,
         posY - nodeDistanceY / 2,
         x,
       )
       let node4 = createNodeList(
-        nodes,
-        nid(ABS_SP, abs),
-        list{"support", ...betaClasses},
+        data.nodes,
+        nid(ABS_SP, id),
+        list{"support", ...data.betaClasses},
         posX + nodeDistanceX,
         posY - nodeDistanceY,
         "",
       )
       let node5 = createNodeList(
-        nodes,
-        nid(ABS_TOP, abs),
-        list{"top", ...betaClasses},
+        data.nodes,
+        nid(ABS_TOP, id),
+        list{"top", ...data.betaClasses},
         posX + nodeDistanceX,
         posY - 2 * nodeDistanceY,
         "",
       )
 
       let edge1 = createEdgeList(
-        edges,
-        eid(ptype, pn, ABS_MP, abs),
-        list{"absedge", ...betaClasses},
-        parent["data"]["id"],
+        data.edges,
+        eid(data.parent.nodeType, data.parent.id, ABS_MP, id),
+        list{"absedge", ...data.betaClasses},
+        data.parent.node["data"]["id"],
         node1["data"]["id"],
         "",
       )
       let edge2 = createEdgeList(
-        edges,
-        eid(ABS_MP, abs, ABS, abs),
-        list{"absedge", ...betaClasses},
+        data.edges,
+        eid(ABS_MP, id, ABS, id),
+        list{"absedge", ...data.betaClasses},
         node1["data"]["id"],
         node2["data"]["id"],
         "",
       )
       let edge3 = createEdgeList(
-        edges,
-        eid(ABS, abs, ABS_SP_MP, abs),
-        list{"varedge", ...betaClasses},
+        data.edges,
+        eid(ABS, id, ABS_SP_MP, id),
+        list{"varedge", ...data.betaClasses},
         node2["data"]["id"],
         node3["data"]["id"],
         "",
       )
       let edge4 = createEdgeList(
-        edges,
-        eid(ABS_SP_MP, abs, ABS_SP, abs),
-        list{"varedge", ...betaClasses},
+        data.edges,
+        eid(ABS_SP_MP, id, ABS_SP, id),
+        list{"varedge", ...data.betaClasses},
         node3["data"]["id"],
         node4["data"]["id"],
         "",
       )
       let edge5 = createEdgeList(
-        edges,
-        eid(ABS_SP, abs, ABS_TOP, abs),
-        list{"varedge", ...betaClasses},
+        data.edges,
+        eid(ABS_SP, id, ABS_TOP, id),
+        list{"varedge", ...data.betaClasses},
         node4["data"]["id"],
         node5["data"]["id"],
         "",
       )
 
-      let midpoint1 = (node1["data"]["id"], parent["data"]["id"], node2["data"]["id"])
-      let midpoint2 = (node3["data"]["id"], node2["data"]["id"], node4["data"]["id"])
+      let midpoint1 = {
+        "midpoint": node1["data"]["id"],
+        "source": data.parent.node["data"]["id"],
+        "target": node2["data"]["id"],
+      }
+      let midpoint2 = {
+        "midpoint": node3["data"]["id"],
+        "source": node2["data"]["id"],
+        "target": node4["data"]["id"],
+      }
 
-      let nnodes = list{node1, node2, node3, node4, node5}
-      let nedges = list{edge1, edge2, edge3, edge4, edge5}
+      let newNodes = list{node1, node2, node3, node4, node5}
+      let newEdges = list{edge1, edge2, edge3, edge4, edge5}
 
-      let nodes = List.concat(list{nnodes, nodes})
-      let edges = List.concat(list{nedges, edges})
-      let (snodes, sedges, smps, vars', abs', apps', betas') = generateGraphElements'(
-        t,
-        list{x, ...ctx},
-        list{(abs, true), ...dict},
-        nodes,
-        edges,
-        node2,
-        abs,
-        ABS,
-        L,
-        redexes,
-        redexEdge,
-        vars,
-        abs + 1,
-        apps,
-        betas,
-        betaClasses,
-      )
+      let nodes = List.concat(list{newNodes, data.nodes})
+      let edges = List.concat(list{newEdges, data.edges})
+      let scope = generateGraphElements'({
+        term: t,
+        ctx: list{x, ...data.ctx},
+        dict: list{(id, true), ...data.dict},
+        nodes: nodes,
+        edges: edges,
+        parent: {node: node2, id: data.stats.abs, nodeType: ABS},
+        dir: L,
+        stats: {...data.stats, abs: data.stats.abs + 1},
+        betaClasses: data.betaClasses,
+      })
 
-      let srightmost = furthestRight(snodes)
-      let snodes =
-        srightmost >= posX ? shiftNodeX(snodes, -(srightmost - posX) - nodeDistanceX) : snodes
+      let srightmost = furthestRight(scope.nodes)
+      let scopeNodes =
+        srightmost >= posX
+          ? shiftNodeX(scope.nodes, -(srightmost - posX) - nodeDistanceX)
+          : scope.nodes
 
-      (
-        List.concat(list{snodes, nnodes}),
-        List.concat(list{sedges, nedges}),
-        list{midpoint1, midpoint2, ...smps},
-        vars',
-        abs',
-        apps',
-        betas',
-      )
+      {
+        nodes: List.concat(list{scopeNodes, newNodes}),
+        edges: List.concat(list{scope.edges, newEdges}),
+        midpoints: list{midpoint1, midpoint2, ...scope.midpoints},
+        stats: scope.stats,
+      }
     }
   | App(t1, t2, _) => {
-      let labelclass = switch dir {
+      let labelclass = switch data.dir {
       | U => "term-edge"
       | L => "app-edge-l"
       | R => "app-edge-r"
       }
-
+      let id = data.stats.apps
       let node1 = createNodeList(
-        nodes,
-        nid(APP_MP, apps),
-        list{"midpoint", labelclass, ...betaClasses},
+        data.nodes,
+        nid(APP_MP, id),
+        list{"midpoint", labelclass, ...data.betaClasses},
         mpPosX,
         mpPosY,
-        prettyPrint(term, ctx, false, true),
+        prettyPrint(data.term, data.ctx, false, true),
       )
       let node2 = createNodeList(
-        nodes,
-        nid(APP, apps),
-        isBetaRedex(term)
-          ? list{"application", "beta-" ++ str(betas), ...betaClasses}
-          : list{"application", ...betaClasses},
+        data.nodes,
+        nid(APP, id),
+        isBetaRedex(data.term)
+          ? list{"application", "beta-" ++ str(data.stats.betas), ...data.betaClasses}
+          : list{"application", ...data.betaClasses},
         posX,
         posY,
         "@",
       )
 
       let edge1 = createEdgeList(
-        edges,
-        eid(ptype, pn, APP_MP, apps),
-        list{"appedge", ...betaClasses},
-        parent["data"]["id"],
+        data.edges,
+        eid(data.parent.nodeType, data.parent.id, APP_MP, id),
+        list{"appedge", ...data.betaClasses},
+        data.parent.node["data"]["id"],
         node1["data"]["id"],
         "",
       )
       let edge2 = createEdgeList(
-        edges,
-        eid(APP_MP, apps, APP, apps),
-        list{"appedge", ...betaClasses},
+        data.edges,
+        eid(APP_MP, id, APP, id),
+        list{"appedge", ...data.betaClasses},
         node1["data"]["id"],
         node2["data"]["id"],
         "",
       )
 
-      let midpoint = (node1["data"]["id"], parent["data"]["id"], node2["data"]["id"])
+      let midpoint = {
+        "midpoint": node1["data"]["id"],
+        "source": data.parent.node["data"]["id"],
+        "target": node2["data"]["id"],
+      }
 
-      let (lnodes, ledges, lmps, vars', abs', apps', betas') = generateGraphElements'(
-        t1,
-        ctx,
-        dict,
-        list{node1, node2, ...nodes},
-        list{edge1, edge2, ...edges},
-        node2,
-        apps,
-        APP,
-        L,
-        redexes,
-        redexEdge,
-        vars,
-        abs,
-        apps + 1,
-        betas + 1,
-        list{"beta-" ++ str(betas), ...betaClasses},
-      )
-      let (rnodes, redges, rmps, vars'', abs'', apps'', betas'') = generateGraphElements'(
-        t2,
-        ctx,
-        dict,
-        nodes,
-        edges,
-        node2,
-        apps,
-        APP,
-        R,
-        redexes,
-        redexEdge,
-        vars',
-        abs',
-        apps',
-        betas',
-        list{"beta-" ++ str(betas), ...betaClasses},
-      )
+      let lhs = generateGraphElements'({
+        term: t1,
+        ctx: data.ctx,
+        dict: data.dict,
+        nodes: list{node1, node2, ...data.nodes},
+        edges: list{edge1, edge2, ...data.edges},
+        parent: {node: node2, id: id, nodeType: APP},
+        dir: L,
+        stats: {...data.stats, apps: data.stats.apps + 1, betas: data.stats.betas + 1},
+        betaClasses: list{"beta-" ++ str(data.stats.betas), ...data.betaClasses},
+      })
+      let rhs = generateGraphElements'({
+        term: t2,
+        ctx: data.ctx,
+        dict: data.dict,
+        nodes: data.nodes,
+        edges: data.edges,
+        parent: {node: node2, id: id, nodeType: APP},
+        dir: R,
+        stats: lhs.stats,
+        betaClasses: list{"beta-" ++ str(data.stats.betas), ...data.betaClasses},
+      })
 
-      let lrightmost = furthestRight(lnodes)
-      let lnodes =
-        lrightmost >= posX ? shiftNodeX(lnodes, -(lrightmost - posX) - nodeDistanceX) : lnodes
+      let lhsRightmost = furthestRight(lhs.nodes)
+      let lhsNodes =
+        lhsRightmost >= posX
+          ? shiftNodeX(lhs.nodes, -(lhsRightmost - posX) - nodeDistanceX)
+          : lhs.nodes
 
-      let rleftmost = furthestLeft(rnodes)
-      let rnodes = rleftmost <= posX ? shiftNodeX(rnodes, posX - rleftmost + nodeDistanceX) : rnodes
+      let rhsLeftmost = furthestLeft(rhs.nodes)
+      let rhsNodes =
+        rhsLeftmost <= posX ? shiftNodeX(rhs.nodes, posX - rhsLeftmost + nodeDistanceX) : rhs.nodes
 
-      (
-        List.concat(list{lnodes, rnodes, list{node1, node2}}),
-        List.concat(list{ledges, redges, list{edge1, edge2}}),
-        list{midpoint, ...List.concat(list{lmps, rmps})},
-        vars'',
-        abs'',
-        apps'',
-        betas'',
-      )
+      {
+        nodes: List.concat(list{lhsNodes, rhsNodes, list{node1, node2}}),
+        edges: List.concat(list{lhs.edges, rhs.edges, list{edge1, edge2}}),
+        midpoints: list{midpoint, ...List.concat(list{lhs.midpoints, rhs.midpoints})},
+        stats: rhs.stats,
+      }
     }
   }
 }

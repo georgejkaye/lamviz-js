@@ -6,7 +6,7 @@ import CytoscapeComponent from "react-cytoscapejs"
 import { useAppSelector, useAppDispatch } from "../redux/hooks"
 import { downloadedSvg, finishedDrawing } from "./workbenchSlice";
 
-import { generateGraphElementsArray, nodeDistanceX, nodeDistanceY } from "../../bs/Graph.bs"
+import { generateGraphElementsArray, Midpoint, nodeDistanceX, nodeDistanceY } from "../../bs/Graph.bs"
 import { Term, Context, betaRedexes } from "../../bs/Lambda.bs"
 
 import { generateSvg, generateAndDownloadSvg } from "./../../libs/convert-to-svg"
@@ -34,7 +34,7 @@ export default function Graph(props: GraphProps) {
 
     let [currentSvg, setCurrentSvg] = useState("")
 
-    function generateElements(term: Term, ctx: Context): [cytoscape.ElementDefinition[], [string, string, string], [string, string, string]] {
+    function generateElements(term: Term, ctx: Context): [cytoscape.ElementDefinition[], [string, string, string], Midpoint[]] {
         let [nodes, edges, frees, mps] = generateGraphElementsArray(term, ctx)
         return [nodes.concat(edges), frees, mps]
     }
@@ -101,9 +101,9 @@ export default function Graph(props: GraphProps) {
 
                     /* Put the midpoints in the middle of the edges */
                     mps.map((mp) => {
-                        let pos1 = cy.$("#" + mp[1]).position()
-                        let pos2 = cy.$("#" + mp[2]).position()
-                        cy.$("#" + mp[0]).position({ x: (pos1.x + pos2.x) / 2, y: (pos1.y + pos2.y) / 2 })
+                        let pos1 = cy.$("#" + mp.source).position()
+                        let pos2 = cy.$("#" + mp.target).position()
+                        cy.$("#" + mp.midpoint).position({ x: (pos1.x + pos2.x) / 2, y: (pos1.y + pos2.y) / 2 })
                     })
 
                     /* Remove dangling edges */
@@ -149,9 +149,14 @@ export default function Graph(props: GraphProps) {
 
                 cy.elements().removeClass("transparent")
                 setCurrentSvg(generateSvg(cy))
+
+                console.log(cy.elements())
             }
         }
         dispatch(finishedDrawing())
+    }
+    const animateRedex = (i: number) => {
+
     }
 
     useEffect(() => {
