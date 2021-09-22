@@ -4,7 +4,7 @@ import cytoscape from "cytoscape"
 import CytoscapeComponent from "react-cytoscapejs"
 
 import { useAppSelector, useAppDispatch } from "../redux/hooks"
-import { doneAnimating, downloadedSvg, finishedDrawing } from "./workbenchSlice";
+import { doneAnimating, unhighlightRedex, downloadedSvg, finishedDrawing } from "./workbenchSlice";
 
 import { generateGraphElementsArray, Midpoint, nodeDistanceX, nodeDistanceY, Redex, RedexNodes } from "../../bs/Graph.bs"
 import { Term, Context, betaRedexes } from "../../bs/Lambda.bs"
@@ -34,6 +34,7 @@ export default function Graph(props: GraphProps) {
     let dispatch = useAppDispatch()
 
     let [currentSvg, setCurrentSvg] = useState("")
+    let [redexStrings, setRedexStrings] = useState<Redex[]>([])
     let [redexes, setRedexes] = useState<RedexNodes[]>([])
 
     function generateElements(term: Term, ctx: Context): [cytoscape.ElementDefinition[], [string, string, string], Midpoint[], Redex[]] {
@@ -42,12 +43,14 @@ export default function Graph(props: GraphProps) {
     }
 
     const redexStringsToNodes = (redex: Redex) => {
-        let { rootParent, root, app, arg, argChild, stem, abs, out, outChild, bound, boundChild } = redex
+        let { rootParent, rootEdge, root, app, arg, argEdge, argChild, stem, abs, out, outChild, bound, boundChild } = redex
         let nodeRedex = {
             rootParent: cy.$id(rootParent),
+            rootEdge: cy.$id(rootEdge),
             root: cy.$id(root),
             app: cy.$id(app),
             arg: cy.$id(arg),
+            argEdge: cy.$id(argEdge),
             argChild: cy.$id(argChild),
             stem: cy.$id(stem),
             abs: cy.$id(abs),
@@ -172,6 +175,7 @@ export default function Graph(props: GraphProps) {
                 cy.elements().removeClass("transparent")
                 setCurrentSvg(generateSvg(cy))
 
+                setRedexStrings(redexes)
                 setRedexes(redexes.map((r) => redexStringsToNodes(r)))
 
                 console.log(cy.elements())
@@ -179,10 +183,10 @@ export default function Graph(props: GraphProps) {
         }
         dispatch(finishedDrawing())
     }
-    const animateRedex = (i: number) => {
+    const animateRedex = async (i: number) => {
 
         if (i > -1) {
-            let { rootParent, root, app, arg, argChild, stem, abs, out, outChild, bound, boundChild } = redexes[i]
+            let { rootParent, rootEdge, root, app, arg, argEdge, argChild, stem, abs, out, outChild, bound, boundChild } = redexes[i]
 
             let appEdges = app.connectedEdges()
             let absEdges = abs.connectedEdges()
@@ -207,10 +211,20 @@ export default function Graph(props: GraphProps) {
             let botPosition = { position: { x: botMidpointX, y: botMidpointY } }
 
             bound.animate(topPosition, duration)
-            arg.animate(topPosition, duration)
+            arg.animate({ ...topPosition, style: { opacity: 0 } }, duration)
             out.animate(botPosition, duration)
             root.animate({ ...botPosition, style: { opacity: 0 } }, duration)
 
+            await new Promise(r => setTimeout(r, 1000))
+
+            rootEdge.move({
+                target: redexStrings[i].out
+            })
+            argEdge.move({
+                source: redexStrings[i].bound
+            })
+
+            dispatch(unhighlightRedex)
             dispatch(doneAnimating())
         }
     }

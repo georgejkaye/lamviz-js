@@ -36,9 +36,11 @@ export interface Midpoint {
 
 export interface Redex {
     rootParent: string
+    rootEdge: string
     root: string
     app: string
     arg: string
+    argEdge: string
     argChild: string
     stem: string
     abs: string
@@ -50,9 +52,11 @@ export interface Redex {
 
 export interface RedexNodes {
     rootParent: CollectionReturnValue
+    rootEdge: CollectionReturnValue
     root: CollectionReturnValue
     app: CollectionReturnValue
     arg: CollectionReturnValue
+    argEdge: CollectionReturnValue
     argChild: CollectionReturnValue
     stem: CollectionReturnValue
     abs: CollectionReturnValue

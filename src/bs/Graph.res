@@ -10,9 +10,11 @@ type edgedata = {"id": string, "source": string, "target": string, "label": stri
 type midpoint = {"source": string, "midpoint": string, "target": string}
 type redex = {
   "rootParent": string,
+  "rootEdge": string,
   "root": string,
   "app": string,
   "arg": string,
+  "argEdge": string,
   "argChild": string,
   "stem": string,
   "abs": string,
@@ -23,11 +25,17 @@ type redex = {
 }
 type nodeNeighbours = {
   parent: string,
+  parentToMidpoint: string,
   parentMidpoint: string,
+  midpointToThis: string,
   this: string,
+  thisToLeftMidpoint: string,
   leftChildMidpoint: string,
+  leftMidpointToLeft: string,
   leftChild: string,
+  thisToRightMidpoint: string,
   rightChildMidpoint: string,
+  rightMidpointToRight: string,
   rightChild: string,
 }
 
@@ -315,11 +323,17 @@ and generateGraphElements' = data => {
       }
       let neighbours = {
         parent: data.parent.node["data"]["id"],
+        parentToMidpoint: edge1["data"]["id"],
         parentMidpoint: node1["data"]["id"],
+        midpointToThis: edge2["data"]["id"],
         this: node2["data"]["id"],
+        thisToLeftMidpoint: "",
         leftChildMidpoint: "",
+        leftMidpointToLeft: "",
         leftChild: "",
+        thisToRightMidpoint: "",
         rightChildMidpoint: "",
+        rightMidpointToRight: "",
         rightChild: "",
       }
       {
@@ -463,11 +477,17 @@ and generateGraphElements' = data => {
           : scope.nodes
       let neighbours = {
         parent: data.parent.node["data"]["id"],
+        parentToMidpoint: edge1["data"]["id"],
         parentMidpoint: node1["data"]["id"],
+        midpointToThis: edge2["data"]["id"],
         this: node2["data"]["id"],
+        thisToLeftMidpoint: scope.neighbours.parentToMidpoint,
         leftChildMidpoint: scope.neighbours.parentMidpoint,
+        leftMidpointToLeft: scope.neighbours.midpointToThis,
         leftChild: scope.neighbours.this,
+        thisToRightMidpoint: edge3["data"]["id"],
         rightChildMidpoint: node3["data"]["id"],
+        rightMidpointToRight: edge4["data"]["id"],
         rightChild: node4["data"]["id"],
       }
       {
@@ -574,9 +594,11 @@ and generateGraphElements' = data => {
         ? list{
             {
               "rootParent": data.parent.node["data"]["id"],
+              "rootEdge": edge1["data"]["id"],
               "root": node1["data"]["id"],
               "app": node2["data"]["id"],
               "arg": rhs.neighbours.parentMidpoint,
+              "argEdge": rhs.neighbours.midpointToThis,
               "argChild": rhs.neighbours.this,
               "stem": lhs.neighbours.parentMidpoint,
               "abs": lhs.neighbours.this,
@@ -591,11 +613,17 @@ and generateGraphElements' = data => {
 
       let neighbours = {
         parent: data.parent.node["data"]["id"],
+        parentToMidpoint: edge1["data"]["id"],
         parentMidpoint: node1["data"]["id"],
+        midpointToThis: edge2["data"]["id"],
         this: node2["data"]["id"],
+        thisToLeftMidpoint: lhs.neighbours.parentToMidpoint,
         leftChildMidpoint: lhs.neighbours.parentMidpoint,
+        leftMidpointToLeft: lhs.neighbours.midpointToThis,
         leftChild: lhs.neighbours.this,
+        thisToRightMidpoint: rhs.neighbours.parentToMidpoint,
         rightChildMidpoint: rhs.neighbours.parentMidpoint,
+        rightMidpointToRight: rhs.neighbours.midpointToThis,
         rightChild: rhs.neighbours.this,
       }
       {
