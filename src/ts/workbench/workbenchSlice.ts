@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit"
+import { specificReduction } from "../../bs/Evaluator.bs"
 import { parseContext, parseTerm } from "../../bs/Parser.bs"
 
 import { Term, Context, emptyContext } from "./../../bs/Lambda.bs"

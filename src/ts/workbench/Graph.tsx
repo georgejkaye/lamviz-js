@@ -4,7 +4,7 @@ import cytoscape from "cytoscape"
 import CytoscapeComponent from "react-cytoscapejs"
 
 import { useAppSelector, useAppDispatch } from "../redux/hooks"
-import { doneAnimating, unhighlightRedex, downloadedSvg, finishedDrawing } from "./workbenchSlice";
+import { doneAnimating, unhighlightRedex, downloadedSvg, finishedDrawing, performReduction, newTerm, updateTerm } from "./workbenchSlice";
 
 import { generateGraphElementsArray, Midpoint, nodeDistanceX, nodeDistanceY, Redex, RedexNodes } from "../../bs/Graph.bs"
 import { Term, Context, betaRedexes } from "../../bs/Lambda.bs"
@@ -12,6 +12,7 @@ import { Term, Context, betaRedexes } from "../../bs/Lambda.bs"
 import { generateSvg, generateAndDownloadSvg } from "./../../libs/convert-to-svg"
 
 import { stylesheet } from "./../../data/style.js"
+import { specificReduction } from "../../bs/Evaluator.bs";
 
 interface GraphProps {
     dimensions: { width: number, height: number }
@@ -64,18 +65,20 @@ export default function Graph(props: GraphProps) {
     }
 
     const updateNodeLabels = () => {
+        let nodes = ".abstraction, .application"
         if (props.nodeLabels) {
-            cy.nodes(".abstraction, .application").addClass("nodelabelled")
+            cy.nodes(nodes).addClass("nodelabelled")
         } else {
-            cy.nodes(".abstraction, .application").removeClass("nodelabelled")
+            cy.nodes(nodes).removeClass("nodelabelled")
         }
     }
 
     const updateEdgeLabels = () => {
+        let edges = ".arc, .abs-edge, .abs-edge-r, .app-edge-l, .app-edge-r, .var-edge-l, .var-edge-r, .term-edge"
         if (props.edgeLabels) {
-            cy.elements(".arc, .abs-edge, .abs-edge-r, .app-edge-l, .app-edge-r, .var-edge-l, .var-edge-r, .term-edge").addClass("termlabelled")
+            cy.elements(edges).addClass("termlabelled")
         } else {
-            cy.elements(".arc, .abs-edge, .abs-edge-r, .app-edge-l, .app-edge-r, .var-edge-l, .var-edge-r, .term-edge").removeClass("termlabelled")
+            cy.elements(edges).removeClass("termlabelled")
         }
     }
     const unhighlightRedex = () => {
@@ -85,7 +88,6 @@ export default function Graph(props: GraphProps) {
         cy.elements(".beta-" + i).addClass("highlighted")
     }
 
-    //const graphDimensions = useSelector((state: RootState) => state.currentState).graphDimensions
     const svgTime = useAppSelector((state) => state.workbench).svgTime
     const [lastNodeLabels, setLastNodeLabels] = useState(props.nodeLabels)
     const [lastEdgeLabels, setLastEdgeLabels] = useState(props.edgeLabels)
@@ -215,17 +217,12 @@ export default function Graph(props: GraphProps) {
             out.animate(botPosition, duration)
             root.animate({ ...botPosition, style: { opacity: 0 } }, duration)
 
-            await new Promise(r => setTimeout(r, 1000))
-
-            rootEdge.move({
-                target: redexStrings[i].out
-            })
-            argEdge.move({
-                source: redexStrings[i].bound
-            })
+            await new Promise(r => setTimeout(r, 2000))
 
             dispatch(unhighlightRedex)
             dispatch(doneAnimating())
+
+            dispatch(updateTerm(specificReduction(props.graph.term, i)))
         }
     }
 
