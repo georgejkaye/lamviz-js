@@ -1,6 +1,6 @@
 # A visualiser for λ-terms as rooted maps
 
-My MSci final year project: a set of tools to help investigation of terms from various fragments of the λ-calculus. The core function of the tools is to represent these λ-terms as *maps* - some background on maps and how λ-terms can be represented as them can be found in my [**Scientific Paper**](/docs/2018-11-23-scientific-paper.pdf).
+My MSci final year project: a set of tools to help investigation of terms from various fragments of the λ-calculus. The core function of the tools is to represent these λ-terms as *maps* - some background on maps and how λ-terms can be represented as them can be found in the **[Project Report](/docs/2019-08-04-project-report.pdf)**.
 
 ## Tools
 Two tools were made for the project:
@@ -29,9 +29,5 @@ All sorts of interesting information is provided about terms, such as the availa
 Normalisation graphs can also be generated for terms!
 
 ## Documentation
-
-The [**Project Proposal**](/docs/2018-10-26-project-proposal.pdf) is a brief overview of the aim of this project and a possible schedule.
-
-The [**Scientific Paper**](/docs/2018-11-23-scientific-paper.pdf) gives some background on the topics involved, and how the project was progressing towards the end of November.
 
 The [**Project Report**](/docs/2019-04-08-final-report.pdf) is the report from the end of the project - the dissertation!
